@@ -11,7 +11,12 @@ export default defineConfig(
     languageOptions: { sourceType: 'script', globals: globals.browser },
   },
   {
-    files: ['scripts/**/*.mjs', '*.config.js'],
+    files: ['scripts/**/*.mjs', '*.config.js', '*.config.mjs'],
     languageOptions: { globals: globals.node },
+  },
+  {
+    // Test code runs in Node, and page.evaluate callbacks run in the browser.
+    files: ['tests/**/*.mjs'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
   },
 )

@@ -68,6 +68,18 @@ pnpm deploy:local   # build, copy the plugin into a Stash plugins folder over SS
 - `src/icons/` holds the sticker and glyph SVGs.
 - `design-system/` is the design-system page. It loads the built theme over Bootstrap 4.6, which stands in for Stash's own styles.
 
+### Compatibility tests
+
+The Compatibility workflow installs Juicy on each Stash version listed in `tests/stash-versions.json` and on the latest Stash develop build, every night and on every change. It checks that Stash still renders the elements Juicy styles and compares screenshots with baselines from the newest listed version. To run it against a local Stash:
+
+```bash
+pnpm build
+tests/stash/stash.sh v0.31.1 stash-work        # or develop
+tests/stash/media.sh stash-work/library
+WORK=stash-work node tests/stash/prepare.mjs
+pnpm test:compat contract
+```
+
 `main` is the trunk. A push to `prod` publishes the plugin source and the design-system page to GitHub Pages. Each Stash release changes some markup, so each one gets a pass over the design-system page and a check on a live library.
 
 ## License
