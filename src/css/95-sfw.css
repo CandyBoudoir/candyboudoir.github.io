@@ -1,0 +1,51 @@
+/* Stash's SFW content mode keeps the candy and drops the cheek */
+body:has(.sfw-content-mode) .juicy-burst.is-drip {
+  background-image: url('assets/icons/sparkle.svg');
+}
+
+.juicy-empty {
+  align-items: center;
+  color: var(--juicy-text-muted);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--juicy-font-display);
+  font-size: 1.25rem;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+}
+
+.juicy-empty::before {
+  animation: juicy-wiggle 2.4s ease-in-out infinite;
+  background: url('assets/icons/mascot.svg') center / contain no-repeat;
+  content: '';
+  height: 120px;
+  width: 120px;
+}
+
+body:has(.sfw-content-mode) .juicy-empty::before {
+  background-image: url('assets/icons/heart.svg');
+}
+
+/* An empty list: Stash shows only "0-0 of 0", and juicy.js adds the line */
+.paginationIndex[data-juicy-empty] {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.paginationIndex[data-juicy-empty]::after {
+  background: url('assets/icons/mascot.svg') top center / 120px no-repeat;
+  color: var(--juicy-text-muted);
+  content: attr(data-juicy-empty);
+  display: block;
+  font-family: var(--juicy-font-display);
+  font-size: 1.25rem;
+  margin-top: 2rem;
+  padding-top: 132px;
+}
+
+/* Plain labels or SFW mode: a heart and no line */
+.paginationIndex[data-juicy-empty='']::after {
+  background-image: url('assets/icons/heart.svg');
+  width: 120px;
+}

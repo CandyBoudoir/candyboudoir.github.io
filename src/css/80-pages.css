@@ -1,0 +1,138 @@
+/* List toolbars, sidebars, tabs, pagination, detail headers, the player */
+.filtered-list-toolbar,
+.sidebar {
+  background-color: var(--juicy-card);
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  border-radius: var(--juicy-radius-lg);
+}
+
+.sidebar .sidebar-section-header,
+.sidebar h3,
+.sidebar h4 {
+  color: var(--juicy-bubblegum);
+  font-family: var(--juicy-font-display);
+}
+
+.nav-tabs {
+  border-bottom: 2px solid var(--juicy-line);
+  gap: 0.25rem;
+}
+
+.nav-tabs .nav-link {
+  border: 0;
+  border-radius: var(--juicy-radius-pill);
+  color: var(--juicy-text-muted);
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+}
+
+.nav-tabs .nav-link:hover {
+  background-color: var(--juicy-pink-soft);
+  color: var(--juicy-bubblegum);
+}
+
+.nav-tabs .nav-link.active {
+  background-image: var(--juicy-gloss-pink);
+  box-shadow: var(--juicy-shine);
+  color: var(--juicy-ink);
+}
+
+.pagination .page-link {
+  background-color: var(--juicy-card-raised);
+  border: 2px solid var(--juicy-ink);
+  border-radius: var(--juicy-radius-pill) !important;
+  color: var(--juicy-text);
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+  margin: 0 0.15rem;
+}
+
+.pagination .page-link:hover {
+  background-color: var(--juicy-pink-soft);
+  border-color: var(--juicy-ink);
+  color: var(--juicy-bubblegum);
+}
+
+.pagination .page-link:focus {
+  box-shadow: var(--juicy-ring);
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--juicy-pink);
+  background-image: var(--juicy-gloss-pink);
+  border-color: var(--juicy-ink);
+  color: var(--juicy-ink);
+}
+
+.detail-header {
+  background-color: var(--juicy-bg-deep);
+  background-image: linear-gradient(
+    160deg,
+    rgb(252 61 159 / 18%) 0%,
+    transparent 55%
+  );
+}
+
+.detail-header .name {
+  color: var(--juicy-text);
+  text-shadow: 0 3px 0 var(--juicy-ink);
+}
+
+/* video.js player */
+.video-js .vjs-control-bar {
+  background-image: linear-gradient(
+    0deg,
+    rgb(13 5 32 / 92%),
+    rgb(13 5 32 / 0%)
+  );
+}
+
+.video-js .vjs-play-progress,
+.video-js .vjs-volume-level {
+  background-color: var(--juicy-pink);
+}
+
+.video-js .vjs-play-progress::before {
+  color: var(--juicy-lime);
+}
+
+.video-js .vjs-load-progress div,
+.video-js .vjs-load-progress {
+  background-color: rgb(252 104 178 / 25%);
+}
+
+/* Settings sidebar and other pill navs */
+.nav-pills .nav-link {
+  border-radius: var(--juicy-radius-pill);
+  color: var(--juicy-text-muted);
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+}
+
+.nav-pills .nav-link:hover {
+  background-color: var(--juicy-pink-soft);
+  color: var(--juicy-bubblegum);
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+  background-color: var(--juicy-pink);
+  background-image: var(--juicy-gloss-pink);
+  box-shadow: var(--juicy-shine);
+  color: var(--juicy-ink);
+}
+
+/* Tables: plum header, hairline rows */
+#root table thead {
+  background-color: var(--juicy-card-raised);
+}
+
+#root .table thead th {
+  border-bottom: 2px solid var(--juicy-line);
+  color: var(--juicy-bubblegum);
+  font-family: var(--juicy-font-display);
+}
+
+#root .table td {
+  border-top-color: var(--juicy-line);
+}

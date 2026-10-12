@@ -1,0 +1,66 @@
+/* Top navigation */
+.top-nav {
+  background-image: linear-gradient(
+    180deg,
+    #24104a 0%,
+    var(--juicy-bg-deep) 100%
+  );
+  border-bottom: 3px solid var(--juicy-ink);
+  box-shadow: 0 3px 0 var(--juicy-pink);
+}
+
+.top-nav .navbar-collapse.bg-dark,
+.top-nav.bg-dark {
+  background-color: transparent !important;
+}
+
+.top-nav .btn.minimal {
+  border-radius: var(--juicy-radius-pill);
+  color: var(--juicy-text-muted);
+  transition:
+    background-color var(--juicy-fast),
+    color var(--juicy-fast),
+    transform var(--juicy-medium) var(--juicy-ease-bounce);
+}
+
+.top-nav .btn.minimal:hover {
+  background-color: var(--juicy-pink-soft);
+  color: var(--juicy-text);
+  transform: translateY(-1px);
+}
+
+.top-nav .active .btn.minimal,
+.top-nav .btn.minimal.active {
+  background-image: var(--juicy-gloss-pink);
+  box-shadow: var(--juicy-shine);
+  color: var(--juicy-ink);
+}
+
+.top-nav .brand-link {
+  align-items: center;
+  color: var(--juicy-pink);
+  display: inline-flex !important;
+  font-family: var(--juicy-font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  gap: 0.35rem;
+}
+
+.top-nav .brand-link::before {
+  background: url('assets/icons/cherry.svg') center / contain no-repeat;
+  content: '';
+  display: inline-block;
+  height: 1.7em;
+  transition: transform var(--juicy-medium) var(--juicy-ease-bounce);
+  width: 1.7em;
+}
+
+.top-nav .brand-link:hover::before {
+  transform: rotate(-12deg) scale(1.1);
+}
+
+/* The phone menu button */
+.navbar-toggler {
+  border: 2px solid var(--juicy-line);
+  border-radius: var(--juicy-radius);
+}

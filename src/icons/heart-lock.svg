@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-4 -4 72 74">
+  <defs>
+    <radialGradient id="heart-lock-fill" cx="0.35" cy="0.3" r="0.8">
+      <stop offset="0" stop-color="#ff9ccf"/>
+      <stop offset="0.45" stop-color="#fc3d9f"/>
+      <stop offset="1" stop-color="#c41d84"/>
+    </radialGradient>
+    <path id="heart-lock-shackle" d="M18 31V21C18 12.5 24.5 6 32 6C39.5 6 46 12.5 46 21V31"/>
+    <path id="heart-lock-body" d="M32 60C18 51 9 43 9 33C9 26 14 21 21 21C26 21 30 24 32 28C34 24 38 21 43 21C50 21 55 26 55 33C55 43 46 51 32 60Z"/>
+  </defs>
+  <g transform="translate(0 3)" fill="none" stroke="#010224" stroke-opacity="0.45" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+    <use xlink:href="#heart-lock-shackle" href="#heart-lock-shackle" stroke-width="16"/><use xlink:href="#heart-lock-body" href="#heart-lock-body"/>
+  </g>
+  <g fill="none" stroke="#d7fa54" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+    <use xlink:href="#heart-lock-shackle" href="#heart-lock-shackle" stroke-width="16"/><use xlink:href="#heart-lock-body" href="#heart-lock-body"/>
+  </g>
+  <use xlink:href="#heart-lock-shackle" href="#heart-lock-shackle" fill="none" stroke="#010224" stroke-width="10" stroke-linecap="round"/>
+  <use xlink:href="#heart-lock-shackle" href="#heart-lock-shackle" fill="none" stroke="#fdda4e" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M20.6 20C21.2 14.6 24.6 10.6 29.4 9.4" fill="none" stroke="#fff" stroke-opacity="0.85" stroke-width="1.8" stroke-linecap="round"/>
+  <use xlink:href="#heart-lock-body" href="#heart-lock-body" fill="url(#heart-lock-fill)" stroke="#010224" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M32 35.2C31 33.2 27.6 33.4 27.6 36.4C27.6 38.6 30 40.4 30.6 41L29.6 47.4H34.4L33.4 41C34 40.4 36.4 38.6 36.4 36.4C36.4 33.4 33 33.2 32 35.2Z" fill="#010224"/>
+  <ellipse cx="18.5" cy="30" rx="5" ry="2.8" transform="rotate(-35 18.5 30)" fill="#fff" fill-opacity="0.85"/>
+  <circle cx="14" cy="37" r="1.6" fill="#fff" fill-opacity="0.8"/>
+</svg>

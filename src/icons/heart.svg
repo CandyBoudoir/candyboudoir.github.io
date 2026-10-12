@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-4 -4 72 74">
+  <defs>
+    <radialGradient id="heart-fill" cx="0.35" cy="0.3" r="0.8">
+      <stop offset="0" stop-color="#ff9ccf"/>
+      <stop offset="0.45" stop-color="#fc3d9f"/>
+      <stop offset="1" stop-color="#c41d84"/>
+    </radialGradient>
+    <path id="heart-shape" d="M32 56C17 46 7 37 7 25C7 16.5 13.5 10 21.5 10C26.5 10 30 12.8 32 16.8C34 12.8 37.5 10 42.5 10C50.5 10 57 16.5 57 25C57 37 47 46 32 56Z"/>
+  </defs>
+  <use xlink:href="#heart-shape" href="#heart-shape" transform="translate(0 3)" fill="none" stroke="#010224" stroke-opacity="0.45" stroke-width="10" stroke-linejoin="round"/>
+  <use xlink:href="#heart-shape" href="#heart-shape" fill="none" stroke="#d7fa54" stroke-width="10" stroke-linejoin="round"/>
+  <use xlink:href="#heart-shape" href="#heart-shape" fill="url(#heart-fill)" stroke="#010224" stroke-width="3.5" stroke-linejoin="round"/>
+  <ellipse cx="19.5" cy="20" rx="6.5" ry="3.6" transform="rotate(-38 19.5 20)" fill="#fff" fill-opacity="0.85"/>
+  <circle cx="13.6" cy="28" r="1.9" fill="#fff" fill-opacity="0.8"/>
+</svg>

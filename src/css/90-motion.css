@@ -1,0 +1,98 @@
+/* Keyframes, burst particles and the calm switch */
+@keyframes juicy-shine {
+  to {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes juicy-bubble {
+  0% {
+    opacity: 1;
+    transform: scale(0.25);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  82% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+
+@keyframes juicy-burst {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.4) rotate(0deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy)))
+      scale(1) rotate(var(--spin));
+  }
+}
+
+@keyframes juicy-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(-8deg);
+  }
+
+  75% {
+    transform: rotate(8deg);
+  }
+}
+
+.juicy-burst {
+  animation: juicy-burst 650ms var(--juicy-ease-out) forwards;
+  background: url('assets/icons/heart.svg') center / contain no-repeat;
+  height: 22px;
+  pointer-events: none;
+  position: fixed;
+  width: 22px;
+  z-index: 2000;
+}
+
+.juicy-burst.is-sparkle {
+  background-image: url('assets/icons/sparkle.svg');
+}
+
+.juicy-burst.is-drip {
+  background-image: url('assets/icons/drip.svg');
+}
+
+.juicy-calm *,
+.juicy-calm *::before,
+.juicy-calm *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+.juicy-calm .LoadingIndicator .spinner-border {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .juicy-burst {
+    display: none;
+  }
+}

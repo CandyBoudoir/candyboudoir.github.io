@@ -1,0 +1,19 @@
+/* Loading: a gum bubble that swells and pops instead of Bootstrap's spinner */
+.LoadingIndicator .spinner-border {
+  animation: juicy-bubble 1.4s var(--juicy-ease-out) infinite;
+  background:
+    radial-gradient(circle at 35% 30%, #fff 0 9%, transparent 10%),
+    radial-gradient(
+      circle at 40% 35%,
+      #ffc2e2 0%,
+      var(--juicy-bubblegum) 55%,
+      #e2399a 100%
+    );
+  border: 3px solid var(--juicy-ink);
+  box-shadow: 0 0 0 4px var(--juicy-lime);
+}
+
+.LoadingIndicator-message {
+  color: var(--juicy-bubblegum);
+  font-family: var(--juicy-font-display);
+}

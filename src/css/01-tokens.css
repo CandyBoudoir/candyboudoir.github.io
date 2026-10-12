@@ -1,0 +1,83 @@
+/*
+ * Juicy design tokens. Stash compiles its colours from SCSS and exposes no
+ * custom properties, so every rule in this theme reads from these instead.
+ * Palette sampled from the sticker references in docs/design.md.
+ */
+:root {
+  color-scheme: dark;
+  accent-color: var(--juicy-pink);
+
+  /* Palette */
+  --juicy-pink: #fc3d9f;
+  --juicy-bubblegum: #fc68b2;
+  --juicy-magenta: #dd2a97;
+  --juicy-lime: #d7fa54;
+  --juicy-gold: #fdda4e;
+  --juicy-cyan: #00a8f0;
+  --juicy-purple: #9b30ff;
+  --juicy-ink: #010224;
+  --juicy-danger: #ff5a4e;
+
+  /* Surfaces, deep plum from back to front */
+  --juicy-bg: #150a2e;
+  --juicy-bg-deep: #0d0520;
+  --juicy-card: #22123f;
+  --juicy-card-raised: #2d1852;
+  --juicy-line: #3d2466;
+
+  /* Text */
+  --juicy-text: #fff2fa;
+  --juicy-text-muted: #cdb6e0;
+  --juicy-text-dim: #957cb0;
+
+  /* Tints */
+  --juicy-pink-soft: rgb(252 61 159 / 16%);
+  --juicy-lime-soft: rgb(215 250 84 / 22%);
+
+  /* Gradients: the glossy candy fill used on buttons and chips */
+  --juicy-gloss-pink: linear-gradient(
+    180deg,
+    #ff7cc0 0%,
+    #fc3d9f 55%,
+    #e02c90 100%
+  );
+  --juicy-gloss-lime: linear-gradient(
+    180deg,
+    #efff9e 0%,
+    #d7fa54 55%,
+    #bfe03a 100%
+  );
+  --juicy-gloss-gold: linear-gradient(
+    180deg,
+    #fff0a3 0%,
+    #fdda4e 55%,
+    #f0b81c 100%
+  );
+  --juicy-gloss-plum: linear-gradient(180deg, #3a2066 0%, #2d1852 100%);
+
+  /* Shape */
+  --juicy-radius-sm: 8px;
+  --juicy-radius: 14px;
+  --juicy-radius-lg: 20px;
+  --juicy-radius-pill: 999px;
+  --juicy-outline: 2.5px;
+
+  /* Depth: stickers sit on a hard ink drop, never a blur */
+  --juicy-drop: 0 3px 0 var(--juicy-ink);
+  --juicy-drop-lg: 0 5px 0 var(--juicy-ink);
+  --juicy-shine: inset 0 2px 0 rgb(255 255 255 / 45%);
+  --juicy-ring: 0 0 0 3px var(--juicy-lime);
+
+  /* Type */
+  --juicy-font-display:
+    'Juicy Fredoka', ui-rounded, 'SF Pro Rounded', system-ui, sans-serif;
+  --juicy-font-body:
+    system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial,
+    sans-serif;
+
+  /* Motion */
+  --juicy-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --juicy-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --juicy-fast: 120ms;
+  --juicy-medium: 220ms;
+}

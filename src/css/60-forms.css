@@ -1,0 +1,119 @@
+/* Inputs, selects, switches and checkboxes */
+.form-control,
+.custom-select,
+.input-control {
+  background-color: var(--juicy-bg-deep);
+  border: 2px solid var(--juicy-line);
+  border-radius: var(--juicy-radius);
+  color: var(--juicy-text);
+  transition:
+    border-color var(--juicy-fast),
+    box-shadow var(--juicy-fast);
+}
+
+.form-control::placeholder {
+  color: var(--juicy-text-dim);
+}
+
+.form-control:focus,
+.custom-select:focus {
+  background-color: var(--juicy-bg-deep);
+  border-color: var(--juicy-pink);
+  box-shadow: 0 0 0 3px var(--juicy-pink-soft);
+  color: var(--juicy-text);
+}
+
+.input-group-text {
+  background-color: var(--juicy-card-raised);
+  border: 2px solid var(--juicy-line);
+  color: var(--juicy-text-muted);
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+  background-color: var(--juicy-pink);
+  border-color: var(--juicy-ink);
+}
+
+.custom-control-input:focus ~ .custom-control-label::before {
+  box-shadow: 0 0 0 3px var(--juicy-pink-soft);
+}
+
+.custom-control-label::before {
+  background-color: var(--juicy-bg-deep);
+  border: 2px solid var(--juicy-line);
+}
+
+.custom-switch .custom-control-input:checked ~ .custom-control-label::after {
+  background-color: var(--juicy-ink);
+}
+
+.custom-switch .custom-control-label::after {
+  background-color: var(--juicy-text-dim);
+}
+
+.custom-checkbox .custom-control-label::before {
+  border-radius: 6px;
+}
+
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::after {
+  background-image: url('assets/icons/glyph-check.svg');
+  background-size: 70%;
+}
+
+/* Stash's searchable selects (react-select) */
+.react-select__control {
+  background-color: var(--juicy-bg-deep) !important;
+  border: 2px solid var(--juicy-line) !important;
+  border-radius: var(--juicy-radius) !important;
+}
+
+.react-select__control--is-focused {
+  border-color: var(--juicy-pink) !important;
+  box-shadow: 0 0 0 3px var(--juicy-pink-soft) !important;
+}
+
+.react-select__menu {
+  background-color: var(--juicy-card-raised) !important;
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  border-radius: var(--juicy-radius) !important;
+  box-shadow: var(--juicy-drop-lg) !important;
+}
+
+.react-select__option--is-focused {
+  background-color: var(--juicy-pink-soft) !important;
+}
+
+.react-select__multi-value {
+  background-color: var(--juicy-purple) !important;
+  border-radius: var(--juicy-radius-pill) !important;
+}
+
+.react-select__multi-value__label {
+  color: #fff !important;
+}
+
+/* Sliders: Stash draws its own (styles/_range.scss), so repaint track and thumb */
+#root input[type='range']::-webkit-slider-runnable-track {
+  background: var(--juicy-pink);
+}
+
+#root input[type='range']:focus::-webkit-slider-runnable-track {
+  background: var(--juicy-bubblegum);
+}
+
+#root input[type='range']::-webkit-slider-thumb {
+  background: var(--juicy-lime);
+  border: 2px solid var(--juicy-ink);
+  height: 16px;
+  margin-top: -5px;
+  width: 16px;
+}
+
+#root input[type='range']::-moz-range-track {
+  background: var(--juicy-pink);
+}
+
+#root input[type='range']::-moz-range-thumb {
+  background: var(--juicy-lime);
+  border: 2px solid var(--juicy-ink);
+}

@@ -1,0 +1,1075 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Juicy design system</title>
+    <meta
+      name="description"
+      content="Juicy, a pink and playful theme for Stash: palette, type, icons and Stash components in Juicy style."
+    />
+    <link rel="icon" href="Theme-Juicy/assets/icons/cherry.svg" />
+    <!-- Bootstrap 4.6 stands in for Stash's own base styles. -->
+    <link rel="stylesheet" href="ds/vendor/bootstrap.min.css" />
+    <link rel="stylesheet" href="Theme-Juicy/juicy.css" />
+    <link rel="stylesheet" href="ds/ds.css" />
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="i-tag" viewBox="0 0 16 16">
+        <path
+          fill-rule="evenodd"
+          d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l7.5 7.5-6 6L1 7ZM4.6 3.2a1.4 1.4 0 1 0 0 2.8a1.4 1.4 0 1 0 0-2.8Z"
+        />
+      </symbol>
+      <symbol id="i-user" viewBox="0 0 16 16">
+        <circle cx="8" cy="4.8" r="3.2" />
+        <path d="M1.8 15c0-3.5 2.8-6 6.2-6s6.2 2.5 6.2 6Z" />
+      </symbol>
+      <symbol id="i-box" viewBox="0 0 16 16">
+        <path d="M1 4.5 8 1l7 3.5v7L8 15l-7-3.5Zm7 1.8 4.6-2.2L8 2 3.4 4.1Z" />
+      </symbol>
+    </svg>
+
+    <nav class="navbar navbar-expand-xl navbar-dark bg-dark top-nav">
+      <button class="btn btn-primary minimal brand-link">Stash</button>
+      <div class="d-flex flex-wrap ml-3" style="gap: 0.25rem">
+        <span class="active"
+          ><button class="btn btn-primary minimal">Scenes</button></span
+        >
+        <button class="btn btn-primary minimal">Images</button>
+        <button class="btn btn-primary minimal">Groups</button>
+        <button class="btn btn-primary minimal">Markers</button>
+        <button class="btn btn-primary minimal">Galleries</button>
+        <button class="btn btn-primary minimal">Performers</button>
+        <button class="btn btn-primary minimal">Studios</button>
+        <button class="btn btn-primary minimal">Tags</button>
+      </div>
+      <div class="nav-utility">
+        <button class="btn btn-primary minimal">Settings</button>
+      </div>
+    </nav>
+
+    <div class="ds-controls">
+      <span class="label">Try it</span>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-calm" />
+        <label class="custom-control-label" for="ds-calm">Calm mode</label>
+      </div>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-plain" />
+        <label class="custom-control-label" for="ds-plain">Plain labels</label>
+      </div>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-sfw" />
+        <label class="custom-control-label" for="ds-sfw">Stash SFW mode</label>
+      </div>
+    </div>
+
+    <div id="root">
+      <div class="main container-fluid p-0" id="ds-main">
+        <header class="ds-hero">
+          <div>
+            <svg
+              class="ds-wordmark"
+              viewBox="0 0 600 250"
+              role="img"
+              aria-label="Juicy"
+            >
+              <defs>
+                <linearGradient id="wm-fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#ff8cc8" />
+                  <stop offset="0.55" stop-color="#fc3d9f" />
+                  <stop offset="1" stop-color="#d0228c" />
+                </linearGradient>
+                <linearGradient id="wm-gloss" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0.18" stop-color="#fff" stop-opacity="0.7" />
+                  <stop offset="0.42" stop-color="#fff" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <g
+                font-family="Juicy Fredoka, ui-rounded, sans-serif"
+                font-size="168"
+                font-weight="700"
+                stroke-linejoin="round"
+              >
+                <text
+                  x="44"
+                  y="170"
+                  fill="#010224"
+                  stroke="#010224"
+                  stroke-width="34"
+                  opacity="0.5"
+                  transform="translate(0 10)"
+                >
+                  juicy
+                </text>
+                <text
+                  x="44"
+                  y="170"
+                  fill="#d7fa54"
+                  stroke="#d7fa54"
+                  stroke-width="34"
+                >
+                  juicy
+                </text>
+                <text
+                  x="44"
+                  y="170"
+                  fill="#010224"
+                  stroke="#010224"
+                  stroke-width="14"
+                >
+                  juicy
+                </text>
+                <text x="44" y="170" fill="url(#wm-fill)">juicy</text>
+                <text x="44" y="170" fill="url(#wm-gloss)">juicy</text>
+              </g>
+            </svg>
+            <p>A pink, playful, slightly naughty theme for Stash.</p>
+          </div>
+          <div class="ds-hero-art" aria-hidden="true">
+            <img
+              class="mascot"
+              src="Theme-Juicy/assets/icons/mascot.svg"
+              alt=""
+            />
+            <img class="s1" src="Theme-Juicy/assets/icons/sparkle.svg" alt="" />
+            <img class="s2" src="Theme-Juicy/assets/icons/heart.svg" alt="" />
+            <img class="s3" src="Theme-Juicy/assets/icons/lips.svg" alt="" />
+          </div>
+        </header>
+
+        <section class="ds-section">
+          <h2>
+            <img src="Theme-Juicy/assets/icons/bubble.svg" alt="" />Palette
+          </h2>
+          <p class="ds-lede">
+            Sampled from the sticker references: hot pink leads, acid lime, gold
+            and cyan accent, and everything sits on deep plum with ink outlines.
+          </p>
+          <div class="ds-swatches">
+            <div class="ds-swatch">
+              <div class="chip" style="background: #fc3d9f"></div>
+              <div class="meta">
+                <div class="hex">#FC3D9F</div>
+                <code>--juicy-pink</code>
+                <div class="role">Primary buttons, active nav, the brand</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #fc68b2"></div>
+              <div class="meta">
+                <div class="hex">#FC68B2</div>
+                <code>--juicy-bubblegum</code>
+                <div class="role">Hover states, highlights, the loader</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #dd2a97"></div>
+              <div class="meta">
+                <div class="hex">#DD2A97</div>
+                <code>--juicy-magenta</code>
+                <div class="role">Pressed states, gradient shadows</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #d7fa54"></div>
+              <div class="meta">
+                <div class="hex">#D7FA54</div>
+                <code>--juicy-lime</code>
+                <div class="role">
+                  Card hover halo, focus, selection, sticker edges
+                </div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #fdda4e"></div>
+              <div class="meta">
+                <div class="hex">#FDDA4E</div>
+                <code>--juicy-gold</code>
+                <div class="role">Rating hearts, rating badges</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #00a8f0"></div>
+              <div class="meta">
+                <div class="hex">#00A8F0</div>
+                <code>--juicy-cyan</code>
+                <div class="role">Links, info</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #9b30ff"></div>
+              <div class="meta">
+                <div class="hex">#9B30FF</div>
+                <code>--juicy-purple</code>
+                <div class="role">Tags and secondary chips</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #ff5a4e"></div>
+              <div class="meta">
+                <div class="hex">#FF5A4E</div>
+                <code>--juicy-danger</code>
+                <div class="role">Delete and other destructive actions</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #010224"></div>
+              <div class="meta">
+                <div class="hex">#010224</div>
+                <code>--juicy-ink</code>
+                <div class="role">
+                  Outlines, hard drop shadows, text on candy
+                </div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #150a2e"></div>
+              <div class="meta">
+                <div class="hex">#150A2E</div>
+                <code>--juicy-bg</code>
+                <div class="role">Page background, with pink polka dots</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #22123f"></div>
+              <div class="meta">
+                <div class="hex">#22123F</div>
+                <code>--juicy-card</code>
+                <div class="role">Cards, panels, sidebars</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #2d1852"></div>
+              <div class="meta">
+                <div class="hex">#2D1852</div>
+                <code>--juicy-card-raised</code>
+                <div class="role">Menus, secondary buttons, toasts</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section ds-type">
+          <h2><img src="Theme-Juicy/assets/icons/crown.svg" alt="" />Type</h2>
+          <p class="ds-lede">
+            Fredoka, bundled with the plugin, sets headings, titles, buttons and
+            chips. Body text stays on the system font so descriptions and
+            settings read easily.
+          </p>
+          <div class="ds-panel">
+            <div class="specimen">
+              <span class="spec">H1 · Fredoka 600</span>
+              <h1 class="m-0">Cherry on top</h1>
+            </div>
+            <div class="specimen">
+              <span class="spec">H3 · Fredoka 600</span>
+              <h3 class="m-0">Bubblegum Sunday</h3>
+            </div>
+            <div class="specimen">
+              <span class="spec">Card title</span>
+              <h5 class="card-section-title m-0">
+                Glitter, gloss and a little mischief
+              </h5>
+            </div>
+            <div class="specimen">
+              <span class="spec">Body · system</span>
+              <p class="m-0">
+                Stash keeps your library organised. Juicy makes it look like a
+                candy shop after dark, without getting in the way of finding
+                what you want.
+              </p>
+            </div>
+            <div class="specimen">
+              <span class="spec">Muted</span>
+              <p class="m-0 text-muted">2026-09-14 · 1080p · 24:16</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2>
+            <img src="Theme-Juicy/assets/icons/sparkle.svg" alt="" />Icons
+          </h2>
+          <p class="ds-lede">
+            Stickers: a glossy body with a 3.5px ink outline, a lime cut edge, a
+            soft ink drop and a white shine in the top left. Glyphs are flat
+            silhouettes used as CSS masks, so they take any colour.
+          </p>
+          <div class="ds-panel">
+            <div class="ds-stickers">
+              <div class="ds-sticker">
+                <img src="Theme-Juicy/assets/icons/mascot.svg" alt="" /><span
+                  >mascot</span
+                >
+              </div>
+              <div class="ds-sticker">
+                <img src="Theme-Juicy/assets/icons/cherry.svg" alt="" /><span
+                  >cherry</span
+                >
+              </div>
+              <div class="ds-sticker">
+                <img src="Theme-Juicy/assets/icons/heart.svg" alt="" /><span
+                  >heart</span
+                >
+              </div>
+              <div class="ds-sticker">
+                <img src="Theme-Juicy/assets/icons/lips.svg" alt="" /><span
+                  >lips</span
+                >
+              </div>
+              <div class="ds-sticker">
+                <img
+                  src="Theme-Juicy/assets/icons/heart-lock.svg"
+                  alt=""
+                /><span>heart-lock</span>
+              </div>
+              <div class="ds-sticker">
+                <img src="Theme-Juicy/assets/icons/crown.svg" alt="" /><span
+                  >crown</span
+                >
+              </div>
+              <div class="ds-sticker">
+                <img src="Theme-Juicy/assets/icons/bubble.svg" alt="" /><span
+                  >bubble</span
+                >
+              </div>
+              <div class="ds-sticker">
+                <img src="Theme-Juicy/assets/icons/drip.svg" alt="" /><span
+                  >drip</span
+                >
+              </div>
+              <div class="ds-sticker">
+                <img src="Theme-Juicy/assets/icons/sparkle.svg" alt="" /><span
+                  >sparkle</span
+                >
+              </div>
+              <div class="ds-sticker">
+                <img src="Theme-Juicy/assets/icons/bolt.svg" alt="" /><span
+                  >bolt</span
+                >
+              </div>
+            </div>
+            <hr />
+            <div class="ds-row">
+              <span
+                class="ds-glyph"
+                style="
+                  color: var(--juicy-gold);
+                  mask-image: url('Theme-Juicy/assets/icons/glyph-heart.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                style="
+                  color: var(--juicy-text-dim);
+                  mask-image: url('Theme-Juicy/assets/icons/glyph-heart-outline.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                style="
+                  color: var(--juicy-bubblegum);
+                  mask-image: url('Theme-Juicy/assets/icons/glyph-drip.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                style="
+                  color: var(--juicy-lime);
+                  mask-image: url('Theme-Juicy/assets/icons/glyph-sparkle.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                style="
+                  color: var(--juicy-pink);
+                  mask-image: url('Theme-Juicy/assets/icons/glyph-check.svg');
+                "
+              ></span>
+              <span class="ds-caption"
+                >glyph-heart, glyph-heart-outline, glyph-drip, glyph-sparkle,
+                glyph-check</span
+              >
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="Theme-Juicy/assets/icons/bolt.svg" alt="" />Buttons</h2>
+          <p class="ds-lede">
+            Candy pills on a hard ink drop. They lift on hover and squish when
+            pressed. Stash's flat icon buttons stay flat and pick up a pink wash
+            on hover.
+          </p>
+          <div class="ds-row">
+            <button class="btn btn-primary">Save</button>
+            <button class="btn btn-secondary">Edit</button>
+            <button class="btn btn-success">Scan</button>
+            <button class="btn btn-warning">Generate</button>
+            <button class="btn btn-info">Identify</button>
+            <button class="btn btn-danger">Delete</button>
+            <button class="btn btn-primary" disabled>Disabled</button>
+          </div>
+          <div class="ds-row">
+            <button class="btn btn-primary btn-sm">Small</button>
+            <button class="btn btn-primary btn-lg">Large</button>
+            <div class="btn-group">
+              <button class="btn btn-secondary">Grid</button>
+              <button class="btn btn-secondary active">List</button>
+              <button class="btn btn-secondary">Wall</button>
+            </div>
+            <button class="btn btn-primary minimal">Minimal</button>
+            <a class="btn btn-link" href="#top">Link button</a>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2>
+            <img src="Theme-Juicy/assets/icons/heart.svg" alt="" />Tags, ratings
+            and favourites
+          </h2>
+          <p class="ds-lede">
+            Tags are purple candy chips. Ratings use gold hearts instead of
+            stars: click one to rate and watch it burst. Favouriting a performer
+            and bumping the O counter burst too.
+          </p>
+          <div class="ds-row">
+            <a class="tag-item tag-link badge badge-secondary" href="#tags"
+              >Pool party</a
+            >
+            <a class="tag-item tag-link badge badge-secondary" href="#tags"
+              >Lingerie</a
+            >
+            <a class="tag-item tag-link badge badge-secondary" href="#tags"
+              >Behind the scenes</a
+            >
+            <a class="tag-item tag-link badge badge-secondary" href="#tags"
+              >Glitter</a
+            >
+            <span class="badge badge-primary">New</span>
+            <span class="badge badge-info">4K</span>
+          </div>
+          <div class="ds-row ds-panel">
+            <div class="rating-stars" id="ds-rating" data-value="3">
+              <button
+                class="btn btn-primary minimal star-fill-100"
+                data-star="1"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set" viewBox="0 0 576 512">
+                    <path
+                      fill="currentColor"
+                      d="M288 0 359 186 576 186 400 300 466 512 288 384 110 512 176 300 0 186 217 186Z"
+                    />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg
+                    class="svg-inline--fa fa-star unset"
+                    viewBox="0 0 576 512"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M288 0 359 186 576 186 400 300 466 512 288 384 110 512 176 300 0 186 217 186Z"
+                    />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-primary minimal star-fill-100"
+                data-star="2"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set" viewBox="0 0 576 512">
+                    <path
+                      fill="currentColor"
+                      d="M288 0 359 186 576 186 400 300 466 512 288 384 110 512 176 300 0 186 217 186Z"
+                    />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg
+                    class="svg-inline--fa fa-star unset"
+                    viewBox="0 0 576 512"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M288 0 359 186 576 186 400 300 466 512 288 384 110 512 176 300 0 186 217 186Z"
+                    />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-primary minimal star-fill-100"
+                data-star="3"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set" viewBox="0 0 576 512">
+                    <path
+                      fill="currentColor"
+                      d="M288 0 359 186 576 186 400 300 466 512 288 384 110 512 176 300 0 186 217 186Z"
+                    />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg
+                    class="svg-inline--fa fa-star unset"
+                    viewBox="0 0 576 512"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M288 0 359 186 576 186 400 300 466 512 288 384 110 512 176 300 0 186 217 186Z"
+                    />
+                  </svg>
+                </div>
+              </button>
+              <button class="btn btn-primary minimal star-fill-0" data-star="4">
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set" viewBox="0 0 576 512">
+                    <path
+                      fill="currentColor"
+                      d="M288 0 359 186 576 186 400 300 466 512 288 384 110 512 176 300 0 186 217 186Z"
+                    />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg
+                    class="svg-inline--fa fa-star unset"
+                    viewBox="0 0 576 512"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M288 0 359 186 576 186 400 300 466 512 288 384 110 512 176 300 0 186 217 186Z"
+                    />
+                  </svg>
+                </div>
+              </button>
+              <button class="btn btn-primary minimal star-fill-0" data-star="5">
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set" viewBox="0 0 576 512">
+                    <path
+                      fill="currentColor"
+                      d="M288 0 359 186 576 186 400 300 466 512 288 384 110 512 176 300 0 186 217 186Z"
+                    />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg
+                    class="svg-inline--fa fa-star unset"
+                    viewBox="0 0 576 512"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M288 0 359 186 576 186 400 300 466 512 288 384 110 512 176 300 0 186 217 186Z"
+                    />
+                  </svg>
+                </div>
+              </button>
+              <span class="star-rating-number">3</span>
+            </div>
+            <button
+              class="btn btn-primary minimal favorite-button not-favorite"
+              id="ds-fav"
+              title="Favourite"
+            >
+              <svg
+                class="svg-inline--fa"
+                viewBox="0 0 24 24"
+                width="28"
+                height="28"
+              >
+                <path
+                  fill="currentColor"
+                  d="M12 21.2C6.4 17.4 2.6 13.9 2.6 9.5C2.6 6.4 5 4 8 4C9.8 4 11.2 4.9 12 6.3C12.8 4.9 14.2 4 16 4C19 4 21.4 6.4 21.4 9.5C21.4 13.9 17.6 17.4 12 21.2Z"
+                />
+              </svg>
+            </button>
+            <div class="btn-group count-button" id="ds-o">
+              <button class="btn btn-primary minimal count-icon">
+                <span
+                  ><svg viewBox="0 0 24 24" width="22" height="22">
+                    <path
+                      fill="currentColor"
+                      d="M12 2s-7 8.5-7 13a7 7 0 0 0 14 0c0-4.5-7-13-7-13Z"
+                    /></svg
+                ></span>
+              </button>
+              <button class="btn btn-primary minimal count-value">
+                <span>2</span>
+              </button>
+            </div>
+            <span class="ds-caption"
+              >Click the hearts, the favourite and the drip.</span
+            >
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="Theme-Juicy/assets/icons/cherry.svg" alt="" />Cards</h2>
+          <p class="ds-lede">
+            Scene and performer cards in Stash's own markup. Hover one: it
+            lifts, tilts, catches a lime halo and a shine sweeps across the
+            thumbnail.
+          </p>
+          <div class="ds-cards">
+            <div class="card grid-card scene-card">
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards"
+                  ><div
+                    class="scene-card-preview"
+                    style="
+                      background: radial-gradient(
+                        circle at 30% 25%,
+                        #ff8ccb,
+                        #c41d84 55%,
+                        #3b1466
+                      );
+                    "
+                  >
+                    <img
+                      src="Theme-Juicy/assets/icons/cherry.svg"
+                      alt=""
+                    /></div
+                ></a>
+                <div class="rating-banner rating-100-20">Rating: 5</div>
+                <div class="studio-overlay">
+                  <a href="#cards">Sugar Rush</a>
+                </div>
+                <div class="scene-specs-overlay">
+                  <span class="overlay-resolution">4K</span
+                  ><span class="overlay-duration">24:16</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-indicator" style="width: 42%"></div>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    Cherry on Top
+                  </h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-09-14</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>6</span>
+                </button>
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>2</span>
+                </button>
+                <div class="btn-group count-button">
+                  <button class="btn btn-primary minimal count-icon">
+                    <span
+                      ><svg class="ds-ico" viewBox="0 0 24 24">
+                        <path
+                          fill="currentColor"
+                          d="M12 2s-7 8.5-7 13a7 7 0 0 0 14 0c0-4.5-7-13-7-13Z"
+                        /></svg
+                    ></span></button
+                  ><button class="btn btn-primary minimal count-value">
+                    <span>3</span>
+                  </button>
+                </div>
+                <div class="organized">
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-box" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card grid-card scene-card">
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards"
+                  ><div
+                    class="scene-card-preview"
+                    style="
+                      background: linear-gradient(
+                        135deg,
+                        #2d1852,
+                        #9b30ff 70%,
+                        #fc68b2
+                      );
+                    "
+                  >
+                    <img src="Theme-Juicy/assets/icons/lips.svg" alt="" /></div
+                ></a>
+                <div class="rating-banner rating-100-16">Rating: 4</div>
+                <div class="studio-overlay">
+                  <a href="#cards">Velvet Hour</a>
+                </div>
+                <div class="scene-specs-overlay">
+                  <span class="overlay-resolution">1080p</span
+                  ><span class="overlay-duration">31:02</span>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    Lipstick and Lace
+                  </h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-08-30</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>4</span>
+                </button>
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>1</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="card grid-card scene-card">
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards"
+                  ><div
+                    class="scene-card-preview"
+                    style="
+                      background: radial-gradient(
+                        circle at 70% 30%,
+                        #00a8f0,
+                        #2d1852 70%
+                      );
+                    "
+                  >
+                    <img
+                      src="Theme-Juicy/assets/icons/bubble.svg"
+                      alt=""
+                    /></div
+                ></a>
+                <div class="studio-overlay"><a href="#cards">Pop Club</a></div>
+                <div class="scene-specs-overlay">
+                  <span class="overlay-resolution">720p</span
+                  ><span class="overlay-duration">12:40</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-indicator" style="width: 78%"></div>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    Bubblegum Sunday
+                  </h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-07-02</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>9</span>
+                </button>
+                <div class="organized">
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-box" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ds-cards mt-4">
+            <div class="card grid-card performer-card">
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div
+                    class="performer-card-image"
+                    style="
+                      background: radial-gradient(
+                        circle at 50% 35%,
+                        #ff9ccf,
+                        #c41d84 60%,
+                        #2d1852
+                      );
+                    "
+                  >
+                    <img
+                      src="Theme-Juicy/assets/icons/mascot.svg"
+                      alt=""
+                    /></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button favorite"
+                >
+                  <svg
+                    class="svg-inline--fa"
+                    viewBox="0 0 24 24"
+                    width="22"
+                    height="22"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M12 21.2C6.4 17.4 2.6 13.9 2.6 9.5C2.6 6.4 5 4 8 4C9.8 4 11.2 4.9 12 6.3C12.8 4.9 14.2 4 16 4C19 4 21.4 6.4 21.4 9.5C21.4 13.9 17.6 17.4 12 21.2Z"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <span class="performer-name">Gumdrop Gigi</span>
+                  </h5></a
+                >
+                <div class="performer-card__age">27 years old</div>
+              </div>
+            </div>
+            <div class="card grid-card performer-card">
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div
+                    class="performer-card-image"
+                    style="
+                      background: linear-gradient(160deg, #fdda4e, #fc3d9f 70%);
+                    "
+                  >
+                    <img src="Theme-Juicy/assets/icons/crown.svg" alt="" /></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button not-favorite"
+                >
+                  <svg
+                    class="svg-inline--fa"
+                    viewBox="0 0 24 24"
+                    width="22"
+                    height="22"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M12 21.2C6.4 17.4 2.6 13.9 2.6 9.5C2.6 6.4 5 4 8 4C9.8 4 11.2 4.9 12 6.3C12.8 4.9 14.2 4 16 4C19 4 21.4 6.4 21.4 9.5C21.4 13.9 17.6 17.4 12 21.2Z"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <span class="performer-name">Sherbet Sparks</span>
+                  </h5></a
+                >
+                <div class="performer-card__age">31 years old</div>
+              </div>
+            </div>
+            <div class="card grid-card performer-card">
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div
+                    class="performer-card-image"
+                    style="
+                      background: radial-gradient(
+                        circle at 50% 40%,
+                        #d7fa54,
+                        #2d1852 75%
+                      );
+                    "
+                  >
+                    <img src="Theme-Juicy/assets/icons/bolt.svg" alt="" /></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button not-favorite"
+                >
+                  <svg
+                    class="svg-inline--fa"
+                    viewBox="0 0 24 24"
+                    width="22"
+                    height="22"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M12 21.2C6.4 17.4 2.6 13.9 2.6 9.5C2.6 6.4 5 4 8 4C9.8 4 11.2 4.9 12 6.3C12.8 4.9 14.2 4 16 4C19 4 21.4 6.4 21.4 9.5C21.4 13.9 17.6 17.4 12 21.2Z"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <span class="performer-name">Bonbon Bijou</span>
+                  </h5></a
+                >
+                <div class="performer-card__age">24 years old</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2>
+            <img src="Theme-Juicy/assets/icons/heart-lock.svg" alt="" />Forms
+            and menus
+          </h2>
+          <p class="ds-lede">
+            Inputs sit dark and glow pink on focus. Menus, tooltips, toasts and
+            modals are stickers too.
+          </p>
+          <div class="ds-row ds-panel">
+            <input
+              class="form-control"
+              style="max-width: 280px"
+              placeholder="Search scenes…"
+            />
+            <select class="custom-select" style="max-width: 200px">
+              <option>Sort by rating</option>
+              <option>Sort by date</option>
+            </select>
+            <div class="custom-control custom-checkbox">
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="ds-check"
+                checked
+              />
+              <label class="custom-control-label" for="ds-check"
+                >Organised only</label
+              >
+            </div>
+            <div class="custom-control custom-switch">
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="ds-switch"
+                checked
+              />
+              <label class="custom-control-label" for="ds-switch"
+                >Show previews</label
+              >
+            </div>
+          </div>
+          <div class="ds-overlays ds-static">
+            <div>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="#menu">Play random</a>
+                <a class="dropdown-item active" href="#menu"
+                  >Generate previews</a
+                >
+                <a class="dropdown-item" href="#menu">Export</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#menu">Delete…</a>
+              </div>
+              <div class="tooltip bs-tooltip-top mt-3" role="tooltip">
+                <div class="tooltip-inner">Organised</div>
+              </div>
+            </div>
+            <div>
+              <div class="toast" role="status">
+                <div class="toast-header">Stash</div>
+                <div class="toast-body">Started generating</div>
+              </div>
+            </div>
+            <div>
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Delete scene?</h5>
+                </div>
+                <div class="modal-body">
+                  The file stays on disk unless you tick the box.
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary">Cancel</button
+                  ><button class="btn btn-danger">Delete</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2>
+            <img src="Theme-Juicy/assets/icons/crown.svg" alt="" />Navigation
+          </h2>
+          <div class="ds-panel">
+            <ul class="nav nav-tabs mb-3">
+              <li class="nav-item">
+                <a class="nav-link active" href="#nav">Details</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#nav">Scenes</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#nav">Galleries</a>
+              </li>
+              <li class="nav-item"><a class="nav-link" href="#nav">Edit</a></li>
+            </ul>
+            <ul class="pagination m-0">
+              <li class="page-item"><a class="page-link" href="#nav">‹</a></li>
+              <li class="page-item active">
+                <a class="page-link" href="#nav">1</a>
+              </li>
+              <li class="page-item"><a class="page-link" href="#nav">2</a></li>
+              <li class="page-item"><a class="page-link" href="#nav">3</a></li>
+              <li class="page-item"><a class="page-link" href="#nav">›</a></li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2>
+            <img src="Theme-Juicy/assets/icons/bubble.svg" alt="" />Loading and
+            empty
+          </h2>
+          <p class="ds-lede">
+            The loader is a gum bubble that swells and pops. Empty results get
+            the mascot. Both messages use the cheeky copy unless Plain labels or
+            SFW mode is on.
+          </p>
+          <div class="ds-row">
+            <div class="ds-panel" style="min-width: 260px">
+              <div class="LoadingIndicator">
+                <div class="spinner-border" role="status">
+                  <span class="sr-only">Loading…</span>
+                </div>
+                <h4 class="LoadingIndicator-message">Loading…</h4>
+              </div>
+            </div>
+            <div class="ds-panel" style="min-width: 260px">
+              <div>No results found.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="Theme-Juicy/assets/icons/lips.svg" alt="" />Copy</h2>
+          <p class="ds-lede">
+            Cheeky copy swaps a few of Stash's own messages, by exact match, so
+            your titles, tags and descriptions are never touched.
+          </p>
+          <div class="ds-panel">
+            <table class="ds-copy">
+              <thead>
+                <tr>
+                  <th>Stash says</th>
+                  <th>Juicy says</th>
+                </tr>
+              </thead>
+              <tbody id="ds-copy-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <footer class="ds-footer">
+          <p>
+            Juicy 0.1.0 · MIT · Fredoka by the Fredoka Project Authors (SIL OFL
+            1.1). This page loads the built theme files over Bootstrap 4.6,
+            which stands in for Stash's own styles.
+          </p>
+        </footer>
+      </div>
+    </div>
+
+    <script src="Theme-Juicy/juicy.js"></script>
+    <script src="ds/ds.js"></script>
+  </body>
+</html>

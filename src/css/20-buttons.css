@@ -1,0 +1,177 @@
+/*
+ * Buttons: glossy candy pills on a hard ink drop that squish when pressed.
+ * Stash renders its icon buttons as `.btn.btn-primary.minimal`, so every candy
+ * rule skips `.minimal` and those stay flat.
+ */
+.btn {
+  border-radius: var(--juicy-radius-pill);
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition:
+    transform var(--juicy-medium) var(--juicy-ease-bounce),
+    box-shadow var(--juicy-fast),
+    filter var(--juicy-fast),
+    background-color var(--juicy-fast),
+    color var(--juicy-fast);
+}
+
+.btn-primary:not(.minimal),
+.btn-secondary:not(.minimal),
+.btn-success:not(.minimal),
+.btn-danger:not(.minimal),
+.btn-warning:not(.minimal),
+.btn-info:not(.minimal) {
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  box-shadow: var(--juicy-drop), var(--juicy-shine);
+  color: var(--juicy-ink);
+}
+
+.btn.btn-primary:not(.minimal),
+.btn.btn-primary:not(.minimal):active,
+.btn.btn-primary:not(.minimal).active {
+  background-color: var(--juicy-pink);
+  background-image: var(--juicy-gloss-pink);
+  border-color: var(--juicy-ink);
+  color: var(--juicy-ink);
+}
+
+.btn.btn-secondary:not(.minimal),
+.btn.btn-secondary:not(.minimal):active,
+.btn.btn-secondary:not(.minimal).active {
+  background-color: var(--juicy-card-raised);
+  background-image: var(--juicy-gloss-plum);
+  border-color: var(--juicy-ink);
+  color: var(--juicy-text);
+}
+
+.btn-success:not(.minimal) {
+  background-color: var(--juicy-lime);
+  background-image: var(--juicy-gloss-lime);
+}
+
+.btn-danger:not(.minimal) {
+  background-color: var(--juicy-danger);
+  background-image: linear-gradient(
+    180deg,
+    #ff8a7f 0%,
+    var(--juicy-danger) 60%
+  );
+}
+
+.btn-warning:not(.minimal) {
+  background-color: var(--juicy-gold);
+  background-image: var(--juicy-gloss-gold);
+}
+
+.btn-info:not(.minimal) {
+  background-color: var(--juicy-cyan);
+  background-image: linear-gradient(180deg, #5fd0ff 0%, var(--juicy-cyan) 60%);
+}
+
+.btn-primary:not(.minimal):hover,
+.btn-success:not(.minimal):hover,
+.btn-danger:not(.minimal):hover,
+.btn-warning:not(.minimal):hover,
+.btn-info:not(.minimal):hover {
+  border-color: var(--juicy-ink);
+  box-shadow: var(--juicy-drop-lg), var(--juicy-shine);
+  color: var(--juicy-ink);
+  filter: brightness(1.07);
+  transform: translateY(-2px);
+}
+
+.btn-secondary:not(.minimal):hover {
+  border-color: var(--juicy-ink);
+  box-shadow: var(--juicy-drop-lg), var(--juicy-shine);
+  color: var(--juicy-bubblegum);
+  transform: translateY(-2px);
+}
+
+.btn.btn:not(.minimal, :disabled):active {
+  box-shadow:
+    0 1px 0 var(--juicy-ink),
+    var(--juicy-shine);
+  transform: translateY(2px) scale(0.97);
+}
+
+.btn:not(.minimal):focus,
+.btn:not(.minimal).focus {
+  box-shadow: var(--juicy-drop), var(--juicy-ring);
+}
+
+.btn.minimal {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--juicy-text-muted);
+}
+
+.btn.minimal:hover,
+.btn.minimal:focus {
+  background-color: var(--juicy-pink-soft);
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--juicy-bubblegum);
+}
+
+.btn:disabled,
+.btn.disabled {
+  opacity: 0.6;
+}
+
+.btn.btn:not(.minimal):disabled,
+.btn.btn:not(.minimal).disabled {
+  background-color: var(--juicy-card-raised);
+  background-image: none;
+  border-color: var(--juicy-line);
+  box-shadow: none;
+  color: var(--juicy-text-dim);
+  filter: none;
+  transform: none;
+}
+
+.btn-group > .btn:not(.minimal, :first-child) {
+  margin-left: calc(var(--juicy-outline) * -1);
+}
+
+/* Selects styled as buttons (the page-size picker in list toolbars) */
+select.btn-secondary:not(.minimal) {
+  background-color: var(--juicy-card-raised);
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  border-radius: var(--juicy-radius-pill);
+  box-shadow: var(--juicy-drop);
+  color: var(--juicy-text);
+}
+
+select option {
+  background-color: var(--juicy-card-raised);
+  color: var(--juicy-text);
+}
+
+/* Player chrome that Stash renders as plain buttons: keep it quiet */
+#root .scene-divider .btn,
+#root .scrubber-button {
+  background-color: transparent;
+  background-image: none;
+  border: 0;
+  box-shadow: none;
+  color: var(--juicy-bubblegum);
+  transform: none;
+}
+
+#root .scrubber-button {
+  background-color: var(--juicy-card-raised);
+  border-radius: var(--juicy-radius-sm);
+}
+
+/* The marker strip above the scrubber thumbnails */
+#root .scrubber-tags-background {
+  background-color: var(--juicy-card-raised);
+}
+
+#root .scene-divider .btn:hover,
+#root .scrubber-button:hover {
+  background-color: var(--juicy-pink-soft);
+  color: var(--juicy-pink);
+}

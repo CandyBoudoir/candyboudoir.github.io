@@ -1,0 +1,20 @@
+name: Theme - Juicy
+description: Pink, playful and a little naughty. Glossy candy stickers, gold hearts for ratings and a gum-bubble loader.
+version: 0.1.0
+url: https://github.com/CandyBoudoir/juicy
+ui:
+  css:
+    - juicy.css
+  javascript:
+    - juicy.js
+  assets:
+    /: assets
+settings:
+  calmMode:
+    displayName: Calm mode
+    description: Turn off Juicy's animations (hover tilts, heart bursts, the bubble loader).
+    type: BOOLEAN
+  plainCopy:
+    displayName: Plain labels
+    description: Keep Stash's own wording instead of Juicy's cheeky copy. Stash's SFW mode always uses plain labels.
+    type: BOOLEAN

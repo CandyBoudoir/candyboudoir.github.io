@@ -1,0 +1,31 @@
+/* Tags and badges: purple candy chips */
+.tag-item,
+.badge-secondary {
+  background-color: var(--juicy-purple);
+  border: 2px solid var(--juicy-ink);
+  border-radius: var(--juicy-radius-pill);
+  box-shadow: 0 2px 0 var(--juicy-ink);
+  color: #fff;
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: transform var(--juicy-medium) var(--juicy-ease-bounce);
+}
+
+.tag-item:hover,
+a.tag-item:hover {
+  background-color: #ae55ff;
+  color: #fff;
+  transform: translateY(-1px) rotate(-2deg);
+}
+
+.badge-primary {
+  background-color: var(--juicy-pink);
+  border: 2px solid var(--juicy-ink);
+  color: var(--juicy-ink);
+}
+
+.badge-info {
+  background-color: var(--juicy-cyan);
+  color: var(--juicy-ink);
+}

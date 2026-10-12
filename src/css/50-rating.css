@@ -1,0 +1,56 @@
+/* Ratings: gold hearts instead of stars. The Font Awesome star paths are
+   hidden and the svg box paints a heart through a mask. */
+.rating-stars svg {
+  background-color: currentcolor;
+  mask: url('assets/icons/glyph-heart-outline.svg') center / 90% no-repeat;
+}
+
+.rating-stars .filled-star svg {
+  mask-image: url('assets/icons/glyph-heart.svg');
+}
+
+.rating-stars svg path {
+  visibility: hidden;
+}
+
+.rating-stars .unfilled-star svg {
+  color: var(--juicy-text-dim);
+}
+
+.rating-stars .filled-star svg,
+.rating-stars .unfilled-star .set {
+  color: var(--juicy-gold);
+  filter: drop-shadow(0 1px 0 var(--juicy-ink));
+}
+
+.rating-stars button {
+  transition: transform var(--juicy-medium) var(--juicy-ease-bounce);
+}
+
+.rating-stars .btn:not(:disabled):hover {
+  transform: scale(1.2) rotate(-8deg);
+}
+
+.star-rating-number {
+  color: var(--juicy-gold);
+  font-family: var(--juicy-font-display);
+  font-weight: 700;
+}
+
+/* The O counter wears a drip. Stash draws it with its own SweatDrops svg (no
+   Font Awesome class) and swaps in a thumbs-up in SFW mode, which this skips. */
+.o-counter svg:not(.svg-inline--fa),
+.count-button .count-icon svg:not(.svg-inline--fa) {
+  background-color: currentcolor;
+  mask: url('assets/icons/glyph-drip.svg') center / 85% no-repeat;
+}
+
+.o-counter svg:not(.svg-inline--fa) path,
+.count-button .count-icon svg:not(.svg-inline--fa) path {
+  visibility: hidden;
+}
+
+.o-counter .btn.minimal,
+.count-button:has(svg:not(.svg-inline--fa)) .btn.minimal {
+  color: var(--juicy-bubblegum);
+}

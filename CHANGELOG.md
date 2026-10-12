@@ -1,0 +1,13 @@
+# Changelog
+
+## 0.1.0
+
+First release, for Stash v0.31.1.
+
+- Candy Boudoir look: glossy sticker cards, candy pill buttons, purple tag chips, raised plum menus and modals, and a pink-dotted plum background.
+- Gold hearts replace the rating stars, and a drip replaces the O counter's drops.
+- Heart, sparkle and drip bursts on rating, favouriting and the O counter.
+- A gum-bubble loader in place of Stash's spinner, and a mascot on empty lists.
+- Cheeky copy for a short list of Stash's messages, matched whole so titles, tags and descriptions are never touched.
+- Calm mode and Plain labels settings. Stash's SFW mode keeps the colours and drops the cheek.
+- Fredoka bundled in the plugin, since Stash's content security policy blocks font hosts.

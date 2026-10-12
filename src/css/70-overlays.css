@@ -1,0 +1,91 @@
+/* Dropdowns, modals, popovers, tooltips, toasts */
+.dropdown-menu,
+.popover {
+  background-color: var(--juicy-card-raised);
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  border-radius: var(--juicy-radius);
+  box-shadow: var(--juicy-drop-lg);
+  color: var(--juicy-text);
+}
+
+.dropdown-item {
+  border-radius: var(--juicy-radius-sm);
+  color: var(--juicy-text);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background-color: var(--juicy-pink-soft);
+  color: var(--juicy-bubblegum);
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+  background-image: var(--juicy-gloss-pink);
+  color: var(--juicy-ink);
+}
+
+.popover-body {
+  color: var(--juicy-text);
+}
+
+.modal-content {
+  background-color: var(--juicy-card);
+  border: 3px solid var(--juicy-ink);
+  border-radius: var(--juicy-radius-lg);
+  box-shadow:
+    0 0 0 3px var(--juicy-pink),
+    0 10px 0 var(--juicy-ink);
+  color: var(--juicy-text);
+}
+
+/* Stash paints each modal section slate; let the plum content show through. */
+.modal-header,
+.modal-body,
+.modal-footer {
+  background-color: transparent;
+  color: var(--juicy-text);
+}
+
+.modal-header,
+.modal-footer {
+  border-color: var(--juicy-line);
+}
+
+.modal-backdrop.show {
+  backdrop-filter: blur(3px);
+  background-color: var(--juicy-bg-deep);
+  opacity: 0.8;
+}
+
+.tooltip-inner {
+  background-color: var(--juicy-ink);
+  border: 2px solid var(--juicy-lime);
+  border-radius: var(--juicy-radius-sm);
+  color: var(--juicy-lime);
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+}
+
+.toast {
+  background-color: var(--juicy-card-raised);
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  border-left: 8px solid var(--juicy-pink);
+  border-radius: var(--juicy-radius);
+  box-shadow: var(--juicy-drop-lg);
+  color: var(--juicy-text);
+}
+
+.toast-header {
+  background-color: transparent;
+  border-bottom-color: var(--juicy-line);
+  color: var(--juicy-text);
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+}
+
+.alert {
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  border-radius: var(--juicy-radius);
+  box-shadow: var(--juicy-drop);
+}

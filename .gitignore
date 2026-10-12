@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.DS_Store
+# Local, per-machine files: agent settings, direnv and local agent notes.
+.claude/
+.envrc
+CLAUDE.local.md

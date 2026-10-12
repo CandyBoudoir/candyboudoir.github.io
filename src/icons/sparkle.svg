@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-4 -4 72 74">
+  <defs>
+    <radialGradient id="sparkle-fill" cx="0.5" cy="0.45" r="0.6">
+      <stop offset="0" stop-color="#fffbe0"/>
+      <stop offset="0.5" stop-color="#fdda4e"/>
+      <stop offset="1" stop-color="#f0a800"/>
+    </radialGradient>
+    <path id="sparkle-shape" d="M32 5C34 21 42 29.5 59 32C42 34.5 34 43 32 59C30 43 22 34.5 5 32C22 29.5 30 21 32 5Z"/>
+  </defs>
+  <use xlink:href="#sparkle-shape" href="#sparkle-shape" transform="translate(0 3)" fill="none" stroke="#010224" stroke-opacity="0.45" stroke-width="10" stroke-linejoin="round"/>
+  <use xlink:href="#sparkle-shape" href="#sparkle-shape" fill="none" stroke="#d7fa54" stroke-width="10" stroke-linejoin="round"/>
+  <use xlink:href="#sparkle-shape" href="#sparkle-shape" fill="url(#sparkle-fill)" stroke="#010224" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M29.5 21.5C30.2 25 31 27.5 32.4 29.4" fill="none" stroke="#fff" stroke-opacity="0.9" stroke-width="2.4" stroke-linecap="round"/>
+</svg>

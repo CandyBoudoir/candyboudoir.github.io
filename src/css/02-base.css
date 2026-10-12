@@ -1,0 +1,62 @@
+/* Page, type, links, focus and selection */
+body {
+  background-color: var(--juicy-bg);
+  background-image: radial-gradient(
+    rgb(252 61 159 / 7%) 1.5px,
+    transparent 1.7px
+  );
+  background-size: 22px 22px;
+  color: var(--juicy-text);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.card-section-title,
+.modal-title,
+.detail-header .name {
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+a,
+.btn-link {
+  color: var(--juicy-cyan);
+}
+
+a:hover,
+.btn-link:hover {
+  color: var(--juicy-bubblegum);
+}
+
+.text-muted {
+  color: var(--juicy-text-dim) !important;
+}
+
+hr {
+  border-top-color: var(--juicy-line);
+}
+
+code {
+  background-color: var(--juicy-card-raised);
+  border-radius: var(--juicy-radius-sm);
+  color: var(--juicy-bubblegum);
+}
+
+::selection {
+  background: var(--juicy-lime);
+  color: var(--juicy-ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--juicy-lime);
+  outline-offset: 2px;
+}
+
+* {
+  scrollbar-color: var(--juicy-pink) var(--juicy-bg-deep);
+}

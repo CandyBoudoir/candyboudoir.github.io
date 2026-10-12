@@ -1,0 +1,141 @@
+/* Cards: stickers with an ink outline that lift, tilt and catch a lime halo */
+.card {
+  background-color: var(--juicy-card);
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  border-radius: var(--juicy-radius-lg);
+  box-shadow: var(--juicy-drop-lg);
+  color: var(--juicy-text);
+}
+
+.grid-card {
+  overflow: hidden;
+  transition:
+    transform var(--juicy-medium) var(--juicy-ease-bounce),
+    box-shadow var(--juicy-fast);
+}
+
+.grid-card:hover {
+  box-shadow:
+    0 0 0 3px var(--juicy-lime),
+    0 8px 0 var(--juicy-ink);
+  transform: translateY(-4px) rotate(-0.6deg);
+}
+
+.grid-card:nth-child(even):hover {
+  transform: translateY(-4px) rotate(0.6deg);
+}
+
+.grid-card .thumbnail-section {
+  border-bottom: var(--juicy-outline) solid var(--juicy-ink);
+  overflow: hidden;
+  position: relative;
+}
+
+/* A gloss sheen sweeps across the thumbnail on hover */
+.grid-card .thumbnail-section::after {
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgb(255 255 255 / 28%) 50%,
+    transparent 65%
+  );
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  transform: translateX(-120%);
+}
+
+.grid-card:hover .thumbnail-section::after {
+  animation: juicy-shine 700ms var(--juicy-ease-out);
+}
+
+.card-section-title {
+  color: var(--juicy-text);
+}
+
+.grid-card a:hover .card-section-title {
+  color: var(--juicy-bubblegum);
+}
+
+.scene-card__date,
+.performer-card__age {
+  color: var(--juicy-text-dim);
+}
+
+.card hr {
+  border-top: 2px dashed var(--juicy-line);
+}
+
+/* Overlays on the thumbnail */
+.scene-specs-overlay span,
+.scene-interactive-speed-overlay {
+  background-color: rgb(1 2 36 / 78%);
+  border-radius: var(--juicy-radius-pill);
+  color: var(--juicy-text);
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+  padding: 0 0.45em;
+}
+
+.overlay-resolution {
+  color: var(--juicy-lime) !important;
+}
+
+.rating-banner {
+  background-color: var(--juicy-gold) !important;
+  background-image: var(--juicy-gloss-gold);
+  border: 2px solid var(--juicy-ink);
+  border-radius: var(--juicy-radius-pill);
+  box-shadow: 0 2px 0 var(--juicy-ink);
+  color: var(--juicy-ink);
+  font-family: var(--juicy-font-display);
+  font-weight: 700;
+  left: 0.5rem;
+  padding: 0.05rem 0.6rem;
+  top: 0.5rem;
+  transform: rotate(-4deg);
+  width: auto;
+}
+
+.progress-bar,
+.grid-card .progress-bar {
+  background-color: rgb(1 2 36 / 70%);
+}
+
+.progress-indicator,
+.progress-bar .progress-indicator {
+  background-image: linear-gradient(
+    90deg,
+    var(--juicy-pink),
+    var(--juicy-bubblegum)
+  );
+}
+
+/* Counts under the card */
+.card-popovers .btn.minimal {
+  color: var(--juicy-text-muted);
+}
+
+.card-popovers .btn.minimal:hover {
+  background-color: var(--juicy-lime-soft);
+  color: var(--juicy-lime);
+}
+
+.card-popovers .organized .btn,
+.card-popovers .organized svg {
+  color: var(--juicy-lime);
+}
+
+/* Favourite heart */
+#root .favorite-button.favorite,
+#root .favorite-button.favorite:hover,
+#root .name-icons .favorite,
+#root .favourite-data .favorite {
+  color: var(--juicy-pink);
+  filter: drop-shadow(0 0 6px rgb(252 61 159 / 70%));
+}
+
+.favorite-button.not-favorite {
+  color: var(--juicy-text-dim);
+}
