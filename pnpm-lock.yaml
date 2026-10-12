@@ -176,8 +176,8 @@ importers:
         specifier: ^1.64.0
         version: 1.64.0
       bootstrap:
-        specifier: 4.6.2
-        version: 4.6.2(jquery@3.7.1)(popper.js@1.16.1)
+        specifier: 5.3.8
+        version: 5.3.8(@popperjs/core@2.11.8)
       eslint:
         specifier: ^10.12.0
         version: 10.12.0(supports-color@10.2.2)
@@ -342,6 +342,9 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
+  '@popperjs/core@2.11.8':
+    resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
+
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
@@ -394,12 +397,10 @@ packages:
     resolution: {integrity: sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==}
     engines: {node: 18 || 20 || >=22}
 
-  bootstrap@4.6.2:
-    resolution: {integrity: sha512-51Bbp/Uxr9aTuy6ca/8FbFloBUJZLHwnhTcnjIeRn2suQWsWzcuJhGjKDB5eppVte/8oCdOL3VuwxvZDUggwGQ==}
-    deprecated: This version of Bootstrap is no longer supported. Please upgrade to the latest version.
+  bootstrap@5.3.8:
+    resolution: {integrity: sha512-HP1SZDqaLDPwsNiqRqi5NcP0SSXciX2s9E+RyqJIIqGo+vJeN5AJVM98CXmW/Wux0nQ5L7jeWUdplCEf0Ee+tg==}
     peerDependencies:
-      jquery: 1.9.1 - 3
-      popper.js: ^1.16.1
+      '@popperjs/core': ^2.11.8
 
   brace-expansion@5.0.12:
     resolution: {integrity: sha512-YovQ3rzhaLMIrDjNDMkNS01tea93qhEhG5xy8f6+R0l+dw3Ki+5sCoIoI942iuLZTHWogWktgwVDhU09iNEimQ==}
@@ -657,9 +658,6 @@ packages:
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
 
-  jquery@3.7.1:
-    resolution: {integrity: sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg==}
-
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
@@ -781,10 +779,6 @@ packages:
     resolution: {integrity: sha512-kVzTnYFYEyQ9RGzBjNCd2+yEqWmVbxl3AHPynv3qQ6JTjv4a+kwRcnqQwIpuP3NnrnIrE/Q6wWAIAvMfIE2/Yg==}
     engines: {node: '>=20'}
     hasBin: true
-
-  popper.js@1.16.1:
-    resolution: {integrity: sha512-Wb4p1J4zyFTbM+u6WuO4XstYx4Ky9Cewe4DWrel7B0w6VVICvPwdOpotjzcf6eD8TsckVnIMNONQyPIUFOUbCQ==}
-    deprecated: You can find the new Popper v2 at @popperjs/core, this package is dedicated to the legacy v1
 
   postcss-safe-parser@7.1.0:
     resolution: {integrity: sha512-1WzZxRLaAFwEh6Do+zyGpjWV3nGJNxxhuh7Ubu/q1ICImMgZJnLwhoaEpRbG4pJppp2Y1ncL9ffA2f+LhrefQg==}
@@ -1075,6 +1069,8 @@ snapshots:
     dependencies:
       playwright: 1.64.0
 
+  '@popperjs/core@2.11.8': {}
+
   '@sindresorhus/merge-streams@4.0.0': {}
 
   '@types/esrecurse@4.3.1': {}
@@ -1117,10 +1113,9 @@ snapshots:
 
   balanced-match@4.0.4: {}
 
-  bootstrap@4.6.2(jquery@3.7.1)(popper.js@1.16.1):
+  bootstrap@5.3.8(@popperjs/core@2.11.8):
     dependencies:
-      jquery: 3.7.1
-      popper.js: 1.16.1
+      '@popperjs/core': 2.11.8
 
   brace-expansion@5.0.12:
     dependencies:
@@ -1372,8 +1367,6 @@ snapshots:
 
   isexe@2.0.0: {}
 
-  jquery@3.7.1: {}
-
   js-tokens@4.0.0: {}
 
   js-yaml@4.3.2:
@@ -1473,8 +1466,6 @@ snapshots:
   playwright@1.64.0:
     dependencies:
       playwright-core: 1.64.0
-
-  popper.js@1.16.1: {}
 
   postcss-safe-parser@7.1.0(postcss@8.5.29):
     dependencies:
