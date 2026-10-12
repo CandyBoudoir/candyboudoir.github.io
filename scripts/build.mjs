@@ -5,8 +5,16 @@
 //   index.html, ds/    the design-system page
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
-import { cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import {
+  cp,
+  mkdir,
+  readdir,
+  readFile,
+  rm,
+  utimes,
+  writeFile,
+} from 'node:fs/promises'
+import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -54,20 +62,6 @@ async function buildPlugin() {
 }
 
 async function buildSource() {
-  const zip = join(site, `${pluginId}.zip`)
-  // -X drops extra file attributes so the zip only changes when content does.
-  execFileSync('zip', ['-q', '-r', '-X', zip, '.'], { cwd: plugin })
-  const sha256 = createHash('sha256')
-    .update(await readFile(zip))
-    .digest('hex')
-
-  const manifest = await readFile(join(src, `${pluginId}.yml`), 'utf8')
-  const field = (name) =>
-    manifest.match(new RegExp(`^${name}: (.*)$`, 'm'))?.[1]
-  // JSON strings are valid YAML, so a ': ' in the name or description can't
-  // break the index.
-  const quoted = (name) => JSON.stringify(field(name))
-
   // Stash offers an update when `date` moves forward; `version` is display only.
   // Both come from the last commit that changed what goes into the zip, so a
   // rebuild with no plugin changes offers no update.
@@ -79,6 +73,35 @@ async function buildSource() {
     .toString()
     .trim()
     .split(' ')
+
+  // A reproducible zip: every file stamped with that commit's time and added
+  // in sorted order, with no directory entries or extra attributes. Any build
+  // of the same commit gives the same bytes, so the GitHub Release asset and
+  // the file the plugin source serves share one sha256.
+  const files = (
+    await readdir(plugin, { recursive: true, withFileTypes: true })
+  )
+    .filter((e) => e.isFile())
+    .map((e) => relative(plugin, join(e.parentPath, e.name)))
+    .sort()
+  const stamp = new Date(Number(epoch) * 1000)
+  await Promise.all(files.map((f) => utimes(join(plugin, f), stamp, stamp)))
+  const zip = join(site, `${pluginId}.zip`)
+  execFileSync('zip', ['-q', '-X', '-D', zip, ...files], {
+    cwd: plugin,
+    env: { ...process.env, TZ: 'UTC' },
+  })
+  const sha256 = createHash('sha256')
+    .update(await readFile(zip))
+    .digest('hex')
+
+  const manifest = await readFile(join(src, `${pluginId}.yml`), 'utf8')
+  const field = (name) =>
+    manifest.match(new RegExp(`^${name}: (.*)$`, 'm'))?.[1]
+  // JSON strings are valid YAML, so a ': ' in the name or description can't
+  // break the index.
+  const quoted = (name) => JSON.stringify(field(name))
+
   const date = new Date(Number(epoch) * 1000)
     .toISOString()
     .replace('T', ' ')

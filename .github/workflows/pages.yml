@@ -1,11 +1,20 @@
-# Publishes the plugin source and the design-system page to GitHub Pages on
-# every push to prod. Stash reads index.yml and Theme-Juicy.zip from the site root.
+# Publishes both plugin channels and the design-system page to GitHub Pages on
+# every push to main or prod:
+#   /index.yml           stable channel, built from prod
+#   /develop/index.yml   develop channel, built from main, for Stash develop builds
+# The stable channel always comes from prod, so a push to main cannot change
+# it. A manual run can publish an older tag as the stable channel to roll back.
+# After deploying, the live indexes and zips are checked against the build.
 name: Publish
 
 on:
   push:
-    branches: [prod]
+    branches: [main, prod]
   workflow_dispatch:
+    inputs:
+      stable_ref:
+        description: Publish this ref as the stable channel instead of prod (for a rollback)
+        required: false
 
 permissions:
   contents: read
@@ -18,23 +27,44 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Full history: build.mjs dates the release from the last plugin commit.
+      # Full history: build.mjs dates each channel from its last plugin commit.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.stable_ref || 'prod' }}
+          path: stable
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          path: develop
           fetch-depth: 0
           persist-credentials: false
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          package_json_file: stable/package.json
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm check
-      - run: pnpm build
+          cache-dependency-path: |
+            stable/pnpm-lock.yaml
+            develop/pnpm-lock.yaml
+      - name: Build the stable channel
+        working-directory: stable
+        run: pnpm install --frozen-lockfile && pnpm check && pnpm build
+      - name: Build the develop channel
+        working-directory: develop
+        run: pnpm install --frozen-lockfile && pnpm check && pnpm build
+      - name: Assemble the site
+        run: |
+          mkdir -p site/develop
+          cp -R stable/dist/site/. site/
+          cp -R develop/dist/site/. site/develop/
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
-          path: dist/site
+          path: site
 
   deploy:
     needs: build
@@ -48,3 +78,19 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  verify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: github-pages
+          path: built
+      - name: Check the live channels match the build
+        run: |
+          mkdir site && tar -xf built/artifact.tar -C site
+          node scripts/verify-live.mjs site https://candyboudoir.github.io/juicy

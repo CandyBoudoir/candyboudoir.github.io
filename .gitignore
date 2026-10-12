@@ -10,3 +10,4 @@ status/
 .claude/
 .envrc
 CLAUDE.local.md
+release-notes.md
