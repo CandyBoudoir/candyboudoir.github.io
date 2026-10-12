@@ -16,6 +16,8 @@ Juicy brings glossy candy stickers, gold hearts for ratings, a gum-bubble loader
 3. Expand the Juicy source, tick Theme - Juicy and click Install.
 4. Turn off any other theme plugin and clear any Custom CSS that restyles Stash, then refresh the page.
 
+If you run a Stash develop build, use `https://candyboudoir.github.io/juicy/develop/index.yml` as the source URL instead. It carries fixes for upcoming Stash changes before they reach the stable channel. Add one of the two sources, never both: they carry the same plugin.
+
 Stash lists new versions under Settings > Plugins > Installed Plugins when you click Check for updates. To remove Juicy, select it there and click Uninstall; Stash's own look returns on the next refresh.
 
 ## Settings
@@ -80,7 +82,7 @@ WORK=stash-work node tests/stash/prepare.mjs
 pnpm test:compat contract
 ```
 
-`main` is the trunk. A push to `prod` publishes the plugin source and the design-system page to GitHub Pages. Each Stash release changes some markup, so each one gets a pass over the design-system page and a check on a live library.
+`main` is the trunk and feeds the develop channel; `prod` feeds the stable channel. Every push to either publishes both channels and the design-system page to GitHub Pages and checks the live files against the build. When `prod` carries a version with no tag yet, the Release workflow tags it and publishes a GitHub Release from that version's CHANGELOG section. Plugin zips are reproducible, so the release asset and the served zip share one sha256. Each Stash release changes some markup, so each one gets a pass over the design-system page and a check on a live library.
 
 ## License
 
