@@ -24,12 +24,15 @@ const masks = (page) => [
 
 // Waits for fonts and the images in view. Network idle never comes on the
 // settings page, which keeps polling the plugin sources, and lazy images below
-// the fold never load.
+// the fold or inside a collapsed section (the Tagger's rows) never load.
 async function settle(page) {
   await page.evaluate(() => document.fonts.ready)
   await page.waitForFunction(() =>
     [...document.images]
-      .filter((img) => img.getBoundingClientRect().top < window.innerHeight)
+      .filter((img) => {
+        const box = img.getBoundingClientRect()
+        return box.width && box.height && box.top < window.innerHeight
+      })
       .every((img) => img.complete),
   )
   await page.waitForTimeout(300)
