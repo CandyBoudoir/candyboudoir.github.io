@@ -79,7 +79,7 @@ jobs:
         id: visual
         if: always() && steps.prepare.outcome == 'success'
         continue-on-error: ${{ matrix.leg.channel != 'stable' }}
-        run: pnpm exec playwright test visual ${{ inputs.update_snapshots && matrix.leg.baseline && '--update-snapshots' || '' }}
+        run: pnpm exec playwright test visual ${{ inputs.update_snapshots && matrix.leg.baseline && '--update-snapshots=all' || '' }}
       - name: Record result
         if: always()
         run: node tests/stash/status.mjs

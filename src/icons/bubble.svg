@@ -3,14 +3,21 @@
     <radialGradient id="bubble-fill" cx="0.38" cy="0.32" r="0.75">
       <stop offset="0" stop-color="#ffc2e2"/>
       <stop offset="0.55" stop-color="#fc68b2"/>
-      <stop offset="1" stop-color="#e2399a"/>
+      <stop offset="1" stop-color="#9a208e"/>
     </radialGradient>
     <circle id="bubble-shape" cx="32" cy="33" r="24"/>
+    <clipPath id="bubble-relief">
+      <use href="#bubble-shape"/>
+    </clipPath>
   </defs>
   <use xlink:href="#bubble-shape" href="#bubble-shape" transform="translate(0 3)" fill="none" stroke="#010224" stroke-opacity="0.45" stroke-width="10"/>
   <use xlink:href="#bubble-shape" href="#bubble-shape" fill="none" stroke="#d7fa54" stroke-width="10"/>
   <use xlink:href="#bubble-shape" href="#bubble-shape" fill="url(#bubble-fill)" stroke="#010224" stroke-width="3.5"/>
-  <ellipse cx="22" cy="21" rx="8" ry="4.2" transform="rotate(-38 22 21)" fill="#fff" fill-opacity="0.9"/>
-  <circle cx="15" cy="32" r="2.2" fill="#fff" fill-opacity="0.85"/>
-  <path d="M47 41C44.5 46 40 49.5 34.5 50.6" fill="none" stroke="#fff" stroke-opacity="0.55" stroke-width="2.6" stroke-linecap="round"/>
+  <g clip-path="url(#bubble-relief)">
+    <path d="M11 35C18 49 38 54 52 35C51 48 43 55 32 55C21 55 13 47 11 35Z" fill="#812493" opacity=".48"/>
+    <path d="M14 26C15 17 25 12 33 14C36 15 35 18 32 18C25 17 20 20 18 27C17 31 13 30 14 26Z" fill="#fff2fa"/>
+    <path d="M39 15C45 17 48 22 49 27" fill="none" stroke="#ffc9ea" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M48 39C45 45 40 48 34 49" fill="none" stroke="#ffb7de" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="15" cy="34" r="2" fill="#fff2fa"/>
+  </g>
 </svg>

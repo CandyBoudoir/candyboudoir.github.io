@@ -14,17 +14,33 @@
     <circle id="crown-orb-l" cx="9" cy="21" r="4.6"/>
     <circle id="crown-orb-m" cx="32" cy="12" r="5"/>
     <circle id="crown-orb-r" cx="55" cy="21" r="4.6"/>
+    <clipPath id="crown-relief">
+      <use href="#crown-body"/>
+    </clipPath>
   </defs>
   <g transform="translate(0 3)" fill="none" stroke="#010224" stroke-opacity="0.45" stroke-width="10" stroke-linejoin="round">
-    <use xlink:href="#crown-body" href="#crown-body"/><use xlink:href="#crown-band" href="#crown-band"/>
-    <use xlink:href="#crown-orb-l" href="#crown-orb-l"/><use xlink:href="#crown-orb-m" href="#crown-orb-m"/><use xlink:href="#crown-orb-r" href="#crown-orb-r"/>
+    <use xlink:href="#crown-body" href="#crown-body"/>
+    <use xlink:href="#crown-band" href="#crown-band"/>
+    <use xlink:href="#crown-orb-l" href="#crown-orb-l"/>
+    <use xlink:href="#crown-orb-m" href="#crown-orb-m"/>
+    <use xlink:href="#crown-orb-r" href="#crown-orb-r"/>
   </g>
   <g fill="none" stroke="#d7fa54" stroke-width="10" stroke-linejoin="round">
-    <use xlink:href="#crown-body" href="#crown-body"/><use xlink:href="#crown-band" href="#crown-band"/>
-    <use xlink:href="#crown-orb-l" href="#crown-orb-l"/><use xlink:href="#crown-orb-m" href="#crown-orb-m"/><use xlink:href="#crown-orb-r" href="#crown-orb-r"/>
+    <use xlink:href="#crown-body" href="#crown-body"/>
+    <use xlink:href="#crown-band" href="#crown-band"/>
+    <use xlink:href="#crown-orb-l" href="#crown-orb-l"/>
+    <use xlink:href="#crown-orb-m" href="#crown-orb-m"/>
+    <use xlink:href="#crown-orb-r" href="#crown-orb-r"/>
   </g>
   <use xlink:href="#crown-body" href="#crown-body" fill="url(#crown-gold)" stroke="#010224" stroke-width="3.5" stroke-linejoin="round"/>
-  <use xlink:href="#crown-band" href="#crown-band" fill="#f0a800" stroke="#010224" stroke-width="3.5"/>
+  <g clip-path="url(#crown-relief)">
+    <path d="M32 18L27 43H38Z" fill="#fff4b0"/>
+    <path d="M32 18L38 43H47L43 36Z" fill="#dc8525" opacity=".7"/>
+    <path d="M12 27L17 41H23L21 36Z" fill="#fff4b0"/>
+    <path d="M52 28L45 43H50Z" fill="#dc8525"/>
+    <path d="M31 26L29 35" stroke="#fff" stroke-width="2.3" stroke-linecap="round"/>
+  </g>
+  <use xlink:href="#crown-band" href="#crown-band" fill="url(#crown-gold)" stroke="#010224" stroke-width="3.5"/>
   <use xlink:href="#crown-orb-l" href="#crown-orb-l" fill="url(#crown-orb)" stroke="#010224" stroke-width="3"/>
   <use xlink:href="#crown-orb-m" href="#crown-orb-m" fill="url(#crown-orb)" stroke="#010224" stroke-width="3"/>
   <use xlink:href="#crown-orb-r" href="#crown-orb-r" fill="url(#crown-orb)" stroke="#010224" stroke-width="3"/>
@@ -33,4 +49,7 @@
   <circle cx="30.4" cy="10.4" r="1.5" fill="#fff" fill-opacity="0.85"/>
   <circle cx="7.6" cy="19.6" r="1.2" fill="#fff" fill-opacity="0.85"/>
   <circle cx="53.6" cy="19.6" r="1.2" fill="#fff" fill-opacity="0.85"/>
+  <path d="M16 46H24M40 46H48" stroke="#fff4b0" stroke-width="2" stroke-linecap="round"/>
+  <path d="M16 51H24M40 51H48" stroke="#c47322" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M30 47L31 48" stroke="#b9f5ff" stroke-width="1.2" stroke-linecap="round"/>
 </svg>

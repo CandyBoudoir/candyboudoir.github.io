@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0
+
+New sticker art, for Stash v0.31.1.
+
+- The ten stickers have curved gloss, violet shadows and sculpted gold and lime details.
+- The cherry mascot on empty lists wears a satin bow with a gold heart and a glossy smirk.
+- The heart padlock has a gold heart keyhole.
+
 ## 0.1.0
 
 First release, for Stash v0.31.1.

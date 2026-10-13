@@ -3,7 +3,7 @@
     <radialGradient id="mascot-fill" cx="0.35" cy="0.3" r="0.8">
       <stop offset="0" stop-color="#ff9ccf"/>
       <stop offset="0.45" stop-color="#fc3d9f"/>
-      <stop offset="1" stop-color="#b8187a"/>
+      <stop offset="1" stop-color="#711c86"/>
     </radialGradient>
     <linearGradient id="mascot-leaf" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#ecff8a"/>
@@ -12,18 +12,39 @@
     <circle id="mascot-body" cx="32" cy="38" r="21"/>
     <path id="mascot-stem" d="M32 17.5C32.5 12 35 7.5 39.5 4.5"/>
     <path id="mascot-leaf-shape" d="M39.5 4.5C45 0.5 53 1.5 57 6C51.5 10 44 9.5 39.5 4.5Z"/>
+    <linearGradient id="mascot-satin" x1="0" y1="0" x2="0.8" y2="1">
+      <stop stop-color="#65458d"/>
+      <stop offset=".45" stop-color="#22123f"/>
+      <stop offset="1" stop-color="#010224"/>
+    </linearGradient>
+    <clipPath id="mascot-relief">
+      <use href="#mascot-body"/>
+    </clipPath>
   </defs>
   <g transform="translate(0 3)" fill="none" stroke="#010224" stroke-opacity="0.45" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
-    <use xlink:href="#mascot-body" href="#mascot-body"/><use xlink:href="#mascot-stem" href="#mascot-stem"/><use xlink:href="#mascot-leaf-shape" href="#mascot-leaf-shape"/>
+    <use xlink:href="#mascot-body" href="#mascot-body"/>
+    <use xlink:href="#mascot-stem" href="#mascot-stem"/>
+    <use xlink:href="#mascot-leaf-shape" href="#mascot-leaf-shape"/>
   </g>
   <g fill="none" stroke="#d7fa54" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
-    <use xlink:href="#mascot-body" href="#mascot-body"/><use xlink:href="#mascot-stem" href="#mascot-stem"/><use xlink:href="#mascot-leaf-shape" href="#mascot-leaf-shape"/>
+    <use xlink:href="#mascot-body" href="#mascot-body"/>
+    <use xlink:href="#mascot-stem" href="#mascot-stem"/>
+    <use xlink:href="#mascot-leaf-shape" href="#mascot-leaf-shape"/>
   </g>
   <use xlink:href="#mascot-stem" href="#mascot-stem" fill="none" stroke="#010224" stroke-width="6.5" stroke-linecap="round"/>
   <use xlink:href="#mascot-stem" href="#mascot-stem" fill="none" stroke="#8fb31a" stroke-width="2.6" stroke-linecap="round"/>
   <use xlink:href="#mascot-leaf-shape" href="#mascot-leaf-shape" fill="url(#mascot-leaf)" stroke="#010224" stroke-width="3" stroke-linejoin="round"/>
   <use xlink:href="#mascot-body" href="#mascot-body" fill="url(#mascot-fill)" stroke="#010224" stroke-width="3.5"/>
-  <ellipse cx="23" cy="25" rx="6" ry="3.2" transform="rotate(-38 23 25)" fill="#fff" fill-opacity="0.85"/>
+  <g clip-path="url(#mascot-relief)">
+    <path d="M14 43C23 55 43 54 51 35C52 49 43 57 32 57C24 57 17 51 14 43Z" fill="#781b89" opacity=".6"/>
+    <path d="M17 29C18 24 23 21 28 22" fill="none" stroke="#fff2fa" stroke-width="3.8" stroke-linecap="round"/>
+    <path d="M43 25C46 27 48 30 48 33" fill="none" stroke="#ffaad9" stroke-width="2.3" stroke-linecap="round"/>
+    <ellipse cx="18" cy="44" rx="3.4" ry="1.8" fill="#ff9ccf"/>
+    <ellipse cx="46" cy="44" rx="3.4" ry="1.8" fill="#ff9ccf"/>
+  </g>
+  <path d="M31 17C25 8 18 10 19 16C18 22 25 24 31 20C37 26 45 24 44 18C46 12 38 10 31 17Z" fill="url(#mascot-satin)" stroke="#010224" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M23 14L29 17M35 18L40 16" stroke="#9b74bd" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M31 17C29 14 26 17 29 20L32 22L35 19C37 16 33 14 31 17Z" fill="#fdda4e" stroke="#010224" stroke-width="1.4"/>
   <!-- left eye: half-lidded, looking sideways -->
   <path d="M20 37.5C21.5 34.8 27 34.6 29 37.5C27 40.6 21.8 40.6 20 37.5Z" fill="#fff" stroke="#010224" stroke-width="1.4"/>
   <circle cx="26.2" cy="38" r="2.2" fill="#9b30ff"/>
@@ -36,10 +57,8 @@
   <!-- brows -->
   <path d="M20.5 31.5C22.5 30 26 29.6 28.5 30.6" fill="none" stroke="#010224" stroke-width="2" stroke-linecap="round"/>
   <path d="M36 30.4C38.4 29.4 41.6 29.8 43.8 31.4" fill="none" stroke="#010224" stroke-width="2" stroke-linecap="round"/>
-  <!-- smirk with tongue -->
-  <path d="M27 46C29.5 48.6 34.5 49 38.5 45.2" fill="none" stroke="#010224" stroke-width="2.2" stroke-linecap="round"/>
-  <path d="M33.2 47.6C33.6 50.4 37 50.6 37.4 47.4" fill="#ff8fc4" stroke="#010224" stroke-width="1.5" stroke-linejoin="round"/>
-  <!-- blush hearts -->
-  <path d="M17 43.4C16.6 42.4 15 42.6 15 43.9C15 44.9 16.2 45.7 17 46.3C17.8 45.7 19 44.9 19 43.9C19 42.6 17.4 42.4 17 43.4Z" fill="#c41d84" fill-opacity="0.75"/>
-  <path d="M47 43.4C46.6 42.4 45 42.6 45 43.9C45 44.9 46.2 45.7 47 46.3C47.8 45.7 49 44.9 49 43.9C49 42.6 47.4 42.4 47 43.4Z" fill="#c41d84" fill-opacity="0.75"/>
+  <path d="M26 46C29 44 31 46 33 46C35 44 37 44 40 43C38 49 31 53 26 46Z" fill="#fc68b2" stroke="#010224" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M28 47C32 48 36 47 38 45" fill="none" stroke="#010224" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M31 49L35 48" stroke="#fff2fa" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M43 7C47 4 51 4 54 6" fill="none" stroke="#f5ffb4" stroke-width="1.5" stroke-linecap="round"/>
 </svg>

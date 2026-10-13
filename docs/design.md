@@ -36,7 +36,9 @@ Stickers are the decorative icons: `mascot`, `cherry`, `heart`, `lips`, `heart-l
 1. A soft ink drop: the shape stroked 10 wide in ink at 45% opacity, offset 3 down.
 2. The lime cut edge: the shape stroked 10 wide in lime (the bolt uses pink, so it reads against its own lime body).
 3. The body: a glossy radial or linear gradient with a 3.5 ink outline.
-4. The shine: a white ellipse and a dot in the top left, 75 to 90% opacity.
+4. The relief and shine: clipped violet shadows on pink candy, facets on gold and lime, and curved cream reflections that follow each shape. Smaller rim reflections keep the volume readable on dark backgrounds.
+
+The mascot adds a satin bow with a gold heart, violet eyes, a wink and glossy lips. Its face stays readable at 32px; larger empty states reveal the bow folds and cheek highlights. Decorative stickers remain transparent vectors with local references only. Keep the mask glyphs flat so their silhouettes stay clear at control sizes.
 
 Glyphs (`glyph-*.svg`) are flat silhouettes on a 24-unit grid. The theme uses them as CSS masks over `currentcolor`, so one file serves every colour: hearts replace the rating stars, the drip replaces the O counter's drops.
 
