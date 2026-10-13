@@ -135,6 +135,28 @@
   margin-left: calc(var(--juicy-outline) * -1);
 }
 
+/*
+ * Buttons joined to a field stay put: no drop and no lift. Their outer corners
+ * match the field's, so a tall group (a scrape dialog row) keeps square-ish
+ * ends instead of a half-circle.
+ */
+.input-group .btn:not(.minimal),
+.input-group .btn:not(.minimal):hover,
+.input-group .btn.btn:not(.minimal, :disabled):active {
+  box-shadow: var(--juicy-shine);
+  transform: none;
+}
+
+.input-group > .input-group-prepend:first-child > .btn:first-child {
+  border-bottom-left-radius: var(--juicy-radius);
+  border-top-left-radius: var(--juicy-radius);
+}
+
+.input-group > .input-group-append:last-child > .btn:last-child {
+  border-bottom-right-radius: var(--juicy-radius);
+  border-top-right-radius: var(--juicy-radius);
+}
+
 /* Selects styled as buttons (the page-size picker in list toolbars) */
 select.btn-secondary:not(.minimal) {
   background-color: var(--juicy-card-raised);

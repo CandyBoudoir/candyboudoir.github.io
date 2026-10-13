@@ -51,6 +51,7 @@ Glyphs (`glyph-*.svg`) are flat silhouettes on a 24-unit grid. The theme uses th
 - **Navigation**: the active page is a pink pill, the brand gets the cherry, and the bar sits on an ink line over a pink rule.
 - **Overlays** (menus, modals, toasts, tooltips) are raised plum stickers. Tooltips are ink with lime text.
 - **Loading** is a gum bubble that swells and pops in place of Bootstrap's spinner.
+- **Stash-box screens** (the Tagger, scrape dialogs and StashID links) are where people clear hundreds of rows, so Tagger rows are flat plum panels that never tilt or lift. The chosen match, button or select, is pink candy. The winning side of a scrape dialog gets a lime toggle and a lime field edge. StashID links are a chip with the stash-box name on pink and the ID on plum.
 
 ## Motion
 
@@ -75,4 +76,4 @@ Both default to off, so a fresh install gets the full theme.
 
 ## Coupling to Stash
 
-The theme targets Stash's markup as of v0.31.1. The selectors it depends on most are `.top-nav`, `.grid-card`, `.scene-card`, `.performer-card`, `.thumbnail-section`, `.rating-stars`, `.rating-banner`, `.tag-item`, `.count-button`, `.favorite-button`, `.LoadingIndicator` and `.sfw-content-mode`. Stash changes its markup between releases (v0.29 and v0.31 both moved list layouts), so each Stash release needs a pass over the design-system page and a live check on a real library.
+The theme targets Stash's markup as of v0.31.1. The selectors it depends on most are `.top-nav`, `.grid-card`, `.scene-card`, `.performer-card`, `.thumbnail-section`, `.rating-stars`, `.rating-banner`, `.tag-item`, `.count-button`, `.favorite-button`, `.LoadingIndicator` and `.sfw-content-mode`. Stash changes its markup between releases (v0.29 and v0.31 both moved list layouts), so each Stash release needs a pass over the design-system page and a live check on a real library. The stash-box screens depend on `.search-item`, `.search-result`, `.selected-result`, `.stash-id-pill`, `.scrape-dialog` and the `-select-active` classes; the compatibility tests reach them through a mock stash-box. Some Stash rules outrank a plain class (`div.dropdown-menu`, favourites, range sliders), and modals render outside `#root`, so Juicy's rules for those use matching selectors, `#root`, or `:is(#root, .modal)`.

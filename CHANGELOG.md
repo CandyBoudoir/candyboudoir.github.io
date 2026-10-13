@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.0
+
+Stash-box screens, for Stash v0.31.1.
+
+- The Tagger's rows, results and match panels are plum. They stay flat, with no tilt or lift, since the Tagger is where you clear hundreds of rows.
+- A Tagger match linked to a performer or studio already in Stash turns pink, like the chosen Create or Skip button. Juicy's select fill had hidden it.
+- Scrape dialogs show plum fields and mark the winning value with a lime toggle and a lime field edge.
+- StashID links are a candy chip with the stash-box name on pink and the ID on plum.
+- Menus are plum in Stash itself. A Stash rule had kept every dropdown slate.
+- Buttons joined to a field stay put on hover, and tall scrape rows keep square-ish ends.
+- Tables in dialogs, the Identify task's source list, the scene edit toolbar and form validation follow the palette.
+- Match icons and status text use lime, gold and Juicy's red.
+- Cheeky copy for the Tagger: "Tagged and bagged", "Already spoken for" and "No match. Playing hard to get."
+
 ## 0.2.0
 
 New sticker art, for Stash v0.31.1.

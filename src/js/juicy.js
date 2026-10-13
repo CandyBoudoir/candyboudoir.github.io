@@ -17,6 +17,10 @@
     ['No tasks are currently running.', 'All quiet. Too quiet.'],
     ['Performer Favourited', 'New crush unlocked'],
     ['Started generating', 'Cooking something hot'],
+    // The scene Tagger's match results
+    ['No results found', 'No match. Playing hard to get.'],
+    ['Scene already tagged', 'Already spoken for'],
+    ['Scene successfully tagged', 'Tagged and bagged'],
   ])
 
   const EMPTY_STATES = new Set(['No results found.'])

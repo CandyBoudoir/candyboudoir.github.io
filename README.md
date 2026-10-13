@@ -2,7 +2,7 @@
 
 A pink, playful theme for [Stash](https://github.com/stashapp/stash), the self-hosted media organizer. Juicy installs as a Stash plugin, so you switch it on, off or update it from Settings > Plugins instead of pasting CSS into the Custom CSS box.
 
-Juicy brings glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording. Calm mode and Plain labels settings turn the motion and the copy down, and Stash's SFW mode keeps the candy and drops the cheek. The [live preview](https://candyboudoir.github.io/juicy/) shows every component on Stash's own markup, and the design rules are in [docs/design.md](docs/design.md). Juicy 0.2.0 is built and tested on Stash v0.31.1.
+Juicy brings glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording. Calm mode and Plain labels settings turn the motion and the copy down, and Stash's SFW mode keeps the candy and drops the cheek. The [live preview](https://candyboudoir.github.io/juicy/) shows every component on Stash's own markup, and the design rules are in [docs/design.md](docs/design.md). Juicy 0.3.0 is built and tested on Stash v0.31.1, including the Tagger and scrape screens that a stash-box such as StashDB adds.
 
 ![The scenes page with Juicy: glossy sticker cards with gold rating badges on a dotted plum background](docs/screenshots/scenes.png)
 
@@ -81,6 +81,8 @@ tests/stash/media.sh stash-work/library
 WORK=stash-work node tests/stash/prepare.mjs
 pnpm test:compat contract
 ```
+
+`prepare.mjs` also points Stash at a mock stash-box (`tests/stash/stashbox.mjs`) that Playwright starts with the tests, so the Tagger, scrape dialogs and StashID links are checked against invented scenes, performers and studios with no stash-box account.
 
 `main` is the trunk and feeds the develop channel; `prod` feeds the stable channel. Every push to either publishes both channels and the design-system page to GitHub Pages and checks the live files against the build. When `prod` carries a version with no tag yet, the Release workflow tags it and publishes a GitHub Release from that version's CHANGELOG section. Plugin zips are reproducible, so the release asset and the served zip share one sha256. Each Stash release changes some markup, so each one gets a pass over the design-system page and a check on a live library.
 

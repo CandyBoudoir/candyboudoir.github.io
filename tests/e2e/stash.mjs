@@ -1,4 +1,6 @@
 // Helpers shared by the compatibility tests.
+import { BOX_NAME } from '../stash/stashbox-data.mjs'
+
 export const STASH = process.env.STASH_URL ?? 'http://127.0.0.1:9999'
 
 export async function gql(query, variables = {}) {
@@ -31,6 +33,14 @@ export const setPlugin = (input) =>
     'mutation ($i: Map!) { configurePlugin(plugin_id: "Theme-Juicy", input: $i) }',
     {
       i: input,
+    },
+  )
+
+export const setAdvanced = (on) =>
+  gql(
+    'mutation ($on: Boolean) { configureUI(partial: { advancedMode: $on }) }',
+    {
+      on,
     },
   )
 
@@ -88,11 +98,152 @@ export const PAGES = [
     'performer',
     '/performers/:performer',
     '.detail-header',
-    ['.detail-header', '.rating-stars', '.favorite-button'],
+    ['.detail-header', '.rating-stars', '.favorite-button', '.stash-id-pill'],
   ],
   ['studios', '/studios', '.studio-card', ['.studio-card']],
   ['tags', '/tags', '.tag-card', ['.tag-card']],
 ]
+
+// Screens that need the mock stash-box (tests/stash/stashbox.mjs), in the same
+// shape as PAGES plus `open`, which clicks through from the page to the state
+// the selectors and screenshots check. `open` may return a function that puts
+// back a setting it changed.
+export const FLOWS = [
+  [
+    'tagger-scenes',
+    '/scenes?disp=3',
+    '.search-item',
+    [
+      '.tagger-container',
+      '.search-item',
+      '.scene-card-preview',
+      '.search-result',
+      '.selected-result',
+      '.scene-image',
+      '.optional-field',
+      '.entity-name',
+      '.performer-select-active',
+      '.studio-select-active',
+      '.stash-id-pill',
+      '.text-success',
+    ],
+    async (page) => {
+      const item = page.locator('.search-item').first()
+      await item.locator('input.text-input').fill('Sweet Tooth')
+      await item.getByRole('button', { name: 'Search', exact: true }).click()
+      await page.locator('.selected-result').waitFor()
+    },
+  ],
+  [
+    'tagger-performers',
+    '/performers?disp=3',
+    '.PerformerTagger-performer',
+    [
+      '.PerformerTagger-performer',
+      '.PerformerTagger-details',
+      '.PerformerTagger-box-link',
+      '.PerformerTagger-performer-search-item',
+    ],
+    async (page) => {
+      await page
+        .getByRole('button', { name: 'Search', exact: true })
+        .first()
+        .click()
+      await page
+        .locator('.PerformerTagger-performer-search-item')
+        .first()
+        .waitFor()
+    },
+  ],
+  [
+    'tagger-studios',
+    '/studios?disp=3',
+    '.StudioTagger-studio',
+    ['.StudioTagger-studio', '.StudioTagger-details', '.StudioTagger-box-link'],
+  ],
+  [
+    'tagger-tags',
+    '/tags?disp=3',
+    '.TagTagger-tag',
+    ['.TagTagger-tag', '.TagTagger-details', '.TagTagger-box-link'],
+  ],
+  [
+    'scene-scrape',
+    '/scenes/:scene',
+    '.video-js',
+    [
+      '.scrape-dialog',
+      '.column-label',
+      '.bg-secondary',
+      '.border-secondary',
+      '.input-group-prepend .text-success',
+      '.string-list-input',
+    ],
+    async (page) => {
+      await page.getByRole('tab', { name: 'Edit' }).click()
+      await page.locator('.scraper-group .dropdown-toggle').first().click()
+      await page.locator('.scraper-filter-container').waitFor()
+      await page
+        .locator('.dropdown-menu.show .dropdown-item', { hasText: BOX_NAME })
+        .click()
+      await page.locator('.scrape-dialog .modal-content').waitFor()
+    },
+  ],
+  [
+    'performer-scrape',
+    '/performers/:performer',
+    '.detail-header',
+    ['.PerformerScrapeModal-list', '.search-item', '.performer-result'],
+    async (page) => {
+      await page.getByRole('button', { name: 'Edit', exact: true }).click()
+      await page.getByRole('button', { name: 'Scrape with…' }).first().click()
+      await page
+        .locator('.dropdown-menu.show .dropdown-item', { hasText: BOX_NAME })
+        .click()
+      await page
+        .locator('.PerformerScrapeModal-list .search-item')
+        .first()
+        .waitFor()
+    },
+  ],
+  [
+    'identify',
+    '/settings?tab=tasks',
+    '.setting-section',
+    ['.scraper-source-list', '.list-group-item', '.modal .table'],
+    async (page) => {
+      // Identify sits with the advanced settings.
+      await setAdvanced(true)
+      await page.reload()
+      await page.locator('button', { hasText: 'Identify' }).first().click()
+      await page.locator('.scraper-source-list').waitFor()
+      return () => setAdvanced(false)
+    },
+  ],
+  [
+    'stash-box-endpoint',
+    '/settings?tab=metadata-providers',
+    '.setting-section',
+    ['.stash-box-name', '.stash-box-endpoint', '.is-valid'],
+    async (page) => {
+      await page
+        .locator('.setting', { hasText: BOX_NAME })
+        .getByRole('button', { name: 'Edit' })
+        .click()
+      await page.locator('.modal .stash-box-endpoint').waitFor()
+    },
+  ],
+]
+
+// Opens a PAGES or FLOWS entry and returns the undo its `open` gave, if any.
+// The pointer goes back to the corner so no hover state lingers from a click.
+export async function visit(page, url, [, , ready, , open]) {
+  await page.goto(url)
+  await page.locator(ready).filter({ visible: true }).first().waitFor()
+  const undo = await open?.(page)
+  await page.mouse.move(0, 0)
+  return undo
+}
 
 export const EMPTY_LIST = '/scenes?q=nothing-matches-this'
 export const CHEEKY_EMPTY_LINE = 'Nothing juicy here. Yet.'

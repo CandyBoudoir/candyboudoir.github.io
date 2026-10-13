@@ -29,6 +29,34 @@
   color: var(--juicy-text-muted);
 }
 
+/* Validation, as in the stash-box endpoint form: lime when valid, red when not */
+.form-control.is-valid,
+.was-validated .form-control:valid {
+  background-image: none;
+  border-color: var(--juicy-lime);
+}
+
+.form-control.is-valid:focus,
+.was-validated .form-control:valid:focus {
+  border-color: var(--juicy-lime);
+  box-shadow: 0 0 0 3px var(--juicy-lime-soft);
+}
+
+.form-control.is-invalid,
+.was-validated .form-control:invalid {
+  border-color: var(--juicy-danger);
+}
+
+.form-control.is-invalid:focus,
+.was-validated .form-control:invalid:focus {
+  border-color: var(--juicy-danger);
+  box-shadow: 0 0 0 3px rgb(255 90 78 / 25%);
+}
+
+.invalid-feedback {
+  color: var(--juicy-danger);
+}
+
 .custom-control-input:checked ~ .custom-control-label::before {
   background-color: var(--juicy-pink);
   border-color: var(--juicy-ink);
@@ -70,6 +98,23 @@
 .react-select__control--is-focused {
   border-color: var(--juicy-pink) !important;
   box-shadow: 0 0 0 3px var(--juicy-pink-soft) !important;
+}
+
+/*
+ * The Tagger fills a select when its match links to something already in
+ * Stash. The fill above would hide that, so the chosen select turns pink candy
+ * like the chosen Create or Skip button beside it.
+ */
+:is(.performer-select-active, .studio-select-active) .react-select__control {
+  background-color: var(--juicy-pink) !important;
+  background-image: var(--juicy-gloss-pink);
+  border-color: var(--juicy-ink) !important;
+}
+
+:is(.performer-select-active, .studio-select-active)
+  .react-select__control
+  :is(.react-select__single-value, .react-select__indicator) {
+  color: var(--juicy-ink);
 }
 
 .react-select__menu {

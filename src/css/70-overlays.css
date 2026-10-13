@@ -1,5 +1,9 @@
-/* Dropdowns, modals, popovers, tooltips, toasts */
+/*
+ * Dropdowns, modals, popovers, tooltips, toasts. Stash paints its menus slate
+ * through div.dropdown-menu rules, so Juicy's menu rules name the div too.
+ */
 .dropdown-menu,
+div.dropdown-menu,
 .popover {
   background-color: var(--juicy-card-raised);
   border: var(--juicy-outline) solid var(--juicy-ink);
@@ -8,19 +12,24 @@
   color: var(--juicy-text);
 }
 
-.dropdown-item {
+.dropdown-item,
+div.dropdown-menu .dropdown-item {
   border-radius: var(--juicy-radius-sm);
   color: var(--juicy-text);
 }
 
 .dropdown-item:hover,
-.dropdown-item:focus {
+.dropdown-item:focus,
+div.dropdown-menu .dropdown-item:hover,
+div.dropdown-menu .dropdown-item:focus {
   background-color: var(--juicy-pink-soft);
   color: var(--juicy-bubblegum);
 }
 
 .dropdown-item.active,
-.dropdown-item:active {
+.dropdown-item:active,
+div.dropdown-menu .dropdown-item.active,
+div.dropdown-menu .dropdown-item:active {
   background-image: var(--juicy-gloss-pink);
   color: var(--juicy-ink);
 }
