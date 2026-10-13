@@ -37,6 +37,19 @@ a:hover,
   color: var(--juicy-text-dim) !important;
 }
 
+/* Bootstrap's status text, as the Tagger's match icons use it */
+.text-success {
+  color: var(--juicy-lime) !important;
+}
+
+.text-warning {
+  color: var(--juicy-gold) !important;
+}
+
+.text-danger {
+  color: var(--juicy-danger) !important;
+}
+
 hr {
   border-top-color: var(--juicy-line);
 }

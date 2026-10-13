@@ -29,6 +29,14 @@
       <symbol id="i-box" viewBox="0 0 16 16">
         <path d="M1 4.5 8 1l7 3.5v7L8 15l-7-3.5Zm7 1.8 4.6-2.2L8 2 3.4 4.1Z" />
       </symbol>
+      <symbol id="i-check" viewBox="0 0 16 16">
+        <path d="m1.5 8.6 1.6-1.6 3 3 6.8-6.8 1.6 1.6-8.4 8.4Z" />
+      </symbol>
+      <symbol id="i-cross" viewBox="0 0 16 16">
+        <path
+          d="m3.1 1.5 4.9 4.9 4.9-4.9 1.6 1.6L9.6 8l4.9 4.9-1.6 1.6L8 9.6l-4.9 4.9-1.6-1.6L6.4 8 1.5 3.1Z"
+        />
+      </symbol>
     </svg>
 
     <nav class="navbar navbar-expand-xl navbar-dark bg-dark top-nav">
@@ -989,6 +997,192 @@
 
         <section class="ds-section">
           <h2>
+            <img
+              src="Theme-Juicy/assets/icons/heart-lock.svg"
+              alt=""
+            />Stash-box
+          </h2>
+          <p class="ds-lede">
+            With a stash-box such as StashDB set up, Stash adds the Tagger,
+            scrape dialogs and StashID links. People clear hundreds of Tagger
+            rows at a time, so the rows stay flat. The chosen match turns pink,
+            like the chosen button beside it, and the winning side of a scrape
+            turns lime.
+          </p>
+          <div class="ds-row">
+            <span class="stash-id-pill" data-endpoint="StashDB"
+              ><span>StashDB</span
+              ><a href="#stash-box">5e1c0a7d-sweet-tooth</a></span
+            >
+            <span class="text-success"
+              ><svg class="ds-ico"><use href="#i-check" /></svg> Duration is a
+              match</span
+            >
+            <span class="text-warning">Duration off by at least 2s</span>
+            <span class="text-danger">No results found</span>
+          </div>
+          <div class="search-item mb-4">
+            <ul class="list-unstyled m-0">
+              <li class="row mx-0 search-result selected-result active">
+                <div class="col-lg-5 d-flex">
+                  <div class="scene-image-container">
+                    <img
+                      class="scene-image ds-cover"
+                      src="Theme-Juicy/assets/icons/heart.svg"
+                      alt=""
+                    />
+                  </div>
+                  <div class="scene-metadata">
+                    <h4 class="m-0">Sweet Tooth</h4>
+                    <h5>Sugar Shack · 2026-03-14</h5>
+                    <span class="stash-id-pill" data-endpoint="StashDB"
+                      ><span>StashDB</span
+                      ><a href="#stash-box">5e1c0a7d</a></span
+                    >
+                  </div>
+                </div>
+                <div class="col-lg-7">
+                  <div class="ds-match">
+                    <span class="entity-name">Studio: Sugar Shack</span>
+                    <div class="btn-group">
+                      <button class="btn btn-secondary">Create</button
+                      ><button class="btn btn-secondary">Skip</button>
+                    </div>
+                    <div
+                      class="studio-select studio-select-active react-select"
+                    >
+                      <div class="react-select__control">
+                        <span class="react-select__single-value"
+                          >Sugar Shack</span
+                        >
+                        <span class="react-select__indicator">▾</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ds-match">
+                    <span class="entity-name">Performer: Toffee Trixie</span>
+                    <div class="btn-group">
+                      <button class="btn btn-secondary">Create</button
+                      ><button class="btn btn-primary">Skip</button>
+                    </div>
+                    <div class="performer-select react-select">
+                      <div class="react-select__control">
+                        <span class="react-select__placeholder"
+                          >Select Performer</span
+                        >
+                        <span class="react-select__indicator">▾</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ds-match">
+                    <span class="entity-name">Performer: Gumdrop Gigi</span>
+                    <span class="text-success"
+                      ><svg class="ds-ico"><use href="#i-check" /></svg>
+                      Matched: Gumdrop Gigi</span
+                    >
+                  </div>
+                </div>
+              </li>
+              <li class="row mx-0 mt-2 search-result">
+                <div class="col">
+                  <h4 class="m-0">Cherry Pop</h4>
+                  <h5 class="m-0">Candy Kitchen · 2026-02-14</h5>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="ds-static">
+            <div class="modal-dialog scrape-dialog modal-lg m-0">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Scene Scrape Results</h5>
+                </div>
+                <div class="modal-body">
+                  <div class="row">
+                    <div class="col-3"></div>
+                    <div class="col column-label">Existing</div>
+                    <div class="col column-label">Scraped</div>
+                  </div>
+                  <div class="row align-items-center mt-3">
+                    <div class="col-3">Title</div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-muted">
+                              <use href="#i-cross" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="Cherry Pop"
+                          readonly
+                        />
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-success">
+                              <use href="#i-check" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="Sweet Tooth"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row align-items-center mt-3">
+                    <div class="col-3">Date</div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-success">
+                              <use href="#i-check" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="2026-02-11"
+                          readonly
+                        />
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-muted">
+                              <use href="#i-cross" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="2026-03-14"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary">Cancel</button
+                  ><button class="btn btn-primary">Apply</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2>
             <img src="Theme-Juicy/assets/icons/crown.svg" alt="" />Navigation
           </h2>
           <div class="ds-panel">
@@ -1062,7 +1256,7 @@
 
         <footer class="ds-footer">
           <p>
-            Juicy 0.2.0 · MIT · Fredoka by the Fredoka Project Authors (SIL OFL
+            Juicy 0.3.0 · MIT · Fredoka by the Fredoka Project Authors (SIL OFL
             1.1). This page loads the built theme files over Bootstrap 4.6,
             which stands in for Stash's own styles.
           </p>

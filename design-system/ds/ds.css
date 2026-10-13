@@ -512,3 +512,67 @@ body {
     top: 0;
   }
 }
+
+/* Stash-box specimens: the layout Stash's Tagger and react-select give them */
+.search-item {
+  padding: 1rem;
+}
+
+.search-result {
+  padding: 1rem 0;
+}
+
+.scene-metadata {
+  margin-left: 1rem;
+}
+
+.ds-cover {
+  background: radial-gradient(circle at 30% 25%, #e9d6ff, #9b30ff);
+  height: 7rem;
+  object-fit: contain;
+  padding: 1.25rem 3rem;
+}
+
+.ds-match {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.ds-match .entity-name {
+  flex: 1 1 10rem;
+}
+
+.ds-match .react-select {
+  width: 14rem;
+}
+
+.react-select__control {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 0 0.75rem;
+}
+
+.react-select__placeholder {
+  color: var(--juicy-text-dim);
+}
+
+.stash-id-pill {
+  display: inline-flex;
+  font-size: 90%;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.stash-id-pill span,
+.stash-id-pill a {
+  padding: 0.25em 0.6em;
+}
+
+.scrape-dialog {
+  max-width: 760px;
+}

@@ -1,0 +1,148 @@
+/*
+ * Stash-box screens: the Tagger, the scrape dialogs, StashID links and the
+ * stash-box search lists. Stash paints these slate in its own stylesheet. The
+ * Tagger is a work surface where people clear hundreds of rows, so its rows are
+ * flat plum panels with no tilt, sheen or lift; the gloss stays on the buttons
+ * that act.
+ */
+
+/* Tagger rows, and the stash-box result lists that reuse .search-item */
+.search-item {
+  background-color: var(--juicy-card);
+  border: 2px solid var(--juicy-line);
+  border-radius: var(--juicy-radius);
+}
+
+/* The performer, studio and tag taggers sit inside a card, so raise them */
+.PerformerTagger-performer,
+.StudioTagger-studio,
+.TagTagger-tag,
+.modal .search-item {
+  background-color: var(--juicy-card-raised);
+  border: 2px solid var(--juicy-line);
+  border-radius: var(--juicy-radius);
+}
+
+.StudioTagger-studio .studio-card img,
+.TagTagger-tag .tag-card img {
+  background-color: var(--juicy-bg-deep);
+}
+
+/* Clickable results in the stash-box search modals take the selection halo */
+.PerformerScrapeModal-list .search-item:hover,
+.StashBoxIDSearchModal-list .search-item:hover {
+  border-color: var(--juicy-lime);
+}
+
+/* Scene Tagger results: the picked one is raised with a lime edge */
+.search-result {
+  background-color: var(--juicy-bg);
+  border-radius: var(--juicy-radius-sm);
+}
+
+.search-result:hover {
+  background-color: var(--juicy-pink-soft);
+}
+
+.selected-result,
+.selected-result:hover {
+  background-color: var(--juicy-card-raised);
+  box-shadow: inset 0 0 0 2px var(--juicy-lime);
+}
+
+.tagger-container .scene-card-preview,
+.search-result .scene-image,
+.search-item .scene-image {
+  border-radius: var(--juicy-radius-sm);
+}
+
+/* Fields left out of a save, or missing from the result */
+li.active .optional-field.missing .optional-field-content,
+li.active .optional-field.excluded .optional-field-content,
+li.active .optional-field.excluded .scene-link {
+  color: var(--juicy-text-dim);
+}
+
+/* StashID links: the box name on pink candy and the ID on plum, one chip */
+.stash-id-pill {
+  border: 2px solid var(--juicy-ink);
+  border-radius: var(--juicy-radius-pill);
+  box-shadow: 0 2px 0 var(--juicy-ink);
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+  overflow: hidden;
+  padding: 0;
+  vertical-align: middle;
+}
+
+.stash-id-pill span {
+  background-color: var(--juicy-pink);
+  background-image: var(--juicy-gloss-pink);
+  border-radius: 0;
+  color: var(--juicy-ink);
+}
+
+.stash-id-pill a {
+  background-color: var(--juicy-card-raised);
+  border-left: 2px solid var(--juicy-ink);
+  border-radius: 0;
+  color: var(--juicy-cyan);
+}
+
+.stash-id-pill a:hover {
+  color: var(--juicy-bubblegum);
+}
+
+/*
+ * Scrape dialogs set Stash's current value against the scraped one, and the
+ * toggle in front of each says which wins. Stash paints the fields slate with
+ * Bootstrap's !important utilities, so these need !important too. The winning
+ * side's toggle turns lime and its field takes a lime edge.
+ */
+.scrape-dialog .bg-secondary {
+  background-color: var(--juicy-bg-deep) !important;
+}
+
+.scrape-dialog .border-secondary {
+  border-color: var(--juicy-line) !important;
+}
+
+.scrape-dialog .column-label {
+  color: var(--juicy-text-muted);
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+}
+
+.scrape-dialog .input-group-prepend .btn:has(.text-success) {
+  background-color: var(--juicy-lime);
+  background-image: var(--juicy-gloss-lime);
+}
+
+.scrape-dialog .input-group-prepend .btn .text-success {
+  color: var(--juicy-ink) !important;
+}
+
+.scrape-dialog
+  .input-group:has(> .input-group-prepend .text-success)
+  :is(.form-control, .react-select__control) {
+  border-color: var(--juicy-lime) !important;
+}
+
+/* The filter bar at the top of the "Scrape with…" menu */
+.scraper-menu .dropdown-menu .scraper-filter-container {
+  background-color: var(--juicy-card-raised);
+  border-bottom: 2px solid var(--juicy-line);
+  border-radius: calc(var(--juicy-radius) - var(--juicy-outline))
+    calc(var(--juicy-radius) - var(--juicy-outline)) 0 0;
+}
+
+/* Identify task: the ordered list of sources */
+.scraper-source-list .list-group-item {
+  background-color: var(--juicy-bg-deep);
+  border-color: var(--juicy-line);
+  color: var(--juicy-text);
+}
+
+.identify-source-editor .default-value {
+  color: var(--juicy-text-dim);
+}

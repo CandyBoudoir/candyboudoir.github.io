@@ -122,17 +122,25 @@
   color: var(--juicy-ink);
 }
 
-/* Tables: plum header, hairline rows */
-#root table thead {
+/*
+ * Tables: plum header, hairline rows. Modals render outside #root, so
+ * :is(#root, .modal) keeps #root's weight and reaches tables in dialogs too.
+ */
+:is(#root, .modal) table thead {
   background-color: var(--juicy-card-raised);
 }
 
-#root .table thead th {
+:is(#root, .modal) .table thead th {
   border-bottom: 2px solid var(--juicy-line);
   color: var(--juicy-bubblegum);
   font-family: var(--juicy-font-display);
 }
 
-#root .table td {
+:is(#root, .modal) .table td {
   border-top-color: var(--juicy-line);
+}
+
+/* The scene edit form's sticky button bar, which Stash paints slate */
+#scene-edit-details .edit-buttons-container {
+  background-color: var(--juicy-bg);
 }
