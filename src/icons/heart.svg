@@ -3,13 +3,21 @@
     <radialGradient id="heart-fill" cx="0.35" cy="0.3" r="0.8">
       <stop offset="0" stop-color="#ff9ccf"/>
       <stop offset="0.45" stop-color="#fc3d9f"/>
-      <stop offset="1" stop-color="#c41d84"/>
+      <stop offset="1" stop-color="#861782"/>
     </radialGradient>
     <path id="heart-shape" d="M32 56C17 46 7 37 7 25C7 16.5 13.5 10 21.5 10C26.5 10 30 12.8 32 16.8C34 12.8 37.5 10 42.5 10C50.5 10 57 16.5 57 25C57 37 47 46 32 56Z"/>
+    <clipPath id="heart-relief">
+      <use href="#heart-shape"/>
+    </clipPath>
   </defs>
   <use xlink:href="#heart-shape" href="#heart-shape" transform="translate(0 3)" fill="none" stroke="#010224" stroke-opacity="0.45" stroke-width="10" stroke-linejoin="round"/>
   <use xlink:href="#heart-shape" href="#heart-shape" fill="none" stroke="#d7fa54" stroke-width="10" stroke-linejoin="round"/>
   <use xlink:href="#heart-shape" href="#heart-shape" fill="url(#heart-fill)" stroke="#010224" stroke-width="3.5" stroke-linejoin="round"/>
-  <ellipse cx="19.5" cy="20" rx="6.5" ry="3.6" transform="rotate(-38 19.5 20)" fill="#fff" fill-opacity="0.85"/>
-  <circle cx="13.6" cy="28" r="1.9" fill="#fff" fill-opacity="0.8"/>
+  <g clip-path="url(#heart-relief)">
+    <path d="M12 32C20 41 32 47 44 40C40 45 36 49 32 52C23 46 16 40 12 32Z" fill="#781b89" opacity=".55"/>
+    <path d="M12 24C12 17 19 12 25 16C27 17 26 20 24 20C19 18 16 21 15 25C14 28 11 27 12 24Z" fill="#fff2fa"/>
+    <path d="M38 16C44 13 50 17 52 22" fill="none" stroke="#ffc9ea" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M47 35C43 41 38 45 33 48" fill="none" stroke="#ff85c9" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="13" cy="30" r="1.7" fill="#fff2fa"/>
+  </g>
 </svg>

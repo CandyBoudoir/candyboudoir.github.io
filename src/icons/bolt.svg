@@ -6,9 +6,17 @@
       <stop offset="1" stop-color="#a8c018"/>
     </linearGradient>
     <path id="bolt-shape" d="M37 4L13 36H29L23 60L51 24H35L41 4Z"/>
+    <clipPath id="bolt-relief">
+      <use href="#bolt-shape"/>
+    </clipPath>
   </defs>
   <use xlink:href="#bolt-shape" href="#bolt-shape" transform="translate(0 3)" fill="none" stroke="#010224" stroke-opacity="0.45" stroke-width="10" stroke-linejoin="round"/>
   <use xlink:href="#bolt-shape" href="#bolt-shape" fill="none" stroke="#fc3d9f" stroke-width="10" stroke-linejoin="round"/>
   <use xlink:href="#bolt-shape" href="#bolt-shape" fill="url(#bolt-fill)" stroke="#010224" stroke-width="3.5" stroke-linejoin="round"/>
-  <path d="M34 10L22 27" fill="none" stroke="#fff" stroke-opacity="0.85" stroke-width="2.6" stroke-linecap="round"/>
+  <g clip-path="url(#bolt-relief)">
+    <path d="M37 7L31 28H45L27 51L33 32H20L37 7Z" fill="#f5ffb4"/>
+    <path d="M35 28L45 28L27 51L32 36Z" fill="#7d9b20" opacity=".65"/>
+    <path d="M34 13L24 27" fill="none" stroke="#fff2fa" stroke-width="3" stroke-linecap="round"/>
+    <path d="M35 39L29 47" fill="none" stroke="#ecff8a" stroke-width="2" stroke-linecap="round"/>
+  </g>
 </svg>

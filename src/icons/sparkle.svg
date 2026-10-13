@@ -6,9 +6,18 @@
       <stop offset="1" stop-color="#f0a800"/>
     </radialGradient>
     <path id="sparkle-shape" d="M32 5C34 21 42 29.5 59 32C42 34.5 34 43 32 59C30 43 22 34.5 5 32C22 29.5 30 21 32 5Z"/>
+    <clipPath id="sparkle-relief">
+      <use href="#sparkle-shape"/>
+    </clipPath>
   </defs>
   <use xlink:href="#sparkle-shape" href="#sparkle-shape" transform="translate(0 3)" fill="none" stroke="#010224" stroke-opacity="0.45" stroke-width="10" stroke-linejoin="round"/>
   <use xlink:href="#sparkle-shape" href="#sparkle-shape" fill="none" stroke="#d7fa54" stroke-width="10" stroke-linejoin="round"/>
   <use xlink:href="#sparkle-shape" href="#sparkle-shape" fill="url(#sparkle-fill)" stroke="#010224" stroke-width="3.5" stroke-linejoin="round"/>
-  <path d="M29.5 21.5C30.2 25 31 27.5 32.4 29.4" fill="none" stroke="#fff" stroke-opacity="0.9" stroke-width="2.4" stroke-linecap="round"/>
+  <g clip-path="url(#sparkle-relief)">
+    <path d="M32 10V32H54C42 34 34 43 32 54V32H10C23 30 30 22 32 10Z" fill="#fff4b0"/>
+    <path d="M32 32H54C42 34 34 43 32 54Z" fill="#e98423" opacity=".75"/>
+    <path d="M32 32H10C23 30 30 22 32 10Z" fill="#fffbe0"/>
+    <path d="M30 22L27 29" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M36 35L40 34" fill="none" stroke="#fff4b0" stroke-width="2" stroke-linecap="round"/>
+  </g>
 </svg>
