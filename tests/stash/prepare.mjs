@@ -1,19 +1,21 @@
 // Prepares a fresh Stash for the compatibility tests: runs setup, scans the
-// demo clips, seeds invented studios, tags and performers, then installs Juicy
-// from a locally served copy of the plugin source, the way users install it.
+// demo clips, seeds invented studios, tags and performers, points Stash at the
+// mock stash-box (stashbox.mjs) and links a few of them to it, then installs
+// Juicy from a locally served copy of the plugin source, the way users
+// install it.
 //
 // Env: STASH_URL (default http://127.0.0.1:9999), WORK (the folder stash.sh
 // used), SITE (default dist/site), PW_CHANNEL (optional Playwright channel).
-import { chromium } from '@playwright/test'
 import { createReadStream } from 'node:fs'
-import { readFile, stat } from 'node:fs/promises'
+import { stat } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { extname, join, resolve } from 'node:path'
+import { BOX_NAME, ENDPOINT, LINKS } from './stashbox-data.mjs'
+import { renderStickers } from './stickers.mjs'
 
 const STASH = process.env.STASH_URL ?? 'http://127.0.0.1:9999'
 const WORK = resolve(process.env.WORK ?? 'stash-work')
 const SITE = resolve(process.env.SITE ?? 'dist/site')
-const ICONS = resolve('src/icons')
 const PLUGIN_ID = 'Theme-Juicy'
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -70,30 +72,30 @@ async function setup() {
 
 // Performer portraits: Juicy's own stickers on candy gradients.
 async function portraits() {
-  const browser = await chromium.launch({
-    channel: process.env.PW_CHANNEL || undefined,
-  })
-  const page = await browser.newPage({ viewport: { width: 400, height: 600 } })
-  const out = {}
-  for (const [icon, from, to] of [
-    ['mascot', '#ffd6ec', '#fc68b2'],
-    ['cherry', '#fff3c4', '#fdda4e'],
-    ['lips', '#e9d6ff', '#9b30ff'],
-    ['crown', '#eaffc2', '#d7fa54'],
-    ['heart-lock', '#d4f1ff', '#00a8f0'],
-    ['bubble', '#ffe0f0', '#dd2a97'],
-  ]) {
-    const svg = await readFile(join(ICONS, `${icon}.svg`), 'utf8')
-    await page.setContent(
-      `<body style="margin:0;height:600px;display:grid;place-items:center;
-        background:radial-gradient(circle at 30% 25%, ${from}, ${to})">
-        <div style="width:300px;height:300px">${svg}</div></body>`,
-    )
-    const png = await page.screenshot()
-    out[icon] = `data:image/png;base64,${png.toString('base64')}`
-  }
-  await browser.close()
-  return out
+  const pngs = await renderStickers(
+    [
+      ['mascot', '#ffd6ec', '#fc68b2'],
+      ['cherry', '#fff3c4', '#fdda4e'],
+      ['lips', '#e9d6ff', '#9b30ff'],
+      ['crown', '#eaffc2', '#d7fa54'],
+      ['heart-lock', '#d4f1ff', '#00a8f0'],
+      ['bubble', '#ffe0f0', '#dd2a97'],
+    ].map(([icon, from, to]) => ({
+      key: icon,
+      icon,
+      from,
+      to,
+      width: 400,
+      height: 600,
+      size: 300,
+    })),
+  )
+  return Object.fromEntries(
+    Object.entries(pngs).map(([icon, png]) => [
+      icon,
+      `data:image/png;base64,${png.toString('base64')}`,
+    ]),
+  )
 }
 
 async function seed() {
@@ -170,6 +172,39 @@ async function seed() {
   )
 }
 
+// Registers the mock stash-box and gives the entities in LINKS a StashID on
+// it, so detail pages show StashID links and the Tagger shows linked entities.
+// Stash only stores the endpoint here; the mock runs during the tests.
+async function stashBox() {
+  await gql(
+    `mutation ($b: [StashBoxInput!]) {
+      configureGeneral(input: { stashBoxes: $b }) { stashBoxes { endpoint } } }`,
+    { b: [{ name: BOX_NAME, endpoint: ENDPOINT, api_key: 'demo' }] },
+  )
+  const { findPerformers, findStudios, findTags, findScenes } = await gql(`{
+    findPerformers(filter: { per_page: -1 }) { performers { id name } }
+    findStudios(filter: { per_page: -1 }) { studios { id name } }
+    findTags(filter: { per_page: -1 }) { tags { id name } }
+    findScenes(filter: { per_page: -1 }) { scenes { id title } }
+  }`)
+  const kinds = [
+    ['Performer', 'performers', findPerformers.performers, 'name'],
+    ['Studio', 'studios', findStudios.studios, 'name'],
+    ['Tag', 'tags', findTags.tags, 'name'],
+    ['Scene', 'scenes', findScenes.scenes, 'title'],
+  ]
+  for (const [kind, key, local, field] of kinds) {
+    for (const [name, stashId] of LINKS[key]) {
+      const { id } = local.find((x) => x[field] === name)
+      await gql(
+        `mutation ($i: ${kind}UpdateInput!) { ${kind.toLowerCase()}Update(input: $i) { id } }`,
+        { i: { id, stash_ids: [{ endpoint: ENDPOINT, stash_id: stashId }] } },
+      )
+    }
+  }
+  console.log(`Linked the demo library to ${BOX_NAME} at ${ENDPOINT}`)
+}
+
 const TYPES = { '.yml': 'text/yaml', '.zip': 'application/zip' }
 
 async function install() {
@@ -214,4 +249,5 @@ async function install() {
 
 await setup()
 await seed()
+await stashBox()
 await install()

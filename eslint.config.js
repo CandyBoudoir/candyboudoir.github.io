@@ -4,7 +4,7 @@ import { defineConfig } from 'eslint/config'
 import globals from 'globals'
 
 export default defineConfig(
-  { ignores: ['node_modules/', 'dist/'] },
+  { ignores: ['node_modules/', 'dist/', 'stash-work/'] },
   js.configs.recommended,
   {
     files: ['src/js/**/*.js', 'design-system/**/*.js'],

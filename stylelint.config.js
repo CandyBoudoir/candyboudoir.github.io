@@ -3,7 +3,7 @@
 /** @type {import('stylelint').Config} */
 const config = {
   extends: ['stylelint-config-standard'],
-  ignoreFiles: ['dist/**', 'node_modules/**'],
+  ignoreFiles: ['dist/**', 'node_modules/**', 'stash-work/**'],
   rules: {
     // The theme targets Stash's own class names (LoadingIndicator, scene-card__date).
     'selector-class-pattern': null,

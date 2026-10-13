@@ -5,10 +5,12 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import {
   CHEEKY_EMPTY_LINE,
   EMPTY_LIST,
+  FLOWS,
   PAGES,
   demoIds,
   setPlugin,
   setSfw,
+  visit,
 } from './stash.mjs'
 
 let ids
@@ -18,12 +20,18 @@ test.beforeAll(async () => {
 const url = (path) =>
   path.replace(':scene', ids.scene).replace(':performer', ids.performer)
 
-for (const [name, path, ready, selectors] of PAGES) {
+for (const entry of [...PAGES, ...FLOWS]) {
+  const [name, path, , selectors] = entry
   test(`${name}: Stash renders the elements Juicy styles`, async ({ page }) => {
-    await page.goto(url(path))
-    await page.locator(ready).filter({ visible: true }).first().waitFor()
-    for (const selector of selectors) {
-      await expect.soft(page.locator(selector).first(), selector).toBeAttached()
+    const undo = await visit(page, url(path), entry)
+    try {
+      for (const selector of selectors) {
+        await expect
+          .soft(page.locator(selector).first(), selector)
+          .toBeAttached()
+      }
+    } finally {
+      await undo?.()
     }
   })
 }
@@ -86,9 +94,10 @@ test('SFW mode drops the cheek', async ({ page }) => {
 })
 
 // Not a pass/fail check: lists the Stash classes in juicy.css that no visited
-// page renders, and which of them still rendered on the baseline Stash version
-// (tests/e2e/unmatched-baseline.txt). Those newly missing classes point at what
-// a Stash change removed; the rest only appear in dialogs, menus or on hover.
+// page or flow renders, and which of them still rendered on the baseline Stash
+// version (tests/e2e/unmatched-baseline.txt). Those newly missing classes point
+// at what a Stash change removed; the rest only appear in dialogs, menus or on
+// hover.
 test('report Stash classes Juicy styles that no page renders', async ({
   page,
 }, info) => {
@@ -99,17 +108,21 @@ test('report Stash classes Juicy styles that no page renders', async ({
     ...new Set([...css.matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)].map((m) => m[1])),
   ].filter((c) => !c.startsWith('juicy'))
   const seen = new Set()
-  for (const [, path, ready] of [
+  for (const entry of [
     ...PAGES,
+    ...FLOWS,
     ['empty', EMPTY_LIST, '.paginationIndex'],
   ]) {
-    await page.goto(url(path))
-    await page.locator(ready).filter({ visible: true }).first().waitFor()
-    for (const c of await page.evaluate(
-      (list) => list.filter((c) => document.getElementsByClassName(c).length),
-      classes,
-    )) {
-      seen.add(c)
+    const undo = await visit(page, url(entry[1]), entry)
+    try {
+      for (const c of await page.evaluate(
+        (list) => list.filter((c) => document.getElementsByClassName(c).length),
+        classes,
+      )) {
+        seen.add(c)
+      }
+    } finally {
+      await undo?.()
     }
   }
   const unmatched = classes.filter((c) => !seen.has(c)).sort()

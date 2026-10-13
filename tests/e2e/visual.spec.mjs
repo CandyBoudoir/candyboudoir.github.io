@@ -2,7 +2,7 @@
 // Stash version in tests/stash-versions.json. Baselines come from the Linux CI
 // runner, so these run in CI only unless VISUAL=1.
 import { expect, test } from '@playwright/test'
-import { EMPTY_LIST, PAGES, demoIds } from './stash.mjs'
+import { EMPTY_LIST, FLOWS, PAGES, demoIds, visit } from './stash.mjs'
 
 test.skip(
   !process.env.CI && !process.env.VISUAL,
@@ -36,17 +36,22 @@ async function settle(page) {
 }
 
 const SHOTS = [
-  ...PAGES.map(([name, path, ready]) => [name, path, ready]),
+  ...PAGES,
+  ...FLOWS,
   ['empty', EMPTY_LIST, '.paginationIndex'],
   ['settings', '/settings?tab=plugins', '.setting-section'],
 ]
 
-for (const [name, path, ready] of SHOTS) {
+for (const entry of SHOTS) {
+  const [name, path] = entry
   test(`${name} looks the same`, async ({ page }) => {
-    await page.goto(url(path))
-    await page.locator(ready).filter({ visible: true }).first().waitFor()
-    await settle(page)
-    await expect(page).toHaveScreenshot(`${name}.png`, { mask: masks(page) })
+    const undo = await visit(page, url(path), entry)
+    try {
+      await settle(page)
+      await expect(page).toHaveScreenshot(`${name}.png`, { mask: masks(page) })
+    } finally {
+      await undo?.()
+    }
   })
 }
 
