@@ -5,7 +5,7 @@ import { chromium } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 
-const ICONS = resolve('src/icons')
+const ICONS = resolve('plugins/juicy/src/icons')
 
 // Each spec: { key, icon, from, to, width, height, size }. The sticker is
 // centred, `size` pixels square (half the shorter side by default). Returns

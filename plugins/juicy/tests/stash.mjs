@@ -1,5 +1,5 @@
 // Helpers shared by the compatibility tests.
-import { BOX_NAME } from '../stash/stashbox-data.mjs'
+import { BOX_NAME } from '../../../tests/stash/stashbox-data.mjs'
 
 export const STASH = process.env.STASH_URL ?? 'http://127.0.0.1:9999'
 

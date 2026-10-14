@@ -1,7 +1,7 @@
 name: Theme - Juicy
 description: Pink, playful and a little naughty. Glossy candy stickers, gold hearts for ratings and a gum-bubble loader.
-version: 0.3.1
-url: https://github.com/CandyBoudoir/juicy
+version: 0.3.2
+url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/juicy
 ui:
   css:
     - juicy.css
