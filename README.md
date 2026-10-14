@@ -25,7 +25,7 @@ These plugins are built with Claude, Anthropic's AI coding assistant, which writ
 
 ## Development
 
-Requires Node 22 and pnpm.
+Requires Node 22.12 or newer and pnpm.
 
 ```bash
 pnpm install
