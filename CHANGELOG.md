@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.1
+
+A fix for image cards, for Stash v0.31.1.
+
+- The zoom button on image cards is a small candy sticker in the picture's bottom-right corner. It had been a big blank pink disc over the middle of every image.
+- With a mouse the sticker shows when you hover the card or reach it by keyboard. On touch screens it always shows, with a bigger tap area.
+- Right-clicking the picture on an image card now offers the browser's image options, such as saving it.
+
 ## 0.3.0
 
 Stash-box screens, for Stash v0.31.1.
