@@ -7,9 +7,10 @@
 //
 // Env: STASH_URL (default http://127.0.0.1:9999), WORK (the folder stash.sh
 // used), SITE (default dist/site), PLUGINS (plugin IDs to install, comma
-// separated, default Theme-Juicy), PW_CHANNEL (optional Playwright channel).
+// separated, default every plugin in SITE's index.yml), PW_CHANNEL (optional
+// Playwright channel).
 import { createReadStream } from 'node:fs'
-import { stat } from 'node:fs/promises'
+import { readFile, stat } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { extname, join, resolve } from 'node:path'
 import { BOX_NAME, ENDPOINT, LINKS } from './stashbox-data.mjs'
@@ -18,7 +19,16 @@ import { renderStickers } from './stickers.mjs'
 const STASH = process.env.STASH_URL ?? 'http://127.0.0.1:9999'
 const WORK = resolve(process.env.WORK ?? 'stash-work')
 const SITE = resolve(process.env.SITE ?? 'dist/site')
-const PLUGIN_IDS = (process.env.PLUGINS ?? 'Theme-Juicy').split(',')
+const PLUGIN_IDS = process.env.PLUGINS
+  ? process.env.PLUGINS.split(',')
+  : Array.from(
+      (await readFile(join(SITE, 'index.yml'), 'utf8')).matchAll(
+        /^- id: (.+)$/gm,
+      ),
+      (m) => m[1],
+    )
+if (!PLUGIN_IDS.length)
+  throw new Error(`No plugins listed in ${SITE}/index.yml`)
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 

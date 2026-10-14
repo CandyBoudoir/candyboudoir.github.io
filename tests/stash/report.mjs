@@ -1,8 +1,9 @@
 // Keeps one GitHub issue per failing channel (stable, candidate, develop) in
 // step with the latest compatibility run, closes it once the channel passes,
 // and opens a "Support Stash vX.Y.Z" issue when Stash ships a stable release
-// that Juicy does not list yet. Reads the status-*.json files the test jobs
-// upload. Needs GH_TOKEN, GITHUB_REPOSITORY, RUN_URL and NEW_STABLE.
+// that tests/stash-versions.json does not list yet. Reads the status-*.json
+// files the test jobs upload. Needs GH_TOKEN, GITHUB_REPOSITORY, RUN_URL and
+// NEW_STABLE.
 import { execFileSync } from 'node:child_process'
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -33,12 +34,18 @@ const openIssue = (label) =>
   )[0]
 
 const LABELS = {
-  'compat:stable': ['b60205', 'Juicy fails on a Stash version it supports'],
-  'compat:candidate': ['d93f0b', 'Juicy fails on a new Stash stable release'],
-  'compat:develop': ['fbca04', 'Juicy fails on the latest Stash develop build'],
+  'compat:stable': ['b60205', 'A plugin fails on a supported Stash version'],
+  'compat:candidate': [
+    'd93f0b',
+    'A plugin fails on a new Stash stable release',
+  ],
+  'compat:develop': [
+    'fbca04',
+    'A plugin fails on the latest Stash develop build',
+  ],
   'stash-release': [
     '0e8a16',
-    'Stash shipped a stable release Juicy does not list yet',
+    'Stash shipped a stable release the plugins do not list yet',
   ],
 }
 for (const [name, [color, description]] of Object.entries(LABELS)) {
@@ -84,7 +91,7 @@ for (const channel of ['stable', 'candidate', 'develop']) {
   const body = [
     `The latest compatibility run found problems on the ${channel} channel: ${runUrl}`,
     '',
-    '| Stash | Build | Setup and install | Elements Juicy styles | Screenshots |',
+    '| Stash | Build | Setup and install | Elements the plugins depend on | Screenshots |',
     '| --- | --- | --- | --- | --- |',
     ...failing.map(
       (s) =>
@@ -100,7 +107,7 @@ for (const channel of ['stable', 'candidate', 'develop']) {
     '',
     'The workflow run has the Playwright report and screenshot diffs as an artifact.',
   ].join('\n')
-  const title = `Compatibility: Juicy fails on Stash ${channel === 'develop' ? 'develop' : failing.map((s) => s.leg).join(', ')}`
+  const title = `Compatibility: failing on Stash ${channel === 'develop' ? 'develop' : failing.map((s) => s.leg).join(', ')}`
   if (!existing) {
     gh('issue', 'create', '--title', title, '--label', label, '--body', body)
   } else if (existing.body !== body) {
@@ -157,7 +164,7 @@ if (newStable) {
         `Stash ${newStable} is out: https://github.com/stashapp/stash/releases/tag/${newStable}`,
         '',
         candidate
-          ? `Juicy on ${newStable}: setup ${candidate.prepare}, elements ${candidate.contract}, screenshots ${candidate.visual} (${runUrl}).`
+          ? `The plugins on ${newStable}: setup ${candidate.prepare}, elements ${candidate.contract}, screenshots ${candidate.visual} (${runUrl}).`
           : `The run that noticed it: ${runUrl}`,
         '',
         'To support it: add it at the top of tests/stash-versions.json, give the previous version an until date 60 days out, refresh the screenshot baselines and release.',

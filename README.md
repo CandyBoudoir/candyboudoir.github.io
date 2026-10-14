@@ -25,7 +25,7 @@ These plugins are built with Claude, Anthropic's AI coding assistant, which writ
 
 ## Development
 
-Requires Node 22 and pnpm.
+Requires Node 22.12 or newer and pnpm.
 
 ```bash
 pnpm install
@@ -46,7 +46,7 @@ The Compatibility workflow installs the plugins on each Stash version listed in 
 pnpm build
 tests/stash/stash.sh v0.31.1 stash-work        # or develop
 tests/stash/media.sh stash-work/library
-WORK=stash-work node tests/stash/prepare.mjs   # PLUGINS=<id>,<id> picks the plugins, Theme-Juicy by default
+WORK=stash-work node tests/stash/prepare.mjs   # PLUGINS=<id>,<id> picks the plugins, every plugin in the source by default
 pnpm test:compat contract
 ```
 

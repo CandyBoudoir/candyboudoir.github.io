@@ -1,6 +1,6 @@
-# Installs Juicy on every Stash version it supports and on the latest develop
-# build, then checks that Stash still renders the elements Juicy styles and
-# compares screenshots. Runs nightly, on pushes to main and on pull requests.
+# Installs every plugin on each Stash version they support and on the latest
+# develop build, then checks that Stash still renders the elements each plugin
+# depends on and compares screenshots. Runs nightly, on pushes to main and on pull requests.
 # The report job keeps one issue per failing channel and opens a "Support
 # Stash vX.Y.Z" issue when Stash ships a stable release.
 name: Compatibility
@@ -41,7 +41,7 @@ jobs:
     name: Stash ${{ matrix.leg.name }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # Only the stable versions Juicy supports can fail the workflow.
+    # Only the supported stable versions can fail the workflow.
     continue-on-error: ${{ matrix.leg.channel != 'stable' }}
     strategy:
       fail-fast: false
@@ -51,7 +51,7 @@ jobs:
       STASH_URL: http://127.0.0.1:9999
       WORK: ${{ github.workspace }}/stash-work
     steps:
-      # Full history: build.mjs dates the plugin from its last commit.
+      # Full history: build.mjs dates each plugin from its last commit.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
@@ -71,7 +71,7 @@ jobs:
           tests/stash/stash.sh "${{ matrix.leg.tag }}" "$WORK"
           tests/stash/media.sh "$WORK/library"
           node tests/stash/prepare.mjs
-      - name: Elements Juicy styles
+      - name: Elements the plugins depend on
         id: contract
         if: steps.prepare.outcome == 'success'
         run: pnpm exec playwright test contract
