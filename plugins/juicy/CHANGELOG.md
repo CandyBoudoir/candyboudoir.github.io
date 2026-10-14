@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.2
+
+Juicy moves to the CandyBoudoir plugin source, for Stash v0.31.1.
+
+- New installs come from `https://candyboudoir.github.io/index.yml`, a source for every CandyBoudoir plugin. Juicy installed from `https://candyboudoir.github.io/juicy/index.yml` keeps updating from there.
+- The plugin's link under Settings > Plugins points to Juicy's folder in the new repo.
+- Juicy looks and behaves as in 0.3.1.
+
 ## 0.3.1
 
 Fixes for card overlays, for Stash v0.31.1.
