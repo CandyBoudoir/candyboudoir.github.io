@@ -14,17 +14,19 @@ export async function gql(query, variables = {}) {
   return body.data
 }
 
-// Ids of a seeded scene with performers and a favourite performer, so detail
-// pages show the parts Juicy styles.
+// Ids of a seeded scene with performers, a favourite performer and the demo
+// gallery, so detail pages show the parts Juicy styles.
 export async function demoIds() {
-  const { findScenes, findPerformers } = await gql(`{
+  const { findScenes, findPerformers, findGalleries } = await gql(`{
     findScenes(filter: { per_page: 1, sort: "path" }) { scenes { id } }
     findPerformers(filter: { per_page: 1, sort: "name" },
       performer_filter: { filter_favorites: true }) { performers { id } }
+    findGalleries(filter: { per_page: 1 }) { galleries { id } }
   }`)
   return {
     scene: findScenes.scenes[0].id,
     performer: findPerformers.performers[0].id,
+    gallery: findGalleries.galleries[0].id,
   }
 }
 
@@ -99,6 +101,18 @@ export const PAGES = [
     '/performers/:performer',
     '.detail-header',
     ['.detail-header', '.rating-stars', '.favorite-button', '.stash-id-pill'],
+  ],
+  [
+    'images',
+    '/images',
+    '.image-card',
+    ['.image-card', '.image-card-preview', '.preview-button', '.rating-banner'],
+  ],
+  [
+    'gallery',
+    '/galleries/:gallery',
+    '.image-card',
+    ['.image-card', '.preview-button', '.rating-banner'],
   ],
   ['studios', '/studios', '.studio-card', ['.studio-card']],
   ['tags', '/tags', '.tag-card', ['.tag-card']],

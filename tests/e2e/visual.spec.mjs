@@ -14,7 +14,10 @@ test.beforeAll(async () => {
   ids = await demoIds()
 })
 const url = (path) =>
-  path.replace(':scene', ids.scene).replace(':performer', ids.performer)
+  path
+    .replace(':scene', ids.scene)
+    .replace(':performer', ids.performer)
+    .replace(':gallery', ids.gallery)
 
 // Dates and versions that change from run to run.
 const masks = (page) => [
@@ -63,15 +66,18 @@ test.describe('phone', () => {
     viewport: { width: 390, height: 844 },
     deviceScaleFactor: 2,
     isMobile: true,
+    // A touch screen, so Stash's (hover: none) and (pointer: coarse) rules apply.
+    hasTouch: true,
   })
-  test('scenes at phone width looks the same', async ({ page }) => {
-    await page.goto('/scenes')
-    await page
-      .locator('.scene-card')
-      .filter({ visible: true })
-      .first()
-      .waitFor()
-    await settle(page)
-    await expect(page).toHaveScreenshot('phone-scenes.png')
-  })
+  for (const [name, card] of [
+    ['scenes', '.scene-card'],
+    ['images', '.image-card'],
+  ]) {
+    test(`${name} at phone width looks the same`, async ({ page }) => {
+      await page.goto(`/${name}`)
+      await page.locator(card).filter({ visible: true }).first().waitFor()
+      await settle(page)
+      await expect(page).toHaveScreenshot(`phone-${name}.png`)
+    })
+  }
 })
