@@ -18,7 +18,10 @@ test.beforeAll(async () => {
   ids = await demoIds()
 })
 const url = (path) =>
-  path.replace(':scene', ids.scene).replace(':performer', ids.performer)
+  path
+    .replace(':scene', ids.scene)
+    .replace(':performer', ids.performer)
+    .replace(':gallery', ids.gallery)
 
 for (const entry of [...PAGES, ...FLOWS]) {
   const [name, path, , selectors] = entry
@@ -63,6 +66,49 @@ test('an empty list gets the cheeky line', async ({ page }) => {
     'data-juicy-empty',
     CHEEKY_EMPTY_LINE,
   )
+})
+
+// The zoom button on image cards is a small sticker in the picture's
+// bottom-right corner. Stash draws it over the middle of the picture, where
+// Juicy's candy pill rule once turned it into a big pink disc.
+async function zoomSticker(page) {
+  const card = page.locator('.image-card').first()
+  const button = card.locator('.preview-button .btn')
+  const preview = await card.locator('.image-card-preview').boundingBox()
+  const box = await button.boundingBox()
+  await expect(button).toHaveCSS('width', '36px')
+  expect(box.x).toBeGreaterThan(preview.x + preview.width / 2)
+  expect(box.y).toBeGreaterThan(preview.y + preview.height / 2)
+  return button
+}
+
+test('the image zoom button waits for hover in a corner', async ({ page }) => {
+  await page.goto('/images')
+  const card = page.locator('.image-card').first()
+  await card.waitFor()
+  await page.mouse.move(0, 0)
+  const button = card.locator('.preview-button .btn')
+  await expect(button).toHaveCSS('opacity', '0')
+  await card.hover()
+  await expect(button).toHaveCSS('opacity', '1')
+  await expect(button).toHaveCSS('transform', 'none')
+  await zoomSticker(page)
+  await button.click()
+  await expect(page.locator('.Lightbox')).toBeVisible()
+})
+
+test.describe('on a touch screen', () => {
+  test.use({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true,
+  })
+  test('the image zoom button always shows in a corner', async ({ page }) => {
+    await page.goto('/images')
+    await page.locator('.image-card').first().waitFor()
+    const button = await zoomSticker(page)
+    await expect(button).toHaveCSS('opacity', '1')
+  })
 })
 
 test('Calm mode and Plain labels take effect', async ({ page }) => {

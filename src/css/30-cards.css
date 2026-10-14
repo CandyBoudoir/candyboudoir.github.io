@@ -139,3 +139,96 @@
 .favorite-button.not-favorite {
   color: var(--juicy-text-dim);
 }
+
+/*
+ * The zoom button on image cards, which opens the lightbox. Stash draws it as
+ * a bare 5em magnifier in the middle of the picture, and the candy pill rule
+ * turned it into a pink disc there. It is a small candy sticker in the
+ * bottom-right corner instead, clear of the checkbox and rating ribbon
+ * (top-left) and the studio logo (top-right). #root outranks Stash's hover,
+ * focus and active reset and Juicy's own button states.
+ */
+#root .image-card .preview-button {
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 0.5rem;
+
+  /* Only the sticker takes the pointer; the rest is the picture and its link */
+  pointer-events: none;
+}
+
+#root .image-card .preview-button .btn {
+  align-items: center;
+  background-color: var(--juicy-pink);
+  background-image: var(--juicy-gloss-pink);
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  border-radius: var(--juicy-radius-pill);
+  box-shadow: var(--juicy-drop), var(--juicy-shine);
+  color: var(--juicy-ink);
+  display: inline-flex;
+  filter: none;
+  height: 36px;
+  justify-content: center;
+  padding: 0;
+  pointer-events: auto;
+  position: relative;
+  transition:
+    opacity var(--juicy-fast),
+    transform var(--juicy-medium) var(--juicy-ease-bounce),
+    box-shadow var(--juicy-fast),
+    filter var(--juicy-fast);
+  width: 36px;
+}
+
+/* A 44px hit area around the 36px sticker */
+#root .image-card .preview-button .btn::after {
+  content: '';
+  inset: calc(-4px - var(--juicy-outline));
+  position: absolute;
+}
+
+#root .image-card .preview-button .fa-icon {
+  color: inherit;
+  filter: none;
+  height: 16px;
+  opacity: 1;
+  transition: none;
+  width: 16px;
+}
+
+/*
+ * With a mouse the sticker waits for the card: it pops in on hover, or when
+ * the keyboard reaches anything on the card. :focus-visible rather than
+ * :focus-within, so focus that Stash hands back after a mouse-opened lightbox
+ * doesn't pin it open. Touch screens have no hover, so there it always shows.
+ */
+@media (hover: hover) and (pointer: fine) {
+  #root .image-card .preview-button .btn {
+    opacity: 0;
+    transform: scale(0.4) rotate(-25deg);
+  }
+
+  #root .image-card:hover .preview-button .btn,
+  #root .image-card:has(:focus-visible) .preview-button .btn {
+    opacity: 1;
+    transform: none;
+  }
+
+  #root .image-card .preview-button .btn:hover {
+    box-shadow: var(--juicy-drop-lg), var(--juicy-shine);
+    filter: brightness(1.07);
+    transform: translateY(-2px) rotate(-12deg);
+  }
+}
+
+#root .image-card .preview-button .btn:active {
+  box-shadow:
+    0 1px 0 var(--juicy-ink),
+    var(--juicy-shine);
+  filter: none;
+  transform: translateY(2px) scale(0.92);
+}
+
+#root .image-card .preview-button .btn:focus-visible {
+  box-shadow: var(--juicy-drop), var(--juicy-ring);
+}
