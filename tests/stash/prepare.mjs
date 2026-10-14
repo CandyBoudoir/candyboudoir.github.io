@@ -2,11 +2,12 @@
 // demo clips and stills, seeds invented studios, tags, performers and a
 // gallery, points Stash at the
 // mock stash-box (stashbox.mjs) and links a few of them to it, then installs
-// Juicy from a locally served copy of the plugin source, the way users
-// install it.
+// the plugins under test from a locally served copy of the plugin source, the
+// way users install them.
 //
 // Env: STASH_URL (default http://127.0.0.1:9999), WORK (the folder stash.sh
-// used), SITE (default dist/site), PW_CHANNEL (optional Playwright channel).
+// used), SITE (default dist/site), PLUGINS (plugin IDs to install, comma
+// separated, default Theme-Juicy), PW_CHANNEL (optional Playwright channel).
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import { createServer } from 'node:http'
@@ -17,7 +18,7 @@ import { renderStickers } from './stickers.mjs'
 const STASH = process.env.STASH_URL ?? 'http://127.0.0.1:9999'
 const WORK = resolve(process.env.WORK ?? 'stash-work')
 const SITE = resolve(process.env.SITE ?? 'dist/site')
-const PLUGIN_ID = 'Theme-Juicy'
+const PLUGIN_IDS = (process.env.PLUGINS ?? 'Theme-Juicy').split(',')
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
@@ -254,21 +255,27 @@ async function install() {
   await gql(
     `mutation ($s: [PackageSourceInput!]) {
       configureGeneral(input: { pluginPackageSources: $s }) { pluginPackageSources { url } } }`,
-    { s: [{ name: 'Juicy', url: source, local_path: 'juicy' }] },
+    { s: [{ name: 'CandyBoudoir', url: source, local_path: 'candyboudoir' }] },
   )
   await gql(
     'mutation ($p: [PackageSpecInput!]!) { installPackages(type: Plugin, packages: $p) }',
-    { p: [{ id: PLUGIN_ID, sourceURL: source }] },
+    { p: PLUGIN_IDS.map((id) => ({ id, sourceURL: source })) },
   )
-  let plugin
-  for (let i = 0; i < 60 && !plugin; i++) {
+  let installed = []
+  for (let i = 0; i < 60 && installed.length < PLUGIN_IDS.length; i++) {
     await sleep(1000)
     const { plugins } = await gql('{ plugins { id version enabled } }')
-    plugin = plugins?.find((p) => p.id === PLUGIN_ID && p.enabled)
+    installed = (plugins ?? []).filter(
+      (p) => PLUGIN_IDS.includes(p.id) && p.enabled,
+    )
   }
   server.close()
-  if (!plugin) throw new Error('Juicy did not install from the plugin source')
-  console.log(`Installed ${PLUGIN_ID} ${plugin.version} from ${source}`)
+  if (installed.length < PLUGIN_IDS.length)
+    throw new Error(
+      `${PLUGIN_IDS.join(', ')} did not install from the plugin source`,
+    )
+  for (const p of installed)
+    console.log(`Installed ${p.id} ${p.version} from ${source}`)
 }
 
 await setup()

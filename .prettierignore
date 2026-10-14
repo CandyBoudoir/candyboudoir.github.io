@@ -4,4 +4,4 @@ node_modules/
 stash-work/
 test-results/
 playwright-report/
-tests/e2e/snapshots/
+plugins/*/tests/snapshots/

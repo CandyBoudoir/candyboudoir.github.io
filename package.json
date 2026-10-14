@@ -1,8 +1,7 @@
 {
-  "name": "juicy",
-  "version": "0.3.1",
+  "name": "candyboudoir",
   "private": true,
-  "description": "A pink, playful theme for Stash, installable as a plugin",
+  "description": "CandyBoudoir's plugins for Stash, published as one plugin source",
   "license": "MIT",
   "type": "module",
   "packageManager": "pnpm@12.11.2",

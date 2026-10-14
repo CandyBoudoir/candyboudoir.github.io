@@ -165,7 +165,7 @@ test('SFW mode drops the cheek', async ({ page }) => {
 
 // Not a pass/fail check: lists the Stash classes in juicy.css that no visited
 // page or flow renders, and which of them still rendered on the baseline Stash
-// version (tests/e2e/unmatched-baseline.txt). Those newly missing classes point
+// version (plugins/juicy/tests/unmatched-baseline.txt). Those newly missing classes point
 // at what a Stash change removed; the rest only appear in dialogs, menus or on
 // hover.
 test('report Stash classes Juicy styles that no page renders', async ({
@@ -197,7 +197,9 @@ test('report Stash classes Juicy styles that no page renders', async ({
   }
   const unmatched = classes.filter((c) => !seen.has(c)).sort()
   const baseline = (
-    await readFile('tests/e2e/unmatched-baseline.txt', 'utf8').catch(() => '')
+    await readFile('plugins/juicy/tests/unmatched-baseline.txt', 'utf8').catch(
+      () => '',
+    )
   )
     .split('\n')
     .filter(Boolean)

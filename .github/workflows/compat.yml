@@ -108,12 +108,12 @@ jobs:
         if: inputs.update_snapshots && matrix.leg.baseline
         with:
           name: snapshots
-          path: tests/e2e/snapshots/
+          path: plugins/*/tests/snapshots/
           retention-days: 14
 
   report:
     needs: [matrix, test]
-    if: always() && github.event_name != 'pull_request' && github.repository == 'CandyBoudoir/juicy'
+    if: always() && github.event_name != 'pull_request' && github.repository == 'CandyBoudoir/candyboudoir.github.io'
     runs-on: ubuntu-latest
     permissions:
       issues: write

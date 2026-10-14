@@ -2,7 +2,7 @@
 
 Juicy's look is Candy Boudoir: the colours and gloss of a candy shop, with a little boudoir cheek in the wording, the motion and the small details. Naughtiness lives in words, motion and motifs (cherries, lips, drips, hearts) and never in explicit imagery. Two sticker illustrations, a bubblegum-blowing pink head in a lime crown and a heart padlock with a gold key, set the style. They belong to the author's own collection and do not ship; every Juicy icon is drawn from scratch in SVG.
 
-The design-system page (`design-system/index.html`, built to `dist/site/index.html`) shows all of this applied to Stash's own markup.
+The design-system page (`design-system/index.html`, built to `dist/site/juicy/index.html`) shows all of this applied to Stash's own markup.
 
 ## Palette
 
