@@ -2,7 +2,7 @@
 
 A pink, playful theme for [Stash](https://github.com/stashapp/stash), the self-hosted media organizer. Juicy installs as a Stash plugin, so you switch it on, off or update it from Settings > Plugins instead of pasting CSS into the Custom CSS box.
 
-Juicy brings glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording. Calm mode and Plain labels settings turn the motion and the copy down, and Stash's SFW mode keeps the candy and drops the cheek. The [live preview](https://candyboudoir.github.io/juicy/) shows every component on Stash's own markup, and the design rules are in [docs/design.md](docs/design.md). Juicy 0.3.2 is built and tested on Stash v0.31.1, including the Tagger and scrape screens that a stash-box such as StashDB adds.
+Juicy brings glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording. Calm mode and Plain labels settings turn the motion and the copy down, and Stash's SFW mode keeps the candy and drops the cheek. The [live preview](https://candyboudoir.github.io/juicy/) shows every component on Stash's own markup, and the design rules are in [docs/design.md](docs/design.md). Juicy 0.4.0 is built and tested on Stash v0.31.1, including the Tagger and scrape screens that a stash-box such as StashDB adds.
 
 ![The scenes page with Juicy: glossy sticker cards with gold rating badges on a dotted plum background](docs/screenshots/scenes.png)
 
@@ -35,7 +35,7 @@ Juicy's settings sit with the plugin under Settings > Plugins. Both start off.
 
 ![Juicy's two settings under Settings > Plugins](docs/screenshots/settings.png)
 
-Juicy also follows your system's reduced-motion setting. In Stash's SFW content mode it keeps the colours, drops the cheeky copy and the drips, and shows a heart instead of the winking mascot.
+Juicy also follows your system's reduced-motion setting. In Stash's SFW content mode it keeps the colours, drops the cheeky copy and the drips, and shows a heart instead of the mascot.
 
 Juicy makes no network requests beyond your own Stash server. Its font, Fredoka, ships inside the plugin.
 
