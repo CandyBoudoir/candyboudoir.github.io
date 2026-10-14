@@ -97,6 +97,24 @@ test('the image zoom button waits for hover in a corner', async ({ page }) => {
   await expect(page.locator('.Lightbox')).toBeVisible()
 })
 
+// Juicy's rating pill sits where Stash puts the card's checkbox, so it moves
+// past the checkbox wherever both show.
+async function ribbonClearsCheckbox(card) {
+  const check = await card.locator('.card-check').boundingBox()
+  const ribbon = await card.locator('.rating-banner').boundingBox()
+  expect(ribbon.x).toBeGreaterThan(check.x + check.width)
+}
+
+test("a selected card's rating pill clears its checkbox", async ({ page }) => {
+  await page.goto('/scenes')
+  const card = page.locator('.scene-card:has(.rating-banner)').first()
+  await card.hover()
+  await card.locator('.card-check').check()
+  await page.mouse.move(0, 0)
+  await expect(card.locator('.rating-banner')).toHaveCSS('opacity', '1')
+  await ribbonClearsCheckbox(card)
+})
+
 test.describe('on a touch screen', () => {
   test.use({
     viewport: { width: 390, height: 844 },
@@ -108,6 +126,12 @@ test.describe('on a touch screen', () => {
     await page.locator('.image-card').first().waitFor()
     const button = await zoomSticker(page)
     await expect(button).toHaveCSS('opacity', '1')
+  })
+  test('the rating pill clears the checkbox', async ({ page }) => {
+    await page.goto('/scenes')
+    const card = page.locator('.scene-card:has(.rating-banner)').first()
+    await card.waitFor()
+    await ribbonClearsCheckbox(card)
   })
 })
 

@@ -47,7 +47,7 @@ Glyphs (`glyph-*.svg`) are flat silhouettes on a 24-unit grid. The theme uses th
 - **Buttons** are glossy pills with an ink outline on a hard 3px ink drop. They lift 2px on hover and squish on press. Stash renders its icon buttons as `.btn.btn-primary.minimal`; those stay flat and take a pink wash on hover.
 - **Cards** are stickers: ink outline, 20px corners and a 5px ink drop. On hover they lift, tilt half a degree, take a lime halo, and a shine sweeps across the thumbnail.
 - **The zoom button on image cards** opens the lightbox. It is a 36px candy sticker in the picture's bottom-right corner, away from the rating ribbon and checkbox. With a mouse it pops in when the card is hovered or reached by keyboard; on touch screens it always shows, with a 44px tap area.
-- **Ratings** are gold hearts. The Font Awesome star paths are hidden and the svg paints a heart through a mask.
+- **Ratings** are gold hearts. The Font Awesome star paths are hidden and the svg paints a heart through a mask. On cards the rating is a tilted gold pill in the top-left corner. It moves right, past the card's checkbox, on touch screens and on selected cards, where Stash shows the checkbox without hover.
 - **Tags** are purple chips with an ink outline; badges follow the palette.
 - **Navigation**: the active page is a pink pill, the brand gets the cherry, and the bar sits on an ink line over a pink rule.
 - **Overlays** (menus, modals, toasts, tooltips) are raised plum stickers. Tooltips are ink with lime text.

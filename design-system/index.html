@@ -917,10 +917,19 @@
           <p class="ds-lede mt-4" id="image-cards">
             Image cards, as on the Images page and a gallery's Images tab. Hover
             one and the zoom sticker pops into the bottom-right corner; on a
-            touch screen it always shows there.
+            touch screen it always shows there. The first card is selected, so
+            its rating pill moves past the checkbox.
           </p>
           <div class="ds-cards ds-image-cards">
             <div class="card grid-card image-card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  checked
+                  aria-label="Select pucker-up.jpg"
+                />
+              </div>
               <div class="thumbnail-section">
                 <a class="image-card-link" href="#image-cards"
                   ><div

@@ -98,6 +98,27 @@
   width: auto;
 }
 
+/*
+ * The pill sits where Stash puts the card's checkbox (0.5rem in, 1.5rem wide
+ * on touch screens). With a mouse Stash hides the pill while the card is
+ * hovered, which is when the checkbox shows. Where both show, the pill moves
+ * past the checkbox: on a selected card, and always on touch screens, where
+ * the checkbox never hides (and a group's drag handle joins it).
+ */
+.grid-card:has(.card-check:checked) .rating-banner {
+  left: 2.4rem;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .grid-card .rating-banner {
+    left: 2.4rem;
+  }
+
+  .grid-card:has(.card-drag-handle) .rating-banner {
+    left: 4.4rem;
+  }
+}
+
 .progress-bar,
 .grid-card .progress-bar {
   background-color: rgb(1 2 36 / 70%);

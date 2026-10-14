@@ -315,6 +315,33 @@ body {
   position: relative;
 }
 
+.grid-card .card-controls {
+  align-items: center;
+  display: flex;
+  left: 0.5rem;
+  position: absolute;
+  top: 0.7rem;
+  z-index: 3;
+}
+
+.grid-card .card-check {
+  height: 1.2rem;
+  opacity: 0;
+  width: 1.2rem;
+}
+
+.grid-card .card-check:checked,
+.grid-card:hover .card-check {
+  opacity: 0.75;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .grid-card .card-check {
+    opacity: 0.25;
+    width: 1.5rem;
+  }
+}
+
 .image-card-preview {
   align-items: center;
   aspect-ratio: 4 / 3;
