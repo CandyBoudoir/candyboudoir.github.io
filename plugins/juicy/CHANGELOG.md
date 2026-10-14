@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0
+
+A new mascot, for Stash v0.31.1.
+
+- The cherry on empty lists is redrawn as a girl, with a purple bow on one side of her head, lashes, big glossy eyes and an open smile. Her face reads at small sizes, where the old wink and smirk blurred together.
+- Her leaf grows from the side of the stem, tucked behind it. The stem's dark end had shown past the leaf's base.
+
 ## 0.3.2
 
 Juicy moves to the CandyBoudoir plugin source, for Stash v0.31.1.

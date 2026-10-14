@@ -38,7 +38,7 @@ Stickers are the decorative icons: `mascot`, `cherry`, `heart`, `lips`, `heart-l
 3. The body: a glossy radial or linear gradient with a 3.5 ink outline.
 4. The relief and shine: clipped violet shadows on pink candy, facets on gold and lime, and curved cream reflections that follow each shape. Smaller rim reflections keep the volume readable on dark backgrounds.
 
-The mascot adds a satin bow with a gold heart, violet eyes, a wink and glossy lips. Its face stays readable at 32px; larger empty states reveal the bow folds and cheek highlights. Decorative stickers remain transparent vectors with local references only. Keep the mask glyphs flat so their silhouettes stay clear at control sizes.
+The mascot is a cherry girl with a purple bow on one side of her head, big glossy eyes with lashes, an open smile and blush. Her leaf grows from the side of the stem, tucked behind it. Her face is built from solid shapes with no fine lines, so it stays readable at 24px; the lashes and the shine on the bow show from about 48px. Decorative stickers remain transparent vectors with local references only. Keep the mask glyphs flat so their silhouettes stay clear at control sizes.
 
 Glyphs (`glyph-*.svg`) are flat silhouettes on a 24-unit grid. The theme uses them as CSS masks over `currentcolor`, so one file serves every colour: hearts replace the rating stars, the drip replaces the O counter's drops.
 
@@ -64,7 +64,7 @@ Cheeky copy swaps a short list of Stash's own messages for flirtier ones (the li
 
 ## SFW mode
 
-Stash's SFW content mode keeps Juicy's colours and drops the cheek: cheeky copy is off, bursts lose their drips, the empty state shows a heart instead of the winking mascot, and Stash's own SFW icon swap (a thumbs-up for the O counter) is left alone.
+Stash's SFW content mode keeps Juicy's colours and drops the cheek: cheeky copy is off, bursts lose their drips, the empty state shows a heart instead of the mascot, and Stash's own SFW icon swap (a thumbs-up for the O counter) is left alone.
 
 ## Settings
 
