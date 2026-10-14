@@ -38,6 +38,9 @@ for (const { name } of await listPlugins()) {
 }
 for (const t of pins)
   if (![...tags.values()].includes(t)) throw new Error(`No plugin for tag ${t}`)
+// A run that starts before prod's release job has tagged anything must fail
+// rather than publish a stable channel with no plugins in it.
+if (!tags.size) throw new Error('No plugin has a release tag yet')
 
 await rm(out, { recursive: true, force: true })
 const entries = []
