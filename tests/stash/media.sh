@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Writes short demo clips from ffmpeg's built-in test patterns, so every run
-# gets the same thumbnails without downloading any media.
+# Writes short demo clips and a folder of demo stills from ffmpeg's built-in
+# test patterns, so every run gets the same thumbnails without downloading any
+# media.
 # Usage: tests/stash/media.sh <library-dir>
 set -euo pipefail
 
@@ -22,4 +23,18 @@ velvet-hour pal100bars
 midnight-fizz yuvtestsrc
 crimson-candy smptehdbars
 CLIPS
-ls "$lib" | wc -l | xargs echo "clips:"
+mkdir -p "$lib/stills"
+while read -r name pattern size; do
+  ffmpeg -nostdin -loglevel error -y \
+    -f lavfi -i "${pattern}=size=${size}" -frames:v 1 \
+    "$lib/stills/$name.jpg"
+done <<'STILLS'
+pink-lemonade testsrc2 400x600
+gummy-glow rgbtestsrc 400x600
+sorbet-swirl colorspectrum 400x600
+fizz-pop smptebars 640x400
+taffy-twist pal100bars 400x600
+jelly-bean yuvtestsrc 640x400
+STILLS
+ls "$lib"/*.mp4 | wc -l | xargs echo "clips:"
+ls "$lib/stills" | wc -l | xargs echo "stills:"

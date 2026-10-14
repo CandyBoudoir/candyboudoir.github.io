@@ -1,5 +1,6 @@
 // Prepares a fresh Stash for the compatibility tests: runs setup, scans the
-// demo clips, seeds invented studios, tags and performers, points Stash at the
+// demo clips and stills, seeds invented studios, tags, performers and a
+// gallery, points Stash at the
 // mock stash-box (stashbox.mjs) and links a few of them to it, then installs
 // Juicy from a locally served copy of the plugin source, the way users
 // install it.
@@ -51,7 +52,7 @@ async function setup() {
           {
             path: join(WORK, 'library'),
             excludeVideo: false,
-            excludeImage: true,
+            excludeImage: false,
           },
         ],
         databaseFile: join(config, 'stash-go.sqlite'),
@@ -167,8 +168,31 @@ async function seed() {
       })
     }
   }
+
+  const gallery = await create('Gallery', {
+    title: 'Sweet Stills',
+    studio_id: studios[0],
+    performer_ids: [performers[0], performers[2]],
+    rating100: 80,
+  })
+  const { findImages } = await gql(
+    '{ findImages(filter: { per_page: -1, sort: "path" }) { images { id } } }',
+  )
+  for (const [n, image] of findImages.images.entries()) {
+    await gql(
+      'mutation ($i: ImageUpdateInput!) { imageUpdate(input: $i) { id } }',
+      {
+        i: {
+          id: image.id,
+          gallery_ids: [gallery],
+          performer_ids: [performers[n % performers.length]],
+          rating100: [100, null, 80, null, 60, null][n % 6],
+        },
+      },
+    )
+  }
   console.log(
-    `Seeded ${studios.length} studios, ${tags.length} tags, ${performers.length} performers, ${findScenes.scenes.length} scenes`,
+    `Seeded ${studios.length} studios, ${tags.length} tags, ${performers.length} performers, ${findScenes.scenes.length} scenes, ${findImages.images.length} images in a gallery`,
   )
 }
 
