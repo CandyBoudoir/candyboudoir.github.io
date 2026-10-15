@@ -2,6 +2,8 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { buildDb } from '../../src/js/model/db.js'
 import { createEngine } from '../../src/js/model/index.js'
+import * as FY from '../../src/js/model/foryou.js'
+import { moreLikeThis } from '../../src/js/model/recs.js'
 import { syntheticLibrary, syntheticStashdb } from './fixtures/synthetic.mjs'
 
 // Issue #24: the fit for a 10,000-scene library finishes in under two
@@ -32,4 +34,19 @@ test('a 10,000-scene library: fit and compute in under two seconds', (t) => {
   assert.ok(M.gate, 'the model still beats your average')
   assert.ok(msFit < LIMIT_MS, `fits took ${ms(msFit)}`)
   assert.ok(msCompute < LIMIT_MS, `compute took ${ms(msCompute)}`)
+})
+
+test('For you and More like this on 10,000 scenes', (t) => {
+  const db = buildDb(input)
+  const M = createEngine(db).compute({})
+  const state = { dontLearn: [], notInterested: [], settings: {} }
+  const [fy, msForYou] = time(() =>
+    FY.computeForYou(FY.context(M, state), FY.EMPTY_SIGNALS),
+  )
+  const [more, msMore] = time(() => moreLikeThis(M, state, db.owned[0]))
+  t.diagnostic(`For you ${ms(msForYou)}, More like this ${ms(msMore)}`)
+  assert.equal(fy.length, 12)
+  assert.ok(more.inLibrary.length > 0)
+  assert.ok(msForYou < LIMIT_MS, `For you took ${ms(msForYou)}`)
+  assert.ok(msMore < LIMIT_MS, `More like this took ${ms(msMore)}`)
 })
