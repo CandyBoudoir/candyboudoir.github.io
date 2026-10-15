@@ -12,10 +12,12 @@
 # Lossy WebP alters edge pixels and draws a faint line at every repeat. Leather
 # shows the tiles at their native CSS size (384px leather, 192px grain) and one
 # file per screen density, since a tile resampled to another size seams too.
-# LP holds the shading settings, as KEY=value pairs; for example:
+# LP holds the shading settings, as KEY=value pairs. These reproduce the
+# shipped tiles (the leather exactly, the grain within 2 levels of 255):
 #
-#   LP="BR=2,PL=0.55,DW=0.7,FW=0.1,KK=4.0,SE=9,SA=0.55,AO=0.26,AMB=0.32,DIF=0.98" \
-#     python3 leather.py leather 1152 93 leather.png
+#   P="BR=3,PL=0.58,DW=0.72,FW=0.09,KK=5.5,SE=9,SA=0.38,AO=0.2,AMB=0.47,DIF=0.72,JL=0.05,JH=0.95"
+#   LP=$P python3 leather.py leather 1152 90 leather.png
+#   LP="$P,GA=0.42" python3 leather.py grain 576 60 grain.png
 #
 # Grain mode, with GA added, writes light and shadow only, with alpha, for
 # laying over dyed leather.
