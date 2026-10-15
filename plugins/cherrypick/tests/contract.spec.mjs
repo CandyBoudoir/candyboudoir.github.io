@@ -2,10 +2,11 @@
 // docs/stash-seams.md lists, and that what it stores reaches Stash.
 import { expect, test } from '@playwright/test'
 import {
-  demoIds,
+  PLUGIN_ID,
   demoScene,
   forYouCards,
   pluginConfig,
+  setPluginSettings,
   setUpCherryPick,
   tearDownCherryPick,
 } from './stash.mjs'
@@ -13,9 +14,7 @@ import {
 let shared
 let demo
 test.beforeAll(async () => {
-  // The shared library's ids, before the demo library adds its own.
-  shared = await demoIds()
-  demo = await setUpCherryPick()
+  ;({ shared, demo } = await setUpCherryPick())
 })
 test.afterAll(tearDownCherryPick)
 
@@ -82,9 +81,10 @@ test('Your score shows on unrated scene cards only', async ({ page }) => {
   await expect(page.locator('.cherrypick-score-banner').first()).toBeVisible({
     timeout: 20_000,
   })
+  // The card's link is /scenes/<id>, with a queue query on lists.
   const banner = (id) =>
     page.locator(
-      `.scene-card:has(a[href^="/scenes/${id}"]) .cherrypick-score-banner`,
+      `.scene-card:has(a[href="/scenes/${id}"], a[href^="/scenes/${id}?"]) .cherrypick-score-banner`,
     )
   await expect(banner(unrated)).toHaveCount(1)
   await expect(banner(unrated)).toHaveText(/^~\d\.\d/)
@@ -167,19 +167,21 @@ test('Settings › Plugins lists the switches, already on', async ({ page }) => 
 })
 
 test('switching For you off removes the row', async ({ page }) => {
-  await page.goto('/settings?tab=plugins')
-  const toggle = page.locator('#plugin-CherryPick-showForYou')
-  await toggle.waitFor()
-  await toggle.click({ force: true })
-  await expect.poll(async () => (await pluginConfig())?.showForYou).toBe(false)
-  await page.goto('/')
-  await page.locator('.recommendations-container').first().waitFor()
-  await page.waitForTimeout(3000)
-  await expect(page.locator('.cherrypick-for-you')).toHaveCount(0)
-  await page.goto('/settings?tab=plugins')
-  await toggle.waitFor()
-  await toggle.click({ force: true })
-  await expect.poll(async () => (await pluginConfig())?.showForYou).toBe(true)
+  // Through the configuration, as Stash's Settings page saves it: develop
+  // collapses each plugin's settings, so the switch is not always visible.
+  const before = await pluginConfig()
+  await setPluginSettings(PLUGIN_ID, { ...before, showForYou: false })
+  try {
+    await page.goto('/')
+    await page.locator('.recommendations-container').first().waitFor()
+    await expect(page.locator('.cherrypick-front')).toBeAttached({
+      timeout: 20_000,
+    })
+    await page.waitForTimeout(2000)
+    await expect(page.locator('.cherrypick-for-you')).toHaveCount(0)
+  } finally {
+    await setPluginSettings(PLUGIN_ID, before)
+  }
 })
 
 test('Remove Cherry Pick data leaves a tombstone', async ({ page }) => {

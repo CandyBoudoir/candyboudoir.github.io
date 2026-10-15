@@ -2,6 +2,7 @@
 // Pick needs a library with ratings and plays, so its specs seed the demo
 // library (demo-library.mjs) next to the shared one and remove it after.
 import {
+  demoIds,
   gql,
   setPluginSettings,
   usePlugins,
@@ -14,10 +15,15 @@ export { DEMO }
 export const PLUGIN_ID = 'CherryPick'
 
 // Cherry Pick alone, with a fresh configuration and the demo library.
+// Returns the shared library's ids (read before the demo library adds its
+// own, since demoIds picks the first scene and performer it finds) and the
+// demo library's.
 export async function setUpCherryPick() {
   await usePlugins(PLUGIN_ID)
   await setPluginSettings(PLUGIN_ID, {})
-  return seedDemoLibrary(gql)
+  await removeDemoLibrary(gql)
+  const shared = await demoIds()
+  return { shared, demo: await seedDemoLibrary(gql) }
 }
 
 export async function tearDownCherryPick() {
