@@ -1,0 +1,65 @@
+/*
+ * Loading: three pyramid studs light up in turn, in place of Bootstrap's
+ * spinner. The light is a registered custom property, so it can animate.
+ */
+.LoadingIndicator .spinner-border,
+.LoadingIndicator .spinner-border::before,
+.LoadingIndicator .spinner-border::after {
+  background: conic-gradient(
+    from -45deg,
+    color-mix(in srgb, #fff var(--leather-lit), #5c5c63) 0 25%,
+    color-mix(in srgb, #9c9ca3 var(--leather-lit), #2f2f34) 0 50%,
+    color-mix(in srgb, #5f5f66 var(--leather-lit), #1c1c20) 0 75%,
+    color-mix(in srgb, #d6d6db var(--leather-lit), #45454b) 0
+  );
+  border: 0;
+  border-radius: 1px;
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 16px 1px
+      color-mix(in srgb, rgb(224 56 79 / 85%) var(--leather-lit), transparent);
+  height: 20px;
+  width: 20px;
+}
+
+.LoadingIndicator .spinner-border {
+  animation: leather-lit 1.2s ease-in-out 0.2s infinite;
+  margin: 0.6rem 32px;
+  position: relative;
+}
+
+.LoadingIndicator .spinner-border::before,
+.LoadingIndicator .spinner-border::after {
+  animation: leather-lit 1.2s ease-in-out infinite;
+  content: '';
+  left: -32px;
+  position: absolute;
+  top: 0;
+}
+
+.LoadingIndicator .spinner-border::after {
+  animation-delay: 0.4s;
+  left: 32px;
+}
+
+/* Small and inline loaders, as in menus and the package manager, keep one stud */
+.LoadingIndicator:is(.small, .inline) .spinner-border,
+.saved-filter-list-menu .LoadingIndicator .spinner-border {
+  height: 12px;
+  margin: 0 0.25rem;
+  width: 12px;
+}
+
+.LoadingIndicator:is(.small, .inline) .spinner-border::before,
+.LoadingIndicator:is(.small, .inline) .spinner-border::after,
+.saved-filter-list-menu .LoadingIndicator .spinner-border::before,
+.saved-filter-list-menu .LoadingIndicator .spinner-border::after {
+  content: none;
+}
+
+.LoadingIndicator-message {
+  color: var(--leather-text);
+  font-family: var(--leather-font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+}

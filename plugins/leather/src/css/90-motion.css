@@ -1,0 +1,117 @@
+/* Keyframes, burst particles and the calm switch */
+@keyframes leather-lit {
+  0%,
+  70%,
+  100% {
+    --leather-lit: 0%;
+  }
+
+  30% {
+    --leather-lit: 100%;
+  }
+}
+
+@keyframes leather-fly {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+
+  65% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy)))
+      rotate(var(--spin)) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(
+        calc(-50% + var(--dx) * 1.12),
+        calc(-50% + var(--dy) + 16px)
+      )
+      rotate(calc(var(--spin) * 2)) scale(0.9);
+  }
+}
+
+/* Bursts: nickel studs and O-rings fly off, with a few red sparks */
+.leather-burst {
+  animation: leather-fly 700ms cubic-bezier(0.15, 0.8, 0.3, 1) forwards;
+  background:
+    radial-gradient(30% 14% at 44% 22%, rgb(255 255 255 / 90%), transparent),
+    var(--leather-stud-face);
+  box-shadow: 0 0 0 0.5px #000;
+  height: 10px;
+  pointer-events: none;
+  position: fixed;
+  width: 10px;
+  z-index: 2000;
+}
+
+.leather-burst.is-ring {
+  background: var(--leather-ring-face);
+  border-radius: 50%;
+  box-shadow: none;
+  height: 13px;
+  mask: radial-gradient(
+    circle,
+    transparent 3.4px,
+    #000 4px 6px,
+    transparent 6.5px
+  );
+  width: 13px;
+}
+
+.leather-burst.is-spark {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #ff6075 40%,
+    #fff 60%,
+    transparent
+  );
+  border-radius: 2px;
+  box-shadow: 0 0 6px #e0384f;
+  height: 2px;
+  width: 13px;
+}
+
+/* Calm mode and reduced motion: everything holds still */
+.leather-calm *,
+.leather-calm *::before,
+.leather-calm *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+.leather-calm .grid-card:hover {
+  transform: none;
+}
+
+.leather-calm .LoadingIndicator .spinner-border,
+.leather-calm .LoadingIndicator .spinner-border::before,
+.leather-calm .LoadingIndicator .spinner-border::after {
+  --leather-lit: 70%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .grid-card:hover {
+    transform: none;
+  }
+
+  .LoadingIndicator .spinner-border,
+  .LoadingIndicator .spinner-border::before,
+  .LoadingIndicator .spinner-border::after {
+    --leather-lit: 70%;
+  }
+
+  .leather-burst {
+    display: none;
+  }
+}

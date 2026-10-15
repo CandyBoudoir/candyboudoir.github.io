@@ -1,0 +1,95 @@
+/* Page, type, links, focus, selection and the saddle stitch */
+::selection {
+  background: var(--leather-blood);
+  color: #fff;
+}
+
+body {
+  background:
+    radial-gradient(
+      1400px 640px at 50% -220px,
+      rgb(122 20 36 / 24%),
+      transparent 70%
+    ),
+    radial-gradient(
+      900px 600px at 100% 100%,
+      rgb(122 20 36 / 8%),
+      transparent 70%
+    ),
+    var(--leather-bg);
+  background-attachment: fixed;
+  color: var(--leather-text);
+}
+
+a {
+  color: var(--leather-text);
+}
+
+a:hover {
+  color: var(--leather-blood-hi);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--leather-font-display);
+  font-weight: 700;
+}
+
+h4,
+h5,
+h6 {
+  font-family: var(--leather-font-label);
+  font-weight: 500;
+}
+
+.text-muted {
+  color: var(--leather-text-muted) !important;
+}
+
+/* Bootstrap's status text, as the Tagger's match icons use it */
+.text-success {
+  color: var(--leather-success) !important;
+}
+
+.text-warning {
+  color: var(--leather-warning) !important;
+}
+
+.text-danger {
+  color: var(--leather-danger) !important;
+}
+
+hr {
+  border-top-color: var(--leather-line);
+}
+
+code {
+  color: var(--leather-blood-hi);
+}
+
+:focus-visible {
+  outline: 2px solid var(--leather-blood-hi);
+  outline-offset: 2px;
+}
+
+* {
+  scrollbar-color: #3b3034 var(--leather-bg);
+}
+
+/*
+ * Saddle stitching: a nine-slice of slanted stitches set into a groove, laid
+ * just inside the edge of every leather panel.
+ */
+.card::after,
+.modal-content::after,
+.toast::after,
+.search-item::after {
+  border: 6px solid transparent;
+  border-image: var(--leather-stitch) 10 round;
+  content: '';
+  inset: 1px;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}

@@ -1,0 +1,1204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Leather design system</title>
+    <meta
+      name="description"
+      content="Leather, a black leather theme for Stash: palette, type, gear and Stash components in Leather style."
+    />
+    <link rel="icon" href="Theme-Leather/assets/icons/collar.webp" />
+    <!-- Bootstrap 4.6 stands in for Stash's own base styles. -->
+    <link rel="stylesheet" href="ds/vendor/bootstrap.min.css" />
+    <link rel="stylesheet" href="Theme-Leather/leather.css" />
+    <link rel="stylesheet" href="ds/ds.css" />
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="i-tag" viewBox="0 0 16 16">
+        <path
+          fill-rule="evenodd"
+          d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l7.5 7.5-6 6L1 7ZM4.6 3.2a1.4 1.4 0 1 0 0 2.8a1.4 1.4 0 1 0 0-2.8Z"
+        />
+      </symbol>
+      <symbol id="i-user" viewBox="0 0 16 16">
+        <circle cx="8" cy="4.8" r="3.2" />
+        <path d="M1.8 15c0-3.5 2.8-6 6.2-6s6.2 2.5 6.2 6Z" />
+      </symbol>
+      <symbol id="i-box" viewBox="0 0 16 16">
+        <path d="M1 4.5 8 1l7 3.5v7L8 15l-7-3.5Zm7 1.8 4.6-2.2L8 2 3.4 4.1Z" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 16 16">
+        <path d="m1.5 8.6 1.6-1.6 3 3 6.8-6.8 1.6 1.6-8.4 8.4Z" />
+      </symbol>
+      <symbol id="i-cross" viewBox="0 0 16 16">
+        <path
+          d="m3.1 1.5 4.9 4.9 4.9-4.9 1.6 1.6L9.6 8l4.9 4.9-1.6 1.6L8 9.6l-4.9 4.9-1.6-1.6L6.4 8 1.5 3.1Z"
+        />
+      </symbol>
+      <symbol id="i-star" viewBox="0 0 576 512">
+        <path
+          fill="currentColor"
+          d="M288 0 359 186 576 186 400 300 466 512 288 384 110 512 176 300 0 186 217 186Z"
+        />
+      </symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M12 21.2C6.4 17.4 2.6 13.9 2.6 9.5C2.6 6.4 5 4 8 4C9.8 4 11.2 4.9 12 6.3C12.8 4.9 14.2 4 16 4C19 4 21.4 6.4 21.4 9.5C21.4 13.9 17.6 17.4 12 21.2Z"
+        />
+      </symbol>
+      <symbol id="i-drops" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M12 2s-7 8.5-7 13a7 7 0 0 0 14 0c0-4.5-7-13-7-13Z"
+        />
+      </symbol>
+      <symbol id="i-zoom" viewBox="0 0 512 512">
+        <path
+          fill="currentColor"
+          d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376C296.3 401.1 253.9 416 208 416 93.1 416 0 322.9 0 208S93.1 0 208 0 416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
+        />
+      </symbol>
+    </svg>
+
+    <!-- Like Stash's MainNavbar: below 1200px the page links fold behind the toggler -->
+    <nav class="navbar navbar-expand-xl navbar-dark bg-dark top-nav">
+      <button
+        class="navbar-toggler"
+        type="button"
+        aria-controls="ds-nav"
+        aria-expanded="false"
+        aria-label="Menu"
+        id="ds-toggler"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="navbar-brand">
+        <button class="btn btn-primary minimal brand-link">Stash</button>
+      </div>
+      <div class="navbar-collapse collapse" id="ds-nav">
+        <div class="navbar-nav">
+          <div class="nav-link">
+            <a class="minimal btn btn-primary active" href="#top">Scenes</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Images</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Groups</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Markers</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Galleries</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Performers</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Studios</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Tags</a>
+          </div>
+        </div>
+      </div>
+      <div class="nav-utility">
+        <button class="btn btn-primary minimal">Settings</button>
+      </div>
+    </nav>
+
+    <div class="ds-controls">
+      <span class="label">Try it</span>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-calm" />
+        <label class="custom-control-label" for="ds-calm">Calm mode</label>
+      </div>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-plain" />
+        <label class="custom-control-label" for="ds-plain">Plain labels</label>
+      </div>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-sfw" />
+        <label class="custom-control-label" for="ds-sfw">Stash SFW mode</label>
+      </div>
+    </div>
+
+    <div id="root">
+      <div class="main container-fluid p-0" id="ds-main">
+        <header class="ds-hero">
+          <div>
+            <div class="kicker">A theme for Stash</div>
+            <h1 class="wordmark">Leather</h1>
+            <div class="strap" aria-hidden="true"></div>
+            <p class="tagline">
+              Black pebble-grain leather, saddle stitching and nickel studs,
+              with a blood-red accent. Ratings are pyramid studs, the favourite
+              is a collar, and every card is sewn shut.
+            </p>
+          </div>
+          <div class="ds-hero-art" aria-hidden="true">
+            <img class="flogger" src="ds/gear/flogger.webp" alt="" />
+            <img class="paddle" src="ds/gear/paddle.webp" alt="" />
+            <img class="ring" src="ds/gear/ring.webp" alt="" />
+            <img class="buckle" src="ds/gear/buckle.webp" alt="" />
+            <img class="collar" src="ds/gear/collar.webp" alt="" />
+          </div>
+        </header>
+
+        <section class="ds-section">
+          <h2><img src="ds/gear/buckle-icon.webp" alt="" />Palette</h2>
+          <p class="ds-lede">
+            Black leather and nickel hardware carry almost everything. Blood red
+            marks what is chosen, active or hers, and oxblood is the pressed and
+            deeper version of it. Thread is a warm bone grey that turns red on
+            hover.
+          </p>
+          <div class="ds-swatches">
+            <div class="ds-swatch">
+              <div class="chip ds-chip-blood"></div>
+              <div class="meta">
+                <code>--leather-blood</code>
+                <div class="hex">#B0182F</div>
+                <div class="role">Primary, active, chosen</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #e0384f"></div>
+              <div class="meta">
+                <code>--leather-blood-hi</code>
+                <div class="hex">#E0384F</div>
+                <div class="role">Red text, numbers, focus</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-oxblood"></div>
+              <div class="meta">
+                <code>--leather-oxblood</code>
+                <div class="hex">#7A1424</div>
+                <div class="role">Pressed, switches, deep dye</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-nickel"></div>
+              <div class="meta">
+                <code>--leather-nickel</code>
+                <div class="hex">#C9C9CE</div>
+                <div class="role">Studs, rings, rivets, buckles</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #b9aea9"></div>
+              <div class="meta">
+                <code>--leather-thread</code>
+                <div class="hex">#B9AEA9</div>
+                <div class="role">Saddle stitching</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #c42a3f"></div>
+              <div class="meta">
+                <code>--leather-thread-red</code>
+                <div class="hex">#C42A3F</div>
+                <div class="role">Stitching on hover and focus</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-leather"></div>
+              <div class="meta">
+                <code>--leather-surface</code>
+                <div class="hex">#151113</div>
+                <div class="role">Navbar, cards, panels, menus</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-raised"></div>
+              <div class="meta">
+                <code>--leather-raised</code>
+                <div class="hex">#221B1E</div>
+                <div class="role">Secondary buttons, tabs</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #0c0a0b"></div>
+              <div class="meta">
+                <code>--leather-bg</code>
+                <div class="hex">#0C0A0B</div>
+                <div class="role">Page</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #ece6e3"></div>
+              <div class="meta">
+                <code>--leather-text</code>
+                <div class="hex">#ECE6E3</div>
+                <div class="role">Text</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #a99f9b"></div>
+              <div class="meta">
+                <code>--leather-text-muted</code>
+                <div class="hex">#A99F9B</div>
+                <div class="role">Secondary text</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #948a8b"></div>
+              <div class="meta">
+                <code>--leather-text-dim</code>
+                <div class="hex">#948A8B</div>
+                <div class="role">Dates, captions (AA on leather)</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section ds-type">
+          <h2><img src="ds/gear/paddle.webp" alt="" />Type</h2>
+          <p class="ds-lede">
+            Grenze Gotisch is a blackletter drawn to stay readable, so it
+            carries the wordmark, section and card titles and her lines. Oswald
+            in letterspaced caps carries buttons, tags, tabs and labels.
+            Descriptions and settings stay on the system font. Both fonts ship
+            inside the plugin.
+          </p>
+          <div class="ds-panel">
+            <div class="specimen">
+              <div class="spec">
+                Grenze Gotisch 900 · wordmark, section titles
+              </div>
+              <div class="t-display">Kneel and Wait</div>
+            </div>
+            <div class="specimen">
+              <div class="spec">
+                Grenze Gotisch 700 · card titles, modal titles, her lines
+              </div>
+              <div class="t-title">Nothing for you here, pet.</div>
+              <div class="t-card">
+                Laced Shut · Rivets and Rules · black-hide.jpg
+              </div>
+            </div>
+            <div class="specimen">
+              <div class="spec">
+                Oswald 500 caps, tracked · buttons, tags, tabs, overlays
+              </div>
+              <div class="t-label">
+                Scenes · Performers · Rating: 5 · 24:16 · 4K
+              </div>
+            </div>
+            <div class="specimen">
+              <div class="spec">System UI · descriptions and settings</div>
+              <div class="t-body">
+                Stash keeps your descriptions, settings and file details on the
+                system font, so long text stays easy to read.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/gear/collar.webp" alt="" />Gear and glyphs</h2>
+          <p class="ds-lede">
+            The gear is rendered as catalogue product shots in black leather,
+            oxblood and nickel, then cut out so it sits on any leather: the
+            studded collar, the strap and roller buckle, the flogger, the O-ring
+            junction of a harness and the studded paddle. They were rendered
+            locally with Qwen-Image 2512 (Apache 2.0). The collar ships with the
+            theme for empty lists; the rest appear on this page only. The flat
+            glyphs are CSS masks, so they take any fill.
+          </p>
+          <div class="ds-panel">
+            <div class="ds-motifs">
+              <div class="ds-motif">
+                <img src="ds/gear/collar.webp" alt="" /><span>collar</span>
+              </div>
+              <div class="ds-motif">
+                <img src="ds/gear/buckle.webp" alt="" /><span>buckle</span>
+              </div>
+              <div class="ds-motif">
+                <img src="ds/gear/flogger.webp" alt="" /><span>flogger</span>
+              </div>
+              <div class="ds-motif">
+                <img src="ds/gear/ring.webp" alt="" /><span>O-ring</span>
+              </div>
+              <div class="ds-motif">
+                <img src="ds/gear/paddle.webp" alt="" /><span>paddle</span>
+              </div>
+            </div>
+            <div class="ds-row m-0">
+              <span
+                class="ds-glyph is-stud"
+                title="rating"
+                style="
+                  mask-image: url('Theme-Leather/assets/icons/glyph-stud.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                title="rating, empty"
+                style="
+                  mask-image: url('Theme-Leather/assets/icons/glyph-grommet.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                title="favourite"
+                style="
+                  mask-image: url('Theme-Leather/assets/icons/glyph-collar.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                title="O counter"
+                style="
+                  mask-image: url('Theme-Leather/assets/icons/glyph-flogger.svg');
+                "
+              ></span>
+              <span class="ds-caption"
+                >glyph-stud, glyph-grommet, glyph-collar, glyph-flogger: the
+                rating, an empty rating, the favourite and the O counter.</span
+              >
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/gear/buckle-icon.webp" alt="" />Buttons</h2>
+          <p class="ds-lede">
+            Buttons are dyed leather with an inner saddle stitch. Primary is
+            blood-red leather with a nickel rivet at each end, secondary is
+            black leather, and the others are cognac, bottle green and steel
+            dyes. Pressing debosses the leather, and the chosen item of a group
+            is pressed into oxblood.
+          </p>
+          <div class="ds-row">
+            <button class="btn btn-primary">Save</button>
+            <button class="btn btn-secondary">Edit</button>
+            <button class="btn btn-success">Scan</button>
+            <button class="btn btn-warning">Generate</button>
+            <button class="btn btn-info">Identify</button>
+            <button class="btn btn-danger">Delete</button>
+            <button class="btn btn-primary" disabled>Disabled</button>
+          </div>
+          <div class="ds-row">
+            <button class="btn btn-primary btn-sm">Small</button>
+            <button class="btn btn-primary btn-lg">Large</button>
+            <div class="btn-group">
+              <button class="btn btn-secondary">Grid</button>
+              <button class="btn btn-secondary active">List</button>
+              <button class="btn btn-secondary">Wall</button>
+            </div>
+            <button class="btn btn-primary minimal">Minimal</button>
+            <a class="btn btn-link" href="#top">Link button</a>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2>
+            <img src="ds/gear/collar.webp" alt="" />Tags, ratings and favourites
+          </h2>
+          <p class="ds-lede">
+            Tags are small leather tags with a nickel eyelet. A rating is a row
+            of pyramid studs set over punched grommets, the favourite is a
+            studded collar that turns blood red, and the O counter is a flogger.
+            Click them and studs, O-rings and sparks fly off.
+          </p>
+          <div class="ds-row">
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Leather</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Boots</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Studs</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Lace</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Behind the scenes</div></a></span
+            >
+            <span class="badge badge-primary">New</span>
+            <span class="badge badge-info">4K</span>
+          </div>
+          <div class="ds-row ds-panel">
+            <div class="rating-stars" id="ds-rating">
+              <button
+                class="btn btn-secondary minimal star-fill-100"
+                data-star="1"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-secondary minimal star-fill-100"
+                data-star="2"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-secondary minimal star-fill-100"
+                data-star="3"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-secondary minimal star-fill-0"
+                data-star="4"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-secondary minimal star-fill-0"
+                data-star="5"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <span class="star-rating-number">3</span>
+            </div>
+            <span class="name-icons">
+              <button
+                class="btn btn-primary minimal favorite-button not-favorite"
+                id="ds-fav"
+                title="Favourite"
+              >
+                <svg class="svg-inline--fa fa-heart" width="28" height="28">
+                  <use href="#i-heart" />
+                </svg>
+              </button>
+            </span>
+            <div class="btn-group count-button" id="ds-o">
+              <button
+                class="btn btn-secondary minimal count-icon"
+                title="O Count"
+              >
+                <span
+                  ><svg width="22" height="22"><use href="#i-drops" /></svg
+                ></span>
+              </button>
+              <button class="btn btn-secondary minimal count-value">
+                <span>2</span>
+              </button>
+            </div>
+            <span class="ds-caption"
+              >Click the rating, the favourite and the O counter.</span
+            >
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/gear/paddle.webp" alt="" />Cards</h2>
+          <p class="ds-lede">
+            Cards are pebble-grain leather with the picture set in like a window
+            and a saddle stitch round the edge. On hover they lift and the
+            thread turns red. The studs stay on the navbar, so the pictures run
+            clear. The rating is a leather tab with a stud, hung to the right of
+            the card's checkbox.
+          </p>
+          <div class="ds-cards">
+            <div class="scene-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  aria-label="Select Laced Shut"
+                />
+              </div>
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards">
+                  <div class="scene-card-preview ph ph-1"></div>
+                  <div class="rating-banner rating-5">Rating: 5</div>
+                  <div class="scene-specs-overlay">
+                    <span class="overlay-resolution">4K</span
+                    ><span class="overlay-duration">24:16</span>
+                  </div>
+                </a>
+                <div class="studio-overlay">
+                  <a href="#cards">Black Saddle</a>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-indicator" style="width: 42%"></div>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    Laced Shut
+                  </h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-09-14</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>6</span>
+                </button>
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>1</span>
+                </button>
+                <div class="btn-group count-button">
+                  <button
+                    class="btn btn-secondary minimal count-icon"
+                    title="O Count"
+                  >
+                    <span
+                      ><svg class="ds-ico" viewBox="0 0 24 24">
+                        <use href="#i-drops" /></svg
+                    ></span></button
+                  ><button class="btn btn-secondary minimal count-value">
+                    <span>3</span>
+                  </button>
+                </div>
+                <div class="organized">
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-box" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="scene-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  aria-label="Select Rivets and Rules"
+                />
+              </div>
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards">
+                  <div class="scene-card-preview ph ph-3"></div>
+                  <div class="rating-banner rating-4">Rating: 4</div>
+                  <div class="scene-specs-overlay">
+                    <span class="overlay-resolution">1080p</span
+                    ><span class="overlay-duration">31:02</span>
+                  </div>
+                </a>
+                <div class="studio-overlay">
+                  <a href="#cards">Nickel Lane</a>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    Rivets and Rules
+                  </h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-08-30</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>9</span>
+                </button>
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>1</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="scene-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  aria-label="Select Saddle Stitch"
+                />
+              </div>
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards">
+                  <div class="scene-card-preview ds-audio-cover">
+                    <img src="Theme-Leather/assets/icons/collar.webp" alt="" />
+                  </div>
+                  <div class="scene-specs-overlay">
+                    <span class="overlay-resolution">Audio</span
+                    ><span class="overlay-duration">18:40</span>
+                  </div>
+                </a>
+                <div class="studio-overlay">
+                  <a href="#cards">Black Saddle</a>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-indicator" style="width: 78%"></div>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    Saddle Stitch
+                  </h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-07-02</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>5</span>
+                </button>
+                <div class="organized">
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-box" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ds-cards mt-4">
+            <div class="performer-card grid-card card">
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div class="performer-card-image ph ph-5"></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button favorite"
+                  title="Favourite"
+                >
+                  <svg class="svg-inline--fa fa-heart">
+                    <use href="#i-heart" />
+                  </svg>
+                </button>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <span class="performer-name">Onyx Buckle</span>
+                  </h5></a
+                >
+                <div class="performer-card__age">29 years old</div>
+              </div>
+            </div>
+            <div class="performer-card grid-card card">
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div class="performer-card-image ph ph-2"></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button not-favorite"
+                  title="Favourite"
+                >
+                  <svg class="svg-inline--fa fa-heart">
+                    <use href="#i-heart" />
+                  </svg>
+                </button>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <span class="performer-name">Velvet Rivet</span>
+                  </h5></a
+                >
+                <div class="performer-card__age">26 years old</div>
+              </div>
+            </div>
+            <div class="performer-card grid-card card">
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div class="performer-card-image ph ph-6"></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button not-favorite"
+                  title="Favourite"
+                >
+                  <svg class="svg-inline--fa fa-heart">
+                    <use href="#i-heart" />
+                  </svg>
+                </button>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <span class="performer-name">Garnet Strap</span>
+                  </h5></a
+                >
+                <div class="performer-card__age">34 years old</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ds-cards mt-4">
+            <div class="image-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  checked
+                  aria-label="Select black-hide.jpg"
+                />
+              </div>
+              <div class="thumbnail-section">
+                <a class="image-card-link" href="#cards"
+                  ><div class="image-card-preview portrait ph ph-4">
+                    <div class="preview-button">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        title="Zoom"
+                      >
+                        <svg class="svg-inline--fa fa-magnifying-glass fa-icon">
+                          <use href="#i-zoom" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="rating-banner rating-5">Rating: 5</div></a
+                >
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    black-hide.jpg
+                  </h5></a
+                >
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>1</span>
+                </button>
+              </div>
+            </div>
+            <div class="image-card grid-card card">
+              <div class="thumbnail-section">
+                <a class="image-card-link" href="#cards"
+                  ><div class="image-card-preview ph ph-2">
+                    <div class="preview-button">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        title="Zoom"
+                      >
+                        <svg class="svg-inline--fa fa-magnifying-glass fa-icon">
+                          <use href="#i-zoom" />
+                        </svg>
+                      </button>
+                    </div></div
+                ></a>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    saddle-stitch.jpg
+                  </h5></a
+                >
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>2</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/gear/buckle-icon.webp" alt="" />Forms and menus</h2>
+          <p class="ds-lede">
+            Inputs are debossed into the leather, and focus runs a red stitch
+            round the field. Menus, tooltips and toasts are stitched leather. A
+            modal carries a strap and roller buckle under its title.
+          </p>
+          <div class="ds-row ds-panel">
+            <input
+              class="form-control"
+              style="max-width: 280px"
+              placeholder="Search scenes…"
+            />
+            <select class="custom-select" style="max-width: 200px">
+              <option>Sort by rating</option>
+              <option>Sort by date</option>
+            </select>
+            <div class="custom-control custom-checkbox">
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="ds-check"
+                checked
+              />
+              <label class="custom-control-label" for="ds-check"
+                >Organised only</label
+              >
+            </div>
+            <div class="custom-control custom-switch">
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="ds-switch"
+                checked
+              />
+              <label class="custom-control-label" for="ds-switch"
+                >Show previews</label
+              >
+            </div>
+          </div>
+          <div class="ds-overlays ds-static">
+            <div>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="#menu">Play random</a>
+                <a class="dropdown-item active" href="#menu"
+                  >Generate previews</a
+                >
+                <a class="dropdown-item" href="#menu">Export</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#menu">Delete…</a>
+              </div>
+              <div class="tooltip bs-tooltip-top show mt-3" role="tooltip">
+                <div class="tooltip-inner">Organised</div>
+              </div>
+            </div>
+            <div class="toast-container">
+              <div class="toast success show" role="status">
+                <div class="toast-header">Started generating</div>
+              </div>
+              <div class="toast success show mt-3" role="status">
+                <div class="toast-header">Performer Favourited</div>
+              </div>
+            </div>
+            <div>
+              <div class="modal-content">
+                <div class="modal-header"><span>Delete scene?</span></div>
+                <div class="modal-body">
+                  The file stays on disk unless you tick the box.
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary">Cancel</button>
+                  <button class="btn btn-danger">Delete</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/gear/ring.webp" alt="" />Stash-box</h2>
+          <p class="ds-lede">
+            Tagger rows stay flat, since you clear hundreds of them. The chosen
+            row gets a blood-red edge and the chosen select a red ring and
+            stitch. StashID links are a nickel tag with the ID on leather.
+          </p>
+          <div class="ds-row">
+            <span class="stash-id-pill" data-endpoint="StashDB"
+              ><span>StashDB</span><a href="#stash-box">7c2e91b4-laced</a></span
+            >
+            <span class="text-success"
+              ><svg class="ds-ico"><use href="#i-check" /></svg> Duration is a
+              match</span
+            >
+            <span class="text-warning">Duration off by at least 2s</span>
+            <span class="text-danger">No results found</span>
+          </div>
+          <div class="search-item mb-4">
+            <ul class="list-unstyled m-0">
+              <li class="row mx-0 search-result selected-result active">
+                <div class="col-lg-5 d-flex">
+                  <div class="scene-image-container">
+                    <div class="scene-image ds-cover ph ph-1"></div>
+                  </div>
+                  <div class="scene-metadata">
+                    <h4 class="m-0">Laced Shut</h4>
+                    <h5>Black Saddle · 2026-09-14</h5>
+                    <span class="stash-id-pill" data-endpoint="StashDB"
+                      ><span>StashDB</span
+                      ><a href="#stash-box">7c2e91b4</a></span
+                    >
+                  </div>
+                </div>
+                <div class="col-lg-7">
+                  <div class="ds-match">
+                    <span class="entity-name">Studio: Black Saddle</span>
+                    <div class="btn-group">
+                      <button class="btn btn-secondary">Create</button
+                      ><button class="btn btn-secondary">Skip</button>
+                    </div>
+                    <div
+                      class="studio-select studio-select-active react-select"
+                    >
+                      <div class="react-select__control">
+                        <span class="react-select__single-value"
+                          >Black Saddle</span
+                        ><span class="react-select__indicator">▾</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ds-match">
+                    <span class="entity-name">Performer: Velvet Rivet</span>
+                    <div class="btn-group">
+                      <button class="btn btn-secondary">Create</button
+                      ><button class="btn btn-primary">Skip</button>
+                    </div>
+                    <div class="performer-select react-select">
+                      <div class="react-select__control">
+                        <span class="react-select__placeholder"
+                          >Select Performer</span
+                        ><span class="react-select__indicator">▾</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ds-match">
+                    <span class="entity-name">Performer: Onyx Buckle</span>
+                    <span class="text-success"
+                      ><svg class="ds-ico"><use href="#i-check" /></svg>
+                      Matched: Onyx Buckle</span
+                    >
+                  </div>
+                </div>
+              </li>
+              <li class="row mx-0 mt-2 search-result">
+                <div class="col">
+                  <h4 class="m-0">Black Hide</h4>
+                  <h5 class="m-0">Nickel Lane · 2026-02-14</h5>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="ds-static">
+            <div class="modal-dialog scrape-dialog modal-lg m-0">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <span>Scene Scrape Results</span>
+                </div>
+                <div class="modal-body">
+                  <div class="row">
+                    <div class="col-3"></div>
+                    <div class="col column-label">Existing</div>
+                    <div class="col column-label">Scraped</div>
+                  </div>
+                  <div class="row align-items-center mt-3">
+                    <div class="col-3 col-form-label">Title</div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-muted">
+                              <use href="#i-cross" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="Black Hide"
+                          readonly
+                        />
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-success">
+                              <use href="#i-check" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="Laced Shut"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row align-items-center mt-3">
+                    <div class="col-3 col-form-label">Date</div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-success">
+                              <use href="#i-check" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="2026-09-11"
+                          readonly
+                        />
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-muted">
+                              <use href="#i-cross" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="2026-09-14"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary">Cancel</button>
+                  <button class="btn btn-primary">Apply</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/gear/ring.webp" alt="" />Navigation</h2>
+          <p class="ds-lede">
+            The navbar is a wide strap with a row of studs along its edge, and
+            the active page is a blood-red patch stitched onto it. On a phone
+            held upright Stash docks the bar at the bottom, and the studs move
+            to its top edge. Tabs are leather flaps with a red edge, and Stash's
+            pagination is a row of leather buttons.
+          </p>
+          <div class="ds-panel">
+            <ul class="nav nav-tabs mb-3">
+              <li class="nav-item">
+                <a class="nav-link active" href="#nav">Details</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#nav">Scenes</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#nav">Galleries</a>
+              </li>
+              <li class="nav-item"><a class="nav-link" href="#nav">Edit</a></li>
+            </ul>
+            <div role="group" class="pagination btn-group">
+              <button disabled type="button" class="btn btn-secondary">
+                «
+              </button>
+              <button disabled type="button" class="btn btn-secondary">
+                &lt;
+              </button>
+              <button type="button" class="page-count btn btn-secondary">
+                1 of 4
+              </button>
+              <button type="button" class="btn btn-secondary">&gt;</button>
+              <button type="button" class="btn btn-secondary">»</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/gear/flogger.webp" alt="" />Loading and empty</h2>
+          <p class="ds-lede">
+            The loader is three pyramid studs that light up in turn. An empty
+            list shows the collar and a short order, or an O-ring and no line in
+            SFW mode.
+          </p>
+          <div class="ds-row" style="align-items: stretch">
+            <div class="ds-panel" style="min-width: 260px">
+              <div class="LoadingIndicator">
+                <div class="spinner-border" role="status">
+                  <span class="sr-only">Loading…</span>
+                </div>
+                <h4 class="LoadingIndicator-message">Loading…</h4>
+              </div>
+            </div>
+            <div class="ds-panel" style="min-width: 260px">
+              <div>No results found.</div>
+            </div>
+            <div class="ds-panel" style="min-width: 260px">
+              <span
+                class="filter-container text-muted paginationIndex center-text"
+                >0-0 of 0<br
+              /></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/gear/flogger.webp" alt="" />Copy</h2>
+          <p class="ds-lede">
+            Short orders in her voice. Matches are exact and whole-text, so
+            titles, tags and descriptions are never touched. Plain labels and
+            Stash's SFW mode turn them off.
+          </p>
+          <div class="ds-panel">
+            <table class="ds-copy">
+              <thead>
+                <tr>
+                  <th>Stash says</th>
+                  <th>Leather says</th>
+                </tr>
+              </thead>
+              <tbody id="ds-copy-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <footer class="ds-footer">
+          <p>
+            Grenze Gotisch by Omnibus-Type and Oswald by Vernon Adams, both SIL
+            OFL 1.1 and bundled with the plugin, since Stash blocks font hosts.
+            Bootstrap 4.6 stands in for Stash's own styles. Built with Claude,
+            Anthropic's AI coding assistant.
+            <a
+              href="https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/leather"
+              >Source and install</a
+            >.
+          </p>
+        </footer>
+      </div>
+    </div>
+
+    <script src="Theme-Leather/leather.js"></script>
+    <script src="ds/ds.js"></script>
+  </body>
+</html>

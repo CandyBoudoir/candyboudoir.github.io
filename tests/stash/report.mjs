@@ -102,7 +102,7 @@ for (const channel of ['stable', 'candidate', 'develop']) {
       .filter((s) => s.unmatched)
       .map(
         (s) =>
-          `Classes Juicy styles that matched nothing on ${s.leg}:\n\n\`\`\`\n${s.unmatched}\n\`\`\``,
+          `Classes the plugins style that matched nothing on ${s.leg}, by plugin folder:\n\n\`\`\`\n${s.unmatched}\n\`\`\``,
       ),
     '',
     'The workflow run has the Playwright report and screenshot diffs as an artifact.',

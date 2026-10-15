@@ -1,0 +1,366 @@
+/*
+ * Menus, popovers, tooltips, toasts and modals: stitched leather. Stash paints
+ * its menus slate through div.dropdown-menu rules, so the menu rules name the
+ * div too, and some menus and their items carry Bootstrap's !important
+ * bg-secondary. Stash caps longer menus (Sort by, the scrapers) at 300px and
+ * scrolls them, so a menu's stitching is its own border, which the items
+ * scroll inside.
+ */
+.dropdown-menu,
+div.dropdown-menu {
+  background: var(--leather-tex) var(--leather-surface);
+  border: 7px solid transparent;
+  border-image: var(--leather-stitch) 10 / 6px round;
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgb(255 255 255 / 7%),
+    0 18px 36px -12px #000;
+  color: var(--leather-text);
+  padding: 0.25rem;
+}
+
+.dropdown-menu.bg-secondary {
+  background-color: var(--leather-surface) !important;
+}
+
+.dropdown-menu .dropdown-item.bg-secondary {
+  background-color: transparent !important;
+}
+
+.dropdown-item,
+div.dropdown-menu .dropdown-item {
+  border-radius: 3px;
+  color: var(--leather-text);
+  font-family: var(--leather-font-label);
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+  padding: 0.35rem 0.75rem;
+  position: relative;
+  z-index: 2;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item.active,
+.dropdown-item:active,
+div.dropdown-menu .dropdown-item:hover,
+div.dropdown-menu .dropdown-item:focus,
+div.dropdown-menu .dropdown-item.active,
+div.dropdown-menu .dropdown-item:active {
+  background:
+    var(--leather-grain),
+    linear-gradient(90deg, rgb(176 24 47 / 55%), rgb(122 20 36 / 25%));
+  box-shadow: inset 2px 0 0 var(--leather-blood-hi);
+  color: #fff;
+}
+
+.dropdown-divider {
+  border-top: 1px dashed rgb(185 174 169 / 30%);
+}
+
+.dropdown-header {
+  color: var(--leather-text-dim);
+  font-family: var(--leather-font-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.popover {
+  background: var(--leather-tex) var(--leather-surface);
+  border: 1px solid #000;
+  border-radius: 6px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 7%),
+    0 18px 36px -12px #000;
+}
+
+.popover-header {
+  background: var(--leather-raised);
+  border-bottom: 1px solid #000;
+  color: var(--leather-text);
+  font-family: var(--leather-font-label);
+  letter-spacing: 0.08em;
+}
+
+.popover-body {
+  color: var(--leather-text);
+}
+
+.bs-popover-top > .arrow::after,
+.bs-popover-auto[x-placement^='top'] > .arrow::after {
+  border-top-color: var(--leather-surface);
+}
+
+.bs-popover-bottom > .arrow::after,
+.bs-popover-auto[x-placement^='bottom'] > .arrow::after {
+  border-bottom-color: var(--leather-surface);
+}
+
+.bs-popover-left > .arrow::after,
+.bs-popover-auto[x-placement^='left'] > .arrow::after {
+  border-left-color: var(--leather-surface);
+}
+
+.bs-popover-right > .arrow::after,
+.bs-popover-auto[x-placement^='right'] > .arrow::after {
+  border-right-color: var(--leather-surface);
+}
+
+.tooltip {
+  font-family: var(--leather-font-label);
+}
+
+.tooltip.show {
+  opacity: 1;
+}
+
+.tooltip-inner {
+  background: var(--leather-tex) var(--leather-raised);
+  border: 1px solid #000;
+  border-radius: 4px;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 60%);
+  color: var(--leather-text);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  outline: 1px dashed rgb(185 174 169 / 45%);
+  outline-offset: -4px;
+  padding: 0.45rem 0.8rem;
+  text-transform: uppercase;
+}
+
+/* A title Stash cut short reads in full in its tooltip, in sentence case */
+.TruncatedText-tooltip .tooltip-inner {
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+  text-transform: none;
+}
+
+.bs-tooltip-top .arrow::before,
+.bs-tooltip-auto[x-placement^='top'] .arrow::before {
+  border-top-color: #000;
+}
+
+.bs-tooltip-bottom .arrow::before,
+.bs-tooltip-auto[x-placement^='bottom'] .arrow::before {
+  border-bottom-color: #000;
+}
+
+.bs-tooltip-left .arrow::before,
+.bs-tooltip-auto[x-placement^='left'] .arrow::before {
+  border-left-color: #000;
+}
+
+.bs-tooltip-right .arrow::before,
+.bs-tooltip-auto[x-placement^='right'] .arrow::before {
+  border-right-color: #000;
+}
+
+/*
+ * Toasts: Stash puts the whole message in the toast's header and colours the
+ * toast by kind. Here every toast is leather, the message is set in
+ * blackletter, and a dyed edge on the left says which kind it is.
+ */
+.toast,
+.toast-container .toast {
+  backdrop-filter: none;
+  background: var(--leather-tex) var(--leather-surface);
+  border: 1px solid #000;
+  border-radius: 6px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 7%),
+    0 14px 28px -12px #000;
+  color: var(--leather-text);
+  position: relative;
+}
+
+.toast-container {
+  opacity: 1;
+}
+
+.toast-container .toast.danger {
+  box-shadow:
+    inset 5px 0 0 var(--leather-danger),
+    0 14px 28px -12px #000;
+}
+
+.toast-container .toast.warning {
+  box-shadow:
+    inset 5px 0 0 var(--leather-warning),
+    0 14px 28px -12px #000;
+}
+
+.toast-header,
+.toast-container .toast-header {
+  align-items: center;
+  background: none;
+  border-bottom: 0;
+  color: var(--leather-text);
+  font-family: var(--leather-font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  gap: 0.65rem;
+  line-height: 1.15;
+  position: relative;
+  z-index: 2;
+}
+
+.toast-header::before {
+  align-self: flex-start;
+  background: var(--leather-stud-face);
+  box-shadow: 0 0 0 0.5px #000;
+  content: '';
+  flex: none;
+  height: 9px;
+  margin-top: 0.45em;
+  width: 9px;
+}
+
+.toast-container .toast-header .close {
+  color: var(--leather-text-muted);
+  font-family: var(--leather-font-label);
+}
+
+.toast-body {
+  position: relative;
+  z-index: 2;
+}
+
+/* Modals: stitched leather, with a strap and buckle under the title */
+.modal-content {
+  background: var(--leather-tex) var(--leather-surface);
+  border: 1px solid #000;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 7%),
+    0 30px 60px -20px #000;
+  color: var(--leather-text);
+}
+
+.modal-content::after {
+  inset: 3px;
+}
+
+/* Stash paints each modal section slate; let the leather show through */
+.modal-header,
+.modal-body,
+.modal-footer {
+  background-color: transparent;
+  color: var(--leather-text);
+  position: relative;
+  z-index: 2;
+}
+
+.modal-content > .modal-header {
+  align-items: center;
+  border-bottom: 0;
+  gap: 0.6rem;
+  justify-content: flex-start;
+  font-family: var(--leather-font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+  padding: 1.1rem 1.25rem 2.2rem;
+}
+
+.modal-content > .modal-header::before {
+  background: url('assets/icons/strap.svg') right center / auto 14px no-repeat;
+  bottom: 0.7rem;
+  content: '';
+  height: 14px;
+  left: 1.25rem;
+  pointer-events: none;
+  position: absolute;
+  right: 1.1rem;
+}
+
+.modal-content > .modal-header::after {
+  background: url('assets/icons/strap-buckle.svg') center / contain no-repeat;
+  bottom: calc(0.7rem - 8px);
+  content: '';
+  height: 30px;
+  left: calc(1.25rem + 6px);
+  pointer-events: none;
+  position: absolute;
+  width: 36px;
+}
+
+.modal-title {
+  color: var(--leather-text);
+  font-family: var(--leather-font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.modal-header .fa-icon {
+  color: var(--leather-blood-hi);
+  height: 0.8em;
+}
+
+.modal-body {
+  color: var(--leather-text-muted);
+}
+
+.modal-footer {
+  border-top: 1px solid #000;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%);
+}
+
+.modal-header .close,
+.modal .close {
+  color: var(--leather-text-muted);
+  text-shadow: none;
+}
+
+/* The edit filter dialog's criteria are a list, not cards */
+.edit-filter-dialog .criterion-list .card {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px dashed rgb(185 174 169 / 22%);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.edit-filter-dialog .criterion-list .card::after {
+  content: none;
+}
+
+.edit-filter-dialog .criterion-list .card .filter-item-header {
+  background: none;
+  border-bottom: 0;
+}
+
+.modal-backdrop.show {
+  background-color: #000;
+  opacity: 0.75;
+}
+
+.alert {
+  background: var(--leather-tex) var(--leather-raised);
+  border: 1px solid #000;
+  border-radius: 6px;
+  box-shadow:
+    inset 4px 0 0 var(--leather-blood),
+    0 6px 14px -8px #000;
+  color: var(--leather-text);
+}
+
+.alert-danger {
+  box-shadow:
+    inset 4px 0 0 var(--leather-danger),
+    0 6px 14px -8px #000;
+}
+
+.alert-warning {
+  box-shadow:
+    inset 4px 0 0 var(--leather-warning),
+    0 6px 14px -8px #000;
+}
+
+.alert-success {
+  box-shadow:
+    inset 4px 0 0 var(--leather-success),
+    0 6px 14px -8px #000;
+}

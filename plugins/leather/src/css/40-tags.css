@@ -1,0 +1,71 @@
+/* Tags: little leather tags with a nickel eyelet and a stitched edge */
+.tag-item.badge,
+.badge-secondary {
+  align-items: center;
+  background: var(--leather-grain), var(--leather-black-dye);
+  border: 1px solid #000;
+  border-radius: 3px 6px 6px 3px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 8%),
+    0 2px 3px -1px #000;
+  color: var(--leather-text);
+  display: inline-flex;
+  font-family: var(--leather-font-label);
+  font-size: 0.78rem;
+  font-weight: 500;
+  gap: 0.5em;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  outline: 1px dashed rgb(185 174 169 / 45%);
+  outline-offset: -4px;
+  padding: 0.55em 0.95em 0.55em 0.75em;
+  text-transform: uppercase;
+}
+
+.tag-item.badge::before {
+  background:
+    radial-gradient(circle, var(--leather-bg) 0 32%, transparent 36%),
+    var(--leather-ring-face);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 0.5px #000,
+    0 1px 1px rgb(0 0 0 / 80%);
+  content: '';
+  flex: none;
+  height: 0.75em;
+  width: 0.75em;
+}
+
+.tag-item.badge a {
+  color: inherit;
+}
+
+.tag-item.badge:hover,
+.tag-item.badge a:hover {
+  color: #fff;
+  outline-color: var(--leather-thread-red);
+  text-decoration: none;
+}
+
+.badge-primary {
+  background: var(--leather-grain), var(--leather-blood-dye);
+  border: 1px solid #000;
+  border-radius: 3px;
+  color: #fff;
+  font-family: var(--leather-font-label);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  outline: 1px dashed rgb(255 235 238 / 55%);
+  outline-offset: -3px;
+  text-transform: uppercase;
+}
+
+.badge-info {
+  background: var(--leather-grain), linear-gradient(180deg, #626872, #2e3237);
+  border: 1px solid #000;
+  border-radius: 3px;
+  color: #f1f2f4;
+  font-family: var(--leather-font-label);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}

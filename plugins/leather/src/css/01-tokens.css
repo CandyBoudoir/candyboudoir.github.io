@@ -1,0 +1,141 @@
+/*
+ * Leather design tokens. Stash compiles its colours from SCSS and exposes no
+ * custom properties, so every rule in this theme reads from these instead.
+ * Every url() here resolves against leather.css.
+ */
+@property --leather-lit {
+  inherits: false;
+  initial-value: 0%;
+  syntax: '<percentage>';
+}
+
+:root {
+  color-scheme: dark;
+  accent-color: var(--leather-blood);
+
+  /* Palette */
+  --leather-blood: #b0182f;
+  --leather-blood-hi: #e0384f;
+  --leather-oxblood: #7a1424;
+  --leather-nickel: #c9c9ce;
+  --leather-thread: #b9aea9;
+  --leather-thread-red: #c42a3f;
+  --leather-success: #8fd3a6;
+  --leather-warning: #e6ad69;
+  --leather-danger: #f0596c;
+
+  /* Surfaces, black leather from back to front */
+  --leather-bg: #0c0a0b;
+  --leather-surface: #151113;
+  --leather-raised: #221b1e;
+  --leather-line: #2f2629;
+
+  /* Text */
+  --leather-text: #ece6e3;
+  --leather-text-muted: #a99f9b;
+  --leather-text-dim: #948a8b;
+
+  /*
+   * Materials. The pebble grain is a seamless tile: periodic noise and wrapped
+   * normals, so copies meet without a line. Each screen density gets its own
+   * lossless file at its own pixels, and the tile is always drawn at its
+   * native size, since resampling the edges brings the seam back.
+   */
+  --leather-tex: image-set(
+      url('assets/icons/leather-1x.webp') 1x,
+      url('assets/icons/leather-2x.webp') 2x,
+      url('assets/icons/leather-3x.webp') 3x
+    )
+    0 0 / 384px 384px;
+
+  /* The same grain as light and shadow only, laid over dyed leather */
+  --leather-grain: image-set(
+      url('assets/icons/grain-1x.webp') 1x,
+      url('assets/icons/grain-2x.webp') 2x,
+      url('assets/icons/grain-3x.webp') 3x
+    )
+    0 0 / 192px 192px;
+  --leather-stitch: url('assets/icons/stitch.svg');
+  --leather-stitch-red: url('assets/icons/stitch-red.svg');
+  --leather-studs: url('assets/icons/studs.svg');
+  --leather-nickel-grad: linear-gradient(
+    180deg,
+    #f4f4f6 0%,
+    #c9c9ce 28%,
+    #8c8c93 50%,
+    #e1e1e6 72%,
+    #55555c 100%
+  );
+
+  /* A pyramid stud seen from above, lit from the top left */
+  --leather-stud-face: conic-gradient(
+    from -45deg,
+    #d9d9de 0deg,
+    #fff 40deg,
+    #cfcfd4 90deg,
+    #a7a7ae 90deg,
+    #6f6f76 180deg,
+    #56565d 180deg,
+    #2f2f35 270deg,
+    #b4b4bb 270deg,
+    #ececf0 360deg
+  );
+
+  /* The same stud turned 45 degrees, for ratings */
+  --leather-stud-diamond: conic-gradient(
+    #d4d4d9 0deg,
+    #9a9aa1 90deg,
+    #5c5c63 90deg,
+    #34343a 180deg,
+    #6a6a71 180deg,
+    #9c9ca3 270deg,
+    #e9e9ed 270deg,
+    #fff 320deg,
+    #dcdce1 360deg
+  );
+  --leather-ring-face: conic-gradient(
+    from 210deg,
+    #fff,
+    #8c8c93 22%,
+    #f4f4f6 42%,
+    #55555c 66%,
+    #e1e1e6 86%,
+    #fff
+  );
+  --leather-blood-dye: linear-gradient(
+    180deg,
+    #c42239 0%,
+    #a3182c 48%,
+    #7a1424 100%
+  );
+  --leather-ox-dye: linear-gradient(
+    180deg,
+    #8e1729 0%,
+    #6d1120 55%,
+    #4c0b16 100%
+  );
+  --leather-black-dye: linear-gradient(180deg, #2e2528, #1a1517);
+
+  /* Shape */
+  --leather-radius: 6px;
+  --leather-nav-band: 16px;
+
+  /*
+   * The navbar is a strap with a row of studs along its edge, taller than
+   * Stash's own 48.75px bar. Stash spaces the page, the sidebar and its sticky
+   * headers by that height, so 80-pages.css moves them with this.
+   */
+  --leather-nav-height: 64px;
+
+  /* Type */
+  --leather-font-display: 'Leather Grenze', 'Times New Roman', serif;
+  --leather-font-label: 'Leather Oswald', 'Arial Narrow', sans-serif;
+  --leather-font-body:
+    system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial,
+    sans-serif;
+
+  /* Motion */
+  --leather-ease: cubic-bezier(0.2, 0.8, 0.25, 1);
+  --leather-fast: 140ms;
+  --leather-medium: 220ms;
+}

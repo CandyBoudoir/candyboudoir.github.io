@@ -1,0 +1,297 @@
+/*
+ * Buttons: dyed leather with an inner saddle stitch. Pressing debosses the
+ * leather. Stash renders its icon buttons as `.btn.btn-primary.minimal`, so
+ * every leather rule skips `.minimal` and those stay flat.
+ */
+.btn {
+  --leather-btn-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 16%), inset 0 -2px 0 rgb(0 0 0 / 35%),
+    0 2px 3px rgb(0 0 0 / 55%);
+
+  border-radius: 5px;
+  font-family: var(--leather-font-label);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition:
+    transform var(--leather-fast) var(--leather-ease),
+    filter var(--leather-fast) var(--leather-ease),
+    color var(--leather-fast) var(--leather-ease);
+}
+
+/*
+ * The stitch and the rivets hang off the button, so it needs a position. A
+ * zero-specificity rule keeps every Stash rule that places a button
+ * absolutely (card favourites, the Tagger's sprite button) in charge.
+ */
+:where(.btn:not(.minimal, .btn-link)) {
+  position: relative;
+}
+
+.btn:not(.minimal, .btn-link) {
+  border: 1px solid #000 !important;
+  box-shadow: var(--leather-btn-shadow);
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 55%);
+}
+
+.btn:not(.minimal, .btn-link)::before {
+  border: 5px solid transparent;
+  border-image: var(--leather-stitch) 10 round;
+  content: '';
+  inset: 1px;
+  opacity: 0.9;
+  pointer-events: none;
+  position: absolute;
+}
+
+.btn:focus,
+.btn.focus {
+  box-shadow: var(--leather-btn-shadow) !important;
+  outline: none;
+}
+
+.btn:focus-visible {
+  box-shadow:
+    var(--leather-btn-shadow),
+    0 0 0 2px var(--leather-bg),
+    0 0 0 4px var(--leather-blood-hi) !important;
+}
+
+/* Pressed: the leather is debossed */
+.btn:not(.minimal, .btn-link, :disabled, .disabled):active,
+.btn:not(.minimal, .btn-link).active {
+  --leather-btn-shadow:
+    inset 0 2px 5px rgb(0 0 0 / 80%), inset 0 -1px 0 rgb(255 255 255 / 6%),
+    0 1px 0 rgb(255 255 255 / 6%);
+
+  transform: translateY(1px);
+}
+
+.btn-primary:not(.minimal),
+.btn-primary:not(.minimal):hover,
+.btn-primary:not(.minimal):focus,
+.btn-primary:not(.minimal, :disabled, .disabled):active,
+.btn-primary:not(.minimal, :disabled, .disabled).active,
+.show > .btn-primary.dropdown-toggle:not(.minimal) {
+  background: var(--leather-grain), var(--leather-blood-dye);
+  color: #fff;
+}
+
+/* Room for a nickel rivet near each end of every primary button */
+.btn-primary:not(.minimal) {
+  padding-inline: 1.5rem;
+}
+
+.btn-primary:not(.minimal)::after {
+  /* Each rivet is a nickel dome lit from the top left, over a soft shadow */
+  background:
+    radial-gradient(
+      circle at 10.2px calc(50% - 1px),
+      #fff 0 0.8px,
+      #e8e8ec 1.5px,
+      #a3a3aa 2.5px,
+      #55555c 3.4px,
+      #050405 4px,
+      transparent 4.5px
+    ),
+    radial-gradient(
+      circle at calc(100% - 11.8px) calc(50% - 1px),
+      #fff 0 0.8px,
+      #e8e8ec 1.5px,
+      #a3a3aa 2.5px,
+      #55555c 3.4px,
+      #050405 4px,
+      transparent 4.5px
+    ),
+    radial-gradient(
+      circle at 11.4px calc(50% + 1.4px),
+      rgb(0 0 0 / 55%) 0 3.4px,
+      transparent 4.6px
+    ),
+    radial-gradient(
+      circle at calc(100% - 10.6px) calc(50% + 1.4px),
+      rgb(0 0 0 / 55%) 0 3.4px,
+      transparent 4.6px
+    );
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.btn-primary:not(.minimal, :disabled, .disabled):hover {
+  filter: brightness(1.12);
+}
+
+.btn-secondary:not(.minimal),
+.btn-secondary:not(.minimal):hover,
+.btn-secondary:not(.minimal):focus,
+.btn-secondary:not(.minimal, :disabled, .disabled):active,
+.show > .btn-secondary.dropdown-toggle:not(.minimal) {
+  background: var(--leather-tex) var(--leather-raised);
+  color: var(--leather-text);
+}
+
+.btn-secondary:not(.minimal, :disabled, .disabled):hover {
+  color: #fff;
+}
+
+.btn-secondary:not(.minimal, :disabled, .disabled):hover::before,
+.btn-secondary:not(.minimal).active::before,
+.show > .btn-secondary.dropdown-toggle:not(.minimal)::before {
+  border-image-source: var(--leather-stitch-red);
+}
+
+/* The chosen item of a group is pressed into oxblood */
+.btn.btn-secondary:not(.minimal, :disabled, .disabled).active {
+  background: var(--leather-grain), var(--leather-ox-dye);
+  color: #fff;
+}
+
+.btn-danger:not(.minimal),
+.btn-danger:not(.minimal):hover,
+.btn-danger:not(.minimal):focus,
+.btn-danger:not(.minimal, :disabled, .disabled):active {
+  background:
+    var(--leather-grain),
+    linear-gradient(180deg, #ec2f48 0%, #c41b33 50%, #911226 100%);
+  color: #fff;
+}
+
+.btn-warning:not(.minimal),
+.btn-warning:not(.minimal):hover,
+.btn-warning:not(.minimal):focus,
+.btn-warning:not(.minimal, :disabled, .disabled):active {
+  background:
+    var(--leather-grain),
+    linear-gradient(180deg, #b56f31 0%, #8e4e20 55%, #643411 100%);
+  color: #fff7ee;
+}
+
+.btn-success:not(.minimal),
+.btn-success:not(.minimal):hover,
+.btn-success:not(.minimal):focus,
+.btn-success:not(.minimal, :disabled, .disabled):active {
+  background:
+    var(--leather-grain),
+    linear-gradient(180deg, #2f6649 0%, #1f4a33 55%, #12301f 100%);
+  color: #ecf8f0;
+}
+
+.btn-info:not(.minimal),
+.btn-info:not(.minimal):hover,
+.btn-info:not(.minimal):focus,
+.btn-info:not(.minimal, :disabled, .disabled):active {
+  background:
+    var(--leather-grain),
+    linear-gradient(180deg, #626872 0%, #474c54 55%, #2e3237 100%);
+  color: #f1f2f4;
+}
+
+:is(.btn-danger, .btn-warning, .btn-success, .btn-info):not(
+    .minimal,
+    :disabled,
+    .disabled
+  ):hover {
+  filter: brightness(1.12);
+}
+
+.btn:disabled,
+.btn.disabled {
+  box-shadow: none !important;
+  cursor: not-allowed;
+  filter: saturate(0.25) brightness(0.75);
+  opacity: 0.5;
+  transform: none;
+}
+
+.btn:disabled::before,
+.btn.disabled::before {
+  opacity: 0.35;
+}
+
+.btn.minimal {
+  --leather-btn-shadow: none;
+
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--leather-text-muted);
+}
+
+.btn.minimal:not(:disabled):hover,
+.btn.minimal:not(:disabled, .disabled):active {
+  background: rgb(255 255 255 / 5%);
+  border-color: transparent;
+  color: #fff;
+}
+
+.btn-link {
+  --leather-btn-shadow: none;
+
+  color: var(--leather-text);
+  text-decoration: underline dashed var(--leather-blood-hi) 1px;
+  text-underline-offset: 6px;
+}
+
+.btn-link:hover {
+  color: var(--leather-blood-hi);
+  text-decoration-color: var(--leather-blood-hi);
+}
+
+/* Buttons joined to a field stay put */
+.input-group .btn:not(.minimal, .btn-link, :disabled, .disabled):active {
+  transform: none;
+}
+
+/* Selects styled as buttons (the page-size picker in list toolbars) */
+select.btn-secondary {
+  background:
+    url('assets/icons/chevron.svg') right 0.6rem center / 12px 12px no-repeat,
+    var(--leather-tex) var(--leather-raised);
+  border: 1px solid #000;
+  border-radius: 5px;
+  box-shadow: var(--leather-btn-shadow);
+  color: var(--leather-text);
+  font-family: var(--leather-font-label);
+  letter-spacing: 0.08em;
+}
+
+select option {
+  background-color: var(--leather-surface);
+  color: var(--leather-text);
+}
+
+/*
+ * Chrome that Stash renders as plain buttons: the bars that fold the details
+ * panel away on scene and gallery pages, and the player's scrubber arrows.
+ * Keep them quiet.
+ */
+#root :is(.scene-divider, .gallery-divider, .details-divider) .btn,
+#root .scrubber-button {
+  background: none;
+  border: 0 !important;
+  box-shadow: none;
+  color: var(--leather-thread);
+  transform: none;
+}
+
+#root :is(.scene-divider, .gallery-divider, .details-divider) .btn::before,
+#root :is(.scene-divider, .gallery-divider, .details-divider) .btn::after,
+#root .scrubber-button::before,
+#root .scrubber-button::after {
+  content: none;
+}
+
+#root .scrubber-button {
+  background: var(--leather-raised);
+}
+
+#root :is(.scene-divider, .gallery-divider, .details-divider) .btn:hover,
+#root .scrubber-button:hover {
+  color: var(--leather-blood-hi);
+}
+
+#root .scrubber-tags-background {
+  background-color: var(--leather-raised);
+}

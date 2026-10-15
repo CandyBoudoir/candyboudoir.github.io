@@ -1,0 +1,203 @@
+/*
+ * Stash-box screens: the Tagger, the scrape dialogs, StashID links and the
+ * stash-box search lists. Stash paints these slate in its own stylesheet. The
+ * Tagger is a work surface where people clear hundreds of rows, so its rows
+ * are flat, untextured leather that never lifts; the chosen row takes a
+ * blood-red edge, and the dye stays on the buttons that act.
+ */
+
+/* Tagger rows, and the stash-box result lists that reuse .search-item */
+.search-item {
+  background: var(--leather-surface);
+  border: 1px solid #000;
+  border-radius: 6px;
+  box-shadow: 0 10px 22px -14px #000;
+  position: relative;
+}
+
+/* The performer, studio and tag taggers sit inside a card, so raise them */
+.PerformerTagger-performer,
+.StudioTagger-studio,
+.TagTagger-tag,
+.modal .search-item {
+  background: var(--leather-raised);
+  border: 1px solid #000;
+  border-radius: 6px;
+  box-shadow: 0 10px 22px -14px #000;
+}
+
+.StudioTagger-studio .studio-card img,
+.TagTagger-tag .tag-card img {
+  background-color: var(--leather-bg);
+}
+
+/* Cards inside the Tagger keep still and go without the collar */
+:is(
+    .tagger-container,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag
+  )
+  .grid-card:hover {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 7%),
+    inset 0 -1px 0 rgb(0 0 0 / 60%),
+    0 2px 4px rgb(0 0 0 / 50%);
+  transform: none;
+}
+
+:is(.PerformerTagger-performer, .StudioTagger-studio, .TagTagger-tag)
+  .card::after {
+  content: none;
+}
+
+/* Clickable results in the stash-box search modals */
+.PerformerScrapeModal-list .search-item:hover,
+.StashBoxIDSearchModal-list .search-item:hover {
+  box-shadow:
+    inset 3px 0 0 var(--leather-blood-hi),
+    0 10px 22px -14px #000;
+}
+
+/* Scene Tagger results: the picked one takes a blood-red edge */
+.search-result {
+  background-color: transparent;
+  border-radius: 3px;
+}
+
+.search-result + .search-result {
+  border-top: 1px solid var(--leather-line);
+}
+
+.search-result:hover {
+  background-color: rgb(255 255 255 / 3%);
+}
+
+.selected-result,
+.selected-result:hover {
+  background: linear-gradient(90deg, rgb(176 24 47 / 16%), transparent 55%);
+  box-shadow: inset 3px 0 0 var(--leather-blood-hi);
+}
+
+.search-result h4 {
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.search-result h5 {
+  color: var(--leather-text-dim);
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+}
+
+.tagger-container .scene-card-preview,
+.search-result .scene-image,
+.search-item .scene-image {
+  border: 1px solid #000;
+  border-radius: 3px;
+}
+
+.entity-name {
+  color: var(--leather-text-muted);
+  font-family: var(--leather-font-label);
+  letter-spacing: 0.04em;
+}
+
+/* Fields left out of a save, or missing from the result */
+li.active .optional-field.missing .optional-field-content,
+li.active .optional-field.excluded .optional-field-content,
+li.active .optional-field.excluded .scene-link {
+  color: var(--leather-text-dim);
+}
+
+/* StashID links: the box name on nickel and the ID on leather, one tag */
+.stash-id-pill {
+  border: 1px solid #000;
+  border-radius: 3px;
+  box-shadow: 0 2px 3px -1px #000;
+  overflow: hidden;
+  padding: 0;
+  vertical-align: middle;
+}
+
+.stash-id-pill span {
+  background: var(--leather-nickel-grad);
+  border-radius: 0;
+  color: #151113;
+  font-family: var(--leather-font-label);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stash-id-pill a {
+  background: var(--leather-tex) var(--leather-raised);
+  border-left: 1px solid #000;
+  border-radius: 0;
+  color: var(--leather-text);
+  font-family: ui-monospace, monospace;
+  font-weight: 400;
+}
+
+.stash-id-pill a:hover {
+  color: var(--leather-blood-hi);
+}
+
+/*
+ * Scrape dialogs set Stash's current value against the scraped one, and the
+ * toggle in front of each says which wins. The winning side's toggle is dyed
+ * blood red and its field takes the red stitch.
+ */
+.scrape-dialog .column-label,
+.scrape-dialog .col-form-label {
+  color: var(--leather-text-muted);
+  font-family: var(--leather-font-label);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.scrape-dialog .input-group-prepend .btn:has(.text-success) {
+  background: var(--leather-grain), var(--leather-blood-dye);
+}
+
+.scrape-dialog .input-group-prepend .btn .text-success {
+  color: #fff !important;
+}
+
+.scrape-dialog
+  .input-group:has(> .input-group-prepend .text-success)
+  :is(.form-control, div.react-select__control) {
+  outline: 1.5px dashed var(--leather-thread-red);
+  outline-offset: -5px;
+}
+
+/* Icons on leather buttons keep their meaning */
+.btn-secondary .text-muted {
+  color: var(--leather-text-muted) !important;
+}
+
+/* The filter bar at the top of the "Scrape with…" menu */
+.scraper-menu .dropdown-menu .scraper-filter-container {
+  background: transparent;
+  border-bottom: 1px dashed rgb(185 174 169 / 30%);
+  position: relative;
+  z-index: 2;
+}
+
+/* Identify task: the ordered list of sources */
+.scraper-source-list .list-group-item,
+.list-group-item {
+  background: var(--leather-surface);
+  border-color: #000;
+  color: var(--leather-text);
+}
+
+.identify-source-editor .default-value {
+  color: var(--leather-text-dim);
+}

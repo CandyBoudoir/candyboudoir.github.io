@@ -7,8 +7,8 @@ updates:
       interval: weekly
     cooldown:
       default-days: 3
-    # Bootstrap stays at the version Stash ships (4.6.2): the design-system page
-    # uses it to stand in for Stash's own styles.
+    # Bootstrap stays at the version Stash ships (4.6.2): the design-system pages
+    # use it to stand in for Stash's own styles.
     ignore:
       - dependency-name: bootstrap
     groups:
