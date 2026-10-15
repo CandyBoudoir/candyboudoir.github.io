@@ -2,12 +2,9 @@
  * Menus, popovers, tooltips, toasts and modals: stitched leather. Stash paints
  * its menus slate through div.dropdown-menu rules, so the menu rules name the
  * div too, and some menus and their items carry Bootstrap's !important
- * bg-secondary.
- */
-/*
- * Stash caps longer menus (Sort by, the scrapers) at 300px and scrolls them.
- * Their stitching is the menu's own border, not an overlay, so it stays put
- * while the items scroll inside it instead of running over the bottom edge.
+ * bg-secondary. Stash caps longer menus (Sort by, the scrapers) at 300px and
+ * scrolls them, so a menu's stitching is its own border, which the items
+ * scroll inside.
  */
 .dropdown-menu,
 div.dropdown-menu {
