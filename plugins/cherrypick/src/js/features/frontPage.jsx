@@ -24,6 +24,7 @@ import { RowSceneCard } from '../ui/rowCards.jsx'
 import { Safe } from '../ui/Safe.jsx'
 import { useAppState } from '../ui/hooks.js'
 import { HallOfFameRow } from './hallOfFame.jsx'
+import { ResumePill } from './brackets/index.jsx'
 
 // ------------------------------------------------------------ the visit's rows
 
@@ -157,7 +158,7 @@ function CherryPickRows() {
           className="cherrypick-follow"
         />
       ))}
-      <HallOfFameRow />
+      <HallOfFameRow extra={<ResumePill />} />
     </div>
   )
 }

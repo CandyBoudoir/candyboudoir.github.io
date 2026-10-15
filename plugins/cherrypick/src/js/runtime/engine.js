@@ -50,6 +50,20 @@ function recompute() {
   store.set({ db: built.db, M, modelMs: Math.round(performance.now() - t0) })
 }
 
+// The model as it would be with other bracket picks: the champion screen
+// counts the unrated scenes whose Your score one bracket's picks moved.
+export function computeWithDecisions(decisions) {
+  const s = store.get()
+  if (!built.engine || built.library !== s.library) return null
+  return built.engine.compute({
+    overrides: {},
+    performerOverrides: {},
+    decisions,
+    notInterested: s.notInterested,
+    dontLearn: s.dontLearn.map((d) => d.sceneId),
+  })
+}
+
 const INPUTS = [
   'library',
   'stashdbData',
