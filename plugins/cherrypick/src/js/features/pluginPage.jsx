@@ -48,7 +48,8 @@ export function SettingRow({ title, sub, children }) {
         <h3>{title}</h3>
         {sub ? <div className="sub-heading">{sub}</div> : null}
       </div>
-      {children ? <div>{children}</div> : null}
+      {/* Stash's .setting lays out two columns; keep the second even when empty. */}
+      <div>{children}</div>
     </div>
   )
 }
