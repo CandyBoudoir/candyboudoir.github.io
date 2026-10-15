@@ -54,6 +54,8 @@ export async function removePluginData() {
   store.set({
     ...fromConfig(null),
     signals: EMPTY_SIGNALS,
+    stashdbData: null,
+    stashdbLookups: {},
     recentHidden: [],
     notice: { kind: 'removed' },
   })

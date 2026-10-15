@@ -185,3 +185,123 @@ export const LINKS = {
   tags: [['Candy', 't-candy']],
   scenes: [['Sugar Rush', 's-sugar-rush']],
 }
+
+// ---------------------------------------------------------------- StashDB
+
+// A stand-in for StashDB, for Cherry Pick's StashDB layer (its lookups go to
+// https://stashdb.org/graphql, which its tests answer from this mock). Its
+// own invented performers, studios and scenes, which nothing else reads, so
+// the themes' Tagger and scrape screenshots never see them. Each scene has a
+// hidden `popularity`, the number of users holding it, which orders
+// POPULARITY queries as StashDB's distinct fingerprint submitters do; its
+// OSHASH submissions add up to that number.
+// Keys the mock refuses, as StashDB refuses an expired one; any other key
+// passes (the shared library's CandyDB key is 'demo').
+export const REFUSED_KEY = /^invalid/
+
+const sdbPerformer = (id, name, gender) => ({
+  id,
+  name,
+  disambiguation: null,
+  gender,
+  aliases: [],
+})
+const coco = sdbPerformer('sdb-p-coco', 'Caramel Coco', 'FEMALE')
+const nova = sdbPerformer('sdb-p-nova', 'Nougat Nova', 'FEMALE')
+const milo = sdbPerformer('sdb-p-milo', 'Maple Milo', 'MALE')
+
+const confection = { id: 'sdb-st-confection', name: 'Confection Network' }
+const fudge = { id: 'sdb-st-fudge', name: 'Fudge Factory', parent: confection }
+const toffee = { id: 'sdb-st-toffee', name: 'Toffee Lane', parent: null }
+
+// Tag names match the shared demo library's, so Cherry Pick maps them.
+const sdbTags = ['Candy', 'Glossy', 'Pastel', 'Sparkle', 'Retro'].map(
+  (name) => ({ id: `sdb-t-${name.toLowerCase()}`, name }),
+)
+
+// [title, users holding it, performers, studio]
+const SDB_SCENES = [
+  ['Butterscotch Bay', 420, [coco], fudge],
+  ['Marshmallow Mile', 35, [coco, nova], toffee],
+  ['Gumball Garden', 980, [coco], fudge],
+  ['Licorice Loop', 150, [coco, milo], toffee],
+  ['Truffle Terrace', 610, [coco], fudge],
+  ['Meringue Manor', 12, [coco, nova], toffee],
+  ['Brittle Bridge', 75, [coco], fudge],
+  ['Fondant Falls', 530, [coco, milo], toffee],
+  ['Praline Park', 260, [coco], fudge],
+  ['Sorbet Shore', 0, [coco, nova], toffee],
+  ['Gummy Gazebo', 840, [coco], fudge],
+  ['Jellybean Junction', 190, [coco], toffee],
+  ['Bonbon Boulevard', 330, [coco, milo], fudge],
+  ['Cocoa Cove', 55, [coco, nova], toffee],
+  ['Wafer Way', 700, [coco], fudge],
+  ['Sherbet Street', 95, [coco], toffee],
+  ['Nougat Nook', 480, [coco, nova], fudge],
+  ['Toffee Trail', 20, [coco], toffee],
+  ['Caramel Canyon', 300, [nova], fudge],
+  ['Fudge Fountain', 640, [nova], fudge],
+  ['Maple Meadow', 110, [milo], toffee],
+  ['Candy Crossing', 45, [nova, milo], toffee],
+]
+
+const LANDSCAPE = ['sugar-rush', 'cherry-pop', 'sweet-tooth', 'lollipop-lane']
+const hash = (n, salt) =>
+  ((n + 1) * 2654435761 + salt).toString(16).padStart(16, '0').slice(-16)
+
+const stashdbScenes = SDB_SCENES.map(([title, popularity, cast, studio], i) => {
+  const id = `sdb-s-${title.toLowerCase().replace(/\W+/g, '-')}`
+  const key = LANDSCAPE[i % LANDSCAPE.length]
+  // two encodes, so OSHASH submissions are spread over two hashes
+  const first = Math.ceil(popularity * 0.6)
+  return {
+    id,
+    title,
+    release_date: `2025-${String(1 + (i % 12)).padStart(2, '0')}-${String(10 + i).padStart(2, '0')}`,
+    date: null,
+    duration: 600 + i * 37,
+    code: `SDB-${String(i + 1).padStart(3, '0')}`,
+    details: `${title}, invented for Cherry Pick's tests.`,
+    images: [image(key, 640, 360)],
+    studio: { ...studio, parent: studio.parent ?? null },
+    performers: cast.map((p) => ({ as: null, performer: p })),
+    tags: [sdbTags[i % 5], sdbTags[(i + 2) % 5]],
+    // the studio's page for the scene, with tracking parameters Cherry
+    // Pick must drop
+    urls: [
+      {
+        url: `https://example.com/scenes/${id}?ats=candy&utm_source=stashdb`,
+        type: 'STUDIO',
+        site: { name: 'Studio' },
+      },
+    ],
+    fingerprints: [
+      {
+        algorithm: 'OSHASH',
+        hash: hash(i, 1),
+        duration: 600,
+        submissions: first,
+      },
+      {
+        algorithm: 'OSHASH',
+        hash: hash(i, 2),
+        duration: 600,
+        submissions: popularity - first,
+      },
+      {
+        algorithm: 'PHASH',
+        hash: hash(i, 3),
+        duration: 600,
+        submissions: Math.round(popularity / 3),
+      },
+    ].filter((f) => f.submissions > 0),
+    popularity,
+  }
+})
+
+export const STASHDB = {
+  scenes: stashdbScenes,
+  performers: [coco, nova, milo],
+  studios: [confection, fudge, toffee],
+  tags: sdbTags,
+}

@@ -15,6 +15,8 @@ import { useAppState } from '../ui/hooks.js'
 import { CardRow } from '../ui/Row.jsx'
 import { RowSceneCard } from '../ui/rowCards.jsx'
 import { ConnectLine } from '../ui/ConnectLine.jsx'
+import { StashdbSceneCard } from '../ui/StashdbSceneCard.jsx'
+import { stashdbReady, useSceneLookups } from '../stashdb/layer.js'
 
 const { OverlayTrigger, Popover, PopoverContent } = Bootstrap
 
@@ -124,6 +126,9 @@ function ToolbarExtras({ scene }) {
 
 function MoreLikeThis({ scene }) {
   const s = useAppState((x) => x)
+  // StashDB lookups for this scene (its popularity, and the candidates for
+  // the row of scenes you don't have)
+  const lookups = useSceneLookups(scene)
   if (!s.settings.showMoreLikeThis || !s.M || s.watching) return null
   const dbScene = s.db.scenes.get(scene.id)
   if (!dbScene) return null
@@ -133,6 +138,8 @@ function MoreLikeThis({ scene }) {
     <RowSceneCard key={rec.id} scene={rec} item={it} rowId={id} index={i} />
   )
   const missing = s.settings.outOfLibrary
+  const ready = stashdbReady(s)
+  const missingId = rowId + '-missing'
   return (
     <div className="cherrypick-more-like-this recommendations-container cherrypick-ui">
       <div className="recommendation-row-head cherrypick-mlt-head">
@@ -149,18 +156,27 @@ function MoreLikeThis({ scene }) {
         empty="Nothing like this one that you haven't watched yet."
         renderCard={card(rowId)}
       />
-      {missing && s.stashdb && s.db.hasStashdb ? (
+      {missing && ready && lookups !== 'failed' ? (
         <CardRow
-          id={rowId + '-missing'}
+          id={missingId}
           title="Not in your library"
           kind="stashdb-scene"
           className="cherrypick-mlt-missing"
-          items={r.notInLibrary}
+          items={
+            lookups === 'idle' || lookups === 'loading' ? null : r.notInLibrary
+          }
           empty="StashDB has nothing like this one that you don't have."
-          renderCard={card(rowId + '-missing')}
+          renderCard={(rec, it) => (
+            <StashdbSceneCard
+              key={rec.id}
+              scene={rec}
+              item={it}
+              rowId={missingId}
+            />
+          )}
         />
       ) : null}
-      {missing && !s.stashdb ? <ConnectLine /> : null}
+      {missing && !ready ? <ConnectLine /> : null}
     </div>
   )
 }

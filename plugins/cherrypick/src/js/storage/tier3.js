@@ -2,7 +2,16 @@
 // the library copy and the taste model (IndexedDB, too big for
 // localStorage), For you's row signals, the StashDB cache and the tier 1
 // mirror. A private window or full storage degrades to no persistence.
-import { clear, createStore, del, get, set } from 'idb-keyval'
+import {
+  clear,
+  createStore,
+  del,
+  delMany,
+  get,
+  getMany,
+  keys,
+  set,
+} from 'idb-keyval'
 import { PLUGIN_ID, STORAGE_PREFIX } from '../name.js'
 
 export const KEYS = {
@@ -44,6 +53,10 @@ export const cache = {
   get: (key) => get(key, db()).catch(() => null),
   set: (key, value) => set(key, value, db()).catch(() => {}),
   del: (key) => del(key, db()).catch(() => {}),
+  // for the StashDB cache's stats and clearing (its keys share a prefix)
+  keys: () => keys(db()).catch(() => []),
+  getMany: (list) => getMany(list, db()).catch(() => list.map(() => undefined)),
+  delMany: (list) => delMany(list, db()).catch(() => {}),
 }
 
 // "Remove Cherry Pick data" and "Open on a new device": everything here goes.

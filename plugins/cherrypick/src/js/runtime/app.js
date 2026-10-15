@@ -21,6 +21,7 @@ import {
 import { cache, KEYS, local } from '../storage/tier3.js'
 import { SETTING_KEYS } from '../storage/settings.js'
 import { EMPTY_SIGNALS } from '../model/foryou.js'
+import { isStashdbEndpoint } from '../stashdb/queries.js'
 
 const docs = new Map()
 const doc = (text) => {
@@ -36,8 +37,12 @@ export const store = createStore({
   configLoaded: false,
   // the library as Stash returned it, and when
   library: null,
-  // the StashDB stash-box from Stash's settings, if any: { endpoint, api_key }
+  // the StashDB stash-box from Stash's settings, if any: { endpoint, apiKey }
   stashdb: null,
+  // what the StashDB layer fetched (buildDb's stashdb input), and the state
+  // of each page's lookups (stashdb/layer.js)
+  stashdbData: null,
+  stashdbLookups: {},
   // For you's row signals (tier 3)
   signals: { ...EMPTY_SIGNALS, ...(local.get(KEYS.signals) || {}) },
   // session only
@@ -48,8 +53,6 @@ export const store = createStore({
   notice: null,
   error: null,
 })
-
-const STASHDB = /(^|\/\/)stashdb\.org\b/
 
 const readPluginMap = async () => {
   const { configuration } = await run(Q.CONFIGURATION)
@@ -126,7 +129,7 @@ function reportError(e) {
 async function loadConfig() {
   const { configuration } = await run(Q.CONFIGURATION)
   const box = (configuration.general.stashBoxes || []).find((b) =>
-    STASHDB.test(b.endpoint),
+    isStashdbEndpoint(b.endpoint),
   )
   const { map, restored } = await tier1.load()
   store.set({

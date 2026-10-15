@@ -14,6 +14,7 @@ import { registerPluginPage } from './features/pluginPage.jsx'
 import { registerPerformers } from './features/performers.jsx'
 import { registerSettingsExtras } from './features/settingsExtras.jsx'
 import { registerBrackets } from './features/brackets/index.jsx'
+import { registerStashdb } from './features/stashdb.jsx'
 
 registerRowCards()
 registerScoreBadge()
@@ -24,6 +25,7 @@ registerPluginPage()
 registerPerformers()
 registerSettingsExtras()
 registerBrackets()
+registerStashdb()
 
 keepModelCurrent()
 watchPlayback()
