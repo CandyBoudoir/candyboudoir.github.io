@@ -1,5 +1,5 @@
 {
-  "$comment": "Stash versions Juicy supports, newest first. The first entry is the screenshot baseline. When Stash ships a stable release, add it at the top and give the previous entry an until date 60 days out; entries past their until date drop out of the tests.",
+  "$comment": "Stash versions the plugins support, newest first. The first entry is the screenshot baseline. When Stash ships a stable release, add it at the top and give the previous entry an until date 60 days out; entries past their until date drop out of the tests.",
   "stable": [{ "version": "v0.31.1" }],
   "develop": true
 }

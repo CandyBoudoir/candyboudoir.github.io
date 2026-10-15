@@ -1,27 +1,26 @@
 // Checks that Stash still renders the elements Juicy styles and that Juicy's
 // CSS, JavaScript and settings take effect.
 import { expect, test } from '@playwright/test'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import {
   CHEEKY_EMPTY_LINE,
   EMPTY_LIST,
   FLOWS,
   PAGES,
   demoIds,
+  demoPath,
+  onlyJuicy,
   setPlugin,
   setSfw,
+  unmatchedClasses,
   visit,
 } from './stash.mjs'
 
 let ids
 test.beforeAll(async () => {
+  await onlyJuicy()
   ids = await demoIds()
 })
-const url = (path) =>
-  path
-    .replace(':scene', ids.scene)
-    .replace(':performer', ids.performer)
-    .replace(':gallery', ids.gallery)
+const url = (path) => demoPath(path, ids)
 
 for (const entry of [...PAGES, ...FLOWS]) {
   const [name, path, , selectors] = entry
@@ -165,56 +164,17 @@ test('SFW mode drops the cheek', async ({ page }) => {
 
 // Not a pass/fail check: lists the Stash classes in juicy.css that no visited
 // page or flow renders, and which of them still rendered on the baseline Stash
-// version (plugins/juicy/tests/unmatched-baseline.txt). Those newly missing classes point
-// at what a Stash change removed; the rest only appear in dialogs, menus or on
-// hover.
+// version (plugins/juicy/tests/unmatched-baseline.txt). Those newly missing
+// classes point at what a Stash change removed; the rest only appear in
+// dialogs, menus or on hover.
 test('report Stash classes Juicy styles that no page renders', async ({
   page,
 }, info) => {
-  const css = (await readFile('dist/site/Theme-Juicy/juicy.css', 'utf8'))
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/url\([^)]*\)/g, '')
-  const classes = [
-    ...new Set([...css.matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)].map((m) => m[1])),
-  ].filter((c) => !c.startsWith('juicy'))
-  const seen = new Set()
-  for (const entry of [
-    ...PAGES,
-    ...FLOWS,
-    ['empty', EMPTY_LIST, '.paginationIndex'],
-  ]) {
-    const undo = await visit(page, url(entry[1]), entry)
-    try {
-      for (const c of await page.evaluate(
-        (list) => list.filter((c) => document.getElementsByClassName(c).length),
-        classes,
-      )) {
-        seen.add(c)
-      }
-    } finally {
-      await undo?.()
-    }
-  }
-  const unmatched = classes.filter((c) => !seen.has(c)).sort()
-  const baseline = (
-    await readFile('plugins/juicy/tests/unmatched-baseline.txt', 'utf8').catch(
-      () => '',
-    )
-  )
-    .split('\n')
-    .filter(Boolean)
-  const newlyMissing = baseline.length
-    ? unmatched.filter((c) => !baseline.includes(c))
-    : []
-  await mkdir('test-results', { recursive: true })
-  await writeFile(
-    'test-results/unmatched-classes.txt',
-    unmatched.join('\n') + '\n',
-  )
-  await writeFile(
-    'test-results/newly-missing-classes.txt',
-    newlyMissing.join('\n'),
-  )
+  const newlyMissing = await unmatchedClasses(page, {
+    css: 'dist/site/Theme-Juicy/juicy.css',
+    prefix: 'juicy',
+    folder: 'juicy',
+  })
   await info.attach('newly-missing-classes', {
     body: newlyMissing.join('\n') || '(none)',
     contentType: 'text/plain',

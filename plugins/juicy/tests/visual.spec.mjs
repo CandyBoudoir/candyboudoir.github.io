@@ -2,7 +2,15 @@
 // Stash version in tests/stash-versions.json. Baselines come from the Linux CI
 // runner, so these run in CI only unless VISUAL=1.
 import { expect, test } from '@playwright/test'
-import { EMPTY_LIST, FLOWS, PAGES, demoIds, visit } from './stash.mjs'
+import {
+  SHOTS,
+  demoIds,
+  demoPath,
+  masks,
+  onlyJuicy,
+  settle,
+  visit,
+} from './stash.mjs'
 
 test.skip(
   !process.env.CI && !process.env.VISUAL,
@@ -11,42 +19,10 @@ test.skip(
 
 let ids
 test.beforeAll(async () => {
+  await onlyJuicy()
   ids = await demoIds()
 })
-const url = (path) =>
-  path
-    .replace(':scene', ids.scene)
-    .replace(':performer', ids.performer)
-    .replace(':gallery', ids.gallery)
-
-// Dates and versions that change from run to run.
-const masks = (page) => [
-  page.locator('h6', { hasText: /Created At|Updated At/ }),
-  page.locator('.package-version, .package-date'),
-]
-
-// Waits for fonts and the images in view. Network idle never comes on the
-// settings page, which keeps polling the plugin sources, and lazy images below
-// the fold or inside a collapsed section (the Tagger's rows) never load.
-async function settle(page) {
-  await page.evaluate(() => document.fonts.ready)
-  await page.waitForFunction(() =>
-    [...document.images]
-      .filter((img) => {
-        const box = img.getBoundingClientRect()
-        return box.width && box.height && box.top < window.innerHeight
-      })
-      .every((img) => img.complete),
-  )
-  await page.waitForTimeout(300)
-}
-
-const SHOTS = [
-  ...PAGES,
-  ...FLOWS,
-  ['empty', EMPTY_LIST, '.paginationIndex'],
-  ['settings', '/settings?tab=plugins', '.setting-section'],
-]
+const url = (path) => demoPath(path, ids)
 
 for (const entry of SHOTS) {
   const [name, path] = entry
