@@ -71,7 +71,8 @@ export function Row({ id, title, className = '', link, extra, children }) {
 
 // A row of Stash cards for model items. renderCard(record, item, index)
 // draws one card; while Stash's records load, the row shows Stash's own
-// skeleton cards so nothing jumps when they arrive.
+// skeleton cards so nothing jumps when they arrive. kind 'stashdb-scene':
+// scenes the user does not own, whose records are the model's own.
 export function CardRow({
   kind,
   items,
@@ -80,13 +81,18 @@ export function CardRow({
   empty,
   ...row
 }) {
+  const fromDb = kind === 'stashdb-scene'
   const ids = (items || []).map(
-    (it) => (kind === 'scene' ? it.scene : it.performer).id,
+    (it) => (kind === 'performer' ? it.performer : it.scene).id,
   )
-  const records = useStashRecords(kind, items ? ids : [])
+  const stashRecords = useStashRecords(
+    fromDb ? 'scene' : kind,
+    items && !fromDb ? ids : [],
+  )
+  const records = fromDb ? items && items.map((it) => it.scene) : stashRecords
   const loading = !items || !records
   const skeletonClass =
-    kind === 'scene' ? 'scene-skeleton' : 'performer-skeleton'
+    kind === 'performer' ? 'performer-skeleton' : 'scene-skeleton'
   let body
   if (loading)
     body = (

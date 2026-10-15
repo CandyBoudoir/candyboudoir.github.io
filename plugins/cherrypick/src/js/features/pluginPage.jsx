@@ -218,7 +218,10 @@ function RemoveDialog() {
               Bracket results from {counts.performers ?? 0} performer
               {counts.performers === 1 ? '' : 's'} (custom fields)
             </li>
-            <li>The library copy and row history in this browser</li>
+            <li>
+              The library copy, the StashDB cache and row history in this
+              browser
+            </li>
           </ul>
         ) : (
           <p className="text-muted">Counting…</p>

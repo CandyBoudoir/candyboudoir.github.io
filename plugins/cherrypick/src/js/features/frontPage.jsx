@@ -25,6 +25,7 @@ import { Safe } from '../ui/Safe.jsx'
 import { useAppState } from '../ui/hooks.js'
 import { HallOfFameRow } from './hallOfFame.jsx'
 import { ResumePill } from './brackets/index.jsx'
+import { useFallbackLookups } from '../stashdb/layer.js'
 
 // ------------------------------------------------------------ the visit's rows
 
@@ -36,7 +37,7 @@ let snap = null
 // once, here.
 function snapshot(s) {
   if (!s.M) return null
-  const key = [s.visit, JSON.stringify(s.settings), !!s.stashdbData].join('|')
+  const key = [s.visit, JSON.stringify(s.settings), s.M.db.hasStashdb].join('|')
   if (snap?.key === key) return snap
   const sameVisit = snap?.visit === s.visit
   const skip = new Set(s.dontLearn.map((d) => d.sceneId))
@@ -116,6 +117,8 @@ function SceneRow({ id, title, items, className, onOpen }) {
 function CherryPickRows() {
   const s = useAppState((x) => x)
   const v = snapshot(s)
+  // StashDB popularity for New in your library's order and reasons
+  useFallbackLookups(v?.fallback)
   // Store this visit's row once, for the next visit to count passes against.
   if (v && !v.stored) {
     v.stored = true
