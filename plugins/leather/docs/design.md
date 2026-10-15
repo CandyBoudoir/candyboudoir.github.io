@@ -1,6 +1,6 @@
 # Leather design
 
-Leather's look is a harness: black pebble-grain leather, saddle stitching, nickel pyramid studs, buckles and O-rings, with a blood-red accent. Ratings are studs, the favourite is a studded collar and the O counter is a flogger. The type is gothic by way of blackletter, never horror. The edge lives in the gear, the stitching and a strict voice in the wording, and never in explicit imagery.
+Leather's look is a harness: black pebble-grain leather, saddle stitching, nickel pyramid studs, buckles and O-rings, with a blood-red accent. Ratings are studs, the favourite is a studded collar and the O counter is a flogger. Titles are set in blackletter. The theme carries its edge in the gear, the stitching and a strict voice in the wording, with no explicit imagery.
 
 The design-system page (`design-system/index.html`, built to `dist/site/leather/index.html`) shows all of this applied to Stash's own markup.
 
@@ -61,7 +61,7 @@ Glyphs (`glyph-*.svg`) are flat silhouettes on a 24-unit grid, used as CSS masks
 
 ## Motion
 
-Motion is short and firm (`--leather-ease`, 140 to 220ms). Rating, favouriting and bumping the O counter throw a burst of nickel studs, O-rings and red sparks. All animation stops when the viewer's system asks for reduced motion, and when the Calm mode setting is on; the loader's studs then stay half lit.
+Motion is short and firm (`--leather-ease`, 140 to 220ms). Rating, favouriting and bumping the O counter throw a burst of nickel studs, O-rings and red sparks. All animation stops when the viewer's system asks for reduced motion, and when the Calm mode setting is on; the loader's studs then stay lit at 70%.
 
 ## Copy
 
