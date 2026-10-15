@@ -2,4 +2,13 @@
 
 ## 0.1.0
 
-Unreleased.
+First release, for Stash v0.31.1.
+
+- For you, the front page's first row: 12 scenes you own, ranked by your taste, your last two weeks of watching, how long since you played each and a little variety, each with the reason it is there. Up to two rows follow when your watching calls for them, then the Hall of Fame.
+- Your score, a likely rating learned from your ratings, how you watch and your bracket picks, on unrated scene cards and beside the stars on scene pages. It shows only once it predicts your ratings better than your average does, and it never changes your ratings.
+- More like this under the player: barely played scenes in your library, then, with a StashDB key, scenes you don't have.
+- Performer and scene brackets beside the Performers and Scenes lists: one click starts 16, Options picks 32 or 64, the gender and the pool. Set genders fills a short pool by hand. Brackets pause and resume, write the results to performers' custom fields, offer to apply ratings with a preview and Undo, and build a Hall of Fame with Champions rounds.
+- A For you line on performer pages and crowns and medals on performer cards.
+- With a StashDB key: how widely a scene is held, its rank among a performer's scenes, and a performer's scenes you don't have. Connect StashDB helps you get a key and adds it to Stash.
+- Not interested and Don't learn from this, eleven switches and a tag exclusion list under Settings > Plugins, and Cherry Pick's own page with Remove Cherry Pick data.
+- Nothing appears while a scene plays.

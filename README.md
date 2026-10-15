@@ -2,12 +2,13 @@
 
 Plugins for [Stash](https://github.com/stashapp/stash), the self-hosted media organizer, published as one plugin source. Add the source once and every CandyBoudoir plugin appears under Available Plugins, including ones released later.
 
-| Plugin                      | What it does                                                                                                                  |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| [Juicy](plugins/juicy/)     | A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording. |
-| [Leather](plugins/leather/) | A black leather theme: saddle stitching, nickel studs for ratings, a collar for favourites and a strict voice in the wording. |
+| Plugin                             | What it does                                                                                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Juicy](plugins/juicy/)            | A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording.                    |
+| [Leather](plugins/leather/)        | A black leather theme: saddle stitching, nickel studs for ratings, a collar for favourites and a strict voice in the wording.                    |
+| [Cherry Pick](plugins/cherrypick/) | Learns what you like from your ratings and plays: a For you row, Your score on unrated scenes, More like this, and performer and scene brackets. |
 
-Each theme restyles all of Stash, so enable one theme at a time.
+Each theme restyles all of Stash, so enable one theme at a time. Cherry Pick works with either theme, or none.
 
 ## Install
 
