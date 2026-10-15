@@ -2,7 +2,7 @@
 // as Stash's own front-page rows, so themes style it with no extra work.
 // Items are model rows ({ scene } or { performer }, plus a reason); the cards
 // come from Stash by id (records.js).
-import { components, ReactRouterDOM } from '../runtime/api.js'
+import { components, hooks, ReactRouterDOM } from '../runtime/api.js'
 import { useStashRecords } from './records.js'
 
 const Slider = window.PluginApi.libraries.ReactSlick.default
@@ -38,8 +38,21 @@ export function sliderSettings(cards, isTouch) {
 
 const isTouch = () => window.matchMedia('(pointer: coarse)').matches
 
+// Stash registers RecommendationRow, SceneCard and PerformerCard only once
+// their lazy modules load (the front page and the lists load them), so a
+// row elsewhere loads them first.
+const { loadableComponents } = window.PluginApi
+const NEEDED = [
+  loadableComponents.FrontPage,
+  loadableComponents.SceneCard,
+  loadableComponents.PerformerCard,
+]
+export const useRowComponents = () => !hooks.useLoadComponents(NEEDED)
+
 export function Row({ id, title, className = '', link, extra, children }) {
+  const ready = useRowComponents()
   const { RecommendationRow } = components
+  if (!ready || !RecommendationRow) return null
   return (
     <RecommendationRow
       className={`cherrypick-row cherrypick-row-${id} ${className}`}
@@ -102,4 +115,19 @@ export function CardRow({
   }
   if (!loading && !records.length && !empty) return null
   return <Row {...row}>{body}</Row>
+}
+
+// A card hidden with Not interested, in its place for the rest of the visit,
+// with Undo. Stash's card classes, so it sits in the row like any card.
+export function HiddenCard({ title, onUndo }) {
+  return (
+    <div className="card grid-card scene-card zoom-1 cherrypick-hidden-card cherrypick-ui">
+      <div className="card-section text-muted">
+        <p>Hidden. You&apos;ll see less like &ldquo;{title}&rdquo;.</p>
+        <button className="btn btn-sm btn-secondary" onClick={onUndo}>
+          Undo
+        </button>
+      </div>
+    </div>
+  )
 }
