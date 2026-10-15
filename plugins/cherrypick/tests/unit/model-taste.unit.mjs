@@ -343,3 +343,23 @@ test('helpers: day, time ago, approximate counts, pronouns', () => {
   }
   assert.equal(pronoun(p(null)), 'their')
 })
+
+test('an engine reuses an earlier fit when only StashDB data changed', async () => {
+  const { syntheticLibrary, syntheticStashdb } =
+    await import('./fixtures/synthetic.mjs')
+  const { input } = syntheticLibrary()
+  const e1 = createEngine(buildDb(input))
+  const run = {
+    overrides: {},
+    performerOverrides: {},
+    decisions: [],
+    notInterested: [],
+    dontLearn: [],
+  }
+  const m1 = e1.compute(run)
+  const db2 = buildDb({ ...input, stashdb: syntheticStashdb(input) })
+  const m2 = createEngine(db2, { fits: e1.cache }).compute(run)
+  assert.equal(m2.fits, m1.fits)
+  for (const s of db2.owned)
+    assert.equal(m2.prediction(s.id).value, m1.prediction(s.id).value)
+})

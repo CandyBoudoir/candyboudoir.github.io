@@ -76,8 +76,11 @@ function featureStats(db, overrides, skip) {
 }
 
 /** @param {import('./db.js').Db} db */
-export function createEngine(db) {
-  const cache = {}
+// shared.fits: an earlier engine's fit cache, reused when only the StashDB
+// part of the database changed. The fit reads only owned scenes, which
+// StashDB data never changes, so a page's lookups need no refit.
+export function createEngine(db, shared = {}) {
+  const cache = shared.fits || {}
 
   // skip: Set of scene ids marked "Don't learn from this"
   function fits(overrides, skip = new Set()) {
@@ -247,7 +250,7 @@ export function createEngine(db) {
     }
   }
 
-  return { compute, fits }
+  return { compute, fits, cache }
 }
 
 // ---------------------------------------------------------------- labels
