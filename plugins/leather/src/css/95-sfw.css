@@ -40,16 +40,10 @@
 
 /*
  * Stash's SFW content mode keeps the leather and the studs and drops the
- * collars: performer cards lose their collar, the favourite is a stud that
- * turns blood red, bursts lose their sparks, and an empty list shows an O-ring
- * with no line. Stash swaps the O counter for a thumbs-up of its own, which
- * the flogger mask skips.
+ * collar: the favourite is a stud that turns blood red, bursts lose their
+ * sparks, and an empty list shows an O-ring with no line. Stash swaps the O
+ * counter for a thumbs-up of its own, which the flogger mask skips.
  */
-.sfw-content-mode .performer-card .thumbnail-section::before,
-.sfw-content-mode .performer-card .thumbnail-section > a::after {
-  content: none;
-}
-
 .sfw-content-mode .favorite-button svg {
   mask-image: url('assets/icons/glyph-stud.svg');
   mask-size: 80%;

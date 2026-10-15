@@ -157,18 +157,19 @@ test('the image zoom button waits for hover in a corner', async ({ page }) => {
   await expect(page.locator('.Lightbox')).toBeVisible()
 })
 
-// Leather's rating tab hangs where Stash puts the card's checkbox, so it moves
-// past the checkbox wherever both show.
+// Leather's rating tab hangs to the right of the card's checkbox, so the
+// checkbox is never covered.
 async function tabClearsCheckbox(card) {
   const check = await card.locator('.card-check').boundingBox()
   const tab = await card.locator('.rating-banner').boundingBox()
   expect(tab.x).toBeGreaterThan(check.x + check.width)
 }
 
-test("a selected card's rating tab clears its checkbox", async ({ page }) => {
+test("a card's rating tab clears its checkbox", async ({ page }) => {
   await page.goto('/scenes')
   const card = page.locator('.scene-card:has(.rating-banner)').first()
   await card.hover()
+  await tabClearsCheckbox(card)
   await card.locator('.card-check').check()
   await page.mouse.move(0, 0)
   await expect(card.locator('.rating-banner')).toHaveCSS('opacity', '1')
@@ -221,7 +222,7 @@ test('Calm mode and Plain labels take effect', async ({ page }) => {
   }
 })
 
-test('SFW mode drops the voice and the collars', async ({ page }) => {
+test('SFW mode drops the voice and the collar', async ({ page }) => {
   try {
     await setSfw(true)
     await page.goto(EMPTY_LIST)
@@ -231,11 +232,11 @@ test('SFW mode drops the voice and the collars', async ({ page }) => {
       '',
     )
     await page.goto('/performers')
-    const collar = page.locator('.performer-card .thumbnail-section').first()
-    await collar.waitFor()
-    expect(
-      await collar.evaluate((el) => getComputedStyle(el, '::before').content),
-    ).toBe('none')
+    const favourite = page
+      .locator('.performer-card .favorite-button svg')
+      .first()
+    await favourite.waitFor()
+    expect(await maskOf(favourite)).toContain('glyph-stud')
   } finally {
     await setSfw(false)
   }

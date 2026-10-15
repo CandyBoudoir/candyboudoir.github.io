@@ -175,6 +175,27 @@ body {
   font-weight: 600;
 }
 
+/*
+ * Stash builds the page count and its dropdown as one split button, with only
+ * 5px on the sides where they join (three classes deep). Each half is its own
+ * stitched piece here, so both get room inside their stitching. Oswald sets « < > » at lowercase
+ * height, so the arrow buttons lift them to the middle of the caps.
+ */
+.pagination .page-count-container .btn.page-count {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.pagination .page-count-container .btn.page-count-dropdown {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.pagination > .btn[title] {
+  padding-bottom: 7.25px;
+  padding-top: 3.25px;
+}
+
 /* Bootstrap's pagination, where Stash uses it */
 .page-link {
   background: var(--leather-tex) var(--leather-surface);

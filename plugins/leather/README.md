@@ -2,9 +2,9 @@
 
 A black leather theme for [Stash](https://github.com/stashapp/stash), the self-hosted media organizer. Leather installs as a Stash plugin, so you switch it on, off or update it from Settings > Plugins instead of pasting CSS into the Custom CSS box.
 
-Leather dresses Stash in black pebble-grain leather with saddle stitching, nickel pyramid studs and a blood-red accent. Ratings are studs, the favourite is a collar, the O counter is a flogger, titles are set in blackletter, and a short list of Stash's messages speaks in a strict voice. Calm mode and Plain labels settings turn the motion and the copy down, and Stash's SFW mode keeps the leather and drops the collars and the voice. The [live preview](https://candyboudoir.github.io/leather/) shows every component on Stash's own markup, and the design rules are in [docs/design.md](docs/design.md). Leather 0.1.0 is built and tested on Stash v0.31.1, including the Tagger and scrape screens that a stash-box such as StashDB adds.
+Leather dresses Stash in black pebble-grain leather with saddle stitching, nickel pyramid studs and a blood-red accent. Ratings are studs, the favourite is a collar, the O counter is a flogger, titles are set in blackletter, and a short list of Stash's messages speaks in a strict voice. Calm mode and Plain labels settings turn the motion and the copy down, and Stash's SFW mode keeps the leather and drops the collar and the voice. The [live preview](https://candyboudoir.github.io/leather/) shows every component on Stash's own markup, and the design rules are in [docs/design.md](docs/design.md). Leather 0.1.0 is built and tested on Stash v0.31.1, including the Tagger and scrape screens that a stash-box such as StashDB adds.
 
-![The scenes page with Leather: stitched leather cards with a studded strap across the top and a blood-red rating tab](docs/screenshots/scenes.png)
+![The scenes page with Leather: stitched leather cards with a blood-red rating tab beside each checkbox](docs/screenshots/scenes.png)
 
 ## Install
 
@@ -33,7 +33,7 @@ Leather's settings sit with the plugin under Settings > Plugins. Both start off.
 
 ![Leather's two settings under Settings > Plugins](docs/screenshots/settings.png)
 
-Leather also follows your system's reduced-motion setting. In Stash's SFW content mode it keeps the leather and the studs, drops the strict copy and the red sparks, takes the collar off performer cards, turns the favourite into a stud, and shows an O-ring on an empty list.
+Leather also follows your system's reduced-motion setting. In Stash's SFW content mode it keeps the leather and the studs, drops the strict copy and the red sparks, turns the favourite collar into a stud, and shows an O-ring on an empty list.
 
 Leather makes no network requests beyond your own Stash server. Its fonts, Grenze Gotisch and Oswald, ship inside the plugin. The plugin is about 1.8 MB, most of it the leather texture at three screen densities; your browser downloads only the one that matches your screen.
 

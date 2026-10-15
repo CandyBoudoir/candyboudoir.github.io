@@ -53,45 +53,6 @@
   z-index: 3;
 }
 
-/* A studded strap sewn across the top of every scene card */
-.scene-card.grid-card.card {
-  padding-top: calc(var(--leather-band) + 7px);
-}
-
-.scene-card.grid-card::before {
-  background:
-    linear-gradient(
-        100deg,
-        transparent 25%,
-        rgb(255 255 255 / 95%) 50%,
-        transparent 75%
-      ) -100%
-      0 / 34% 100% no-repeat,
-    var(--leather-studs) 0 0 / auto 100% repeat-x;
-  background-blend-mode: overlay, normal;
-  border-radius: 5px 5px 0 0;
-  content: '';
-  height: var(--leather-band);
-  left: 0;
-  pointer-events: none;
-  position: absolute;
-  right: 0;
-  top: 0;
-  z-index: 1;
-}
-
-.scene-card.grid-card::after {
-  top: calc(var(--leather-band) + 1px);
-}
-
-.scene-card.grid-card .card-controls {
-  top: calc(var(--leather-band) + 7px + 0.5rem);
-}
-
-.scene-card.grid-card:hover::before {
-  animation: leather-shine 900ms cubic-bezier(0.45, 0.05, 0.35, 1);
-}
-
 .card a {
   color: inherit;
 }
@@ -240,7 +201,6 @@
   font-family: var(--leather-font-label);
   font-size: 0.66rem;
   font-weight: 600;
-  left: 10px;
   letter-spacing: 0.12em;
   line-height: 1;
   padding: 0.4rem 0.5rem calc(0.4rem + 13px);
@@ -264,24 +224,16 @@
 }
 
 /*
- * The tab hangs where Stash puts the card's checkbox. With a mouse Stash hides
- * the tab while the card is hovered, which is when the checkbox shows. Where
- * both show, the tab moves past the checkbox: on a selected card, and always
- * on touch screens, where the checkbox never hides (and a group's drag handle
- * joins it).
+ * Stash shows the card's checkbox in the picture's top-left corner whenever a
+ * card is hovered or selected, and always on touch screens, so the tab hangs
+ * to its right (and past a group's drag handle where there is one).
  */
-.grid-card:has(.card-check:checked) .rating-banner {
-  left: 2.2rem;
+.grid-card .rating-banner {
+  left: calc(7px + 0.5rem + 1.75rem);
 }
 
-@media (hover: none), (pointer: coarse) {
-  .grid-card .rating-banner {
-    left: 2.2rem;
-  }
-
-  .grid-card:has(.card-drag-handle) .rating-banner {
-    left: 4.2rem;
-  }
+.grid-card:has(.card-drag-handle) .rating-banner {
+  left: calc(7px + 0.5rem + 3.75rem);
 }
 
 .grid-card .progress-bar {
@@ -317,43 +269,6 @@
 .card-popovers .organized .btn,
 .card-popovers .organized svg {
   color: var(--leather-success);
-}
-
-/* Performers wear a studded collar with a hanging O-ring */
-.performer-card .thumbnail-section::before {
-  background:
-    var(--leather-studs) 0 0 / auto 100% repeat-x,
-    var(--leather-tex) var(--leather-surface);
-  bottom: 28px;
-  box-shadow:
-    0 4px 8px rgb(0 0 0 / 70%),
-    0 -1px 4px rgb(0 0 0 / 50%);
-  content: '';
-  height: 20px;
-  left: 0;
-  pointer-events: none;
-  position: absolute;
-  right: 0;
-  z-index: 2;
-}
-
-.performer-card .thumbnail-section > a::after {
-  background: var(--leather-ring-face);
-  border-radius: 50%;
-  bottom: 3px;
-  content: '';
-  height: 32px;
-  left: calc(50% - 16px);
-  mask: radial-gradient(
-    circle,
-    transparent 9.6px,
-    #000 10.2px 15.2px,
-    transparent 15.8px
-  );
-  pointer-events: none;
-  position: absolute;
-  width: 32px;
-  z-index: 1;
 }
 
 .performer-card .card-section-title {

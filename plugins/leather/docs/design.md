@@ -50,14 +50,14 @@ Glyphs (`glyph-*.svg`) are flat silhouettes on a 24-unit grid, used as CSS masks
 
 - **Navigation** is a wide leather strap with a thread line along the top and a row of studs along the bottom. The active page is a blood-red patch stitched onto it. The brand is set in blackletter beside a stud.
 - **Buttons** are dyed leather with an inner saddle stitch and a hard shadow. Primary is blood red with a nickel rivet at each end, secondary is black leather whose stitch turns red on hover, and success, warning, info and danger are bottle green, cognac, steel and bright red dyes. Pressing debosses the leather, and the chosen item of a group is pressed into oxblood. Stash's flat icon buttons (`.btn.minimal`) stay flat.
-- **Cards** are stitched leather with the picture set in like a window. On hover they lift 3px and the thread turns red. Scene cards carry a studded strap across the top, and a light runs across the studs on hover. Performers wear a collar with a hanging O-ring across the bottom of the picture.
+- **Cards** are stitched leather with the picture set in like a window. On hover they lift 3px and the thread turns red. Studs stay on the navbar: a strap or collar across the pictures crowded them, so the pictures run clear. The rating is a leather tab with a stud, hung to the right of the card's checkbox so it never covers it.
 - **Ratings** are pyramid studs over punched grommets. On cards the rating is a blood-red leather tab hanging from the top of the picture, with a stud. It moves right, past the card's checkbox, on touch screens and on selected cards, where Stash shows the checkbox without hover.
 - **The zoom button on image cards** is a 34px nickel dome in the picture's bottom-right corner. With a mouse it shows when the card is hovered or reached by keyboard; on touch screens it always shows.
 - **Tags** are small leather tags with a nickel eyelet and a stitched edge.
 - **Forms** are debossed into the leather, and focus runs a red stitch round the field. Switches are a leather strap with a nickel snap.
 - **Overlays** (menus, popovers, tooltips, toasts and modals) are stitched leather. A modal carries a strap and roller buckle under its title. A toast sets its message in blackletter beside a stud, with a dyed edge for warnings and errors.
 - **Loading** is three pyramid studs that light up in turn. **Empty lists** show the collar and a short order.
-- **Stash-box screens** (the Tagger, scrape dialogs, StashID links and Identify) are where people clear hundreds of rows, so Tagger rows are flat, untextured leather that never lifts, and cards inside the Tagger keep still and go without the collar. The chosen result takes a blood-red edge and the chosen select a red ring and stitch. In a scrape dialog the winning side's toggle is dyed blood red and its field takes the red stitch. StashID links are a nickel tag with the ID on leather.
+- **Stash-box screens** (the Tagger, scrape dialogs, StashID links and Identify) are where people clear hundreds of rows, so Tagger rows are flat, untextured leather that never lifts, and cards inside the Tagger keep still. The chosen result takes a blood-red edge and the chosen select a red ring and stitch. In a scrape dialog the winning side's toggle is dyed blood red and its field takes the red stitch. StashID links are a nickel tag with the ID on leather.
 
 ## Motion
 
@@ -69,7 +69,7 @@ Strict copy swaps a short list of Stash's own messages for short orders in her v
 
 ## SFW mode
 
-Stash's SFW content mode keeps the leather and the studs and drops the collars and the voice: strict copy is off, bursts lose their sparks, performer cards lose their collar, the favourite is a stud that turns blood red, and an empty list shows an O-ring. Stash's own SFW icon for the O counter (a thumbs-up) is left alone.
+Stash's SFW content mode keeps the leather and the studs and drops the collar and the voice: strict copy is off, bursts lose their sparks, the favourite is a stud that turns blood red, and an empty list shows an O-ring. Stash's own SFW icon for the O counter (a thumbs-up) is left alone.
 
 ## Settings
 

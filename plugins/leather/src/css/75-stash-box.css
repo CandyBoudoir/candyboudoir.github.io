@@ -51,16 +51,6 @@
   content: none;
 }
 
-:is(.tagger-container, .PerformerTagger-performer)
-  .performer-card
-  .thumbnail-section::before,
-:is(.tagger-container, .PerformerTagger-performer)
-  .performer-card
-  .thumbnail-section
-  > a::after {
-  content: none;
-}
-
 /* Clickable results in the stash-box search modals */
 .PerformerScrapeModal-list .search-item:hover,
 .StashBoxIDSearchModal-list .search-item:hover {

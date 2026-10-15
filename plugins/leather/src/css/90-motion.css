@@ -1,18 +1,4 @@
 /* Keyframes, burst particles and the calm switch */
-@keyframes leather-shine {
-  from {
-    background-position:
-      -100% 0,
-      0 0;
-  }
-
-  to {
-    background-position:
-      200% 0,
-      0 0;
-  }
-}
-
 @keyframes leather-lit {
   0%,
   70%,
