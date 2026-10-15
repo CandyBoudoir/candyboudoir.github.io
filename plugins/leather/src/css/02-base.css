@@ -83,7 +83,6 @@ code {
  */
 .card::after,
 .modal-content::after,
-.dropdown-menu::after,
 .toast::after,
 .search-item::after {
   border: 6px solid transparent;

@@ -4,16 +4,23 @@
  * div too, and some menus and their items carry Bootstrap's !important
  * bg-secondary.
  */
+/*
+ * Stash caps longer menus (Sort by, the scrapers) at 300px and scrolls them.
+ * Their stitching is the menu's own border, not an overlay, so it stays put
+ * while the items scroll inside it instead of running over the bottom edge.
+ */
 .dropdown-menu,
 div.dropdown-menu {
   background: var(--leather-tex) var(--leather-surface);
-  border: 1px solid #000;
+  border: 7px solid transparent;
+  border-image: var(--leather-stitch) 10 / 6px round;
   border-radius: 6px;
   box-shadow:
+    0 0 0 1px #000,
     inset 0 1px 0 rgb(255 255 255 / 7%),
     0 18px 36px -12px #000;
   color: var(--leather-text);
-  padding: 0.6rem;
+  padding: 0.25rem;
 }
 
 .dropdown-menu.bg-secondary {

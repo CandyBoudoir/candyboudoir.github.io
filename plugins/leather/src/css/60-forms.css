@@ -234,17 +234,30 @@ div.react-select__control .react-select__input-container {
   outline-offset: -5px;
 }
 
+/*
+ * Select menus match the dropdowns: the stitching is the border, and the
+ * options sit inset with rounded corners, so neither the first nor the last
+ * option runs into the menu's edge.
+ */
 div.react-select__menu {
   background: var(--leather-tex) var(--leather-surface);
-  border: 1px solid #000;
+  border: 7px solid transparent;
+  border-image: var(--leather-stitch) 10 / 6px round;
   border-radius: 6px;
   box-shadow:
+    0 0 0 1px #000,
     inset 0 1px 0 rgb(255 255 255 / 7%),
     0 18px 36px -12px #000;
   color: var(--leather-text);
+  overflow: hidden;
+}
+
+div.react-select__menu .react-select__menu-list {
+  padding: 0.25rem;
 }
 
 div.react-select__menu .react-select__option {
+  border-radius: 3px;
   color: var(--leather-text);
 }
 
