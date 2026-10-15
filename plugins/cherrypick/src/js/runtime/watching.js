@@ -1,0 +1,24 @@
+// The watch journey: once the scene player starts playing, every Cherry Pick
+// piece on the page steps out until the user leaves the page, so nothing
+// appears while someone watches or finishes a scene. Media events do not
+// bubble, so this listens in the capture phase, and only to the scene
+// player (cards' hover previews are videos too).
+import { store } from './app.js'
+
+const PLAYER = '.scene-player-container'
+
+export function watchPlayback() {
+  document.addEventListener(
+    'play',
+    (e) => {
+      if (!(e.target instanceof HTMLMediaElement)) return
+      if (!e.target.closest(PLAYER)) return
+      if (!store.get().watching) store.set({ watching: true })
+    },
+    true,
+  )
+  store.subscribe((next, prev) => {
+    if (next.watching !== prev.watching)
+      document.body.classList.toggle('cherrypick-watching', next.watching)
+  })
+}
