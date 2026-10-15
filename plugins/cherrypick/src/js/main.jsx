@@ -11,6 +11,7 @@ import { registerFrontPage } from './features/frontPage.jsx'
 import { registerScenePage } from './features/scenePage.jsx'
 import { registerNavbar } from './features/navbar.jsx'
 import { registerPluginPage } from './features/pluginPage.jsx'
+import { registerPerformers } from './features/performers.jsx'
 
 registerRowCards()
 registerScoreBadge()
@@ -18,6 +19,7 @@ registerFrontPage()
 registerScenePage()
 registerNavbar()
 registerPluginPage()
+registerPerformers()
 
 keepModelCurrent()
 watchPlayback()
