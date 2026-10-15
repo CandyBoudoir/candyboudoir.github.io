@@ -47,7 +47,14 @@ function recompute() {
     notInterested: s.notInterested,
     dontLearn: s.dontLearn.map((d) => d.sceneId),
   })
-  store.set({ db: built.db, M, modelMs: Math.round(performance.now() - t0) })
+  store.set({
+    db: built.db,
+    M,
+    modelMs: Math.round(performance.now() - t0),
+    // the StashDB data this model was built with (stashdb/layer.js waits
+    // for it before showing a page's answers)
+    modelStashdb: built.stashdbData,
+  })
 }
 
 // The model as it would be with other bracket picks: the champion screen
