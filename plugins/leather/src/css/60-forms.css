@@ -1,0 +1,338 @@
+/* Forms: fields are debossed into the leather, and focus runs a red stitch */
+.form-control,
+.custom-select,
+.input-control,
+div.react-select__control {
+  background:
+    linear-gradient(rgb(0 0 0 / 50%), rgb(0 0 0 / 35%)),
+    var(--leather-tex) var(--leather-surface);
+  border: 1px solid #000;
+  border-radius: 5px;
+  box-shadow:
+    inset 0 2px 4px rgb(0 0 0 / 85%),
+    inset 0 -1px 0 rgb(255 255 255 / 4%),
+    0 1px 0 rgb(255 255 255 / 7%);
+  color: var(--leather-text);
+}
+
+.custom-select {
+  background:
+    url('assets/icons/chevron.svg') right 0.75rem center / 12px 12px no-repeat,
+    linear-gradient(rgb(0 0 0 / 50%), rgb(0 0 0 / 35%)),
+    var(--leather-tex) var(--leather-surface);
+  padding-right: 2.2rem;
+}
+
+.custom-select option {
+  background: var(--leather-surface);
+  color: var(--leather-text);
+}
+
+.form-control::placeholder {
+  color: var(--leather-text-dim);
+}
+
+.form-control:focus,
+.custom-select:focus,
+.input-control:focus,
+div.react-select__control--is-focused {
+  border-color: #000;
+  box-shadow:
+    inset 0 2px 4px rgb(0 0 0 / 85%),
+    0 0 0 1px var(--leather-blood),
+    0 0 0 4px rgb(176 24 47 / 28%);
+  color: var(--leather-text);
+  outline: 1.5px dashed var(--leather-thread-red);
+  outline-offset: -5px;
+}
+
+.form-control:focus,
+.input-control:focus {
+  background:
+    linear-gradient(rgb(0 0 0 / 50%), rgb(0 0 0 / 35%)),
+    var(--leather-tex) var(--leather-surface);
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+  color: var(--leather-text-muted);
+}
+
+/* Bootstrap paints these fields (the scrape dialogs) with !important */
+.form-control.bg-secondary {
+  background:
+    linear-gradient(rgb(0 0 0 / 30%), rgb(0 0 0 / 20%)),
+    var(--leather-tex) var(--leather-raised) !important;
+}
+
+.form-control.border-secondary {
+  border-color: #000 !important;
+}
+
+.input-group-text {
+  background: var(--leather-grain), var(--leather-black-dye);
+  border: 1px solid #000;
+  color: var(--leather-text-muted);
+  font-family: var(--leather-font-label);
+  letter-spacing: 0.06em;
+}
+
+/* Validation, as in the stash-box endpoint form */
+.form-control.is-valid,
+.was-validated .form-control:valid {
+  background-image:
+    linear-gradient(rgb(0 0 0 / 50%), rgb(0 0 0 / 35%)), var(--leather-tex);
+  border-color: var(--leather-success);
+}
+
+.form-control.is-valid:focus,
+.was-validated .form-control:valid:focus {
+  border-color: var(--leather-success);
+  box-shadow:
+    inset 0 2px 4px rgb(0 0 0 / 85%),
+    0 0 0 3px rgb(143 211 166 / 25%);
+  outline-color: var(--leather-success);
+}
+
+.form-control.is-invalid,
+.was-validated .form-control:invalid {
+  border-color: var(--leather-danger);
+}
+
+.form-control.is-invalid:focus,
+.was-validated .form-control:invalid:focus {
+  border-color: var(--leather-danger);
+  box-shadow:
+    inset 0 2px 4px rgb(0 0 0 / 85%),
+    0 0 0 3px rgb(240 89 108 / 28%);
+}
+
+.invalid-feedback {
+  color: var(--leather-danger);
+}
+
+/* Checkboxes and switches */
+.custom-control-label::before {
+  background:
+    linear-gradient(rgb(0 0 0 / 45%), rgb(0 0 0 / 25%)),
+    var(--leather-tex) var(--leather-surface);
+  border: 1px solid #000;
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 90%),
+    0 1px 0 rgb(255 255 255 / 7%);
+}
+
+.custom-checkbox .custom-control-label::before {
+  border-radius: 3px;
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+  background: var(--leather-grain), var(--leather-blood-dye);
+  border-color: #000;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    0 0 8px -2px rgb(224 56 79 / 60%);
+}
+
+.custom-control-input:focus ~ .custom-control-label::before {
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 90%),
+    0 0 0 3px rgb(224 56 79 / 35%);
+}
+
+.custom-control-input:focus:not(:checked) ~ .custom-control-label::before {
+  border-color: var(--leather-blood);
+}
+
+.custom-control-input:disabled ~ .custom-control-label {
+  color: var(--leather-text-dim);
+}
+
+/* Switches: a leather strap with a nickel snap */
+.custom-switch {
+  padding-left: 2.95rem;
+}
+
+.custom-switch .custom-control-label::before {
+  border-radius: 0.6rem;
+  height: 1.2rem;
+  left: -2.95rem;
+  outline: 1px dashed rgb(185 174 169 / 35%);
+  outline-offset: -4px;
+  top: 0.15rem;
+  width: 2.4rem;
+}
+
+.custom-switch .custom-control-input:checked ~ .custom-control-label::before {
+  background: var(--leather-grain), var(--leather-ox-dye);
+  outline-color: rgb(255 214 220 / 50%);
+}
+
+.custom-switch .custom-control-label::after,
+.custom-switch .custom-control-input:checked ~ .custom-control-label::after {
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 0 28%,
+      rgb(0 0 0 / 35%) 32%,
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 36% 30%,
+      #fff 0 8%,
+      #e1e1e6 24%,
+      #9a9aa1 60%,
+      #4a4a50 100%
+    );
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 1px #000,
+    0 2px 3px rgb(0 0 0 / 80%);
+  height: calc(1.2rem - 6px);
+  left: calc(-2.95rem + 3px);
+  top: calc(0.15rem + 3px);
+  transition: transform var(--leather-medium) var(--leather-ease);
+  width: calc(1.2rem - 6px);
+}
+
+.custom-switch .custom-control-input:checked ~ .custom-control-label::after {
+  transform: translateX(1.2rem);
+}
+
+/* Stash's searchable selects (react-select) */
+div.react-select__control .react-select__single-value,
+div.react-select__control .react-select__input-container {
+  color: var(--leather-text);
+}
+
+.react-select__placeholder {
+  color: var(--leather-text-dim) !important;
+}
+
+.react-select__indicator {
+  color: var(--leather-thread) !important;
+}
+
+.react-select__indicator-separator {
+  background-color: var(--leather-line) !important;
+}
+
+/*
+ * The Tagger marks a match linked to something already in Stash by
+ * colouring its select. Here it takes the red ring and stitch of a focused
+ * field.
+ */
+.search-result
+  :is(.performer-select-active, .studio-select-active)
+  div.react-select__control,
+:is(.performer-select-active, .studio-select-active) div.react-select__control {
+  box-shadow:
+    inset 0 2px 4px rgb(0 0 0 / 85%),
+    0 0 0 1px var(--leather-blood-hi),
+    0 0 0 4px rgb(176 24 47 / 28%);
+  outline: 1.5px dashed var(--leather-thread-red);
+  outline-offset: -5px;
+}
+
+div.react-select__menu {
+  background: var(--leather-tex) var(--leather-surface);
+  border: 1px solid #000;
+  border-radius: 6px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 7%),
+    0 18px 36px -12px #000;
+  color: var(--leather-text);
+}
+
+div.react-select__menu .react-select__option {
+  color: var(--leather-text);
+}
+
+div.react-select__menu .react-select__option--is-selected {
+  background: var(--leather-grain), var(--leather-ox-dye);
+  color: #fff;
+}
+
+div.react-select__menu .react-select__option--is-focused {
+  background: linear-gradient(
+    90deg,
+    rgb(176 24 47 / 55%),
+    rgb(122 20 36 / 25%)
+  );
+  box-shadow: inset 2px 0 0 var(--leather-blood-hi);
+  color: #fff;
+}
+
+div.react-select__control .react-select__multi-value {
+  background: var(--leather-grain), var(--leather-black-dye);
+  border: 1px solid #000;
+  border-radius: 3px;
+  color: var(--leather-text);
+}
+
+.react-select__multi-value__label {
+  color: var(--leather-text) !important;
+  font-family: var(--leather-font-label);
+  letter-spacing: 0.06em;
+}
+
+/*
+ * Sliders: Stash draws its own (styles/_range.scss), so repaint the track and
+ * the thumb. The scene filter sliders keep their colour tracks.
+ */
+#root
+  input[type='range']:not(
+    .blue-slider,
+    .brightness-slider,
+    .contrast-slider,
+    .double-range-slider-max,
+    .green-slider,
+    .hue-rotate-slider,
+    .red-slider,
+    .saturation-slider,
+    .white-balance-slider
+  )::-webkit-slider-runnable-track {
+  background: linear-gradient(180deg, #000, #2a2124);
+  box-shadow: inset 0 1px 2px #000;
+}
+
+#root input[type='range']::-webkit-slider-thumb {
+  background: radial-gradient(
+    circle at 36% 30%,
+    #fff 0 8%,
+    #e1e1e6 24%,
+    #9a9aa1 60%,
+    #4a4a50 100%
+  );
+  border: 1px solid #000;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 80%);
+  height: 16px;
+  margin-top: -5px;
+  width: 16px;
+}
+
+#root
+  input[type='range']:not(
+    .blue-slider,
+    .brightness-slider,
+    .contrast-slider,
+    .double-range-slider-max,
+    .green-slider,
+    .hue-rotate-slider,
+    .red-slider,
+    .saturation-slider,
+    .white-balance-slider
+  )::-moz-range-track {
+  background: linear-gradient(180deg, #000, #2a2124);
+}
+
+#root input[type='range']::-moz-range-thumb {
+  background: radial-gradient(
+    circle at 36% 30%,
+    #fff 0 8%,
+    #e1e1e6 24%,
+    #9a9aa1 60%,
+    #4a4a50 100%
+  );
+  border: 1px solid #000;
+}

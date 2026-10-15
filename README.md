@@ -2,9 +2,12 @@
 
 Plugins for [Stash](https://github.com/stashapp/stash), the self-hosted media organizer, published as one plugin source. Add the source once and every CandyBoudoir plugin appears under Available Plugins, including ones released later.
 
-| Plugin                  | What it does                                                                                                                  |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| [Juicy](plugins/juicy/) | A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording. |
+| Plugin                      | What it does                                                                                                                  |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| [Juicy](plugins/juicy/)     | A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording. |
+| [Leather](plugins/leather/) | A black leather theme: saddle stitching, nickel studs for ratings, a collar for favourites and a strict voice in the wording. |
+
+Each theme restyles all of Stash, so enable one theme at a time.
 
 ## Install
 
@@ -50,6 +53,8 @@ WORK=stash-work node tests/stash/prepare.mjs   # PLUGINS=<id>,<id> picks the plu
 pnpm test:compat contract
 ```
 
+`prepare.mjs` installs every plugin into the one Stash, and two themes enabled together would each see the other's CSS. Each plugin's spec files therefore start with `usePlugins` (`tests/stash/helpers.mjs`), which enables that plugin and disables the others; the shared pages, stash-box flows and screenshot helpers live in the same file.
+
 `prepare.mjs` also points Stash at a mock stash-box (`tests/stash/stashbox.mjs`) that Playwright starts with the tests, so the Tagger, scrape dialogs and StashID links are checked against invented scenes, performers and studios with no stash-box account.
 
 ### Branches and releases
@@ -60,4 +65,4 @@ Each plugin releases on its own. When `prod` carries a plugin version with no `<
 
 ## License
 
-MIT. Juicy bundles Fredoka under the SIL Open Font License 1.1 (`assets/fonts/OFL.txt` in the plugin).
+MIT. Juicy bundles Fredoka, and Leather bundles Grenze Gotisch and Oswald, under the SIL Open Font License 1.1 (each plugin's `assets/fonts` folder holds the license).

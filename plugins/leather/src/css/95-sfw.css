@@ -1,0 +1,77 @@
+/*
+ * Empty states: the collar and a short order. Stash marks an empty list with
+ * nothing but "0-0 of 0" in .paginationIndex, and leather.js adds the line.
+ */
+.leather-empty,
+.paginationIndex[data-leather-empty] {
+  align-items: center;
+  color: var(--leather-text);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--leather-font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  gap: 0.5rem;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.leather-empty::before,
+.paginationIndex[data-leather-empty]::before {
+  background: url('assets/icons/collar.webp') center / contain no-repeat;
+  content: '';
+  filter: drop-shadow(0 6px 8px rgb(0 0 0 / 60%));
+  height: 76px;
+  width: 76px;
+}
+
+/* Stash marks the line .text-muted, which Bootstrap sets with !important */
+.paginationIndex[data-leather-empty] {
+  color: var(--leather-text) !important;
+  font-size: 0;
+  padding-block: 1.5rem;
+}
+
+.paginationIndex[data-leather-empty]::after {
+  content: attr(data-leather-empty);
+  font-size: 1.6rem;
+}
+
+/*
+ * Stash's SFW content mode keeps the leather and the studs and drops the
+ * collars: performer cards lose their collar, the favourite is a stud that
+ * turns blood red, bursts lose their sparks, and an empty list shows an O-ring
+ * with no line. Stash swaps the O counter for a thumbs-up of its own, which
+ * the flogger mask skips.
+ */
+.sfw-content-mode .performer-card .thumbnail-section::before,
+.sfw-content-mode .performer-card .thumbnail-section > a::after {
+  content: none;
+}
+
+.sfw-content-mode .favorite-button svg {
+  mask-image: url('assets/icons/glyph-stud.svg');
+  mask-size: 80%;
+}
+
+.sfw-content-mode .favorite-button.favorite svg {
+  background:
+    radial-gradient(16% 9% at 34% 33%, rgb(255 255 255 / 70%), transparent),
+    var(--leather-blood-dye);
+}
+
+body:has(.sfw-content-mode) .leather-empty::before,
+body:has(.sfw-content-mode) .paginationIndex[data-leather-empty]::before {
+  background: var(--leather-ring-face);
+  border-radius: 50%;
+  filter: drop-shadow(0 4px 6px rgb(0 0 0 / 70%));
+  height: 64px;
+  mask: radial-gradient(
+    circle,
+    transparent 20px,
+    #000 21px 31px,
+    transparent 32px
+  );
+  width: 64px;
+}

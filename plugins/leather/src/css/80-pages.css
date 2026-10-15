@@ -1,0 +1,301 @@
+/*
+ * The page under the taller navbar. Stash spaces the page, the filter sidebar
+ * and its sticky bars by its own 48.75px bar, so each of those moves down by
+ * --leather-nav-height. On a phone held upright the bar is at the bottom.
+ */
+body {
+  padding-top: var(--leather-nav-height);
+}
+
+.sidebar-pane .sidebar {
+  margin-top: var(--leather-nav-height);
+}
+
+.sidebar-toggle-button-container .sidebar-toggle-button {
+  background: var(--leather-tex) var(--leather-raised);
+  border-color: #000;
+  opacity: 1;
+  top: calc(var(--leather-nav-height) + 0.5rem);
+}
+
+.sticky.detail-header {
+  top: var(--leather-nav-height);
+}
+
+/* The task queue at the top of Settings > Tasks sticks under the bar */
+#tasks-panel .tasks-panel-queue {
+  background-color: var(--leather-bg);
+  top: var(--leather-nav-height);
+}
+
+#queue-viewer .queue-controls {
+  background-color: var(--leather-bg);
+}
+
+#queue-viewer .current {
+  background-color: var(--leather-raised);
+}
+
+@media (width <= 575.98px) and (orientation: portrait) {
+  body {
+    padding-bottom: var(--leather-nav-height);
+    padding-top: 0.5rem;
+  }
+
+  .pagination-footer-container {
+    bottom: var(--leather-nav-height);
+  }
+
+  .sidebar-pane .sidebar {
+    margin-top: 0;
+  }
+
+  .detail-body .sidebar {
+    height: calc(100vh - var(--leather-nav-height));
+    max-height: calc(100vh - var(--leather-nav-height));
+  }
+}
+
+/* List toolbars and the filter sidebar */
+.filtered-list-toolbar {
+  background-color: transparent;
+}
+
+.item-list-container .filtered-list-toolbar.has-selection {
+  background: var(--leather-tex) var(--leather-surface);
+  border: 1px solid #000;
+  box-shadow: 0 10px 22px -12px #000;
+}
+
+.sidebar-pane .sidebar,
+.sidebar {
+  background: var(--leather-tex) var(--leather-surface);
+  border-right: 1px solid #000;
+  box-shadow:
+    inset -1px 0 0 rgb(255 255 255 / 5%),
+    8px 0 18px -10px #000;
+}
+
+.sidebar .collapse-button.btn.minimal,
+.sidebar-section .collapse-button {
+  color: var(--leather-text);
+  font-family: var(--leather-font-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sidebar-section + .sidebar-section {
+  border-top: 1px dashed rgb(185 174 169 / 22%);
+}
+
+.pagination-footer-container .pagination {
+  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 70%));
+}
+
+.paginationIndex {
+  color: var(--leather-text-dim);
+  font-family: var(--leather-font-label);
+  letter-spacing: 0.1em;
+}
+
+/* Tabs: the active tab is a raised leather flap with a red edge */
+.nav-tabs {
+  border-bottom: 2px solid #000;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 5%);
+  gap: 0.2rem;
+}
+
+.nav-tabs .nav-link {
+  background: none;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 5px 5px 0 0;
+  color: var(--leather-text-muted);
+  font-family: var(--leather-font-label);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.nav-tabs .nav-link:hover,
+.nav-tabs .nav-link:focus {
+  border-color: transparent;
+  color: #fff;
+}
+
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+  background: var(--leather-tex) var(--leather-raised);
+  border-color: #000;
+  box-shadow:
+    inset 0 3px 0 var(--leather-blood-hi),
+    inset 0 4px 0 rgb(0 0 0 / 40%);
+  color: #fff;
+}
+
+/* Settings and other pill navs */
+.nav-pills .nav-link {
+  border-radius: 4px;
+  color: var(--leather-text-muted);
+  font-family: var(--leather-font-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.nav-pills .nav-link:hover {
+  background: rgb(255 255 255 / 4%);
+  color: #fff;
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+  background: var(--leather-grain), var(--leather-blood-dye);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    0 0 0 1px #000;
+  color: #fff;
+  outline: 1px dashed rgb(255 235 238 / 55%);
+  outline-offset: -4px;
+}
+
+/* Settings: blackletter section titles, the rest on the system font */
+.setting-section > h1 {
+  color: var(--leather-text);
+  text-shadow: 0 2px 0 #000;
+}
+
+.setting-section .setting h3,
+.setting-section .sub-heading {
+  font-family: var(--leather-font-body);
+}
+
+.setting-section .setting h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Bootstrap's pagination, where Stash uses it */
+.page-link {
+  background: var(--leather-tex) var(--leather-surface);
+  border: 1px solid #000;
+  color: var(--leather-text);
+  font-family: var(--leather-font-label);
+  font-weight: 500;
+  min-width: 2.4rem;
+  text-align: center;
+}
+
+.page-item:first-child .page-link {
+  border-radius: 5px 0 0 5px;
+}
+
+.page-item:last-child .page-link {
+  border-radius: 0 5px 5px 0;
+}
+
+.page-link:hover {
+  background: var(--leather-tex) var(--leather-raised);
+  border-color: #000;
+  color: var(--leather-blood-hi);
+}
+
+.page-link:focus {
+  box-shadow: 0 0 0 3px rgb(224 56 79 / 35%);
+}
+
+.page-item.active .page-link {
+  background: var(--leather-grain), var(--leather-blood-dye);
+  border-color: #000;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 20%);
+  color: #fff;
+  outline: 1px dashed rgb(255 235 238 / 55%);
+  outline-offset: -4px;
+}
+
+/* Detail pages: a leather header lit blood red from the top */
+.detail-header {
+  background:
+    radial-gradient(
+      900px 420px at 20% -120px,
+      rgb(176 24 47 / 22%),
+      transparent 70%
+    ),
+    var(--leather-tex) var(--leather-surface);
+  border-bottom: 1px solid #000;
+  box-shadow: 0 10px 22px -14px #000;
+}
+
+.detail-header .performer-name,
+.detail-header :is(.studio-name, .tag-name, .group-name),
+.scene-header {
+  color: var(--leather-text);
+  font-family: var(--leather-font-display);
+  font-weight: 700;
+  text-shadow:
+    0 -1px 0 #000,
+    0 2px 0 rgb(0 0 0 / 80%);
+}
+
+.detail-item-title {
+  color: var(--leather-text-dim);
+  font-family: var(--leather-font-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* video.js player */
+.video-js .vjs-control-bar {
+  background-color: transparent;
+  background-image: linear-gradient(
+    0deg,
+    rgb(12 10 11 / 92%),
+    rgb(12 10 11 / 0%)
+  );
+}
+
+.video-js .vjs-play-progress,
+.video-js .vjs-volume-level {
+  background-color: var(--leather-blood-hi);
+}
+
+.video-js .vjs-play-progress::before {
+  color: var(--leather-nickel);
+}
+
+.video-js .vjs-load-progress,
+.video-js .vjs-load-progress div {
+  background: rgb(185 174 169 / 25%);
+}
+
+/*
+ * Tables: a leather header and hairline rows. Modals render outside #root, so
+ * :is(#root, .modal) keeps #root's weight and reaches tables in dialogs too.
+ */
+:is(#root, .modal) table thead {
+  background-color: var(--leather-raised);
+}
+
+:is(#root, .modal) .table td,
+:is(#root, .modal) .table th {
+  background-color: transparent;
+  color: var(--leather-text);
+}
+
+:is(#root, .modal) .table thead th {
+  border-bottom: 1px solid #000;
+  color: var(--leather-text-muted);
+  font-family: var(--leather-font-label);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+:is(#root, .modal) .table td {
+  border-top: 1px dashed rgb(185 174 169 / 18%);
+}
+
+/* The scene edit form's sticky button bar, which Stash paints slate */
+#scene-edit-details .edit-buttons-container {
+  background-color: var(--leather-bg);
+}

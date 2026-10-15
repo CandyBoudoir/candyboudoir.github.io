@@ -1,0 +1,921 @@
+/*
+ * Design-system page only. Stash's own stylesheet positions card overlays,
+ * stacks the rating stars and fixes the navbar to the window; this file stands
+ * in for those few rules so the specimens below match Stash's layout, and
+ * dresses the page itself. Everything Stash shows comes from leather.css.
+ */
+
+/*
+ * The leather tokens hold url()s relative to leather.css, and browsers resolve
+ * a url() in a custom property against the stylesheet that uses it, so this
+ * page's own panels take copies that point into the plugin folder.
+ */
+:root {
+  --ds-tex: image-set(
+      url('../Theme-Leather/assets/icons/leather-1x.webp') 1x,
+      url('../Theme-Leather/assets/icons/leather-2x.webp') 2x,
+      url('../Theme-Leather/assets/icons/leather-3x.webp') 3x
+    )
+    0 0 / 384px 384px;
+  --ds-grain: image-set(
+      url('../Theme-Leather/assets/icons/grain-1x.webp') 1x,
+      url('../Theme-Leather/assets/icons/grain-2x.webp') 2x,
+      url('../Theme-Leather/assets/icons/grain-3x.webp') 3x
+    )
+    0 0 / 192px 192px;
+  --ds-stitch: url('../Theme-Leather/assets/icons/stitch.svg');
+}
+
+/* Stash fixes its navbar and pads the page for it; here the bar is sticky */
+body {
+  font-family: var(--leather-font-body);
+  padding: 0 0 6rem;
+}
+
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+.top-nav .nav-utility {
+  margin-left: auto;
+}
+
+.top-nav .navbar-collapse {
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+@media (width < 1200px) {
+  .top-nav.navbar {
+    flex-wrap: wrap;
+  }
+
+  .top-nav .navbar-toggler {
+    margin-right: 0.5rem;
+  }
+
+  .top-nav .navbar-collapse {
+    flex-basis: 100%;
+    order: 3;
+    padding: 0.4rem 0 0.2rem;
+  }
+
+  .top-nav .navbar-collapse.show {
+    display: flex;
+  }
+}
+
+/* On this page the bar stays at the top of a phone, with its studs below */
+@media (width <= 575.98px) and (orientation: portrait) {
+  body {
+    padding: 0 0 6rem;
+  }
+
+  .top-nav.navbar {
+    border-bottom: 1px solid #000;
+    border-top: 0;
+    padding: 5px 1rem calc(5px + var(--leather-nav-band));
+  }
+
+  .top-nav.navbar::before {
+    bottom: auto;
+    top: 4px;
+  }
+
+  .top-nav.navbar::after {
+    bottom: 0;
+    top: auto;
+  }
+}
+
+/* The "Try it" switches */
+.ds-controls {
+  align-items: center;
+  backdrop-filter: blur(8px);
+  background: rgb(12 10 11 / 88%);
+  border-bottom: 1px solid #000;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 5%);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  padding: 0.6rem 1rem;
+  position: sticky;
+  top: var(--leather-nav-height);
+  z-index: 1020;
+}
+
+.ds-controls .label {
+  color: var(--leather-text-dim);
+  font-family: var(--leather-font-label);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Below 1200px the demo navbar wraps, so the switches stop sticking under it */
+@media (width < 1200px) {
+  .ds-controls {
+    position: static;
+  }
+}
+
+/* Sections */
+.ds-section {
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 3.5rem 1rem 0;
+}
+
+/* Each section opens with a stitched belt end */
+.ds-section::before {
+  background: url('../Theme-Leather/assets/icons/strap.svg') right center / auto
+    14px no-repeat;
+  content: '';
+  display: block;
+  filter: drop-shadow(0 3px 3px rgb(0 0 0 / 70%));
+  height: 14px;
+  margin-bottom: 2.75rem;
+}
+
+.ds-section > h2 {
+  align-items: center;
+  color: var(--leather-text);
+  display: flex;
+  font-size: 2.7rem;
+  font-weight: 900;
+  gap: 0.6rem;
+  letter-spacing: 0.005em;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  text-shadow:
+    0 -1px 0 #000,
+    0 2px 0 rgb(0 0 0 / 80%);
+}
+
+.ds-section > h2 img {
+  filter: drop-shadow(0 3px 4px rgb(0 0 0 / 70%));
+  height: 2.8rem;
+  width: 2.8rem;
+}
+
+.ds-lede {
+  color: var(--leather-text-muted);
+  margin-bottom: 1.5rem;
+  max-width: 68ch;
+}
+
+.ds-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+/* A stitched leather panel to show specimens on */
+.ds-panel {
+  background: var(--ds-tex) var(--leather-surface);
+  border: 1px solid #000;
+  border-radius: var(--leather-radius);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 6%),
+    0 12px 24px -16px #000;
+  padding: 1.25rem;
+  position: relative;
+}
+
+.ds-panel::after,
+.ds-swatch::after {
+  border: 6px solid transparent;
+  border-image: var(--ds-stitch) 10 round;
+  content: '';
+  inset: 1px;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+.ds-panel > * {
+  position: relative;
+  z-index: 2;
+}
+
+.ds-caption {
+  color: var(--leather-text-dim);
+  font-size: 0.85rem;
+}
+
+/* Hero */
+.ds-hero {
+  align-items: center;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  margin: 0 auto;
+  max-width: 1180px;
+  min-height: 420px;
+  overflow: clip;
+  padding: 3rem 1rem 1rem;
+  position: relative;
+}
+
+.ds-hero .kicker {
+  color: var(--leather-text-dim);
+  font-family: var(--leather-font-label);
+  font-size: 0.8rem;
+  letter-spacing: 0.24em;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}
+
+.ds-hero .wordmark {
+  background:
+    var(--ds-grain),
+    linear-gradient(180deg, #f2586b 0%, #c41f38 34%, #8e1427 64%, #5a0a17 100%);
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 -1px 0 rgb(255 255 255 / 18%)) drop-shadow(0 2px 0 #000)
+    drop-shadow(0 2px 0 #000) drop-shadow(0 18px 26px rgb(0 0 0 / 70%));
+  font-family: var(--leather-font-display);
+  font-size: clamp(5rem, 15vw, 11rem);
+  font-weight: 900;
+  letter-spacing: 0.005em;
+  line-height: 0.9;
+  margin: 0;
+  padding: 0 0.05em 0.08em 0;
+}
+
+.ds-hero .strap {
+  background: url('../Theme-Leather/assets/icons/strap.svg') right center / auto
+    14px no-repeat;
+  filter: drop-shadow(0 3px 3px rgb(0 0 0 / 70%));
+  height: 14px;
+  margin-top: 0.9rem;
+  max-width: 34rem;
+  position: relative;
+}
+
+.ds-hero .strap::before {
+  background: url('../Theme-Leather/assets/icons/strap-buckle.svg') center /
+    contain no-repeat;
+  content: '';
+  height: 30px;
+  left: 0;
+  position: absolute;
+  top: -8px;
+  width: 36px;
+}
+
+.ds-hero .tagline {
+  color: var(--leather-text-muted);
+  font-size: 1.15rem;
+  margin-top: 1.25rem;
+  max-width: 46ch;
+}
+
+.ds-hero-art {
+  aspect-ratio: 1;
+  position: relative;
+}
+
+.ds-hero-art img {
+  filter: drop-shadow(0 18px 24px rgb(0 0 0 / 75%));
+  position: absolute;
+}
+
+.ds-hero-art .flogger {
+  right: 2%;
+  top: -6%;
+  transform: rotate(-4deg);
+  width: 60%;
+}
+
+.ds-hero-art .paddle {
+  left: -4%;
+  top: -6%;
+  transform: rotate(-16deg);
+  width: 46%;
+}
+
+.ds-hero-art .ring {
+  right: 0;
+  top: 44%;
+  transform: rotate(8deg);
+  width: 34%;
+}
+
+.ds-hero-art .buckle {
+  bottom: -4%;
+  left: -6%;
+  transform: rotate(-7deg);
+  width: 54%;
+}
+
+.ds-hero-art .collar {
+  animation: ds-sway 6s ease-in-out infinite;
+  left: 12%;
+  top: 30%;
+  transform-origin: 50% 20%;
+  width: 70%;
+}
+
+@keyframes ds-sway {
+  50% {
+    transform: rotate(2.5deg);
+  }
+}
+
+/* Palette */
+.ds-swatches {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+}
+
+.ds-swatch {
+  background: var(--ds-tex) var(--leather-surface);
+  border: 1px solid #000;
+  border-radius: var(--leather-radius);
+  overflow: hidden;
+  position: relative;
+}
+
+.ds-swatch .chip {
+  border-bottom: 1px solid #000;
+  box-shadow: inset 0 -8px 12px -8px rgb(0 0 0 / 50%);
+  height: 84px;
+}
+
+.ds-swatch .meta {
+  padding: 0.65rem 0.85rem 0.85rem;
+}
+
+.ds-swatch code {
+  color: var(--leather-text-dim);
+  display: block;
+  font-family: var(--leather-font-label);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+.ds-swatch .hex {
+  color: var(--leather-text);
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+}
+
+.ds-swatch .role {
+  color: var(--leather-text-muted);
+  font-size: 0.8rem;
+}
+
+/* Swatches that show the material, not only the colour */
+.ds-chip-blood {
+  background: var(--ds-grain), var(--leather-blood-dye);
+}
+
+.ds-chip-oxblood {
+  background: var(--ds-grain), var(--leather-ox-dye);
+}
+
+.ds-chip-nickel {
+  background: var(--leather-nickel-grad);
+}
+
+.ds-chip-leather {
+  background: var(--ds-tex) var(--leather-surface);
+}
+
+.ds-chip-raised {
+  background: var(--ds-grain), var(--leather-raised);
+}
+
+/* Type */
+.ds-type .specimen {
+  border-bottom: 1px dashed rgb(185 174 169 / 22%);
+  padding: 1rem 0;
+}
+
+.ds-type .specimen:last-child {
+  border-bottom: 0;
+}
+
+.ds-type .spec {
+  color: var(--leather-text-dim);
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.ds-type .t-display {
+  color: var(--leather-text);
+  font: 900 3.6rem/1 var(--leather-font-display);
+}
+
+.ds-type .t-title {
+  color: var(--leather-blood-hi);
+  font: 700 1.75rem/1.2 var(--leather-font-display);
+}
+
+.ds-type .t-card {
+  color: var(--leather-text);
+  font: 700 1.35rem/1.2 var(--leather-font-display);
+  margin-top: 0.35rem;
+}
+
+.ds-type .t-label {
+  color: var(--leather-thread);
+  font: 500 1.05rem var(--leather-font-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ds-type .t-body {
+  color: var(--leather-text-muted);
+}
+
+/* Motifs and glyphs. The gear is rendered, not drawn, so it gets room. */
+.ds-motifs {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  margin-bottom: 1.5rem;
+}
+
+.ds-motif {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ds-motif img {
+  filter: drop-shadow(0 10px 12px rgb(0 0 0 / 70%));
+  height: 170px;
+  transition: transform 220ms ease;
+  width: 170px;
+}
+
+.ds-motif:hover img {
+  transform: scale(1.06);
+}
+
+.ds-motif span {
+  color: var(--leather-text-dim);
+  font-family: var(--leather-font-label);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ds-glyph {
+  background: var(--leather-nickel-grad);
+  display: inline-block;
+  height: 32px;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  width: 32px;
+}
+
+.ds-glyph.is-stud {
+  background:
+    radial-gradient(16% 9% at 34% 33%, rgb(255 255 255 / 95%), transparent),
+    var(--leather-stud-diamond);
+}
+
+/* Cards, as Stash lays them out */
+.ds-cards {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.ds-cards .scene-card {
+  width: 300px;
+}
+
+.ds-cards .performer-card {
+  width: 220px;
+}
+
+.ds-cards .image-card {
+  width: 240px;
+}
+
+.scene-card .video-section,
+.performer-card .thumbnail-section,
+.image-card .thumbnail-section {
+  position: relative;
+}
+
+.scene-card-preview {
+  align-items: center;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  justify-content: center;
+}
+
+.performer-card-image {
+  align-items: center;
+  aspect-ratio: 2 / 3;
+  display: flex;
+  justify-content: center;
+}
+
+.image-card-preview {
+  align-items: center;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.image-card-preview.portrait {
+  aspect-ratio: 3 / 4;
+}
+
+.grid-card .card-controls {
+  align-items: center;
+  display: flex;
+  position: absolute;
+}
+
+.grid-card .card-check {
+  height: 1.2rem;
+  opacity: 0;
+  width: 1.2rem;
+}
+
+.grid-card .card-check:checked,
+.grid-card:hover .card-check {
+  opacity: 0.75;
+}
+
+.preview-button {
+  display: flex;
+  height: 100%;
+  position: absolute;
+  width: 100%;
+}
+
+.rating-banner {
+  position: absolute;
+}
+
+.grid-card:hover .rating-banner {
+  opacity: 0;
+}
+
+.studio-overlay {
+  position: absolute;
+  right: 0.7rem;
+  top: 0.7rem;
+  z-index: 8;
+}
+
+.overlay-resolution {
+  text-transform: uppercase;
+}
+
+.scene-specs-overlay {
+  bottom: 0.7rem;
+  font-size: 0.8rem;
+  position: absolute;
+  right: 0.5rem;
+  z-index: 2;
+}
+
+.grid-card .progress-bar {
+  left: 0;
+  position: absolute;
+  right: 0;
+  z-index: 2;
+}
+
+.card-popovers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0 0.4rem 0.3rem;
+}
+
+.card-popovers .btn {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+.ds-ico {
+  fill: currentcolor;
+  height: 14px;
+  width: 14px;
+}
+
+.performer-card .favorite-button {
+  padding: 0;
+  position: absolute;
+  right: 5px;
+  top: 10px;
+  z-index: 2;
+}
+
+/* Audio-only covers: a collar laid on oxblood-lit leather */
+.ds-audio-cover {
+  background:
+    radial-gradient(60% 70% at 50% 45%, rgb(176 24 47 / 30%), transparent 70%),
+    var(--ds-tex) #110d0f;
+}
+
+.ds-audio-cover img {
+  filter: drop-shadow(0 8px 10px rgb(0 0 0 / 70%));
+  height: 62%;
+}
+
+/* Rating stars, as Stash's Rating/styles.scss stacks them */
+.rating-stars {
+  display: inline-flex;
+  font-size: 1.6rem;
+  vertical-align: middle;
+}
+
+.rating-stars button {
+  font-size: inherit;
+  line-height: 1;
+  padding: 0 0.1rem;
+  position: relative;
+}
+
+.rating-stars .filled-star {
+  height: 100%;
+  left: 0.1rem;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+}
+
+.rating-stars .star-fill-0 .filled-star {
+  width: 0;
+}
+
+.rating-stars .star-fill-100 .filled-star {
+  width: 1em;
+}
+
+.rating-stars svg {
+  display: block;
+  height: 1em;
+  width: 1em;
+}
+
+.star-rating-number {
+  margin-left: 0.5rem;
+}
+
+/* Overlays shown in place rather than floating */
+.ds-static .dropdown-menu,
+.ds-static .toast,
+.ds-static .modal-content,
+.ds-static .tooltip {
+  display: block;
+  float: none;
+  left: auto;
+  opacity: 1;
+  position: relative;
+  top: auto;
+}
+
+.ds-static .tooltip-inner {
+  display: inline-block;
+}
+
+.ds-overlays {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+/* Bootstrap's spinner box */
+.LoadingIndicator {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+/* Stash-box: the layout the Tagger and react-select give these */
+.search-item {
+  padding: 1rem;
+}
+
+.search-result {
+  padding: 1rem 0;
+}
+
+.scene-metadata {
+  margin-left: 1rem;
+}
+
+.ds-cover {
+  aspect-ratio: 16 / 9;
+  height: 7rem;
+}
+
+.ds-match {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.ds-match .entity-name {
+  flex: 1 1 10rem;
+}
+
+.ds-match .react-select {
+  width: 14rem;
+}
+
+.react-select__control {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 0 0.75rem;
+}
+
+.stash-id-pill {
+  display: inline-flex;
+  font-size: 90%;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.stash-id-pill span,
+.stash-id-pill a {
+  padding: 0.25em 0.6em;
+}
+
+.scrape-dialog {
+  max-width: 760px;
+}
+
+/* The pagination line Stash prints above a list */
+.paginationIndex {
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+}
+
+/* Copy table */
+.ds-copy {
+  width: 100%;
+}
+
+.ds-copy td,
+.ds-copy th {
+  border-top: 1px dashed rgb(185 174 169 / 22%);
+  padding: 0.6rem 0.75rem;
+}
+
+.ds-copy th {
+  color: var(--leather-text-dim);
+  font-family: var(--leather-font-label);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ds-copy td:first-child {
+  color: var(--leather-text-muted);
+}
+
+.ds-copy td:last-child {
+  color: var(--leather-blood-hi);
+  font-family: var(--leather-font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.ds-footer {
+  color: var(--leather-text-dim);
+  font-size: 0.85rem;
+  margin: 4rem auto 0;
+  max-width: 1180px;
+  padding: 0 1rem;
+}
+
+/*
+ * Picture stand-ins: soft gradients in place of covers, so each specimen
+ * frames something with a picture's light and shade. They are colour only.
+ */
+.ph {
+  background-color: #15090d;
+}
+
+.ph-1 {
+  background:
+    radial-gradient(
+      34% 62% at 42% 58%,
+      #e8bbad 0,
+      #c68a6d 38%,
+      transparent 72%
+    ),
+    radial-gradient(40% 50% at 72% 30%, #93384b 0, transparent 70%),
+    linear-gradient(160deg, #3a2a2c, #15090d 70%);
+}
+
+.ph-2 {
+  background:
+    radial-gradient(
+      30% 58% at 60% 55%,
+      #ebb9b2 0,
+      #c6866c 40%,
+      transparent 72%
+    ),
+    radial-gradient(45% 70% at 20% 40%, #524540 0, transparent 70%),
+    linear-gradient(200deg, #241018, #0f070b 75%);
+}
+
+.ph-3 {
+  background:
+    radial-gradient(
+      28% 50% at 50% 46%,
+      #e0b0b5 0,
+      #b98887 36%,
+      transparent 70%
+    ),
+    radial-gradient(60% 60% at 80% 80%, #afafae66 0, transparent 70%),
+    linear-gradient(140deg, #2f282e, #0f070b 70%);
+}
+
+.ph-4 {
+  background:
+    radial-gradient(
+      36% 64% at 36% 52%,
+      #efe8e5 0,
+      #cc939c 34%,
+      transparent 70%
+    ),
+    radial-gradient(50% 50% at 78% 40%, #8b243d 0, transparent 72%),
+    linear-gradient(180deg, #383035, #17090d 70%);
+}
+
+.ph-5 {
+  background:
+    radial-gradient(
+      40% 54% at 50% 38%,
+      #e7c7bf 0,
+      #c5878d 40%,
+      transparent 72%
+    ),
+    radial-gradient(70% 40% at 50% 100%, #782f49 0, transparent 70%),
+    linear-gradient(170deg, #44393c, #180d17 75%);
+}
+
+.ph-6 {
+  background:
+    radial-gradient(
+      34% 56% at 58% 50%,
+      #e8bbad 0,
+      #ae5758 46%,
+      transparent 74%
+    ),
+    radial-gradient(40% 40% at 18% 24%, #bcbab855 0, transparent 70%),
+    linear-gradient(150deg, #241018, #15090d 70%);
+}
+
+@media (width <= 720px) {
+  .ds-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .ds-hero-art {
+    max-width: 320px;
+  }
+
+  .ds-section > h2 {
+    font-size: 2.2rem;
+  }
+
+  .ds-cards .scene-card,
+  .ds-cards .performer-card,
+  .ds-cards .image-card {
+    width: 100%;
+  }
+
+  .search-result .col-lg-5.d-flex {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .scene-metadata {
+    margin-left: 0;
+    min-width: 0;
+  }
+}

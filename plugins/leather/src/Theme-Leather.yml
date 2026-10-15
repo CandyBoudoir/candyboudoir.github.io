@@ -1,0 +1,20 @@
+name: Theme - Leather
+description: Black pebble-grain leather, saddle stitching and nickel studs with a blood-red accent. Studs for ratings, a collar for favourites and a strict voice.
+version: 0.1.0
+url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/leather
+ui:
+  css:
+    - leather.css
+  javascript:
+    - leather.js
+  assets:
+    /: assets
+settings:
+  calmMode:
+    displayName: Calm mode
+    description: Turn off Leather's animations (card lifts, stud bursts, the stud loader).
+    type: BOOLEAN
+  plainCopy:
+    displayName: Plain labels
+    description: Keep Stash's own wording instead of Leather's strict copy. Stash's SFW mode always uses plain labels.
+    type: BOOLEAN

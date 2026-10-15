@@ -1,0 +1,159 @@
+/*
+ * Ratings: pyramid studs set over punched grommets. The Font Awesome star
+ * paths are hidden and the svg box paints a stud or a grommet through a mask.
+ */
+.rating-stars svg {
+  background: conic-gradient(
+    from 210deg,
+    #b0b0b7,
+    #3a3a40 25%,
+    #8e8e95 48%,
+    #2c2c31 72%,
+    #b0b0b7
+  );
+  mask: url('assets/icons/glyph-grommet.svg') center / 80% no-repeat;
+}
+
+.rating-stars .filled-star svg {
+  background:
+    radial-gradient(16% 9% at 34% 33%, rgb(255 255 255 / 95%), transparent),
+    var(--leather-stud-diamond);
+  mask-image: url('assets/icons/glyph-stud.svg');
+  mask-size: 96%;
+}
+
+.rating-stars .filled-star {
+  filter: drop-shadow(0 0 0.5px #000)
+    drop-shadow(0 1.5px 1.2px rgb(0 0 0 / 85%));
+}
+
+.rating-stars svg path,
+.rating-stars svg use {
+  visibility: hidden;
+}
+
+/* A full stud covers its grommet, which would show through the facets */
+.rating-stars .star-fill-100 .unfilled-star {
+  visibility: hidden;
+}
+
+.rating-stars .btn.minimal {
+  transition: transform var(--leather-medium) var(--leather-ease);
+}
+
+.rating-stars .btn.minimal:not(:disabled):hover,
+.rating-stars .btn.minimal:not(:disabled, .disabled):active {
+  background: none;
+}
+
+.rating-stars .btn.minimal:not(:disabled):hover {
+  transform: translateY(-2px);
+}
+
+.rating-stars .btn.minimal:not(:disabled):active {
+  transform: translateY(1px) scale(0.92);
+}
+
+.star-rating-number {
+  color: var(--leather-blood-hi);
+  font-family: var(--leather-font-label);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/*
+ * Favourite: a studded collar with a hanging O-ring. Stash colours favourites
+ * and their shadow three classes deep, so these rules start at #root.
+ */
+.favorite-button svg {
+  background-color: currentcolor;
+  mask: url('assets/icons/glyph-collar.svg') center / contain no-repeat;
+}
+
+.favorite-button svg path,
+.favorite-button svg use {
+  visibility: hidden;
+}
+
+#root button.btn.favorite-button.not-favorite {
+  color: #74747c;
+}
+
+#root button.btn.favorite-button.not-favorite:hover {
+  color: var(--leather-nickel);
+}
+
+/* Collared: the band turns blood red, the ring stays nickel */
+.favorite-button.favorite svg {
+  background:
+    linear-gradient(
+      180deg,
+      #f2586b 0%,
+      #c41f38 30%,
+      #8e1427 56%,
+      transparent 56%
+    ),
+    linear-gradient(180deg, #f4f4f6 56%, #8c8c93 76%, #e1e1e6 88%, #55555c 100%);
+}
+
+#root button.btn.favorite-button.favorite,
+#root button.btn.favorite-button.favorite:hover {
+  filter: drop-shadow(0 0 5px rgb(224 56 79 / 65%));
+}
+
+/* The collar beside a name, on detail pages */
+.name-icons .favorite-button svg {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+/* On a card the collar sits on the picture, so it takes a dark edge */
+#root .grid-card button.btn.favorite-button svg {
+  height: 28px;
+  width: 28px;
+}
+
+#root .grid-card button.btn.favorite-button {
+  filter: drop-shadow(0 1px 1px #000) drop-shadow(0 0 3px rgb(0 0 0 / 80%));
+}
+
+#root .grid-card button.btn.favorite-button.not-favorite {
+  color: rgb(214 214 219 / 70%);
+}
+
+#root .grid-card button.btn.favorite-button.favorite {
+  filter: drop-shadow(0 1px 1px #000) drop-shadow(0 0 5px rgb(224 56 79 / 75%));
+}
+
+/*
+ * The O counter is a flogger. Stash draws it with its own SweatDrops svg (no
+ * Font Awesome class), and the play count beside it uses Font Awesome, so the
+ * mask skips those.
+ */
+.count-button .count-icon svg:not(.svg-inline--fa) {
+  background-color: currentcolor;
+  mask: url('assets/icons/glyph-flogger.svg') center / 92% no-repeat;
+}
+
+.count-button .count-icon svg:not(.svg-inline--fa) :is(path, rect, use) {
+  visibility: hidden;
+}
+
+.count-button .btn.minimal {
+  color: var(--leather-thread);
+}
+
+.count-button .btn.minimal:not(:disabled):hover,
+.count-button button.count-icon:hover {
+  color: var(--leather-blood-hi);
+}
+
+.count-button:hover {
+  background: rgb(255 255 255 / 4%);
+}
+
+.count-value {
+  font-family: var(--leather-font-label);
+  font-weight: 600;
+}
