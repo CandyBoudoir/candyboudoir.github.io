@@ -19,3 +19,12 @@ export const SETTING_KEYS = MANIFEST_SETTINGS.map((s) => s.key)
 export const SETTING_DEFAULTS = Object.fromEntries(
   MANIFEST_SETTINGS.map((s) => [s.key, s.def]),
 )
+
+// Stash keeps a plugin's settings in a map, so Settings › Plugins lists them
+// in no fixed order; Cherry Pick sorts its own into the manifest's.
+export function inManifestOrder(settings) {
+  const rank = new Map(SETTING_KEYS.map((k, i) => [k, i]))
+  return [...settings].sort(
+    (a, b) => (rank.get(a.name) ?? 99) - (rank.get(b.name) ?? 99),
+  )
+}
