@@ -1,0 +1,9 @@
+name: Cherry Pick
+description: Learns what you like from your ratings and plays. A For you row, Your score on unrated scenes, More like this and performer brackets.
+version: 0.1.0
+url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/cherrypick
+ui:
+  javascript:
+    - cherrypick.js
+  css:
+    - cherrypick.css
