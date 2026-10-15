@@ -7,8 +7,9 @@ export const PLUGIN_NAME = 'Cherry Pick'
 export const PLUGIN_ID = 'CherryPick'
 
 const slug = PLUGIN_ID.toLowerCase()
-// PluginApi.register.route path for the plugin page
-export const PLUGIN_ROUTE = '/plugin/' + slug
+// PluginApi.register.route path for the plugin page. Stash's server owns
+// /plugin/ (plugin assets), so a reload there would 404; /plugins/ is free.
+export const PLUGIN_ROUTE = '/plugins/' + slug
 // custom fields the plugin writes on performers (tier 2)
 export const FIELD_PREFIX = slug + '_'
 // browser storage keys (tier 3)
