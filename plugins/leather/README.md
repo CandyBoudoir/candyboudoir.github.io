@@ -47,7 +47,7 @@ Leather makes no network requests beyond your own Stash server. Its fonts, Grenz
 
 <img src="docs/screenshots/phone.png" alt="The scenes page at phone width, with the navbar docked at the bottom" width="260">
 
-The demo library uses invented names, clips and stills made from ffmpeg test patterns, and Juicy's stickers as performer portraits.
+The demo library uses invented names and clips made from ffmpeg test patterns, with soft-focus colour stand-ins for its pictures.
 
 ## Made with AI
 
