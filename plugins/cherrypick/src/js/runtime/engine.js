@@ -32,11 +32,14 @@ function recompute() {
       performers: s.library.performers,
       stashdb: s.stashdbData || undefined,
     })
+    // Same library, new StashDB data: keep the fit, which reads only the
+    // scenes the user owns.
+    const reuse = s.library === built.library && built.engine
     built = {
       library: s.library,
       stashdbData: s.stashdbData,
       db,
-      engine: createEngine(db),
+      engine: createEngine(db, reuse ? { fits: built.engine.cache } : {}),
     }
   }
   const t0 = performance.now()

@@ -14,6 +14,7 @@ import {
 } from '../runtime/api.js'
 import { store } from '../runtime/app.js'
 import { genderLabel } from '../model/util.js'
+import { inManifestOrder } from '../storage/settings.js'
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_ROUTE } from '../name.js'
 import { useAppState } from '../ui/hooks.js'
 import { Safe } from '../ui/Safe.jsx'
@@ -89,6 +90,11 @@ function PageLink() {
 }
 
 export function registerSettingsExtras() {
+  patch.before('PluginSettings', (props, ...rest) =>
+    props?.pluginID === PLUGIN_ID && Array.isArray(props.settings)
+      ? [{ ...props, settings: inManifestOrder(props.settings) }, ...rest]
+      : [props, ...rest],
+  )
   patch.after('PluginSettings', (props, _, result) => {
     if (props.pluginID !== PLUGIN_ID) return result
     const rows = (

@@ -1,7 +1,10 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { MANIFEST_SETTINGS } from '../../src/js/storage/settings.js'
+import {
+  inManifestOrder,
+  MANIFEST_SETTINGS,
+} from '../../src/js/storage/settings.js'
 
 const manifest = await readFile(
   new URL('../../src/CherryPick.yml', import.meta.url),
@@ -20,4 +23,13 @@ test('the manifest declares every setting the plugin reads, with its type', () =
 
 test('the manifest lets the browser reach StashDB', () => {
   assert.match(manifest, /connect-src:\n\s+- https:\/\/stashdb\.org/)
+})
+
+test("Settings › Plugins lists Cherry Pick's switches in manifest order", () => {
+  const order = MANIFEST_SETTINGS.map((s) => s.key)
+  const shuffled = [...order].reverse().map((name) => ({ name }))
+  assert.deepEqual(
+    inManifestOrder(shuffled).map((s) => s.name),
+    order,
+  )
 })
