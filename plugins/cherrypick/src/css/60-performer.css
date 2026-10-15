@@ -1,6 +1,6 @@
 /* The For you line in a performer's details: Stash's detail-item markup
    does the rest. */
-.cherrypick-for-you .cherrypick-mark {
+.cherrypick-performer-line .cherrypick-mark {
   opacity: 0.85;
 }
 

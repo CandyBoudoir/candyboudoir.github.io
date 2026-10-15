@@ -24,12 +24,14 @@ function ForYouLine({ performer, fullWidth }) {
   if (!text) return null
   // Stash's DetailItem: the label, then a colon in the full-width layout.
   return (
-    <div className="detail-item cherrypick-for-you cherrypick-ui">
-      <span className="detail-item-title cherrypick-for-you">
+    <div className="detail-item cherrypick-performer-line cherrypick-ui">
+      <span className="detail-item-title cherrypick-performer-line">
         For you <Cherries />
         {fullWidth ? ':' : ''}
       </span>
-      <span className="detail-item-value cherrypick-for-you">{text}</span>
+      <span className="detail-item-value cherrypick-performer-line">
+        {text}
+      </span>
     </div>
   )
 }
@@ -58,7 +60,7 @@ export function registerPerformers() {
   patch.after('PerformerDetailsPanel.DetailGroup', (props, _, result) => {
     if (!props.performer) return result
     const line = (
-      <Safe key="cherrypick-for-you" name="For you line">
+      <Safe key="cherrypick-performer-line" name="For you line">
         <ForYouLine performer={props.performer} fullWidth={props.fullWidth} />
       </Safe>
     )
