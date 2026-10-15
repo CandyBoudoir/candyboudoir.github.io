@@ -2,6 +2,7 @@
 import js from '@eslint/js'
 import { defineConfig } from 'eslint/config'
 import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
 
 export default defineConfig(
   { ignores: ['node_modules/', 'dist/', 'stash-work/'] },
@@ -19,6 +20,11 @@ export default defineConfig(
       sourceType: 'module',
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    plugins: { 'react-hooks': reactHooks },
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
     },
   },
   {

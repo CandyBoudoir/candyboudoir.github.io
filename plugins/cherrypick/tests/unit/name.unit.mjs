@@ -7,7 +7,7 @@ import {
 } from '../../src/js/name.js'
 
 test('prefixes derive from the plugin id', () => {
-  assert.equal(PLUGIN_ROUTE, '/plugin/cherrypick')
+  assert.equal(PLUGIN_ROUTE, '/plugins/cherrypick')
   assert.equal(FIELD_PREFIX, 'cherrypick_')
   assert.equal(STORAGE_PREFIX, 'cherrypick:')
 })
