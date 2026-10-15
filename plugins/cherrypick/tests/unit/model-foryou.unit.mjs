@@ -387,3 +387,24 @@ test("Don't learn keeps a scene's plays out of momentum, not its freshness", () 
   for (const it of row)
     if (theirs.includes(it.scene.id)) assert.equal(it.freshKind, 'recent')
 })
+
+test('no kind of reason, and no one sentence, dominates the row', () => {
+  // A fortnight of heavy watching: momentum could explain most cards.
+  const loved = [...db.localPerformers]
+    .sort((a, b) => b.ownedSceneIds.length - a.ownedSceneIds.length)
+    .slice(0, 3)
+  const plays = loved.flatMap((p, k) =>
+    p.ownedSceneIds.slice(0, 4).map((sceneId, j) => ({
+      sceneId,
+      at: input.asOf - (1 + ((j + k) % 10)) * 86_400_000,
+    })),
+  )
+  const { ctx } = afterPlays(plays)
+  const fy = FY.computeForYou(ctx, FY.EMPTY_SIGNALS)
+  const count = (key) =>
+    fy.reduce((m, it) => m.set(it[key], (m.get(it[key]) || 0) + 1), new Map())
+  for (const [kind, n] of count('reasonKind'))
+    assert.ok(n <= fy.length / 2, `${n} cards give a ${kind} reason`)
+  for (const [text, n] of count('reason'))
+    assert.ok(n <= 2, `"${text}" on ${n} cards`)
+})

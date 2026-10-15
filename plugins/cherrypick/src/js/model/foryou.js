@@ -390,28 +390,63 @@ function freshPhrase(ctx, s, f) {
   return null
 }
 
-function reasonFor(ctx, it) {
+// The reasons a card could give, best first, each with its kind: recent
+// behaviour (momentum), then freshness, then taste. Exploration cards have
+// one reason of their own.
+function reasonOptions(ctx, it) {
   if (it.kind === 'forgotten')
-    return freshPhrase(ctx, it.scene, it.f) || 'One of your favorites'
+    return [
+      {
+        kind: 'explore',
+        text: freshPhrase(ctx, it.scene, it.f) || 'One of your favorites',
+      },
+    ]
   if (it.kind === 'nearmiss') {
     const t = ctx.M.reason(it.scene.id, true)?.text
-    return 'Worth a try' + (t ? ': ' + t[0].toLowerCase() + t.slice(1) : '')
+    return [
+      {
+        kind: 'explore',
+        text: 'Worth a try' + (t ? ': ' + t[0].toLowerCase() + t.slice(1) : ''),
+      },
+    ]
   }
-  // main: recent behavior first (momentum), then freshness, then taste
-  // TODO(#28): in the mockup 7 of 12 reasons cite recent watching, because
-  // the sample user's recent plays are their favourites, and the row reads as
-  // repetitive. Vary the reasons so no more than about half the row uses the
-  // same kind.
+  const out = []
   const mp =
     it.m.source && it.m.value >= 0.2
       ? momentumPhrase(ctx, it.m.source, it.scene.id)
       : null
-  if (mp) return mp
+  if (mp) out.push({ kind: 'momentum', text: mp })
   const fp = freshPhrase(ctx, it.scene, it.f)
-  if (fp) return fp
-  return (
-    ctx.M.reason(it.scene.id, true)?.text || 'A lot like scenes you rate well'
-  )
+  if (fp) out.push({ kind: 'fresh', text: fp })
+  out.push({
+    kind: 'taste',
+    text:
+      ctx.M.reason(it.scene.id, true)?.text ||
+      'A lot like scenes you rate well',
+  })
+  return out
+}
+
+// No kind of reason on more than half the row, and no one sentence more
+// than twice: in the mockup 7 of 12 cards cited recent watching (the sample
+// user's recent plays were their favourites) and the row read as
+// repetitive. A card past a limit gives its next-best reason; only the text
+// changes, never the ranking.
+export const REASON_SHARE = 0.5
+function assignReasons(ctx, cards) {
+  const cap = Math.ceil(cards.length * REASON_SHARE)
+  const kinds = new Map()
+  const texts = new Map()
+  return cards.map((card) => {
+    const options = reasonOptions(ctx, card)
+    const pick =
+      options.find(
+        (o) => (kinds.get(o.kind) || 0) < cap && (texts.get(o.text) || 0) < 2,
+      ) || options[options.length - 1]
+    kinds.set(pick.kind, (kinds.get(pick.kind) || 0) + 1)
+    texts.set(pick.text, (texts.get(pick.text) || 0) + 1)
+    return pick
+  })
 }
 
 // ---------------------------------------------------------------- the row
@@ -502,7 +537,7 @@ export function computeForYou(ctx, signals) {
   const cut = mains.length
     ? Math.min(...mains.map((it) => it.base + it.variety))
     : 0
-  return picked.map((it, i) => {
+  const items = picked.map((it, i) => {
     const exploration =
       it.kind === 'main' ? 0 : Math.max(0, cut - (it.base + it.variety))
     const item = {
@@ -521,11 +556,19 @@ export function computeForYou(ctx, signals) {
       momentumSource: it.m.source ? describeSource(it.m.source) : null,
       freshKind: it.f.kind,
     }
-    item.reason = reasonFor(ctx, { ...it, ...item, m: it.m, f: it.f })
     item.key =
       it.m.source?.kind === 'performer' ? 'p:' + it.m.source.p.id : null
     return item
   })
+  const reasons = assignReasons(
+    ctx,
+    picked.map((it, i) => ({ ...it, ...items[i], m: it.m, f: it.f })),
+  )
+  items.forEach((item, i) => {
+    item.reason = reasons[i].text
+    item.reasonKind = reasons[i].kind
+  })
+  return items
 }
 
 function describeSource(src) {
