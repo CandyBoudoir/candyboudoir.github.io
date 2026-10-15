@@ -114,7 +114,14 @@ export function createTier1(io) {
     const write = new Set(
       !cur || cur.removedAt ? ALL_KEYS : stale ? [...DATA_KEYS, ...keys] : keys,
     )
-    const next = cur && !cur.removedAt ? { ...cur } : {}
+    // After a removal the map starts empty but keeps its tombstone, so
+    // another browser's older mirror still cannot bring old data back.
+    const next =
+      cur && !cur.removedAt
+        ? { ...cur }
+        : cur?.removedAt
+          ? { removedAt: cur.removedAt }
+          : {}
     for (const k of write) if (full[k] !== undefined) next[k] = full[k]
     next.updatedAt = now()
     await io.write(next)
@@ -170,9 +177,10 @@ export function createTier1(io) {
       const cur = await io.read()
       const mirror = io.mirror.get()
       if (cur?.removedAt && cur.removedAt >= (mirror?.updatedAt || '')) {
-        // The plugin's data was removed after this browser last wrote.
+        // The plugin's data was removed after this browser last wrote: its
+        // mirror is void, and the map holds only what came after.
         io.mirror.del()
-        return { map: null, restored: null }
+        return { map: cur, restored: null }
       }
       if (!mirror) {
         if (cur && !cur.removedAt) io.mirror.set(cur)

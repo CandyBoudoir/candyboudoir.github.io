@@ -86,3 +86,12 @@ export const SCENE_UPDATE = `
     sceneUpdate(input: $input) { id rating100 }
   }
 `
+
+// Performers carrying one of the plugin's custom fields.
+export const PERFORMERS_WITH_FIELD = `
+  query CherryPickPerformersWithField($performer_filter: PerformerFilterType) {
+    findPerformers(performer_filter: $performer_filter, filter: { per_page: -1 }) {
+      performers { id custom_fields }
+    }
+  }
+`

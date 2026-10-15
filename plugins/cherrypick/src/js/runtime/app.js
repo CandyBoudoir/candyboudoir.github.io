@@ -20,6 +20,7 @@ import {
 } from '../storage/tier1.js'
 import { cache, KEYS, local } from '../storage/tier3.js'
 import { SETTING_KEYS } from '../storage/settings.js'
+import { EMPTY_SIGNALS } from '../model/foryou.js'
 
 const docs = new Map()
 const doc = (text) => {
@@ -29,13 +30,6 @@ const doc = (text) => {
 // One GraphQL request through Stash's client, outside Apollo's cache.
 export const run = (text, variables) => query(doc(text), variables, 'no-cache')
 export const runMutation = (text, variables) => mutate(doc(text), variables)
-
-export const EMPTY_SIGNALS = {
-  opens: {},
-  passes: {},
-  lastShown: [],
-  lastShownOpened: [],
-}
 
 export const store = createStore({
   ...fromConfig(null),
@@ -116,6 +110,13 @@ function persist(next, prev) {
 // Writes anything waiting now (before leaving, or when a flow ends).
 export const flushWrites = saveNow
 
+// Drops writes still waiting (the plugin's data is being removed).
+export function cancelWrites() {
+  clearTimeout(saveTimer)
+  saveTimer = null
+  unsaved.clear()
+}
+
 function reportError(e) {
   console.error(`${PLUGIN_ID}:`, e)
   store.set({ error: String(e?.message || e) })
@@ -194,3 +195,20 @@ export function boot() {
     .then(() => refreshLibrary())
     .catch(reportError)
 }
+
+// After the plugin changes a record in Stash (a gender, a rating, custom
+// fields), it patches its copy of the library so the model sees the change at
+// once, without waiting for the next refresh.
+function patchLibrary(list, id, fields) {
+  store.set((s) => {
+    if (!s.library) return null
+    const rows = s.library[list].map((r) =>
+      r.id === id ? { ...r, ...fields } : r,
+    )
+    return { library: { ...s.library, [list]: rows } }
+  })
+}
+export const patchLibraryScene = (id, fields) =>
+  patchLibrary('scenes', id, fields)
+export const patchLibraryPerformer = (id, fields) =>
+  patchLibrary('performers', id, fields)

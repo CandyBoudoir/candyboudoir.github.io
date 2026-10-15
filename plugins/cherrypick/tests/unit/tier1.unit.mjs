@@ -140,7 +140,7 @@ test("removal leaves a tombstone that other browsers' mirrors respect", async ()
   // Another browser still holds a mirror from before the removal.
   a.box.mirror = otherMirror
   const { map, restored } = await a.tier1.load()
-  assert.equal(map, null)
+  assert.deepEqual(fromConfig(map).dontLearn, [])
   assert.equal(restored, null)
   assert.equal(a.box.mirror, null)
 })
@@ -155,4 +155,20 @@ test('a staged change reaches the mirror at once and is restored at the next loa
   assert.equal(restored, 'stale')
   assert.deepEqual(fromConfig(map).dontLearn, [{ sceneId: '8' }])
   assert.deepEqual(fromConfig(server.map).dontLearn, [])
+})
+
+test('the first write after a removal keeps the tombstone', async () => {
+  const a = rig()
+  await a.tier1.save(toConfig(state({ dontLearn: [{ sceneId: '5' }] })), [
+    'dontLearn',
+  ])
+  const otherMirror = structuredClone(a.box.mirror)
+  await a.tier1.remove()
+  await a.tier1.save(toConfig(state()), ['notInterested'])
+  assert.ok(a.server.map.removedAt)
+  assert.deepEqual(fromConfig(a.server.map).dontLearn, [])
+  a.box.mirror = otherMirror
+  const { map } = await a.tier1.load()
+  assert.deepEqual(fromConfig(map).dontLearn, [])
+  assert.equal(a.box.mirror, null)
 })
