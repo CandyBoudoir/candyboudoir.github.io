@@ -4,7 +4,6 @@
 // Stash has no slot beside the rating (RatingSystem does not know its scene,
 // and the toolbar takes no extensions), so the line renders through a portal
 // into the toolbar's first group, from a component added after ScenePage.
-// More like this follows ScenePlayer.
 import { Bootstrap, patch, React, ReactDOM } from '../runtime/api.js'
 import { toggleDontLearn, isDontLearn } from '../runtime/actions.js'
 import { badgeLabel, fmtStars } from '../model/index.js'
@@ -125,9 +124,6 @@ function ToolbarExtras({ scene }) {
 
 function MoreLikeThis({ scene }) {
   const s = useAppState((x) => x)
-  if (window.__cpMlt === 'null') return null
-  if (window.__cpMlt === 'div') return <div>mlt</div>
-  if (window.__cpMlt === 'connect') return <ConnectLine />
   if (!s.settings.showMoreLikeThis || !s.M || s.watching) return null
   const dbScene = s.db.scenes.get(scene.id)
   if (!dbScene) return null
@@ -170,18 +166,15 @@ function MoreLikeThis({ scene }) {
 }
 
 export function registerScenePage() {
+  // Both go after ScenePage's own output, inside the page's .row; CSS orders
+  // More like this last and full width, so it sits under the player on wide
+  // screens and after the scene's details on a phone.
   patch.after('ScenePage', (props, _, result) => (
     <>
       {result}
       <Safe name="scene toolbar">
         <ToolbarExtras scene={props.scene} />
       </Safe>
-    </>
-  ))
-  if (window.__cpNoPlayer) return
-  patch.after('ScenePlayer', (props, _, result) => (
-    <>
-      {result}
       <Safe name="More like this">
         <MoreLikeThis scene={props.scene} />
       </Safe>
