@@ -7,7 +7,6 @@ import { store } from './app.js'
 import { buildDb } from '../model/db.js'
 import { createEngine } from '../model/index.js'
 import { modelDecisions } from '../model/brackets.js'
-import { setGenderResolver } from '../model/util.js'
 
 // Every bracket pick the model learns from: finished brackets and the one in
 // progress.
@@ -39,8 +38,6 @@ function recompute() {
       db,
       engine: createEngine(db),
     }
-    // Pronouns follow the performer's gender in Stash.
-    setGenderResolver((p) => p?.local?.gender ?? p?.stashdbGender ?? null)
   }
   const t0 = performance.now()
   const M = built.engine.compute({

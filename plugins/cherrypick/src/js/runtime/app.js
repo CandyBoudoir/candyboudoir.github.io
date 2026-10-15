@@ -191,9 +191,11 @@ export function boot() {
       refreshLibrary()
   })
   if (onFrontPage()) store.set((s) => ({ visit: s.visit + 1 }))
+  // The library loads even if the configuration could not be read: the
+  // rows then run on the default settings.
   loadConfig()
-    .then(() => refreshLibrary())
     .catch(reportError)
+    .then(() => refreshLibrary())
 }
 
 // After the plugin changes a record in Stash (a gender, a rating, custom
