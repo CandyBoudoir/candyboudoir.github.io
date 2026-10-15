@@ -1,0 +1,382 @@
+// When a bracket ends: the champion screen (podium, where the results went,
+// Undo of the final pick, a Champions round when one is due) and the
+// optional, previewed "Apply to my ratings".
+import { FontAwesomeSolid, React, ReactRouterDOM } from '../../runtime/api.js'
+import { store } from '../../runtime/app.js'
+import { allDecisions, computeWithDecisions } from '../../runtime/engine.js'
+import * as BR from '../../model/brackets.js'
+import { championsRoundPool } from '../../model/bracketSetup.js'
+import { fmtStars, genderLabel, pronoun } from '../../model/util.js'
+import { customFieldUrl } from '../../data/listFilter.js'
+import { NAME_S } from '../../name.js'
+import { closeDialog, openDialog } from '../../ui/dialogs.jsx'
+import { useAppState } from '../../ui/hooks.js'
+import {
+  applyRatingChanges,
+  startChampionsRound,
+  undoApplied,
+  undoPick,
+  VIEWS,
+} from './actions.js'
+import {
+  BracketIcon,
+  BracketTree,
+  Dialog,
+  Icon,
+  plural,
+  useEntrant,
+} from './parts.jsx'
+
+const { Link } = ReactRouterDOM
+const { faCrown, faCheck, faRotateLeft, faUndo } = FontAwesomeSolid
+
+const FIELD_LIST = `${BR.FIELDS.titles}, ${BR.FIELDS.best} and ${BR.FIELDS.last}`
+export const WINNERS_URL = customFieldUrl(BR.FIELDS.titles)
+
+const linkTo = (kind, id) =>
+  kind === 'performer' ? `/performers/${id}` : `/scenes/${id}`
+
+// How many unrated scenes' Your score this bracket's picks moved (by
+// 0.05★ or more)
+function useMoved(bracketId) {
+  const M = useAppState((s) => s.M)
+  return React.useMemo(() => {
+    if (!bracketId || !M) return null
+    const others = allDecisions(store.get()).filter(
+      (d) => d.bracket !== bracketId,
+    )
+    const before = computeWithDecisions(others)
+    if (!before) return null
+    return M.db.owned.filter(
+      (s) =>
+        M.rating(s) == null &&
+        Math.abs(M.prediction(s.id).value - before.prediction(s.id).value) >=
+          0.05,
+    ).length
+  }, [bracketId, M])
+}
+
+function Applied({ bracketId }) {
+  const applied = useAppState((s) => s.applied)
+  return applied
+    .filter((a) => a.bracketId === bracketId)
+    .map((a) => (
+      <p className="small cherrypick-applied" key={a.id}>
+        <Icon icon={faCheck} className="text-success" /> Applied{' '}
+        {a.changes.length} {plural(a.changes.length, 'rating')}.{' '}
+        <button
+          type="button"
+          className="btn btn-link btn-sm cherrypick-inline-link"
+          onClick={() => undoApplied(a.id)}
+        >
+          Undo
+        </button>
+      </p>
+    ))
+}
+
+export function ResultDialog({ id }) {
+  const M = useAppState((s) => s.M)
+  const history = useAppState((s) => s.brackets.history)
+  const active = useAppState((s) => s.brackets.active)
+  const lastFinished = useAppState((s) => s.lastFinished)
+  const b = history.find((x) => x.id === id)
+  const [tree, setTree] = React.useState(false)
+  const moved = useMoved(b?.id)
+  const entrant = useEntrant(b?.kind || 'performer')
+  if (!b || !M) return null
+  const r = b.result
+  const isP = b.kind === 'performer'
+  const champ = entrant(r.champion)
+  const word = { her: 'she', his: 'he' }[pronoun(champ.p)] || 'they'
+  const wins = b.decisions.filter((d) => d.winner === r.champion).length
+  const due =
+    isP && b.gender && !b.champions && !active
+      ? championsRoundPool(M, history, b.gender)
+      : null
+  const written = b.fieldWrites ? Object.keys(b.fieldWrites).length : null
+  const done = (
+    <Link to={linkTo(b.kind, r.champion)} onClick={closeDialog}>
+      {champ.name}
+    </Link>
+  )
+  return (
+    <Dialog
+      title={b.champions ? 'Champion of champions' : 'Champion'}
+      size="xl"
+      onHide={closeDialog}
+      className="cherrypick-result-modal"
+      headerExtra={
+        <span className="text-muted cherrypick-round">
+          {b.poolLabel} · {b.seeds.length} {isP ? 'performers' : 'scenes'}
+        </span>
+      }
+      footer={
+        <>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setTree(!tree)}
+          >
+            <BracketIcon />
+            <span>{tree ? 'Hide bracket' : 'Show bracket'}</span>
+          </button>
+          {lastFinished === b.id ? (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={undoPick}
+            >
+              <Icon icon={faRotateLeft || faUndo} />
+              <span>Undo the final pick</span>
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className="btn btn-secondary cherrypick-apply-open"
+            onClick={() => openDialog({ view: VIEWS.apply, id: b.id })}
+          >
+            {isP ? 'Apply to my performer ratings…' : 'Apply to my ratings…'}
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={closeDialog}
+          >
+            Done
+          </button>
+        </>
+      }
+    >
+      <div className={`cherrypick-champion ${isP ? 'performer' : 'clip'}`}>
+        <Link
+          className="cherrypick-champ-img"
+          to={linkTo(b.kind, r.champion)}
+          onClick={closeDialog}
+        >
+          {champ.image ? <img src={champ.image} alt="" /> : null}
+          <span className="cherrypick-crown text-warning">
+            <Icon icon={faCrown} />
+          </span>
+        </Link>
+        <div className="cherrypick-champ-body">
+          <h2 className="cherrypick-champ-name">{done}</h2>
+          <p className="text-muted">
+            {wins} {plural(wins, 'win')} on the way to the top.{' '}
+            {isP ? `Long may ${word} reign.` : 'Long may it reign.'}
+          </p>
+          <p className="small text-muted">
+            Every pick fed {NAME_S} model
+            {moved == null
+              ? '.'
+              : `: Your score moved on ${moved} unrated ${plural(moved, 'scene')}`}
+            {moved != null && isP
+              ? `, and the crown now sits on ${champ.name}'s card.`
+              : moved != null
+                ? '.'
+                : ''}
+          </p>
+          {isP ? (
+            <p className="small text-muted cherrypick-fields-written">
+              {written == null
+                ? 'Saving the results to their performer records…'
+                : written
+                  ? `Saved to ${written} performer ${plural(written, 'record')} in Stash as ${FIELD_LIST}.`
+                  : null}{' '}
+              {written ? (
+                <Link to={WINNERS_URL} onClick={closeDialog}>
+                  Performers who have won a bracket
+                </Link>
+              ) : null}
+            </p>
+          ) : null}
+          <Applied bracketId={b.id} />
+        </div>
+      </div>
+      <div className="cherrypick-podium">
+        {[
+          [r.finalist, 'Finalist'],
+          ...r.semifinalists.map((x) => [x, 'Semifinalist']),
+        ]
+          .filter(([x]) => x)
+          .map(([x, label]) => {
+            const e = entrant(x)
+            return (
+              <Link
+                key={x}
+                className={`card cherrypick-podium-item ${isP ? 'performer' : 'clip'}`}
+                to={linkTo(b.kind, x)}
+                onClick={closeDialog}
+              >
+                <span className="cherrypick-podium-img">
+                  {e.image ? <img src={e.image} alt="" /> : null}
+                </span>
+                <span className="small text-muted">{label}</span>
+                <span className="cherrypick-podium-name">{e.name}</span>
+              </Link>
+            )
+          })}
+      </div>
+      {due?.size ? (
+        <div className="card cherrypick-fixes cherrypick-champions-due">
+          <p className="mb-2">
+            {genderLabel(b.gender)} brackets have crowned {due.ids.length}{' '}
+            different champions. Time to settle it?
+          </p>
+          <div>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => startChampionsRound(b.gender)}
+            >
+              <Icon icon={faCrown} />
+              <span>Champions round ({due.size})</span>
+            </button>
+          </div>
+        </div>
+      ) : null}
+      {tree ? <BracketTree b={b} st={BR.bracketState(b)} /> : null}
+    </Dialog>
+  )
+}
+
+// ------------------------------------------------------------ Apply (preview)
+
+// The result with only what is still in the library
+function present(M, b) {
+  const has = (x) =>
+    b.kind === 'performer'
+      ? !!M.db.performers.get(x)?.local
+      : !!M.db.scenes.get(x)?.owned
+  const r = b.result
+  return {
+    ...b,
+    result: {
+      champion: has(r.champion) ? r.champion : null,
+      finalist: has(r.finalist) ? r.finalist : null,
+      semifinalists: (r.semifinalists || []).filter(has),
+      quarterfinalists: (r.quarterfinalists || []).filter(has),
+    },
+  }
+}
+
+export function ApplyDialog({ id }) {
+  const M = useAppState((s) => s.M)
+  const history = useAppState((s) => s.brackets.history)
+  const b = history.find((x) => x.id === id)
+  const entrant = useEntrant(b?.kind || 'performer')
+  const [includeRated, setIncludeRated] = React.useState(false)
+  const [unchecked, setUnchecked] = React.useState(() => new Set())
+  const [busy, setBusy] = React.useState(false)
+  const rows = React.useMemo(
+    () => (b && M ? BR.ratingProposals(M, present(M, b), includeRated) : []),
+    [b, M, includeRated],
+  )
+  if (!b || !M) return null
+  const isP = b.kind === 'performer'
+  const chosen = rows.filter((x) => !unchecked.has(x.id))
+  const back = () => openDialog({ view: VIEWS.result, id })
+  const toggle = (x) => {
+    const n = new Set(unchecked)
+    if (n.has(x)) n.delete(x)
+    else n.add(x)
+    setUnchecked(n)
+  }
+  const apply = async () => {
+    setBusy(true)
+    await applyRatingChanges(
+      b,
+      chosen.map(({ id: x, to }) => ({ id: x, to })),
+    )
+    back()
+  }
+  return (
+    <Dialog
+      title={isP ? 'Apply to my performer ratings' : 'Apply to my ratings'}
+      onHide={back}
+      className="cherrypick-apply-modal"
+      footer={
+        <>
+          <button type="button" className="btn btn-secondary" onClick={back}>
+            Back
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary cherrypick-apply-go"
+            disabled={!chosen.length || busy}
+            onClick={apply}
+          >
+            {busy
+              ? 'Applying…'
+              : `Apply ${chosen.length} ${plural(chosen.length, 'rating')}`}
+          </button>
+        </>
+      }
+    >
+      <p>
+        These are the Stash ratings this bracket would set. Untick anything
+        you&apos;d rather keep; you can undo the whole batch afterwards.
+      </p>
+      <div className="custom-control custom-checkbox mb-2">
+        <input
+          type="checkbox"
+          className="custom-control-input"
+          id="cherrypick-apply-rated"
+          checked={includeRated}
+          onChange={(e) => setIncludeRated(e.target.checked)}
+        />
+        <label
+          className="custom-control-label"
+          htmlFor="cherrypick-apply-rated"
+        >
+          Also raise {isP ? 'performers' : 'scenes'} you&apos;ve rated lower
+          than the bracket says
+        </label>
+      </div>
+      {rows.length ? (
+        <table className="table table-sm cherrypick-apply-table">
+          <thead>
+            <tr>
+              <th />
+              <th>{isP ? 'Performer' : 'Scene'}</th>
+              <th className="num">Now</th>
+              <th className="num">After</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((x) => (
+              <tr key={x.id}>
+                <td>
+                  <input
+                    type="checkbox"
+                    aria-label={'Apply to ' + entrant(x.id).name}
+                    checked={!unchecked.has(x.id)}
+                    onChange={() => toggle(x.id)}
+                  />
+                </td>
+                <td>{entrant(x.id).name}</td>
+                <td className="num">
+                  {x.from == null ? (
+                    <span className="text-muted">unrated</span>
+                  ) : (
+                    fmtStars(x.from / 20) + '★'
+                  )}
+                </td>
+                <td className="num">
+                  <b>{fmtStars(x.to / 20)}★</b>
+                </td>
+                <td className="small text-muted">{x.why}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p className="text-muted">
+          Nothing to set: you&apos;ve already rated everyone this bracket
+          placed.{includeRated ? '' : ' Tick the box to raise ratings too.'}
+        </p>
+      )}
+    </Dialog>
+  )
+}

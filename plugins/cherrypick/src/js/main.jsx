@@ -13,6 +13,7 @@ import { registerNavbar } from './features/navbar.jsx'
 import { registerPluginPage } from './features/pluginPage.jsx'
 import { registerPerformers } from './features/performers.jsx'
 import { registerSettingsExtras } from './features/settingsExtras.jsx'
+import { registerBrackets } from './features/brackets/index.jsx'
 
 registerRowCards()
 registerScoreBadge()
@@ -22,6 +23,7 @@ registerNavbar()
 registerPluginPage()
 registerPerformers()
 registerSettingsExtras()
+registerBrackets()
 
 keepModelCurrent()
 watchPlayback()
