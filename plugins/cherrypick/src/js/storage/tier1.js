@@ -122,7 +122,14 @@ export function createTier1(io) {
         : cur?.removedAt
           ? { removedAt: cur.removedAt }
           : {}
-    for (const k of write) if (full[k] !== undefined) next[k] = full[k]
+    // Settings are Stash's to write: the plugin only fills in one the map
+    // lacks (the defaults, or a map restored from the mirror). A deferred
+    // write that carried the plugin's older copy would otherwise undo a
+    // switch the user just turned on Stash's Settings page.
+    const stashOwns = (k) =>
+      SETTING_KEYS.includes(k) && !!cur && !cur.removedAt && cur[k] != null
+    for (const k of write)
+      if (full[k] !== undefined && !stashOwns(k)) next[k] = full[k]
     next.updatedAt = now()
     await io.write(next)
     io.mirror.set(next)

@@ -94,7 +94,8 @@ function saveNow() {
 }
 
 function persist(next, prev) {
-  if (!next.configLoaded || next === prev) return
+  // Loading the configuration is not a change to write back.
+  if (!next.configLoaded || !prev.configLoaded || next === prev) return
   const keys = []
   for (const [k, cfg] of Object.entries(STATE_TO_CONFIG))
     if (prev[k] !== next[k]) keys.push(...cfg)

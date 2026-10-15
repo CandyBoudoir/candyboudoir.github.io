@@ -91,6 +91,22 @@ test("writes wait while Stash's Settings page is open, then land on top", async 
   assert.deepEqual(tier1.pending(), [])
 })
 
+test("a deferred write never undoes a switch turned on Stash's Settings page", async () => {
+  const { server, open, tier1 } = rig({ settingsOpen: true })
+  server.map = { updatedAt: '2025-12-31T00:00:00.000Z', medals: true }
+  // The plugin's copy, still with medals on, writing every key (a restore).
+  const full = toConfig(state({ dontLearn: [{ sceneId: '1' }] }))
+  assert.equal(full.medals, true)
+  await tier1.save(full, Object.keys(full))
+  // The user turns medals off; Stash writes its copy.
+  server.map = { ...server.map, medals: false }
+  open.value = false
+  await tier1.flush()
+  assert.equal(server.map.medals, false)
+  assert.equal(server.map.showForYou, true, 'a missing setting is filled in')
+  assert.deepEqual(fromConfig(server.map).dontLearn, [{ sceneId: '1' }])
+})
+
 test('a missing map is restored from the mirror', async () => {
   const { server, box, tier1 } = rig()
   await tier1.save(toConfig(state({ notInterested: [{ sceneId: '2' }] })), [
