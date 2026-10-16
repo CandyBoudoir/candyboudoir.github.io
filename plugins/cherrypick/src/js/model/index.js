@@ -12,6 +12,7 @@ import {
   sceneFeatures,
 } from './taste.js'
 import { replay } from './bt.js'
+import { matchDecisions, sourcesText } from './matches.js'
 import { behaviourOf } from './behaviour.js'
 import { ownRating, sceneRating, pronoun, fmtStars } from './util.js'
 
@@ -40,6 +41,11 @@ const fmt1 = fmtStars
  *   (Elo scores, Restash's mirrored score, Ascension's Prime; rankings.js)
  *   as the user's own. Off by default: they stay out of the model, which
  *   then sees those records as unrated
+ * @property {boolean} [learnFromMatches]  replay the matches Ascension,
+ *   HotOrNot and Xenith recorded (matches.js) as picks, ahead of
+ *   `decisions` and at BT.external of their weight. Off by default. With
+ *   learnFromRankings on as well, the same matches count twice: once as
+ *   picks and once in the scores they made
  */
 
 /**
@@ -180,13 +186,23 @@ export function createEngine(db, shared = {}) {
       sceneFeatures(db.scenes.get(id))
         .map(([k]) => k)
         .filter((k) => k[0] === 'p' || k[0] === 's')
-    // clip picks involving a "Don't learn" scene teach nothing
-    const decisions = (input.decisions || []).filter(
+    // Other plugins' matches first, then the user's own picks. Clip picks
+    // involving a "Don't learn" scene teach nothing, whoever made them.
+    const decisions = [
+      ...(input.learnFromMatches ? matchDecisions(db) : []),
+      ...(input.decisions || []),
+    ].filter(
       (d) =>
         d.kind === 'performer' ||
         (!dontLearn.has(d.winner) && !dontLearn.has(d.loser)),
     )
     const bt = replay(decisions, { baseScene, keys: btKeys, basePerformer })
+    // The matches it learned from: how many, and from which plugins
+    const fromMatches = decisions.filter((d) => d.source)
+    const matches = {
+      count: fromMatches.length,
+      sources: [...new Set(fromMatches.map((d) => d.source))].sort(),
+    }
 
     const extraFor = (scene) => ({
       penalty,
@@ -272,6 +288,7 @@ export function createEngine(db, shared = {}) {
       ratingsToGo,
       penalty,
       bt,
+      matches,
       predictions,
       userMean,
       highShare,
@@ -378,21 +395,36 @@ function phrase(db, F, bt, part, scene, dir) {
     if (dir > 0 && w)
       return `Won ${w} match${w === 1 ? '' : 'es'} in your brackets`
     if (dir < 0 && l) return 'Went out early in a bracket'
-    return null
+    return matchesPhrase(bt.sceneMatches.get(scene.id), dir, 'Won', 'Lost')
   }
   const id = k.slice(2)
   const st = F.stats.get(k)
   if (k[0] === 'p') {
     const p = db.performers.get(id)
     if (!p) return null
+    // What moved them more than their scenes' ratings did: your performer
+    // brackets, or another plugin's matches
+    const own = bt.bracketPerformerOffset.get(id) || 0
+    const other = (bt.performerOffset.get(id) || 0) - own
+    const learned = Math.abs(F.content.W.get(k) || 0)
     if (
       part.value &&
-      bt.performerOffset.get(id) &&
-      Math.abs(bt.performerOffset.get(id)) > Math.abs(F.content.W.get(k) || 0)
+      own &&
+      Math.abs(own) > learned &&
+      Math.abs(own) >= Math.abs(other)
     ) {
       return dir > 0
         ? `${p.name} did well in your performer bracket`
         : `${p.name} went out early in your performer bracket`
+    }
+    if (part.value && other * dir > 0 && Math.abs(other) > learned) {
+      const text = matchesPhrase(
+        bt.performerMatches.get(id),
+        dir,
+        'won',
+        'lost',
+      )
+      if (text) return `${p.name} ${text}`
     }
     if (st && st.n >= 2)
       return `You average ${fmt1(st.mean)}★ on ${p.name}'s scenes`
@@ -421,6 +453,16 @@ function phrase(db, F, bt, part, scene, dir) {
     return `Scenes tagged ${t.name} average ${fmt1(st.mean)}★ for you`
   }
   return null
+}
+
+// "Won 7 of 9 matches in Ascension" (dir > 0) or "Lost 5 of 8 matches in
+// HotOrNot and Xenith", from another plugin's matches (bt.js tally); null
+// when none went that way
+function matchesPhrase(t, dir, won, lost) {
+  const n = t ? t.won + t.lost : 0
+  const k = dir > 0 ? t?.won : t?.lost
+  if (!k) return null
+  return `${dir > 0 ? won : lost} ${k} of ${n} match${n === 1 ? '' : 'es'} in ${sourcesText(t.sources)}`
 }
 
 // The key most responsible for a scene showing up, for "Not interested"

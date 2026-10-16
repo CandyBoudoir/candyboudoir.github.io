@@ -15,3 +15,4 @@ First release, for Stash v0.31.1.
 - Nothing appears while a scene plays.
 - Beside Ascension, HotOrNot, Xenith or Restash: the ratings they set (the Elo scores of the first three, Ascension's Prime, and Restash's score when its mirror writes it to Stash's rating) stay out of what Cherry Pick learns. Apply never rates a record whose rating they set, and says when Ascension, HotOrNot or Xenith will pick up its ratings.
 - Your score shows beside Ascension's badge on scene cards, and HotOrNot's floating button goes under Cherry Pick's dialogs so it can't cover their buttons on a phone.
+- Learn from Ascension, HotOrNot and Xenith matches, a switch under Settings > Plugins that starts off: each match those plugins recorded teaches Your score and For you as half a bracket pick, and Cherry Pick's page counts them.
