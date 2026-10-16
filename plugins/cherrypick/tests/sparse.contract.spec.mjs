@@ -8,6 +8,7 @@ import {
   SPARSE,
   demoScene,
   forYouCards,
+  gql,
   setPluginSettings,
   setUpSparseCherryPick,
   sharedScenes,
@@ -139,4 +140,73 @@ test('play a bracket starts one from the front page', async ({ page }) => {
   )
   await line.locator('.cherrypick-sharpen-bracket').click()
   await expect(play).toContainText('match 2 of 8')
+})
+
+// How many performers carry Cherry Pick's provisional mark (with one value)
+async function provisional(value) {
+  const { findPerformers } = await gql(
+    `query ($f: [CustomFieldCriterionInput!]) {
+      findPerformers(filter: { per_page: -1 },
+        performer_filter: { custom_fields: $f }) { count }
+    }`,
+    {
+      f: [
+        value == null
+          ? { field: 'cherrypick_provisional', modifier: 'NOT_NULL' }
+          : {
+              field: 'cherrypick_provisional',
+              modifier: 'EQUALS',
+              value: [value],
+            },
+      ],
+    },
+  )
+  return findPerformers.count
+}
+
+test("a bracket of performers you never rated asks for the champion's stars and steps the rest down", async ({
+  page,
+}) => {
+  await page.goto('/performers')
+  const bracket = visible(page.locator('.cherrypick-bracket-button'))
+  await expect(bracket).toBeVisible({ timeout: 20_000 })
+  await bracket.click()
+  const play = page.locator('.cherrypick-play-modal')
+  await expect(play).toContainText('16 performers')
+  // nothing on the cards hints at a rating or a seed
+  await expect(play.locator('.rating-stars, .rating-number')).toHaveCount(0)
+  await expect(play.locator('.cherrypick-match')).not.toContainText('seed')
+  for (let i = 0; i < 15; i++) {
+    await page.keyboard.press('ArrowLeft')
+    await page.waitForTimeout(150)
+  }
+  const result = page.locator('.cherrypick-result-modal')
+  const ask = result.locator('.cherrypick-champ-rate')
+  await expect(ask).toContainText('How many stars for')
+  await expect(ask.locator('.rating-stars .star-fill-100')).toHaveCount(0)
+  await ask.locator('.rating-stars button').nth(3).click()
+  await expect(ask).toContainText('4.0★')
+
+  await result.locator('.cherrypick-apply-open').click()
+  const apply = page.locator('.cherrypick-apply-modal')
+  const rows = apply.locator('.cherrypick-apply-table tbody tr')
+  // the champion, the finalist, two semifinalists and four quarterfinalists;
+  // the first round's losers get nothing
+  await expect(rows).toHaveCount(8)
+  await expect(rows.first()).toContainText('Your rating for the champion')
+  await expect(rows.first()).toContainText('4.0★')
+  await expect(rows.nth(1)).toContainText('Finalist, ½★ under the champion')
+  await expect(apply.locator('.cherrypick-provisional')).toHaveCount(7)
+  await apply.locator('.cherrypick-apply-go').click()
+
+  // the stepped ratings carry the mark, with the value written; the
+  // champion's, the user's own, does not
+  await expect.poll(() => provisional()).toBe(7)
+  expect(await provisional(70)).toBe(1)
+  expect(await provisional(60)).toBe(2)
+  expect(await provisional(50)).toBe(4)
+
+  // Undo takes the ratings and the marks back
+  await result.locator('.cherrypick-applied button').click()
+  await expect.poll(() => provisional()).toBe(0)
 })
