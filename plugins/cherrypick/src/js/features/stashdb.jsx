@@ -11,7 +11,12 @@ import {
 } from '../runtime/api.js'
 import { theirScenesYouDontHave } from '../model/recs.js'
 import { PLUGIN_NAME } from '../name.js'
-import { allowLookups, saveKey, validateKey } from '../stashdb/connect.js'
+import {
+  allowLookups,
+  saveKey,
+  stopLookups,
+  validateKey,
+} from '../stashdb/connect.js'
 import {
   cacheStats,
   clearStashdbCache,
@@ -71,17 +76,13 @@ function Steps({ step }) {
 // key (StashDB's guidelines page publishes the invite key registration
 // needs; StashDB emails an activation key and issues API keys to logged-in
 // users only, so this part stays in the user's hands), the pasted key,
-// validated by Stash and added to its stash-boxes, then done. When Stash
-// already has a StashDB key, the first step asks to use it instead.
+// validated by Stash and added to its stash-boxes, then done. It opens only
+// when Stash has no StashDB key: with one, lookups are already on.
 function ConnectDialog() {
-  const existing = useAppState((s) => s.stashdb)
-  const [hadKey] = React.useState(() => !!existing)
   const [step, setStep] = React.useState(1)
   const [key, setKey] = React.useState('')
   const [busy, setBusy] = React.useState(false)
   const [problem, setProblem] = React.useState(null)
-  // with a key in Stash: whether StashDB refused it and a new one was asked
-  const [asked, setAsked] = React.useState(false)
 
   const attempt = async (fn) => {
     setBusy(true)
@@ -94,24 +95,9 @@ function ConnectDialog() {
     setBusy(false)
   }
 
-  const useExisting = () =>
-    attempt(async () => {
-      const r = await validateKey(existing.apiKey, existing.endpoint)
-      if (r.valid) {
-        allowLookups(existing)
-        setStep(3)
-      } else {
-        setProblem(
-          `StashDB did not take the key in Stash's settings: ${r.status}`,
-        )
-        setAsked(true)
-        setStep(2)
-      }
-    })
-
   const validate = () =>
     attempt(async () => {
-      const r = await validateKey(key, existing?.endpoint || STASHDB_ENDPOINT)
+      const r = await validateKey(key, STASHDB_ENDPOINT)
       if (!r.valid) {
         setProblem(r.status)
         return
@@ -121,31 +107,7 @@ function ConnectDialog() {
     })
 
   let body, footer
-  if (step === 1 && hadKey) {
-    body = (
-      <>
-        <p>
-          Stash already has a StashDB key, in Settings › Metadata Providers.
-          With your go-ahead, {PLUGIN_NAME} uses it from this browser to show
-          how widely a scene is held and the scenes you don&apos;t have.
-        </p>
-        <p className="text-muted small">
-          Lookups are cached in this browser for 7 days.
-        </p>
-        {problem ? <p className="text-danger">{problem}</p> : null}
-      </>
-    )
-    footer = (
-      <>
-        <Button variant="secondary" onClick={closeDialog}>
-          Later
-        </Button>
-        <Button variant="primary" disabled={busy} onClick={useExisting}>
-          {busy ? 'Checking…' : 'Use my key'}
-        </Button>
-      </>
-    )
-  } else if (step === 1) {
+  if (step === 1) {
     body = (
       <>
         <p>
@@ -228,27 +190,11 @@ function ConnectDialog() {
       <div className="cherrypick-connected">
         <Icon icon={faCheck} className="text-success" />
         <div>
-          {hadKey && !key ? (
-            <>
-              <b>{PLUGIN_NAME} now uses your StashDB key.</b>
-              <div className="small text-muted">
-                Popularity and the scenes you don&apos;t have show as you visit
-                pages.
-              </div>
-            </>
-          ) : (
-            <>
-              <b>
-                {hadKey
-                  ? 'Saved the new key in your Stash settings.'
-                  : 'Added StashDB to your Stash settings.'}
-              </b>
-              <div className="small text-muted">
-                You&apos;ll find it in Settings › Metadata Providers.
-                Stash&apos;s Tagger can use it too.
-              </div>
-            </>
-          )}
+          <b>Added StashDB to your Stash settings.</b>
+          <div className="small text-muted">
+            You&apos;ll find it in Settings › Metadata Providers. Stash&apos;s
+            Tagger can use it too.
+          </div>
         </div>
       </div>
     )
@@ -269,9 +215,7 @@ function ConnectDialog() {
         <Modal.Title>Connect StashDB</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {/* With a key in Stash already, there is nothing to get or paste
-            unless StashDB refuses it. */}
-        {hadKey && !asked ? null : <Steps step={step} />}
+        <Steps step={step} />
         {body}
       </Modal.Body>
       <Modal.Footer>{footer}</Modal.Footer>
@@ -281,13 +225,6 @@ function ConnectDialog() {
 
 // ------------------------------------------------------------ plugin page
 
-const longDate = (iso) =>
-  new Date(iso).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-
 function age(ms) {
   const days = Math.floor((Date.now() - ms) / 86400000)
   return days < 1 ? 'today' : days === 1 ? 'yesterday' : `${days} days ago`
@@ -295,7 +232,7 @@ function age(ms) {
 
 function StashdbSection() {
   const stashdb = useAppState((s) => s.stashdb)
-  const consent = useAppState((s) => s.consent?.stashdb)
+  const off = useAppState((s) => s.consent?.stashdbOff)
   const lookups = useAppState((s) => s.stashdbLookups)
   const [stats, setStats] = React.useState(null)
   const [clearing, setClearing] = React.useState(false)
@@ -306,40 +243,65 @@ function StashdbSection() {
       live = false
     }
   }, [lookups])
-  const ready = !!(stashdb && consent)
+  const ready = !!(stashdb?.apiKey && !off)
   const count = stats?.count || 0
+  let status
+  if (ready)
+    status = (
+      <SettingRow
+        title="Connected"
+        sub={`Using the StashDB key in Settings › Metadata Providers, for popularity and the scenes you don't have. ${PLUGIN_NAME} sends StashDB the ids of the performers and scenes on the pages you open, with that key.`}
+      >
+        <Link
+          className="btn btn-secondary btn-sm"
+          to="/settings?tab=metadata-providers"
+        >
+          Manage
+        </Link>{' '}
+        <Button
+          variant="secondary"
+          size="sm"
+          className="cherrypick-stashdb-off"
+          onClick={stopLookups}
+        >
+          Stop using StashDB
+        </Button>
+      </SettingRow>
+    )
+  else if (stashdb?.apiKey)
+    status = (
+      <SettingRow
+        title="Off"
+        sub={`Stash has a StashDB key, and ${PLUGIN_NAME} leaves it alone until you turn StashDB back on.`}
+      >
+        <Button
+          variant="primary"
+          size="sm"
+          className="cherrypick-stashdb-on"
+          onClick={() => allowLookups()}
+        >
+          Use StashDB
+        </Button>
+      </SettingRow>
+    )
+  else
+    status = (
+      <SettingRow
+        title="Not connected"
+        sub="Your score and brackets work without it. A free StashDB account adds popularity and the scenes you're missing."
+      >
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => openDialog({ view: 'connect' })}
+        >
+          Connect StashDB
+        </Button>
+      </SettingRow>
+    )
   return (
     <div className="card setting-card">
-      {ready ? (
-        <SettingRow
-          title="Connected"
-          sub={`Using the StashDB key in Settings › Metadata Providers, for popularity and the scenes you don't have. Lookups allowed since ${longDate(consent)}.`}
-        >
-          <Link
-            className="btn btn-secondary btn-sm"
-            to="/settings?tab=metadata-providers"
-          >
-            Manage
-          </Link>
-        </SettingRow>
-      ) : (
-        <SettingRow
-          title="Not connected"
-          sub={
-            stashdb
-              ? `Stash has a StashDB key. ${PLUGIN_NAME} looks things up with it only once you connect.`
-              : "Your score and brackets work without it. A free StashDB account adds popularity and the scenes you're missing."
-          }
-        >
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => openDialog({ view: 'connect' })}
-          >
-            Connect StashDB
-          </Button>
-        </SettingRow>
-      )}
+      {status}
       {ready || count ? (
         <SettingRow
           title="Cache"

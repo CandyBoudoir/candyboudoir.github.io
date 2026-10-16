@@ -338,7 +338,7 @@ test("More like this on an owned scene: a row of StashDB scenes you don't have",
   expect(lookups('list')).toHaveLength(2)
 })
 
-test('the plugin page: connected since, the cache, and clearing it', async ({
+test('the plugin page: connected, the cache, and clearing it', async ({
   page,
 }) => {
   await page.goto(`/performers/${ids.performer}`)
@@ -346,12 +346,44 @@ test('the plugin page: connected since, the cache, and clearing it', async ({
   await page.goto('/plugins/cherrypick#stashdb')
   const box = page.locator('#stashdb')
   await expect(box).toContainText('Connected')
-  await expect(box).toContainText('Lookups allowed since')
   await expect(box).toContainText(
     '1 lookup, the oldest from today. Lookups are cached in this browser for 7 days.',
   )
   await box.getByRole('button', { name: 'Clear StashDB cache' }).click()
   await expect(box).toContainText('Nothing looked up yet.')
+})
+
+test('a key already in Stash is used without asking; Stop using StashDB turns the lookups off', async ({
+  page,
+}) => {
+  // As on a Stash that had the key before Cherry Pick: nothing recorded.
+  await setPluginMap({
+    ...(await pluginMap()),
+    consent: JSON.stringify({ stashdb: null }),
+  })
+  await page.goto(`/performers/${ids.performer}`)
+  await expect(cards(page)).toHaveCount(12)
+
+  await page.goto('/plugins/cherrypick#stashdb')
+  const box = page.locator('#stashdb')
+  await box.getByRole('button', { name: 'Stop using StashDB' }).click()
+  await expect(box).toContainText('Off')
+  await expect
+    .poll(async () => JSON.parse((await pluginMap())?.consent || 'null'))
+    .toMatchObject({ stashdbOff: expect.stringMatching(/^\d{4}-\d\d-\d\dT/) })
+
+  toStashdb = []
+  await page.goto(`/performers/${ids.performer}`)
+  const line = section(page).locator('.cherrypick-connect-line')
+  await expect(line).toContainText('StashDB lookups are off')
+  await expect(cards(page)).toHaveCount(0)
+  expect(toStashdb).toEqual([])
+
+  await line.getByRole('button', { name: 'Use StashDB' }).click()
+  await expect(cards(page)).toHaveCount(12)
+  await expect
+    .poll(async () => JSON.parse((await pluginMap())?.consent || 'null'))
+    .toMatchObject({ stashdbOff: null })
 })
 
 test('with "Show scenes you don\'t have" off, nothing shows and nothing is asked', async ({

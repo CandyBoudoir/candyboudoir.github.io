@@ -61,7 +61,7 @@ Pick with a click, a tap or the arrow keys: U undoes, Esc pauses, and a paused b
 
 ### StashDB
 
-With a StashDB key in Settings > Metadata Providers, Cherry Pick also shows how widely a scene is held, a scene's rank among a performer's scenes, and the scenes you don't have. Without one, where those would show, a Connect StashDB button walks you through getting a key and adds it to Stash's settings for you.
+With a StashDB key in Settings > Metadata Providers, Cherry Pick uses it straight away and also shows how widely a scene is held, a scene's rank among a performer's scenes, and the scenes you don't have. Without one, where those would show, a Connect StashDB button walks you through getting a key and adds it to Stash's settings for you. Cherry Pick's page can stop the lookups without removing the key.
 
 ![A performer's StashDB scenes that are not in the library, most popular first](docs/screenshots/not-in-library.png)
 
@@ -89,7 +89,7 @@ Settings > Plugins > Cherry Pick switches each piece on or off. All start on exc
 
 Cherry Pick runs in Stash's web interface and keeps its data in your Stash:
 
-- **Stash's plugin configuration** (`config.yml`): the settings above, the Hall of Fame, a bracket in progress, Not interested, Don't learn, applied ratings and your StashDB consent. A few kilobytes.
+- **Stash's plugin configuration** (`config.yml`): the settings above, the Hall of Fame, a bracket in progress, Not interested, Don't learn, applied ratings and whether you turned StashDB off. A few kilobytes.
 - **Your performers' custom fields**: the three bracket fields above, written once when a bracket ends.
 - **Your Stash ratings**: only when you choose Apply to my performer ratings, and Undo puts them back.
 
@@ -98,7 +98,7 @@ Your browser keeps only what Cherry Pick can rebuild from Stash: a copy of your 
 ### Network requests
 
 - **Your Stash server**, through Stash's own GraphQL API: your library, the plugin configuration, and the custom fields and ratings above.
-- **StashDB** (`https://stashdb.org/graphql`), only when Stash has a StashDB key and you have agreed to the lookups: the StashDB ids of the performers, scenes and studios on the pages you open, sent with your key in StashDB's `ApiKey` header, at most six requests per page, one a second. Answers are cached in your browser for 7 days. The covers of scenes you don't have load from StashDB's image server.
+- **StashDB** (`https://stashdb.org/graphql`), only when Stash has a StashDB key, and never after you choose Stop using StashDB on Cherry Pick's page: the StashDB ids of the performers, scenes and studios on the pages you open, sent with your key in StashDB's `ApiKey` header, at most six requests per page, one a second. Answers are cached in your browser for 7 days. The covers of scenes you don't have load from StashDB's image server.
 
 Cherry Pick sends nothing to CandyBoudoir or anyone else.
 
