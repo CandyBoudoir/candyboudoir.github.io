@@ -19,7 +19,7 @@ const theirOf = (gender) => pronoun({ local: { gender: gender ?? null } })
  * @param {{ champion: number, finalist: number }|null} [input.honours]
  *   finished performer brackets they won or reached the final of
  * @param {number} [input.offset]  how far bracket picks moved them, in stars
- *   (M.bt.performerOffset)
+ *   (M.bt.bracketPerformerOffset: not other plugins' matches)
  * @param {string|null} [input.gender]  the performer's gender in Stash
  * @returns {string[]}
  */
@@ -77,7 +77,7 @@ export function performerLineFor(M, history, performer) {
   return performerLine({
     stats: M ? M.performerSceneStats(performer.id) : null,
     honours: honoursOf(history)[performer.id] || null,
-    offset: M?.bt.performerOffset.get(performer.id) || 0,
+    offset: M?.bt.bracketPerformerOffset.get(performer.id) || 0,
     gender: performer.gender,
   })
 }

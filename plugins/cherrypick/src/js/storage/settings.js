@@ -14,6 +14,7 @@ export const MANIFEST_SETTINGS = [
   { key: 'performerLine', type: 'BOOLEAN', def: true },
   { key: 'relativeBadges', type: 'BOOLEAN', def: false },
   { key: 'excludedTags', type: 'STRING', def: '' },
+  { key: 'learnFromMatches', type: 'BOOLEAN', def: true },
 ]
 export const SETTING_KEYS = MANIFEST_SETTINGS.map((s) => s.key)
 export const SETTING_DEFAULTS = Object.fromEntries(

@@ -5,6 +5,7 @@ import {
   PLUGIN_ID,
   demoScene,
   forYouCards,
+  gql,
   pluginConfig,
   setPluginSettings,
   setUpCherryPick,
@@ -164,6 +165,10 @@ test('Settings › Plugins lists the switches, already on', async ({ page }) => 
   const toggle = page.locator('#plugin-CherryPick-showForYou')
   await expect(toggle).toBeAttached({ timeout: 20_000 })
   await expect(toggle).toBeChecked()
+  // Learning from other plugins' matches starts on too
+  await expect(
+    page.locator('#plugin-CherryPick-learnFromMatches'),
+  ).toBeChecked()
 })
 
 test('switching For you off removes the row', async ({ page }) => {
@@ -181,6 +186,45 @@ test('switching For you off removes the row', async ({ page }) => {
     await expect(page.locator('.cherrypick-for-you')).toHaveCount(0)
   } finally {
     await setPluginSettings(PLUGIN_ID, before)
+  }
+})
+
+test("with the switch on, other plugins' matches reach the model", async ({
+  page,
+}) => {
+  // Three demo performers as HotOrNot_V3 leaves them: two matches, each in
+  // both players' records, and a skip
+  const [a, b, c] = Object.values(demo.performers)
+  const match = (opponent, won, minute) => ({
+    date: `2026-10-15T20:0${minute}:00.000Z`,
+    opponent: `${opponent}:Someone`,
+    won,
+    ratingAfter: 50,
+  })
+  const records = {
+    [a]: [match(b, true, 0), match(c, true, 1)],
+    [b]: [match(a, false, 0), match(c, null, 2)],
+    [c]: [match(a, false, 1), match(b, null, 2)],
+  }
+  const write = (id, custom_fields) =>
+    gql(
+      'mutation ($i: PerformerUpdateInput!) { performerUpdate(input: $i) { id } }',
+      { i: { id, custom_fields } },
+    )
+  for (const [id, list] of Object.entries(records))
+    await write(id, { partial: { performer_record: JSON.stringify(list) } })
+  const before = await pluginConfig()
+  await setPluginSettings(PLUGIN_ID, { ...before, learnFromMatches: true })
+  try {
+    await page.goto('/plugins/cherrypick')
+    await expect(page.locator('#your-score')).toContainText(
+      '2 matches in HotOrNot',
+      { timeout: 20_000 },
+    )
+  } finally {
+    await setPluginSettings(PLUGIN_ID, before)
+    for (const id of Object.keys(records))
+      await write(id, { remove: ['performer_record'] })
   }
 })
 
