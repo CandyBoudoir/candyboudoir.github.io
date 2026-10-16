@@ -1,7 +1,7 @@
 // Connecting StashDB: the key lives in Stash's own stash-box settings
-// (Settings › Metadata Providers), where Stash's Tagger uses it too, and
-// Cherry Pick's consent to look things up with it lives in tier 1, with the
-// date it was given.
+// (Settings › Metadata Providers), where Stash's Tagger uses it too. Tier 1
+// records only whether the user turned Cherry Pick's lookups off
+// (consent.stashdbOff) and when they connected through Cherry Pick.
 import { client, GQL, utils } from '../runtime/api.js'
 import { run, runMutation, store } from '../runtime/app.js'
 import { STASHBOX_NAME, STASHDB_ENDPOINT, withStashdbKey } from './queries.js'
@@ -50,13 +50,22 @@ export async function saveKey(apiKey) {
   allowLookups({ endpoint, apiKey: key })
 }
 
-// The user's go-ahead, with the date it was first given.
+// Lookups on: after a key is added, or when the user turns them back on.
+// consent.stashdb keeps the date they were first turned on by hand.
 export function allowLookups(box) {
   store.set((s) => ({
     stashdb: box || s.stashdb,
     consent: {
       ...s.consent,
       stashdb: s.consent?.stashdb || new Date().toISOString(),
+      stashdbOff: null,
     },
+  }))
+}
+
+// Lookups off, from Cherry Pick's page: the key stays in Stash.
+export function stopLookups() {
+  store.set((s) => ({
+    consent: { ...s.consent, stashdbOff: new Date().toISOString() },
   }))
 }

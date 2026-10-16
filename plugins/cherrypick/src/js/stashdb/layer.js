@@ -1,5 +1,5 @@
-// The StashDB layer at run time: who may look things up (a StashDB key in
-// Stash's settings and the user's consent in Cherry Pick), the client for
+// The StashDB layer at run time: whether to look things up (a StashDB key in
+// Stash's settings, unless the user turned StashDB off in Cherry Pick), the client for
 // that key, and what each page fetches. Nothing is fetched at load: a page
 // asks for its own lookups when it shows, and the answers merge into the
 // store's `stashdbData`, the stashdb input buildDb takes, so the model
@@ -28,9 +28,11 @@ import { stashdbIdOf } from './queries.js'
 const SCENE_PERFORMERS = 3
 const FALLBACK_PERFORMERS = 3
 
-// Lookups need a StashDB key in Stash and the user's go-ahead (tier 1
-// consent, recorded by the Connect StashDB dialog).
-export const stashdbReady = (s) => !!(s.stashdb?.apiKey && s.consent?.stashdb)
+// A StashDB key in Stash turns the lookups on: the user gave Stash the key,
+// and Stash uses it the same way. Cherry Pick's page can turn them off
+// (tier 1 consent.stashdbOff).
+export const stashdbReady = (s) =>
+  !!(s.stashdb?.apiKey && !s.consent?.stashdbOff)
 
 // ------------------------------------------------------------ the client
 

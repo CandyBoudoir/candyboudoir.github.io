@@ -1,19 +1,27 @@
-// The one line shown where scenes you don't have would be, when Stash has
-// no StashDB key. The button opens the Connect StashDB dialog.
+// The one line shown where scenes you don't have would be, when Cherry Pick
+// cannot look them up: Stash has no StashDB key (Connect StashDB opens the
+// dialog), or the user turned StashDB off on Cherry Pick's page.
+import { allowLookups } from '../stashdb/connect.js'
 import { openDialog } from './dialogs.jsx'
+import { useAppState } from './hooks.js'
 
 export function ConnectLine() {
+  const hasKey = useAppState((s) => !!s.stashdb?.apiKey)
   return (
     <div className="cherrypick-connect-line cherrypick-ui">
       <span className="text-muted">
-        Connect StashDB to see what you&apos;re missing.
+        {hasKey
+          ? "StashDB lookups are off, so the scenes you're missing don't show."
+          : "Connect StashDB to see what you're missing."}
       </span>
       <button
         type="button"
         className="btn btn-sm btn-primary"
-        onClick={() => openDialog({ view: 'connect' })}
+        onClick={() =>
+          hasKey ? allowLookups() : openDialog({ view: 'connect' })
+        }
       >
-        Connect StashDB
+        {hasKey ? 'Use StashDB' : 'Connect StashDB'}
       </button>
     </div>
   )
