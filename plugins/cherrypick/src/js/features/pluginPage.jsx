@@ -2,9 +2,12 @@
 // cherries and from Settings › Plugins. A plain Stash settings page: setting
 // sections and cards. Features add their own sections (registerPageSection);
 // this file holds Your score, Not interested, Don't learn and Remove.
-import { Bootstrap, React, register } from '../runtime/api.js'
+import { Bootstrap, React, ReactRouterDOM, register } from '../runtime/api.js'
 import { toggleDontLearn, undoNotInterested } from '../runtime/actions.js'
 import { allDecisions } from '../runtime/engine.js'
+import { rateMore } from '../model/index.js'
+import { MIN_RATED } from '../model/taste.js'
+import { toRateUrl } from '../data/listFilter.js'
 import { NAME_S, PLUGIN_NAME, PLUGIN_ROUTE } from '../name.js'
 import { Cherries } from '../ui/Cherries.jsx'
 import { closeDialog, openDialog, registerDialog } from '../ui/dialogs.jsx'
@@ -13,6 +16,7 @@ import { Safe } from '../ui/Safe.jsx'
 import { removePluginData, removalCounts } from './remove.js'
 
 const { Button, Modal } = Bootstrap
+const { Link } = ReactRouterDOM
 
 const shortDate = (iso) =>
   new Date(iso).toLocaleDateString(undefined, {
@@ -74,9 +78,16 @@ function YourScore() {
   else if (!cv)
     body = (
       <SettingRow
-        title="Rate 10 scenes to start"
-        sub={`${PLUGIN_NAME} learns from your Stash ratings.`}
-      />
+        title={`${rateMore(M)} to start`}
+        sub={`Your score needs ${MIN_RATED} rated scenes to check its guesses against. Until then, For you goes by your favorites, performer ratings, brackets and plays.`}
+      >
+        <Link
+          className="btn btn-secondary btn-sm cherrypick-rate-link"
+          to={toRateUrl()}
+        >
+          Scenes to rate
+        </Link>
+      </SettingRow>
     )
   else {
     const decisions = allDecisions({ brackets }).length

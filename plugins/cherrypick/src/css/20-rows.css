@@ -28,3 +28,25 @@
   gap: 0.75rem;
   justify-content: flex-end;
 }
+
+/* For you's header line while Your score has too few ratings: the line
+   wraps, the row's title never does. Its two links take the line's size. */
+.cherrypick-for-you .recommendation-row-head {
+  gap: 1rem;
+}
+
+.cherrypick-for-you .recommendation-row-head h2 {
+  white-space: nowrap;
+}
+
+.cherrypick-sharpen {
+  text-align: right;
+}
+
+.cherrypick-sharpen a,
+.cherrypick-sharpen .btn-link {
+  border: 0;
+  font-size: inherit;
+  padding: 0;
+  vertical-align: baseline;
+}

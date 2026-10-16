@@ -10,6 +10,7 @@ import {
   listUrl,
   noGenderUrl,
   taggerUrl,
+  toRateUrl,
 } from '../../src/js/data/listFilter.js'
 
 // A criterion as Stash's list filter holds it
@@ -161,6 +162,10 @@ test("criteria in URLs, encoded as Stash's ListFilterModel does", () => {
     '/performers?c=(%22type%22:%22gender%22,%22modifier%22:%22IS_NULL%22)',
   )
   assert.equal(taggerUrl(), noGenderUrl() + '&disp=3')
+  assert.equal(
+    toRateUrl(),
+    '/scenes?c=(%22type%22:%22rating100%22,%22modifier%22:%22IS_NULL%22)&sortby=play_count&sortdir=desc',
+  )
   assert.equal(
     customFieldUrl('cherrypick_titles'),
     '/performers?c=(%22type%22:%22custom_fields%22,%22value%22:%5B(%22field%22:%22cherrypick_titles%22,%22modifier%22:%22GREATER_THAN%22,%22value%22:%5B0%5D)%5D)',

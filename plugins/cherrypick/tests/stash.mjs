@@ -7,23 +7,41 @@ import {
   setPluginSettings,
   usePlugins,
 } from '../../../tests/stash/helpers.mjs'
-import { DEMO, removeDemoLibrary, seedDemoLibrary } from './demo-library.mjs'
+import {
+  DEMO,
+  MARK,
+  SPARSE,
+  removeDemoLibrary,
+  seedDemoLibrary,
+} from './demo-library.mjs'
 
 export * from '../../../tests/stash/helpers.mjs'
-export { DEMO }
+export { DEMO, SPARSE }
 
 export const PLUGIN_ID = 'CherryPick'
 
-// Cherry Pick alone, with a fresh configuration and the demo library.
-// Returns the shared library's ids (read before the demo library adds its
-// own, since demoIds picks the first scene and performer it finds) and the
-// demo library's.
-export async function setUpCherryPick() {
+// Cherry Pick alone, with a fresh configuration and the demo library (or
+// the sparse one). Returns the shared library's ids (read before the demo
+// library adds its own, since demoIds picks the first scene and performer
+// it finds) and the demo library's. Both take no arguments: specs pass them
+// to beforeAll, which reads a first parameter as fixtures.
+async function setUp(sparse) {
   await usePlugins(PLUGIN_ID)
   await setPluginSettings(PLUGIN_ID, {})
   await removeDemoLibrary(gql)
   const shared = await demoIds()
-  return { shared, demo: await seedDemoLibrary(gql) }
+  return { shared, demo: await seedDemoLibrary(gql, { sparse }) }
+}
+export const setUpCherryPick = () => setUp(false)
+export const setUpSparseCherryPick = () => setUp(true)
+
+// The shared clips' scenes, for Don't learn: they are all rated, and the
+// sparse library's specs keep their ratings out of the model.
+export async function sharedScenes() {
+  const { findScenes } = await gql(
+    '{ findScenes(filter: { per_page: -1 }) { scenes { id title details } } }',
+  )
+  return findScenes.scenes.filter((s) => s.details !== MARK)
 }
 
 export async function tearDownCherryPick() {
@@ -37,9 +55,10 @@ export async function pluginConfig() {
   return configuration.plugins?.[PLUGIN_ID] ?? null
 }
 
-// A demo scene by what it is: rated or not, played or not.
-export function demoScene(ids, { rated, played }) {
-  const s = DEMO.scenes.find(
+// A demo scene by what it is: rated or not, played or not, in the demo plan
+// (or the sparse one).
+export function demoScene(ids, { rated, played }, plan = DEMO) {
+  const s = plan.scenes.find(
     (x) => !!x.rating100 === rated && !!x.plays.length === played,
   )
   return ids.scenes[s.title]

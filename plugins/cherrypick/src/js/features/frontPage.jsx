@@ -7,7 +7,7 @@
 // The rows are computed once per visit to the front page and then hold
 // still: Not interested turns a card into an Undo card in place, and nothing
 // reorders while the page is open.
-import { patch } from '../runtime/api.js'
+import { patch, ReactRouterDOM } from '../runtime/api.js'
 import { store } from '../runtime/app.js'
 import { recordOpen, undoNotInterested } from '../runtime/actions.js'
 import {
@@ -25,6 +25,9 @@ import { Safe } from '../ui/Safe.jsx'
 import { useAppState } from '../ui/hooks.js'
 import { HallOfFameRow } from './hallOfFame.jsx'
 import { ResumePill } from './brackets/index.jsx'
+import { quickStartPerformers, resumeBracket } from './brackets/actions.js'
+import { rateMore } from '../model/index.js'
+import { toRateUrl } from '../data/listFilter.js'
 import { useFallbackLookups } from '../stashdb/layer.js'
 
 // ------------------------------------------------------------ the visit's rows
@@ -76,7 +79,7 @@ function snapshot(s) {
 
 // One row of the visit. Hidden cards stay in place as Undo cards; scenes
 // hidden since the visit began never show again in it.
-function SceneRow({ id, title, items, className, onOpen }) {
+function SceneRow({ id, title, items, className, onOpen, extra }) {
   const hidden = useAppState((s) => s.notInterested)
   const recent = useAppState((s) => s.recentHidden)
   const isHidden = new Set(hidden.map((n) => n.sceneId))
@@ -91,6 +94,7 @@ function SceneRow({ id, title, items, className, onOpen }) {
       title={title}
       className={`cherrypick-ui ${className || ''}`}
       kind="scene"
+      extra={extra}
       items={items ? shown : null}
       renderCard={(scene, it, i) =>
         isHidden.has(it.scene.id) ? (
@@ -111,6 +115,32 @@ function SceneRow({ id, title, items, className, onOpen }) {
         )
       }
     />
+  )
+}
+
+const { Link } = ReactRouterDOM
+
+// One line in For you's header while Your score has too few ratings to
+// check itself: the two quickest ways to sharpen the row, each one click.
+// The ratings link opens your unrated scenes, most played first; a bracket
+// starts (or resumes) here.
+function SharpenLine() {
+  const M = useAppState((s) => s.M)
+  const active = useAppState((s) => !!s.brackets.active)
+  const rate = rateMore(M)
+  if (!rate) return null
+  return (
+    <span className="text-muted small cherrypick-sharpen">
+      <Link to={toRateUrl()}>{rate}</Link> or{' '}
+      <button
+        type="button"
+        className="btn btn-link cherrypick-sharpen-bracket"
+        onClick={() => (active ? resumeBracket() : quickStartPerformers(null))}
+      >
+        {active ? 'finish your bracket' : 'play a bracket'}
+      </button>{' '}
+      to sharpen these picks
+    </span>
   )
 }
 
@@ -142,6 +172,7 @@ function CherryPickRows() {
           items={v.forYou}
           className="cherrypick-for-you"
           onOpen={recordOpen}
+          extra={<SharpenLine />}
         />
       ) : null}
       {v.fallback ? (
