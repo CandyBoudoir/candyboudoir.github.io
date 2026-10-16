@@ -1,7 +1,8 @@
 // Tier 1: the plugin's configuration map, kept by Stash in config.yml with
 // configurePlugin and the same in every browser. It holds the settings, the
 // remembered bracket choice, Not interested, Don't learn, the bracket in
-// progress, the Hall of Fame, applied-rating batches and consent: a few KB.
+// progress, the Hall of Fame, applied-rating batches, consent and the answer
+// to the offer beside Stash Curator: a few KB.
 //
 // Two Stash behaviours shape it:
 //   - configurePlugin replaces the plugin's whole map, so every write is
@@ -28,6 +29,7 @@ export const DATA_KEYS = [
   'hallOfFame',
   'applied',
   'consent',
+  'curatorOffer',
 ]
 export const ALL_KEYS = [...SETTING_KEYS, ...DATA_KEYS]
 
@@ -59,6 +61,8 @@ export function fromConfig(map) {
     },
     applied: decode(m.applied) || [],
     consent: decode(m.consent) || { stashdb: null },
+    // 'hide' or 'keep' once the user answered (model/curator.js)
+    curatorOffer: decode(m.curatorOffer),
   }
 }
 
@@ -73,6 +77,7 @@ export function toConfig(s) {
     hallOfFame: encode(s.brackets.history),
     applied: encode(s.applied),
     consent: encode(s.consent),
+    curatorOffer: encode(s.curatorOffer),
   }
 }
 
@@ -84,7 +89,18 @@ export const STATE_TO_CONFIG = {
   brackets: ['bracket', 'hallOfFame'],
   applied: ['applied'],
   consent: ['consent'],
+  curatorOffer: ['curatorOffer'],
 }
+
+// The map Stash's Settings page saves when the Curator offer is answered
+// there: that page's own copy, with the answer and the settings it changes.
+// The page writes its copy back on every toggle, so the answer goes through
+// it rather than past it.
+export const withCuratorAnswer = (map, answer, settings) => ({
+  ...map,
+  ...settings,
+  curatorOffer: encode(answer),
+})
 
 /**
  * @param {{
@@ -100,13 +116,16 @@ export function createTier1(io) {
   const now = io.now || (() => new Date().toISOString())
   const log = io.log || (() => {})
   const pending = new Set()
+  const pendingOwn = new Set()
   let pendingFull = null
   let chain = Promise.resolve()
 
   // Writes run one at a time, so two read-modify-writes never interleave.
   const serial = (fn) => (chain = chain.then(fn, fn))
 
-  async function readModifyWrite(full, keys) {
+  // own: settings among keys the user changed through the plugin itself,
+  // which are written over Stash's value.
+  async function readModifyWrite(full, keys, own = []) {
     const cur = await io.read()
     const mirror = io.mirror.get()
     const stale =
@@ -123,11 +142,16 @@ export function createTier1(io) {
           ? { removedAt: cur.removedAt }
           : {}
     // Settings are Stash's to write: the plugin only fills in one the map
-    // lacks (the defaults, or a map restored from the mirror). A deferred
-    // write that carried the plugin's older copy would otherwise undo a
-    // switch the user just turned on Stash's Settings page.
+    // lacks (the defaults, or a map restored from the mirror), or one the
+    // user changed through the plugin (own). A deferred write that carried
+    // the plugin's older copy would otherwise undo a switch the user just
+    // turned on Stash's Settings page.
     const stashOwns = (k) =>
-      SETTING_KEYS.includes(k) && !!cur && !cur.removedAt && cur[k] != null
+      SETTING_KEYS.includes(k) &&
+      !own.includes(k) &&
+      !!cur &&
+      !cur.removedAt &&
+      cur[k] != null
     for (const k of write)
       if (full[k] !== undefined && !stashOwns(k)) next[k] = full[k]
     next.updatedAt = now()
@@ -144,26 +168,31 @@ export function createTier1(io) {
   }
 
   return {
-    // full: the whole map from the plugin's state; keys: what changed.
-    save(full, keys) {
+    // full: the whole map from the plugin's state; keys: what changed;
+    // own: settings among them the user changed through the plugin itself
+    // (Hide on cards, off Stash's Settings page), written over Stash's.
+    save(full, keys, own = []) {
       if (!keys.length) return Promise.resolve('none')
       if (io.settingsOpen()) {
         keys.forEach((k) => pending.add(k))
+        own.forEach((k) => pendingOwn.add(k))
         pendingFull = full
         log(`deferred ${keys.join(', ')}: Stash's Settings page is open`)
         return Promise.resolve('deferred')
       }
-      return serial(() => readModifyWrite(full, keys))
+      return serial(() => readModifyWrite(full, keys, own))
     },
 
     // Call when the user leaves Stash's Settings page.
     flush(full) {
       if (!pending.size) return Promise.resolve('none')
       const keys = [...pending]
+      const own = [...pendingOwn]
       const map = full || pendingFull
       pending.clear()
+      pendingOwn.clear()
       pendingFull = null
-      return serial(() => readModifyWrite(map, keys))
+      return serial(() => readModifyWrite(map, keys, own))
     },
 
     pending: () => [...pending],

@@ -114,3 +114,12 @@ export const SCENE_SET_FIELDS = `
     sceneUpdate(input: $input) { id custom_fields }
   }
 `
+
+// The plugins installed in Stash, and which are enabled: Apply's preview names
+// the ranking plugins among them, and Cherry Pick offers to hide Your score
+// on cards beside Stash Curator.
+export const PLUGINS = `
+  query CherryPickPlugins {
+    plugins { id name enabled }
+  }
+`
