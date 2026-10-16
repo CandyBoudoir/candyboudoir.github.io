@@ -5,7 +5,7 @@
 // scenes", the Scenes list's Bracket button) are secondary.
 
 import { behaviourOf } from './behaviour.js'
-import { isRanked } from './rankings.js'
+import { pluginRating } from './rankings.js'
 import { FIELD_PREFIX } from '../name.js'
 
 export const SIZES = [16, 32, 64]
@@ -378,8 +378,9 @@ export function fieldsFromHistory(history) {
 // Tiers: champion 5★, finalist 4.5★, semifinalists 4★, quarterfinalists 3.5★.
 // By default only for what you haven't rated; includeRated also raises (never
 // lowers) ratings you set lower than the tier. A rating Ascension's Prime set
-// counts as unrated. A record Ascension or HotOrNot ranks is never written:
-// its row comes back with skip: 'ranked', to show why it is left alone.
+// counts as unrated. A record Ascension, HotOrNot or Xenith ranks, or whose
+// rating is Restash's mirrored score, is never written: its row comes back
+// with skip: 'ranked' or 'mirrored', to show why it is left alone.
 export const TIERS = [
   ['champion', 100, 'Champion'],
   ['finalist', 90, 'Finalist'],
@@ -401,6 +402,8 @@ export function ratingProposals(M, b, includeRated) {
           : M.stashRating(M.db.scenes.get(id))
       const source = M.ratingSource(b.kind, id)
       if (source === 'elo') out.push({ id, from, to, why, skip: 'ranked' })
+      else if (source === 'mirror')
+        out.push({ id, from, to, why, skip: 'mirrored' })
       else if (source === 'primed')
         out.push({ id, from, to, why, primed: true })
       else if (from == null || (includeRated && to > from))
@@ -412,15 +415,15 @@ export function ratingProposals(M, b, includeRated) {
 
 // The changes Apply may still write, against the records as Stash has them
 // right before the write (current: Map id -> { rating100, custom_fields }):
-// a record gone from Stash, or one Ascension or HotOrNot started ranking
-// since the preview, is left out.
+// a record gone from Stash, or one another plugin started ranking or
+// mirroring since the preview, is left out (`ranked` lists the latter).
 export function writableChanges(changes, current) {
   const write = []
   const ranked = []
   for (const c of changes) {
     const rec = current.get(c.id)
     if (!rec) continue
-    if (isRanked(rec.custom_fields)) ranked.push(c.id)
+    if (pluginRating(rec)) ranked.push(c.id)
     else write.push({ ...c, from: rec.rating100 ?? null })
   }
   return { write, ranked }

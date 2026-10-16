@@ -1,17 +1,23 @@
-// Ratings other plugins set. Ascension and HotOrNot rank performers and
-// scenes by Elo: every match writes the new score to Stash's own rating100
-// and the match history to custom fields. Ascension's Prime tasks give
-// unrated records a random starting rating and mark nothing. Neither is a
-// rating the user gave, so the model leaves both out, and Apply never writes
-// over a ranked record (the plugin owns that number).
+// Ratings other plugins set. Ascension, HotOrNot and Xenith (a fork of
+// Ascension 1.2.6) rank performers and scenes by Elo: every match writes the
+// new score to Stash's own rating100 and the match history to custom fields.
+// Ascension's Prime tasks give unrated records a random starting rating and
+// mark nothing. Restash keeps a score in custom fields and, with its mirror
+// on, writes it over rating100 too. None of these is a rating the user gave,
+// so the model leaves them out, and Apply never writes over a ranked or
+// mirrored record (the plugin owns that number).
 
-// Custom fields that mark a record as ranked: the stats both plugins keep,
-// Ascension's match lists, and the match count older HotOrNot builds kept.
+// Custom fields that mark a record as ranked: the stats Ascension and
+// HotOrNot keep, Ascension's match lists, the match count older HotOrNot
+// builds kept, and Xenith's stats and match list. Xenith still reads the
+// first two from libraries it has not migrated.
 export const ELO_FIELDS = [
   'hotornot_stats',
   'elo_matches',
   'performer_record',
   'scene_record',
+  'xenith_stats',
+  'xenith_record',
 ]
 
 // True when another plugin ranks this record (custom_fields as Stash
@@ -23,9 +29,32 @@ export function isRanked(customFields) {
   )
 }
 
-// Where a record's rating came from: 'elo' (a ranking plugin's score),
-// 'primed' (Ascension's Prime, see primedIds) or null (the user, or unrated).
-// buildDb sets it on each record's `local`.
+// Restash's score, which its "Also mirror score to rating100" setting also
+// writes to rating100 (writer.py). Its other fields (restash_raw,
+// restash_components, restash_updated) are no ranking.
+export const MIRROR_FIELD = 'restash_score'
+
+// True when the record's rating is Restash's score: rating100 equals
+// restash_score (Stash may return it as a number or a string). A rating
+// that differs, or a record Restash never scored, is the user's.
+export function isMirrored(rating100, customFields) {
+  const score = customFields?.[MIRROR_FIELD]
+  if (rating100 == null || score == null || score === '') return false
+  return Number(score) === rating100
+}
+
+// Who set a record's rating, when a plugin did and marks it: 'elo' (a
+// ranking plugin's score), 'mirror' (Restash's score) or null. rec:
+// { rating100, custom_fields } as Stash returns them.
+export function pluginRating(rec) {
+  if (isRanked(rec.custom_fields)) return 'elo'
+  if (isMirrored(rec.rating100, rec.custom_fields)) return 'mirror'
+  return null
+}
+
+// Where a record's rating came from: 'elo' and 'mirror' (pluginRating),
+// 'primed' (Ascension's Prime, see primedIds) or null (the user, or
+// unrated). buildDb sets it on each record's `local`.
 
 // ---------------------------------------------------------------- Prime
 
@@ -81,8 +110,8 @@ function primedIn(rated) {
  * the rows, and each group groupOf names, such as a gender's performers) it
  * needs a value in 1–9 shared by PRIME_MIN_SHARED or more, at least two of
  * Prime's three bands, and Prime's values must cover more than half of the
- * group's ratings. Records another plugin ranks must be left out of `rows`:
- * their rating is accounted for already.
+ * group's ratings. Records another plugin ranks or mirrors must be left out
+ * of `rows`: their rating is accounted for already.
  * @param {{ id: string, rating100: number|null }[]} rows
  * @param {(row: object) => string|null} [groupOf]
  * @returns {Set<string>}
@@ -110,7 +139,7 @@ export function markRatingSources(list, localOf, groupOf) {
   const free = []
   for (const rec of list) {
     const local = localOf(rec)
-    local.ratingSource = isRanked(local.custom_fields) ? 'elo' : null
+    local.ratingSource = pluginRating(local)
     if (!local.ratingSource)
       free.push({ id: rec.id, rating100: local.rating100, rec })
   }
@@ -122,16 +151,18 @@ export function markRatingSources(list, localOf, groupOf) {
 // ---------------------------------------------------------------- installed
 
 // Plugin ids as Stash reports them (a plugin's id is its manifest's file
-// name): Ascension 1.4.1 ships ascension.yml and ascension-beta.yml, and
+// name): Ascension 1.4.1 ships ascension.yml and ascension-beta.yml,
 // HotOrNot's builds hotornot.yml, hotOrNot.yml, hotOrNotV2.yml and
-// hot_or_not.yml. Names cover forks that rename the file.
+// hot_or_not.yml, and Xenith 3.2.0 xenith.yml. Names cover forks that rename
+// the file.
 const PLUGINS = [
   ['Ascension', /^ascension\b/i],
   ['HotOrNot', /^hot[\s_-]*or[\s_-]*not/i],
+  ['Xenith', /^xenith\b/i],
 ]
 
 // The ranking plugins installed and enabled, by name ("Ascension",
-// "HotOrNot"), from Stash's `plugins` query.
+// "HotOrNot", "Xenith"), from Stash's `plugins` query.
 export function rankingPlugins(plugins) {
   const out = []
   for (const [name, re] of PLUGINS)

@@ -363,7 +363,7 @@ for (const [key, side] of Object.entries(SIDE)) {
       const before = await performerRatings()
       await go.click()
       await expect(page.locator('.cherrypick-applied').first()).toContainText(
-        'Ascension or HotOrNot ranks',
+        'another plugin rates',
       )
       expect(await performerRatings()).toEqual(before)
       await rankEveryPerformer(side, false)
