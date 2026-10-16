@@ -5,6 +5,8 @@
 - Brackets play the performers and scenes you haven't rated. People rate their favorites, so the rated ones won their way to nearly every final; they now play only when there aren't enough unrated ones to fill a bracket. Performers and scenes from your last three brackets of the same kind and gender sit out while others can take their places.
 - The Challenge round: after the final, a champion with no rating of yours meets up to three performers or scenes you have rated, lowest rated first, until one beats it. Where it stops sets the champion's rating in Apply, and the finalist and semifinalists step down from it. A champion that beats every one gets a trophy on its performer card, "beat your favorites" in its For you line and a mark in the Hall of Fame. Rate them myself skips it.
 - A loss to a rated performer or scene no longer sets a rating on its own. A first-round loser to your 5★ favorite was offered 4.5★.
+- Scene brackets work the same way: scenes you have rated sit out while four unrated ones can play, so "Bracket her scenes" plays the ones you haven't rated and her rated ones wait for the champion. A champion meets the rated ones from its own list first.
+- Apply bracket ratings automatically, a new switch under Settings > Plugins: closing a bracket's champion screen sets its ratings, and Cherry Pick's page keeps each batch with Undo. It starts on, and off while Ascension, HotOrNot, Xenith or Restash's mirror writes your ratings, and follows those plugins until you set it yourself.
 
 ## 0.1.2
 

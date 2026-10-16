@@ -335,6 +335,14 @@ test('Settings › Plugins lists the switches, already on', async ({ page }) => 
   await expect(
     page.locator('#plugin-CherryPick-learnFromMatches'),
   ).toBeChecked()
+  // and so does applying bracket ratings, unless a plugin that writes
+  // Stash's ratings is on (Restash only with its mirror on)
+  const managed = ['ascension', 'hotornot', 'xenith'].some((c) =>
+    companionPluginIds().includes(c),
+  )
+  const auto = page.locator('#plugin-CherryPick-autoApply')
+  if (managed) await expect(auto).not.toBeChecked()
+  else await expect(auto).toBeChecked()
 })
 
 test('without Stash Curator, nothing offers to hide Your score on cards', async ({

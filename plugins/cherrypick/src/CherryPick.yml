@@ -63,3 +63,7 @@ settings:
     displayName: Learn from Ascension, HotOrNot and Xenith matches
     description: Each match those plugins recorded counts as half a bracket pick, leaving out skips, draws and anything not in your library. Off, only your own ratings, plays and brackets teach Cherry Pick.
     type: BOOLEAN
+  autoApply:
+    displayName: Apply bracket ratings automatically
+    description: "On: closing a bracket's champion screen sets the ratings it found, with Undo on Cherry Pick's page. Off: Apply to my ratings shows them first. Starts off while Ascension, HotOrNot, Xenith or Restash's mirror manages your ratings."
+    type: BOOLEAN

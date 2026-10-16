@@ -45,6 +45,8 @@ export const CHAMPIONS_MIN = 4
  *   rating100 when the bracket started
  * @property {string[]} [sceneAnchors]  the anchors whose rating100 is the
  *   average of the user's ratings on their scenes (performer brackets)
+ * @property {string[]} [waiting]  rated records of the pool that did not
+ *   play, which the Challenge round puts up first (waitingIn)
  * @property {number|null} [championRating]  the user's rating of the
  *   champion, asked when no anchor played
  * @property {{ winner: string, loser: string }[]} decisions  picks, in order
@@ -139,6 +141,16 @@ export const clipByes = (n) =>
   n >= MIN_CLIP_POOL && n < DEFAULT_SIZE ? clipSize(n) - n : 0
 
 export const watchedScenes = (db) => db.owned.filter((s) => behaviourOf(s))
+
+// The scenes a clip bracket plays out of a pool of watched ones: those with
+// no rating of the user's own, when there are MIN_CLIP_POOL of them, so the
+// rated ones wait for the champion's Challenge round; else the whole pool.
+// A clip pool under 16 plays every scene it gets, so without this the rated
+// ones would play in every small bracket.
+export function clipEntrants(M, ids) {
+  const unrated = ids.filter((id) => entrantRole(M, 'clip', id) !== 'anchor')
+  return unrated.length >= MIN_CLIP_POOL ? unrated : ids
+}
 
 // ---------------------------------------------------------------- anchors and candidates
 
@@ -423,9 +435,10 @@ export function firstRoundSlots(anchors, unknowns, size, now = 0) {
   return slots
 }
 
-// kind: 'performer' | 'clip'; ids: the pool; size: slots (byes fill the rest).
-// recent: entrants of recent brackets (recentEntrants), who wait while
-// others can fill the bracket. now: when it is created, for its id and
+// kind: 'performer' | 'clip'; ids: who may play; pool: the whole pool, when
+// some of it may not play (a clip pool's rated scenes, clipEntrants); size:
+// slots (byes fill the rest). recent: entrants of recent brackets
+// (recentEntrants), who wait while others can fill the bracket. now: when it is created, for its id and
 // createdAt: the time of the click, not the library's asOf, so two brackets
 // in one session get different ids.
 export function createBracket(
@@ -439,6 +452,7 @@ export function createBracket(
     champions = false,
     origin = null,
     recent = null,
+    pool = ids,
     now = Date.now(),
   },
 ) {
@@ -461,6 +475,7 @@ export function createBracket(
     slots,
     anchors: ratings,
     sceneAnchors,
+    waiting: champions ? [] : waitingIn(M, kind, pool, slots),
     championRating: null,
     decisions: [],
     createdAt: new Date(now).toISOString(),
@@ -583,18 +598,81 @@ export function modelDecisions(b) {
 
 // The most anchors a champion meets
 export const CHALLENGE_RUNGS = 3
+// The most rated records a bracket keeps as waiting for its champion
+export const WAITING_KEEP = 12
 
 const has = (o, k) => !!o && Object.prototype.hasOwnProperty.call(o, k)
+
+// The rated records among ids, as a bracket would anchor them: the user's
+// own rating, else (performers) the average of their scene ratings. above:
+// only those rated higher. Returns { own, scene, rating }.
+function ratedIn(M, kind, ids, above = -Infinity) {
+  const rating = new Map()
+  const own = []
+  const scene = []
+  for (const id of ids) {
+    const role = entrantRole(M, kind, id)
+    const r =
+      role === 'anchor'
+        ? stashRatingOf(M, kind, id)
+        : role === 'candidate' && kind === 'performer'
+          ? sceneAnchorRating(M, id)
+          : null
+    if (r == null || r <= above) continue
+    rating.set(id, r)
+    ;(role === 'anchor' ? own : scene).push(id)
+  }
+  return { own, scene, rating }
+}
+
+// k of them, spread over the user's stars like a bracket's anchors: own
+// ratings first, scene averages filling. Returns { own, scene }.
+function spreadRated(M, kind, { own, scene, rating }, k) {
+  const strength = strengthOf(M, kind)
+  const value = (id) => rating.get(id)
+  const byRating = (x, y) => value(y) - value(x) || strength(y) - strength(x)
+  const spread = (list, n) =>
+    spreadPick(list.slice().sort(byRating), value, n, linearTargets)
+  const kOwn = Math.min(own.length, k)
+  return { own: spread(own, kOwn), scene: spread(scene, k - kOwn) }
+}
+
+/**
+ * The rated records of a bracket's pool that did not play, up to
+ * WAITING_KEEP spread over the user's stars: the Challenge round puts these
+ * up first, so the champion of a list meets the favorites of that list.
+ * @param {object} M
+ * @param {'performer'|'clip'} kind
+ * @param {string[]} pool
+ * @param {(string|null)[]} played  the bracket's slots
+ * @returns {string[]}
+ */
+export function waitingIn(M, kind, pool, played) {
+  const seeds = new Set(played)
+  const r = spreadRated(
+    M,
+    kind,
+    ratedIn(
+      M,
+      kind,
+      pool.filter((id) => !seeds.has(id)),
+    ),
+    WAITING_KEEP,
+  )
+  return [...r.own, ...r.scene]
+}
 
 /**
  * The Challenge round a finished bracket offers its champion, or null. The
  * champion must have no rating of the user's own (an anchor needs no
  * measuring), and the user must have rated records of the bracket's kind,
  * and for performers its gender, that did not play in it: up to
- * CHALLENGE_RUNGS of them, spread over the user's stars like a bracket's
- * anchors (own ratings first, scene averages filling), each above every
- * anchor the champion already beat in the bracket, met lowest rated first
- * so the highest rated comes last. Champions rounds have none.
+ * CHALLENGE_RUNGS of them, those the bracket's pool held back first
+ * (b.waiting) and the rest of the library filling, each spread over the
+ * user's stars like a bracket's anchors (own ratings first, scene averages
+ * filling) and above every anchor the champion already beat in the bracket,
+ * met lowest rated first so the highest rated comes last. Champions rounds
+ * have none.
  * @param {object} M
  * @param {Bracket} b  finished: b.result set
  * @param {(p: object) => string|null} [genderOf]
@@ -609,41 +687,50 @@ export function challengeFor(M, b, genderOf = stashGender) {
   // a champion beat every anchor in its bracket, directly or through
   // someone it beat
   const floor = Math.max(-Infinity, ...Object.values(b.anchors || {}))
-  const pool =
+  const library = (
     kind === 'performer'
       ? M.db.localPerformers
           .filter(eligible)
           .filter((p) => genderOf(p) === b.gender)
           .map((p) => p.id)
       : M.db.owned.filter((s) => !M.dontLearn.has(s.id)).map((s) => s.id)
-  const rating = new Map()
-  const own = []
-  const scene = []
-  for (const id of pool) {
-    if (played.has(id)) continue
-    const role = entrantRole(M, kind, id)
-    const r =
-      role === 'anchor'
-        ? stashRatingOf(M, kind, id)
-        : role === 'candidate' && kind === 'performer'
-          ? sceneAnchorRating(M, id)
-          : null
-    if (r == null || r <= floor) continue
-    rating.set(id, r)
-    ;(role === 'anchor' ? own : scene).push(id)
-  }
+  ).filter((id) => !played.has(id))
+  const inLibrary = new Set(library)
+  const held = (b.waiting || []).filter((id) => inLibrary.has(id))
+  const heldSet = new Set(held)
+  const first = spreadRated(
+    M,
+    kind,
+    ratedIn(M, kind, held, floor),
+    CHALLENGE_RUNGS,
+  )
+  const n = first.own.length + first.scene.length
+  const rest = spreadRated(
+    M,
+    kind,
+    ratedIn(
+      M,
+      kind,
+      library.filter((id) => !heldSet.has(id)),
+      floor,
+    ),
+    CHALLENGE_RUNGS - n,
+  )
+  const sceneRungs = [...first.scene, ...rest.scene]
+  const all = [...first.own, ...first.scene, ...rest.own, ...rest.scene]
+  if (!all.length) return null
+  const rating = (id) =>
+    sceneRungs.includes(id)
+      ? sceneAnchorRating(M, id)
+      : stashRatingOf(M, kind, id)
   const strength = strengthOf(M, kind)
-  const value = (id) => rating.get(id)
-  const byRating = (x, y) => value(y) - value(x) || strength(y) - strength(x)
-  const spread = (list, k) =>
-    spreadPick(list.sort(byRating), value, k, linearTargets)
-  const kOwn = Math.min(own.length, CHALLENGE_RUNGS)
-  const sceneRungs = spread(scene, CHALLENGE_RUNGS - kOwn)
-  const rungs = [...spread(own, kOwn), ...sceneRungs].sort(byRating).reverse()
-  if (!rungs.length) return null
+  // lowest rated first; on a tie, the weaker first
+  const rungs = all.sort(
+    (x, y) => rating(x) - rating(y) || strength(x) - strength(y),
+  )
   return {
     rungs,
-    ratings: Object.fromEntries(rungs.map((id) => [id, value(id)])),
+    ratings: Object.fromEntries(rungs.map((id) => [id, rating(id)])),
     sceneRungs,
     decisions: [],
   }

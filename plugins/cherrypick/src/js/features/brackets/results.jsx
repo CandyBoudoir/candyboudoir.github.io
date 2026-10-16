@@ -14,7 +14,7 @@ import * as BR from '../../model/brackets.js'
 import { championsRoundPool } from '../../model/bracketSetup.js'
 import { andList, fmtStars, genderLabel, pronoun } from '../../model/util.js'
 import { customFieldUrl } from '../../data/listFilter.js'
-import { NAME_S } from '../../name.js'
+import { NAME_S, PLUGIN_ROUTE } from '../../name.js'
 import { closeDialog, openDialog } from '../../ui/dialogs.jsx'
 import { useAppState } from '../../ui/hooks.js'
 import {
@@ -139,15 +139,18 @@ function ChampionStars({ b }) {
 // scene played, and the Challenge round was skipped, lost at once or not
 // there), the user's rating of the champion sets the scale: the rest step
 // down from it, half a star a round. lost: the champion lost its first
-// challenge, which the card above says.
-export function ChampionPrompt({ b, name, them, lost = false }) {
+// challenge, which the card above says. auto: ratings apply when the
+// champion screen closes (the autoApply setting).
+export function ChampionPrompt({ b, name, them, lost = false, auto = false }) {
   const value = b.championRating ?? null
   const st = BR.challengeState(b)
   return (
     <div className="card cherrypick-fixes cherrypick-champ-rate">
       <p className="mb-2">
         {value != null
-          ? `${name}: ${fmtStars(value / 20)}★. Apply to my ratings sets it, and the rest below it.`
+          ? auto
+            ? `${name}: ${fmtStars(value / 20)}★, and the rest below ${them}.`
+            : `${name}: ${fmtStars(value / 20)}★. Apply to my ratings sets it, and the rest below it.`
           : lost
             ? `How many stars for ${name}? The rest are rated below ${them}.`
             : `None of this bracket's ${b.kind === 'performer' ? 'performers' : 'scenes'} had a rating of yours to measure against. How many stars for ${name}? The rest are rated below ${them}.`}
@@ -169,8 +172,9 @@ export function ChampionPrompt({ b, name, them, lost = false }) {
 }
 
 // The Challenge round on the champion screen: offered, under way, or how
-// it went. proposal: the champion's row in Apply, once the round placed it.
-function ChallengeCard({ b, st, name, them, proposal }) {
+// it went. proposal: the champion's row in Apply, once the round placed it;
+// auto: ratings apply when the champion screen closes.
+function ChallengeCard({ b, st, name, them, proposal, auto }) {
   const entrant = useEntrant(b.kind)
   const n = st.rungs.length
   const what = b.kind === 'performer' ? 'performers' : 'scenes'
@@ -244,7 +248,9 @@ function ChallengeCard({ b, st, name, them, proposal }) {
       <p className="mb-1 cherrypick-challenge-outcome">
         {text}
         {proposal
-          ? ` Apply to my ratings sets ${them} at ${fmtStars(proposal.to / 20)}★, and the rest below.`
+          ? auto
+            ? ` That puts ${them} at ${fmtStars(proposal.to / 20)}★, and the rest below.`
+            : ` Apply to my ratings sets ${them} at ${fmtStars(proposal.to / 20)}★, and the rest below.`
           : ''}
       </p>
       <div>
@@ -265,6 +271,8 @@ export function ResultDialog({ id }) {
   const history = useAppState((s) => s.brackets.history)
   const active = useAppState((s) => s.brackets.active)
   const lastFinished = useAppState((s) => s.lastFinished)
+  const auto = useAppState((s) => !!s.settings.autoApply)
+  const rankers = useRankingPlugins(auto)
   const b = history.find((x) => x.id === id)
   const [tree, setTree] = React.useState(false)
   const moved = useMoved(b?.id)
@@ -292,6 +300,10 @@ export function ResultDialog({ id }) {
           (x) => x.id === r.champion && !x.skip && x.to != null,
         )
       : null
+  // what closing sets, with the autoApply setting on
+  const toSet = auto
+    ? (proposals?.rows || []).filter((x) => !x.skip && x.to != null).length
+    : 0
   const wins = b.decisions.filter((d) => d.winner === r.champion).length
   const due =
     isP && b.gender && !b.champions && !active
@@ -334,13 +346,15 @@ export function ResultDialog({ id }) {
               <span>Undo the final pick</span>
             </button>
           ) : null}
-          <button
-            type="button"
-            className="btn btn-secondary cherrypick-apply-open"
-            onClick={() => openDialog({ view: VIEWS.apply, id: b.id })}
-          >
-            {isP ? 'Apply to my performer ratings…' : 'Apply to my ratings…'}
-          </button>
+          {auto ? null : (
+            <button
+              type="button"
+              className="btn btn-secondary cherrypick-apply-open"
+              onClick={() => openDialog({ view: VIEWS.apply, id: b.id })}
+            >
+              {isP ? 'Apply to my performer ratings…' : 'Apply to my ratings…'}
+            </button>
+          )}
           <button
             type="button"
             className="btn btn-primary"
@@ -400,6 +414,7 @@ export function ResultDialog({ id }) {
               name={champ.name}
               them={them}
               proposal={placed}
+              auto={auto}
             />
           ) : null}
           {ask ? (
@@ -408,9 +423,24 @@ export function ResultDialog({ id }) {
               name={champ.name}
               them={them}
               lost={!!challenge?.lostTo}
+              auto={auto}
             />
           ) : null}
           <Applied bracketId={b.id} />
+          {toSet ? (
+            <>
+              <p className="small cherrypick-auto-apply">
+                Closing this sets {toSet} {isP ? 'performer ' : ''}
+                {plural(toSet, 'rating')} in Stash. You can undo{' '}
+                {toSet === 1 ? 'it' : 'them'} on{' '}
+                <Link to={`${PLUGIN_ROUTE}#hall-of-fame`} onClick={closeDialog}>
+                  {NAME_S} page
+                </Link>
+                .
+              </p>
+              <RankingWarning names={rankers} />
+            </>
+          ) : null}
         </div>
       </div>
       <div className="cherrypick-podium">
@@ -463,10 +493,11 @@ export function ResultDialog({ id }) {
 // ------------------------------------------------------------ Apply (preview)
 
 // Ascension, HotOrNot and Xenith, when installed and enabled (null while
-// Stash is asked)
-function useRankingPlugins() {
+// Stash is asked, or when not wanted)
+function useRankingPlugins(wanted = true) {
   const [names, setNames] = React.useState(null)
   React.useEffect(() => {
+    if (!wanted) return undefined
     let live = true
     installedRankingPlugins()
       .then((n) => live && setNames(n))
@@ -474,7 +505,7 @@ function useRankingPlugins() {
     return () => {
       live = false
     }
-  }, [])
+  }, [wanted])
   return names
 }
 

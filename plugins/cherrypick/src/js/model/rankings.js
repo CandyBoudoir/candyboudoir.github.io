@@ -161,16 +161,30 @@ const PLUGINS = [
   ['Xenith', /^xenith\b/i],
 ]
 
+const enabledAs = (plugins, re) =>
+  (plugins || []).find(
+    (p) => p.enabled && (re.test(p.id) || re.test(p.name || '')),
+  )
+
 // The ranking plugins installed and enabled, by name ("Ascension",
-// "HotOrNot", "Xenith"), from Stash's `plugins` query.
+// "HotOrNot", "Xenith"), from Stash's `plugins` query. A plugin that is
+// installed but disabled writes nothing, so it does not count.
 export function rankingPlugins(plugins) {
-  const out = []
-  for (const [name, re] of PLUGINS)
-    if (
-      (plugins || []).some(
-        (p) => p.enabled && (re.test(p.id) || re.test(p.name || '')),
-      )
-    )
-      out.push(name)
+  return PLUGINS.filter(([, re]) => enabledAs(plugins, re)).map(([n]) => n)
+}
+
+// Restash's id (restash.yml), and its "Also mirror score to rating100"
+// setting
+const RESTASH = /^restash\b/i
+export const RESTASH_MIRROR = 'mirrorToRating100'
+
+// The plugins writing Stash's ratings now, by name: the ranking plugins
+// installed and enabled, and Restash when it is enabled with its mirror on.
+// configs: Stash's configuration.plugins, each plugin's settings by its id.
+export function ratingManagers(plugins, configs) {
+  const out = rankingPlugins(plugins)
+  const restash = enabledAs(plugins, RESTASH)
+  const mirror = restash && configs?.[restash.id]?.[RESTASH_MIRROR]
+  if (mirror === true || mirror === 'true') out.push('Restash')
   return out
 }

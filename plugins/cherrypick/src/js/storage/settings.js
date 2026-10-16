@@ -15,11 +15,32 @@ export const MANIFEST_SETTINGS = [
   { key: 'relativeBadges', type: 'BOOLEAN', def: false },
   { key: 'excludedTags', type: 'STRING', def: '' },
   { key: 'learnFromMatches', type: 'BOOLEAN', def: true },
+  // written at first load by autoApplyToWrite, which can make it false
+  { key: 'autoApply', type: 'BOOLEAN', def: true },
 ]
 export const SETTING_KEYS = MANIFEST_SETTINGS.map((s) => s.key)
 export const SETTING_DEFAULTS = Object.fromEntries(
   MANIFEST_SETTINGS.map((s) => [s.key, s.def]),
 )
+
+/**
+ * Apply bracket ratings automatically: what to write, or null to leave it.
+ * It starts on, unless another plugin manages Stash's ratings (Ascension,
+ * HotOrNot, Xenith, or Restash with its mirror on), whose rankings would
+ * take up every rating applied without a preview. Cherry Pick keeps
+ * following that rule while the switch holds the value it last wrote
+ * (`wrote`, the autoApplyDefault key), so installing or removing such a
+ * plugin moves it; once the user sets it otherwise, it is theirs.
+ * @param {{ value: unknown, wrote: boolean|null, managed: boolean }} input
+ * @returns {boolean|null}
+ */
+export function autoApplyToWrite({ value, wrote, managed }) {
+  const want = !managed
+  const v = value === 'true' ? true : value === 'false' ? false : value
+  if (v == null) return want
+  if (wrote != null && v === wrote && want !== wrote) return want
+  return null
+}
 
 // Stash keeps a plugin's settings in a map, so Settings › Plugins lists them
 // in no fixed order; Cherry Pick sorts its own into the manifest's.

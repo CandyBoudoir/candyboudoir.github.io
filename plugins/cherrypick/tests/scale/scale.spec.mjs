@@ -14,7 +14,7 @@
 // CI never runs it: the compatibility runs select specs by "contract".
 import { expect, test } from '@playwright/test'
 import { readFile, writeFile } from 'node:fs/promises'
-import { gql } from '../stash.mjs'
+import { gql, setAutoApply } from '../stash.mjs'
 
 const summary = process.env.SCALE_SUMMARY
   ? JSON.parse(await readFile(process.env.SCALE_SUMMARY, 'utf8'))
@@ -53,6 +53,9 @@ test.beforeAll(async ({ browser }) => {
     profile: summary?.profile ?? 'copy',
   }
   metrics.library = library
+  // The walk times Apply's preview, so the champion screen keeps its Apply
+  // button
+  await setAutoApply(false)
   const context = await browser.newContext({
     viewport: { width: 1440, height: 900 },
   })
@@ -451,6 +454,7 @@ test('Settings › Plugins lists every Cherry Pick setting', async () => {
     'Score badges on cards',
     'More like this',
     'Learn from Ascension, HotOrNot and Xenith matches',
+    'Apply bracket ratings automatically',
   ])
     await expect(page.getByText(name, { exact: true }).first()).toBeVisible({
       timeout: 30_000,

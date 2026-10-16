@@ -5,7 +5,10 @@ import {
   fromConfig,
   toConfig,
 } from '../../src/js/storage/tier1.js'
-import { SETTING_DEFAULTS } from '../../src/js/storage/settings.js'
+import {
+  autoApplyToWrite,
+  SETTING_DEFAULTS,
+} from '../../src/js/storage/settings.js'
 
 // A fake Stash (one plugin map), a fake browser mirror and a clock.
 function rig({ settingsOpen = false } = {}) {
@@ -187,4 +190,23 @@ test('the first write after a removal keeps the tombstone', async () => {
   const { map } = await a.tier1.load()
   assert.deepEqual(fromConfig(map).dontLearn, [])
   assert.equal(a.box.mirror, null)
+})
+
+test('Apply bracket ratings automatically: on unless another plugin manages ratings, until the user sets it', () => {
+  assert.equal(SETTING_DEFAULTS.autoApply, true)
+  const w = (value, wrote, managed) =>
+    autoApplyToWrite({ value, wrote, managed })
+  // first load: the default
+  assert.equal(w(undefined, null, false), true)
+  assert.equal(w(null, null, true), false, 'Ascension and the like: off')
+  // untouched since Cherry Pick wrote it: it follows the plugins
+  assert.equal(w(true, true, true), false, 'a ranking plugin turned on since')
+  assert.equal(w(false, false, false), true, 'and turned off again')
+  assert.equal(w('true', true, true), false, 'a value Stash returns as text')
+  assert.equal(w(true, true, false), null, 'nothing to change')
+  // the user set it: theirs
+  assert.equal(w(false, true, false), null)
+  assert.equal(w(true, false, true), null)
+  // a map from before the setting's rule was kept: theirs as well
+  assert.equal(w(true, null, true), null)
 })

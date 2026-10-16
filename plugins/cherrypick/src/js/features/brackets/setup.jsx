@@ -378,16 +378,22 @@ export function GenderGrid({ listFilter, choice: given, picked }) {
 
 const an = (n) => ([8, 11, 18].includes(n) ? 'an' : 'a')
 
-// Size and pool, laid out like the performer sheet. A pool of 4 to 15 keeps
-// 16 on and plays every scene, some taking byes; under 4 every size
-// is off and a card says why.
+// Size and pool, laid out like the performer sheet. The pool's rated
+// scenes wait for the Challenge round while 4 unrated ones can play
+// (clipEntrants). Fewer than 16 that play keeps 16 on and plays every one,
+// some taking byes; a pool under 4 turns every size off and a card says why.
 export function ClipSetup({ ids, poolLabel, poolNote, short, origin }) {
+  const M = useAppState((s) => s.M)
   const [pref, setPref] = React.useState(BR.DEFAULT_SIZE)
   const n = ids.length
+  const e = M ? BR.clipEntrants(M, ids).length : n
+  const rated = M
+    ? ids.filter((id) => BR.entrantRole(M, 'clip', id) === 'anchor').length
+    : 0
   const tooFew = n < BR.MIN_CLIP_POOL
-  const all = n < BR.DEFAULT_SIZE
-  const shown = tooFew ? null : all ? BR.DEFAULT_SIZE : BR.resolveSize(pref, n)
-  const plays = all ? n : shown
+  const all = e < BR.DEFAULT_SIZE
+  const shown = tooFew ? null : all ? BR.DEFAULT_SIZE : BR.resolveSize(pref, e)
+  const plays = all ? e : shown
   const start = () => startClipBracket({ ids, poolLabel, origin, size: shown })
   return (
     <Dialog
@@ -418,21 +424,24 @@ export function ClipSetup({ ids, poolLabel, poolNote, short, origin }) {
     >
       <div className="cherrypick-setup cherrypick-clip-setup">
         <SizePicker
-          n={n}
+          n={e}
           shown={shown}
           floor={BR.MIN_CLIP_POOL}
           onPick={setPref}
         />
-        {all && !tooFew ? <ByesNote n={n} /> : null}
+        {all && !tooFew ? <ByesNote n={e} /> : null}
 
         <h6 className="text-muted">Pool</h6>
         <p className="cherrypick-clip-pool mb-0">
           {poolLabel} <span className="small text-muted">{poolNote}</span>
         </p>
-        <p className="small text-muted cherrypick-new-faces">
-          Scenes you haven&apos;t rated play first. The ones you&apos;ve rated
-          wait for the champion in a Challenge round.
-        </p>
+        {rated ? (
+          <p className="small text-muted cherrypick-new-faces">
+            {e < n
+              ? `${rated} ${plural(rated, "scene you've rated sits", "scenes you've rated sit")} out, and the champion meets ${rated > BR.CHALLENGE_RUNGS ? `up to ${BR.CHALLENGE_RUNGS} of them` : rated === 1 ? 'it' : 'them'} in a Challenge round.`
+              : `Fewer than ${BR.MIN_CLIP_POOL} scenes here have no rating of yours, so the ones you've rated play too.`}
+          </p>
+        ) : null}
 
         {tooFew ? (
           <div className="card cherrypick-fixes cherrypick-clip-short">

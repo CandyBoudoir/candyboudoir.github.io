@@ -64,6 +64,16 @@ export function demoScene(ids, { rated, played }, plan = DEMO) {
   return ids.scenes[s.title]
 }
 
+// Apply bracket ratings automatically, set as the user would. Off, the
+// champion screen offers Apply to my ratings and its preview; on, closing
+// the screen sets the ratings. Set it before the page loads.
+export async function setAutoApply(on) {
+  await setPluginSettings(PLUGIN_ID, {
+    ...((await pluginConfig()) || {}),
+    autoApply: on,
+  })
+}
+
 // The demo performers a bracket counts as candidates: no rating of their
 // own (with ownRatings false, as if every performer were unrated) and fewer
 // than two rated scenes, which would anchor them at their average
