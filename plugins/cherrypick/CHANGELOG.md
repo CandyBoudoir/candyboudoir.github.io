@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+- Your score now shows on scenes whose only rating another plugin set: Ascension's or Xenith's Elo score, the random starting rating of Ascension's Prime tasks, or Restash's mirrored score. Cherry Pick already counted those scenes as unrated, but hid Your score on them, so the scenes Prime Unrated Scenes primed lost it. It takes the card's rating corner, where Ascension and Xenith already hide Stash's rating, and shows beside the stars on the scene page. A rating you set yourself still hides it.
+- Your score's badge dims the cover behind it with a half-black background instead of a backdrop filter, which stopped a page with a few dozen badges from rendering in WebKit on Linux.
+- Checked live beside Ascension 1.4.1 (its battle dialog in every mode, Performer Statistics, the Metrics Dashboard and every task, at 390px under Juicy and Leather too) and Restash 0.3.0 (its scoring with the mirror off and on, and Restore Ratings).
+
 ## 0.1.0
 
 First release, for Stash v0.31.1, under the AGPL-3.0.

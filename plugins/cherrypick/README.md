@@ -2,7 +2,7 @@
 
 A [Stash](https://github.com/stashapp/stash) plugin that learns what you like from your own ratings and plays, and shows it inside Stash's pages: a For you row on the front page, Your score on scenes you haven't rated, More like this on scene pages, and performer and scene brackets that sharpen what it learns. It needs no account and no setup. A StashDB key, if you have one in Stash, adds popularity and the scenes you don't have.
 
-Cherry Pick 0.1.0 is built and tested on Stash v0.31.1.
+Cherry Pick 0.1.1 is built and tested on Stash v0.31.1.
 
 ![The front page with Cherry Pick: For you first, each card saying why it is there, then a row of one performer's scenes](docs/screenshots/front.png)
 
@@ -75,7 +75,7 @@ With a StashDB key in Settings > Metadata Providers, Cherry Pick uses it straigh
 
 ### With Ascension, HotOrNot, Xenith or Restash
 
-Ascension, HotOrNot and Xenith rank performers and scenes by Elo and keep the score in Stash's rating. Restash keeps a score in its own custom fields, and its "Also mirror score to rating100" setting writes that score over Stash's rating too. Cherry Pick reads a rating as yours only when none of these plugins set it. A record carrying Elo match history (the `hotornot_stats`, `elo_matches`, `performer_record`, `scene_record`, `xenith_stats` or `xenith_record` custom field) counts as unrated, and so does a record whose rating equals its `restash_score`. The random starting ratings Ascension's Prime tasks give unrated performers and scenes count as unrated too, and Cherry Pick recognises them by their shape: one value from 1 to 9 shared by most of them, one from 25 to 39, and 40. Your score, For you and the performer lines learn from the ratings you set yourself. A rating you set by hand that equals the record's Restash score reads as Restash's.
+Ascension, HotOrNot and Xenith rank performers and scenes by Elo and keep the score in Stash's rating. Restash keeps a score in its own custom fields, and its "Also mirror score to rating100" setting writes that score over Stash's rating too. Cherry Pick reads a rating as yours only when none of these plugins set it. A record carrying Elo match history (the `hotornot_stats`, `elo_matches`, `performer_record`, `scene_record`, `xenith_stats` or `xenith_record` custom field) counts as unrated, and so does a record whose rating equals its `restash_score`. The random starting ratings Ascension's Prime tasks give unrated performers and scenes count as unrated too, and Cherry Pick recognises them by their shape: one value from 1 to 9 shared by most of them, one from 25 to 39, and 40. Your score, For you and the performer lines learn from the ratings you set yourself. A rating you set by hand that equals the record's Restash score reads as Restash's. With Restash's mirror on, every record it scores carries its score, yours included, so Cherry Pick finds none of your ratings there until its Restore Ratings task puts them back. Your score shows on a scene these plugins rated as on one you haven't: on its card, in place of the plugin's rating (Ascension and Xenith already put their own badges there), and beside the stars on its page.
 
 Apply never rates a performer or scene that Ascension, HotOrNot or Xenith ranks or whose rating is Restash's score, and its preview lists them as kept. When Ascension, HotOrNot or Xenith is installed, the preview says it will pick up every rating you apply, since its rankings start from Stash's ratings. Cherry Pick's custom fields sit beside theirs, and Remove Cherry Pick data removes only its own.
 
@@ -100,7 +100,7 @@ Settings > Plugins > Cherry Pick switches each piece on or off. All start on exc
 | Hall of Fame row                                  | Your bracket champions on the front page.                                                   |
 | More like this                                    | The rows under the player on scene pages.                                                   |
 | Show scenes you don't have                        | StashDB scenes in More like this and on performer pages.                                    |
-| Score badges on cards                             | Your score in the rating corner of unrated scenes. See With Stash Curator above.            |
+| Score badges on cards                             | Your score in the rating corner of scenes you haven't rated. See With Stash Curator above.  |
 | Your score on scene pages                         | "likely 4★ for you" beside the stars.                                                       |
 | Crowns and medals on performer cards              | Bracket champions and finalists.                                                            |
 | For you line in performer details                 | How you rate their scenes and how they do in your brackets.                                 |
