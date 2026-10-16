@@ -13,3 +13,4 @@ First release, for Stash v0.31.1.
 - With a StashDB key: how widely a scene is held, its rank among a performer's scenes, and a performer's scenes you don't have. Connect StashDB helps you get a key and adds it to Stash.
 - Not interested and Don't learn from this, eleven switches and a tag exclusion list under Settings > Plugins, and Cherry Pick's own page with Remove Cherry Pick data.
 - Nothing appears while a scene plays.
+- Beside Ascension or HotOrNot: the ratings they set (their Elo scores and Ascension's Prime) stay out of what Cherry Pick learns, Apply never rates a record they rank and says when they will pick up its ratings, and Your score shows beside Ascension's badge on scene cards.

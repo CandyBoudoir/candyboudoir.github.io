@@ -67,6 +67,12 @@ With a StashDB key in Settings > Metadata Providers, Cherry Pick uses it straigh
 
 ![A performer's StashDB scenes that are not in the library, most popular first](docs/screenshots/not-in-library.png)
 
+### With Ascension or HotOrNot
+
+Ascension and HotOrNot rank performers and scenes by Elo and keep the score in Stash's rating. Cherry Pick reads a rating as yours only when neither plugin set it. A record carrying their match history (the `hotornot_stats`, `elo_matches`, `performer_record` or `scene_record` custom field) counts as unrated, and so do the random starting ratings Ascension's Prime tasks give unrated performers and scenes, which Cherry Pick recognises by their shape: one value from 1 to 9 shared by most of them, one from 25 to 39, and 40. Your score, For you and the performer lines learn from the ratings you set yourself.
+
+Apply never rates a performer or scene that Ascension or HotOrNot ranks, and its preview lists them as kept. When either plugin is installed, the preview says it will pick up every rating you apply, since its rankings start from Stash's ratings. Cherry Pick's custom fields sit beside theirs, and Remove Cherry Pick data removes only its own.
+
 ## Settings
 
 Settings > Plugins > Cherry Pick switches each piece on or off. All start on except Relative badge style.
@@ -93,7 +99,7 @@ Cherry Pick runs in Stash's web interface and keeps its data in your Stash:
 
 - **Stash's plugin configuration** (`config.yml`): the settings above, the Hall of Fame, a bracket in progress, Not interested, Don't learn, applied ratings and whether you turned StashDB off. A few kilobytes.
 - **Your performers' custom fields**: the three bracket fields above, written once when a bracket ends.
-- **Your Stash ratings**: only when you choose Apply to my performer ratings, and Undo puts them back.
+- **Your Stash ratings**: only when you choose Apply to my performer ratings, never on a record Ascension or HotOrNot ranks, and Undo puts them back.
 
 Your browser keeps only what Cherry Pick can rebuild from Stash: a copy of your library for a fast start, the taste model, the StashDB cache and which For you cards you opened. A new browser rebuilds them.
 
