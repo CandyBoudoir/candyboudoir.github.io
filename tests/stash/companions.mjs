@@ -5,6 +5,26 @@
 // and usePlugins leaves them enabled. Each is pinned to one release: its zip,
 // which Stash checks against sha256 as it installs it, at a fixed commit when
 // the author keeps the zip in git.
+const CURATOR_RELEASE =
+  'https://github.com/mrx-31415/stash-curator/releases/download/v0.36.0'
+const CURATOR_ZIPS = {
+  'linux-x64': [
+    'stash-curator-linux-amd64.zip',
+    '4e997b78d325d909ba1b01c040147ff0dc52b94e5361ebcdd864abf6d787c1c5',
+  ],
+  'darwin-arm64': [
+    'stash-curator-darwin-arm64.zip',
+    '1d54e6cd42c3e8bbb38abe6d50ad5efb4980c270b29d3ada9f23fdcbd019334c',
+  ],
+}
+// Stash Curator's zip for the machine Stash runs on, linux-amd64 by default
+function curatorZip() {
+  const [file, sha256] =
+    CURATOR_ZIPS[`${process.platform}-${process.arch}`] ??
+    CURATOR_ZIPS['linux-x64']
+  return { path: `${CURATOR_RELEASE}/${file}`, sha256 }
+}
+
 export const COMPANIONS = {
   // Ascension 1.4.1, the Elo ranking plugin (a fork of HotOrNot) from
   // https://github.com/Servbot91/Sakotos-Stash-Repo
@@ -43,6 +63,26 @@ export const COMPANIONS = {
         '1aedd8f9ed57bbbee8d8a5e483482359edd0d0458cb4add2a1a8e69aa08c2123',
     },
     enable: ['hotornot'],
+    disable: [],
+  },
+  // Stash Curator 0.36.0, local recommendations that score scenes and
+  // performers on Stash's own cards, from
+  // https://github.com/mrx-31415/stash-curator (AGPL-3.0). Its zip carries a
+  // compiled backend, one zip per platform: linux-amd64 in CI, darwin-arm64
+  // for a local run on a Mac. Both are the builds attached to the v0.36.0
+  // release, which later releases leave in place; its GitHub Pages index
+  // serves only the newest. Its manifest runs `python` (a launcher for the
+  // backend), so Stash needs one on its PATH: where there is only python3,
+  // link it as python.
+  curator: {
+    package: {
+      id: 'stash-curator',
+      name: 'Stash Curator',
+      version: '0.36.0',
+      date: '2026-10-14 18:50:51',
+      ...curatorZip(),
+    },
+    enable: ['stash-curator'],
     disable: [],
   },
 }
