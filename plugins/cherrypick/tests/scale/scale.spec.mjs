@@ -119,7 +119,7 @@ async function forYouScenes() {
 }
 
 // Plays a bracket that is open in the play dialog to its end, picking with
-// the given key, and returns how many picks it took.
+// the given key ('random' for either), and returns how many picks it took.
 async function playOut(key = 'ArrowLeft') {
   const play = page.locator('.cherrypick-play-modal')
   const result = page.locator('.cherrypick-result-modal')
@@ -129,7 +129,13 @@ async function playOut(key = 'ArrowLeft') {
       await expect(result).toBeVisible({ timeout: 10_000 })
       break
     }
-    await page.keyboard.press(key)
+    await page.keyboard.press(
+      key === 'random'
+        ? Math.random() < 0.5
+          ? 'ArrowLeft'
+          : 'ArrowRight'
+        : key,
+    )
     picks++
     await page.waitForTimeout(120)
     if (picks > 200) throw new Error('A bracket did not end')
@@ -336,7 +342,8 @@ test('a 64-performer bracket from Options, with Apply and Undo', async () => {
 
 test('four brackets crown four champions, then a Champions round', async () => {
   const champions = new Set()
-  for (let i = 0; i < 8 && champions.size < 4; i++) {
+  // Random picks, so a small pool still crowns four different champions.
+  for (let i = 0; i < 12 && champions.size < 4; i++) {
     await page.goto('/performers')
     const button = visible('.cherrypick-bracket-button')
     await expect(button).toBeVisible({ timeout: 30_000 })
@@ -344,7 +351,7 @@ test('four brackets crown four champions, then a Champions round', async () => {
     await expect(page.locator('.cherrypick-play-modal')).toContainText(
       '16 performers',
     )
-    await playOut(i % 2 ? 'ArrowRight' : 'ArrowLeft')
+    await playOut('random')
     champions.add(
       await page
         .locator('.cherrypick-result-modal .cherrypick-champ-name')
