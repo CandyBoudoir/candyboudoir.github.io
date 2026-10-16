@@ -1,18 +1,22 @@
-// Cherry Pick beside the Elo ranking plugins the compatibility tests can
-// install (companions.mjs): Ascension 1.4.1 and HotOrNot 1.0.0. Each block
-// runs when prepare.mjs installed its plugin (COMPANIONS=ascension or
-// COMPANIONS=hotornot) and is skipped otherwise, and when both are installed:
-// Ascension is a fork of HotOrNot and the two claim the same element ids, so
-// they fight over a performer's page whatever Cherry Pick does. Both plugins'
-// pieces render on the pages they share, nothing throws, they don't overlap,
-// a dialog's buttons are never covered, and Apply never writes over a
-// performer the other plugin ranks and says that plugin will pick up what it
-// sets.
+// Cherry Pick beside the plugins the compatibility tests can install
+// (companions.mjs): the Elo ranking plugins Ascension 1.4.1 and HotOrNot
+// 1.0.0, and Stash Curator 0.36.0. Each block runs when prepare.mjs installed
+// its plugin alone (COMPANIONS=ascension, hotornot or curator) and is skipped
+// otherwise: Ascension is a fork of HotOrNot and the two claim the same
+// element ids, so they fight over a performer's page whatever Cherry Pick
+// does. Beside a ranking plugin, both plugins' pieces render on the pages
+// they share, nothing throws, they don't overlap, a dialog's buttons are
+// never covered, and Apply never writes over a performer the other plugin
+// ranks and says that plugin will pick up what it sets. Beside Curator, whose
+// patches change the list components' arguments and whose criteria Stash's
+// schema lacks, the lists render and Bracket works on a list it filters.
 import { expect, test } from '@playwright/test'
 import { companionPluginIds } from '../../../tests/stash/companions.mjs'
 import {
   forYouCards,
   gql,
+  PLUGIN_ID,
+  setPluginSettings,
   setUpCherryPick,
   tearDownCherryPick,
 } from './stash.mjs'
@@ -405,3 +409,162 @@ for (const [key, side] of Object.entries(SIDE)) {
     })
   })
 }
+
+// A list filtered on one of Curator's criteria, "is greater than 0", in
+// Stash's URL encoding
+const curatorFilter = (path, type) =>
+  `${path}?c=(%22type%22:%22${type}%22,%22modifier%22:%22GREATER_THAN%22,%22value%22:%220%22)`
+
+// Curator's pieces on Stash's own cards and its controls on a list
+const CURATOR = '.curator-scene-card-badge, .curator-performer-card-badge'
+
+// Stash's answers that rejected a query outright, as "400 CherryPickListScenes"
+function rejected(page) {
+  const out = []
+  page.on('response', (r) => {
+    if (r.url().endsWith('/graphql') && r.status() === 400)
+      out.push(`400 ${r.request().postDataJSON()?.operationName}`)
+  })
+  return out
+}
+
+test.describe('beside Stash Curator', () => {
+  test.skip(
+    companionPluginIds().length !== 1 ||
+      !companionPluginIds().includes('stash-curator'),
+    'Stash Curator is not installed alone (COMPANIONS=curator)',
+  )
+
+  let demo
+  test.beforeAll(async () => {
+    ;({ demo } = await setUpCherryPick())
+    // Curator scores what its last sync saw: the demo library's plays
+    await gql(
+      'mutation { runPluginTask(plugin_id: "stash-curator", task_name: "Sync and build recommendations") }',
+    )
+    await expect
+      .poll(async () => (await gql('{ jobQueue { id } }')).jobQueue?.length, {
+        timeout: 120_000,
+      })
+      .toBeFalsy()
+  })
+  test.afterAll(tearDownCherryPick)
+  // A bracket left paused hides the list's Bracket button
+  test.beforeEach(() => setPluginSettings(PLUGIN_ID, {}))
+
+  test('both lists render, with both plugins on their cards and apart', async ({
+    page,
+  }) => {
+    const errors = []
+    page.on('pageerror', (e) => errors.push(`${page.url()}: ${e.message}`))
+    const bracket = page
+      .locator('.cherrypick-bracket-button')
+      .filter({ visible: true })
+
+    await page.goto('/scenes?sortby=title&perPage=120')
+    await expect(page.locator('.scene-card').first()).toBeVisible({
+      timeout: 20_000,
+    })
+    await expect(
+      page.locator('.scene-card .curator-scene-card-badge').first(),
+    ).toBeVisible({ timeout: 20_000 })
+    await expect(
+      page.locator('.scene-card .cherrypick-score-banner').first(),
+    ).toBeVisible({ timeout: 20_000 })
+    await expect(bracket).toHaveCount(1)
+    expect(await overlaps(page, CURATOR)).toEqual([])
+
+    await page.goto('/performers')
+    await expect(
+      page.locator('.performer-card .curator-performer-card-badge').first(),
+    ).toBeVisible({ timeout: 20_000 })
+    await expect(bracket).toHaveCount(1, { timeout: 20_000 })
+    expect(await overlaps(page, CURATOR)).toEqual([])
+
+    // A performer's Scenes tab is the same scene list
+    await page.goto(`/performers/${Object.values(demo.performers)[0]}/scenes`)
+    await expect(page.locator('.scene-card').first()).toBeVisible({
+      timeout: 20_000,
+    })
+    await expect(
+      page.locator('.detail-item.cherrypick-performer-line'),
+    ).toBeVisible({ timeout: 20_000 })
+
+    expect(errors).toEqual([])
+  })
+
+  test('Bracket on a Scenes list filtered by Curator Appeal leaves it out and says so', async ({
+    page,
+  }) => {
+    const bad = rejected(page)
+    await page.goto(curatorFilter('/scenes', 'curator_appeal'))
+    await expect(page.locator('.scene-card').first()).toBeVisible({
+      timeout: 20_000,
+    })
+    const bracket = page
+      .locator('.cherrypick-bracket-button')
+      .filter({ visible: true })
+    await expect(bracket).toBeEnabled({ timeout: 20_000 })
+    await expect(bracket).toHaveAttribute(
+      'title',
+      /watched scenes in this list · Curator Appeal not applied$/,
+    )
+    await bracket.click()
+    await expect(page.locator('.cherrypick-play-modal')).toContainText(
+      'Curator Appeal not applied',
+    )
+    expect(bad).toEqual([])
+  })
+
+  test('Bracket on a Performers list filtered by Curator affinity leaves it out and says so', async ({
+    page,
+  }) => {
+    const bad = rejected(page)
+    await page.goto(curatorFilter('/performers', 'curator_affinity'))
+    await expect(page.locator('.performer-card').first()).toBeVisible({
+      timeout: 20_000,
+    })
+    const bracket = page
+      .locator('.cherrypick-bracket-button')
+      .filter({ visible: true })
+    await expect(bracket).toBeEnabled({ timeout: 20_000 })
+    await expect(bracket).toHaveAttribute(
+      'title',
+      'Bracket the performers in this list · Curator affinity not applied',
+    )
+    await bracket.click()
+    await expect(page.locator('.cherrypick-play-modal')).toContainText(
+      'Curator affinity not applied',
+    )
+    expect(bad).toEqual([])
+  })
+
+  test("Bracket says why when Stash rejects the list's filter", async ({
+    page,
+  }) => {
+    // Without Stash's filter fields, Curator's key goes to Stash as it is
+    await page.route('**/graphql', (route) =>
+      route.request().postDataJSON()?.operationName === 'CherryPickFilterFields'
+        ? route.fulfill({ status: 500, body: '' })
+        : route.fallback(),
+    )
+    await page.goto(curatorFilter('/scenes', 'curator_appeal'))
+    const bracket = page
+      .locator('.cherrypick-bracket-button')
+      .filter({ visible: true })
+    await expect(bracket).toHaveAttribute(
+      'title',
+      "Can't bracket this list: unknown field (scene_filter.curator_appeal)",
+      { timeout: 20_000 },
+    )
+    await expect(bracket).toBeDisabled()
+
+    await page.goto(curatorFilter('/performers', 'curator_affinity'))
+    await expect(bracket).toHaveAttribute(
+      'title',
+      "Can't bracket this list: unknown field (performer_filter.curator_affinity)",
+      { timeout: 20_000 },
+    )
+    await expect(bracket).toBeDisabled()
+  })
+})

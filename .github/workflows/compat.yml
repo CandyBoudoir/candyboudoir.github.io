@@ -69,6 +69,10 @@ jobs:
       - run: pnpm build
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: pnpm exec playwright install --with-deps chromium
+      # Stash Curator's manifest runs `python`; the runner may have only python3
+      - name: Python for companion plugins
+        if: matrix.leg.companions
+        run: command -v python || sudo ln -s "$(command -v python3)" /usr/local/bin/python
       - name: Start Stash ${{ matrix.leg.name }}
         id: prepare
         run: |

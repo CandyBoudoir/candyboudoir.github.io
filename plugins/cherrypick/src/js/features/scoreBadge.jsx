@@ -2,7 +2,7 @@
 // draws a scene card. Stash's own RatingBanner sits in SceneCard.Image, so
 // the badge goes there too, in the same markup (.rating-banner) so themes
 // style it, outlined to set it apart from a real rating.
-import { patch, React } from '../runtime/api.js'
+import { patchAfter, React } from '../runtime/api.js'
 import { badgeLabel, fmtStars } from '../model/index.js'
 import { NAME_S } from '../name.js'
 import { useModel, useSettings } from '../ui/hooks.js'
@@ -56,7 +56,7 @@ function ScoreCorner({ scene }) {
 }
 
 export function registerScoreBadge() {
-  patch.after('SceneCard.Image', (props, _, result) => (
+  patchAfter('SceneCard.Image', (props, result) => (
     <>
       {result}
       <Safe name="score badge">
