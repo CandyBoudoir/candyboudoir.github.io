@@ -19,7 +19,11 @@
 // holds the shared library's names, not these. The StashDB layer adds its
 // own entries when it needs them.
 //
-// Usage: node plugins/cherrypick/tests/demo-library.mjs seed|remove
+// A sparse variant (SPARSE, `seed sparse`) has the same records with one
+// rated scene and a dozen played, for how Cherry Pick starts in a library
+// that gives the model almost nothing.
+//
+// Usage: node plugins/cherrypick/tests/demo-library.mjs seed [sparse]|remove
 // Env: STASH_URL (default http://127.0.0.1:9999)
 import { execFile } from 'node:child_process'
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
@@ -142,6 +146,8 @@ const SCENES = 90
 const NEVER_PLAYED = 15
 const RATED_UNPLAYED = 2
 const RATED_PLAYED = 52
+const SPARSE_RATED = 1
+const SPARSE_PLAYED = 12
 const DAY = 24 * 60
 
 // mulberry32: the same plan on every machine and every run.
@@ -157,7 +163,7 @@ function random(seed) {
 
 // The whole library as data: names, casts, ratings, and plays and O events
 // as minutes before the anchor (the start of the UTC day the seed runs).
-function plan() {
+function plan({ sparse = false } = {}) {
   const r = random(43)
   const int = (lo, hi) => lo + Math.floor(r() * (hi - lo + 1))
   const pick = (list) => list[Math.floor(r() * list.length)]
@@ -324,6 +330,20 @@ function plan() {
       .map((ago) => ago - 15)
       .sort((a, b) => b - a)
   }
+  // Sparse: the same names, casts, studios, tags and favourites, as someone
+  // who rarely rates and mostly watches outside Stash's player would have
+  // them. One scene rated, a dozen played, no performer ratings. Every
+  // random draw above still happens, so the two plans share their names.
+  if (sparse) {
+    const kept = new Set(played.slice(0, SPARSE_PLAYED))
+    const rate = new Set(played.slice(0, SPARSE_RATED))
+    for (const s of scenes) {
+      if (!rate.has(s)) s.rating100 = null
+      if (kept.has(s)) continue
+      Object.assign(s, { plays: [], os: [], duration: null, resume: null })
+    }
+    for (const p of performers) p.rating100 = null
+  }
   return { performers, studios, tags, scenes }
 }
 
@@ -331,6 +351,7 @@ function plan() {
 // (the taste's score before noise), its rating and its plays and O events in
 // minutes before the anchor seedDemoLibrary returns.
 export const DEMO = plan()
+export const SPARSE = plan({ sparse: true })
 
 const run = promisify(execFile)
 
@@ -477,13 +498,17 @@ const create = async (gql, kind, input) =>
 const timestamp = (anchor, ago) =>
   new Date(anchor - ago * 60_000).toISOString().replace(/\.\d+Z$/, 'Z')
 
-// Removes an earlier seed, then creates the demo library and its history.
-// Plays and O events are placed relative to the start of the UTC day of
-// `now`. Returns the anchor and the new ids by name.
-export async function seedDemoLibrary(gql, { now = Date.now() } = {}) {
+// Removes an earlier seed, then creates the demo library and its history
+// (the sparse one with `sparse`). Plays and O events are placed relative to
+// the start of the UTC day of `now`. Returns the anchor and the new ids by
+// name.
+export async function seedDemoLibrary(
+  gql,
+  { now = Date.now(), sparse = false } = {},
+) {
   await removeDemoLibrary(gql)
   const anchor = Math.floor(now / 86_400_000) * 86_400_000
-  const { performers, studios, tags, scenes } = DEMO
+  const { performers, studios, tags, scenes } = sparse ? SPARSE : DEMO
   const images = await drawImages(performers.length, scenes.length)
 
   const tagIds = {}
@@ -554,12 +579,14 @@ export async function seedDemoLibrary(gql, { now = Date.now() } = {}) {
 
 if (resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url)) {
   const { gql } = await import('../../../tests/stash/helpers.mjs')
-  const command = process.argv[2]
-  if (command === 'seed') {
-    const ids = await seedDemoLibrary(gql)
-    const played = DEMO.scenes.filter((s) => s.plays.length)
+  const [command, variant] = process.argv.slice(2)
+  if (command === 'seed' && (!variant || variant === 'sparse')) {
+    const sparse = variant === 'sparse'
+    const { scenes } = sparse ? SPARSE : DEMO
+    const ids = await seedDemoLibrary(gql, { sparse })
+    const played = scenes.filter((s) => s.plays.length)
     console.log(
-      `Seeded the Cherry Pick demo library: ${Object.keys(ids.scenes).length} scenes (${DEMO.scenes.filter((s) => s.rating100).length} rated, ${played.length} played, ${DEMO.scenes.length - played.length} never played), ${Object.keys(ids.performers).length} performers, ${Object.keys(ids.studios).length} studios, ${Object.keys(ids.tags).length} tags; plays before ${ids.anchor}`,
+      `Seeded the ${sparse ? 'sparse ' : ''}Cherry Pick demo library: ${Object.keys(ids.scenes).length} scenes (${scenes.filter((s) => s.rating100).length} rated, ${played.length} played, ${scenes.length - played.length} never played), ${Object.keys(ids.performers).length} performers, ${Object.keys(ids.studios).length} studios, ${Object.keys(ids.tags).length} tags; plays before ${ids.anchor}`,
     )
   } else if (command === 'remove') {
     const removed = await removeDemoLibrary(gql)
@@ -570,7 +597,7 @@ if (resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url)) {
     )
   } else {
     console.error(
-      'Usage: node plugins/cherrypick/tests/demo-library.mjs seed|remove',
+      'Usage: node plugins/cherrypick/tests/demo-library.mjs seed [sparse]|remove',
     )
     process.exitCode = 1
   }
