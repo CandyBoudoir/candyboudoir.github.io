@@ -411,6 +411,11 @@ for (const [key, side] of Object.entries(SIDE)) {
       await expect(
         page.locator('.performer-card .cherrypick-honours').first(),
       ).toBeVisible({ timeout: 20_000 })
+      // once the other plugin has drawn its own, which can come later
+      if (side.seen.performers)
+        await expect(side.seen.performers(page)).toBeVisible({
+          timeout: 20_000,
+        })
       expect(await overlaps(page, side.theirs)).toEqual([])
       await rankEveryPerformer(side, false)
     })
