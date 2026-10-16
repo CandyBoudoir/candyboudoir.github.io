@@ -5,8 +5,8 @@
 // mark they count as the user's.
 import {
   cancelWrites,
-  patchLibraryPerformer,
-  patchLibraryScene,
+  patchLibraryPerformers,
+  patchLibraryScenes,
   run,
   runMutation,
   store,
@@ -60,6 +60,9 @@ export async function removalCounts() {
 export async function removePluginData() {
   cancelWrites()
   await tier1.remove()
+  // One library update for each list at the end: each update rebuilds the
+  // model.
+  const performers = new Map()
   for (const p of await performersWithFields()) {
     const remove = ownFieldsOn(p.custom_fields)
     await runMutation(PERFORMER_UPDATE, {
@@ -67,8 +70,10 @@ export async function removePluginData() {
     })
     const rest = { ...(p.custom_fields || {}) }
     for (const f of remove) delete rest[f]
-    patchLibraryPerformer(p.id, { custom_fields: rest })
+    performers.set(p.id, { custom_fields: rest })
   }
+  patchLibraryPerformers(performers)
+  const scenes = new Map()
   for (const s of await scenesWithFields()) {
     const data = await runMutation(SCENE_SET_FIELDS, {
       input: {
@@ -76,8 +81,9 @@ export async function removePluginData() {
         custom_fields: { remove: ownFieldsOn(s.custom_fields) },
       },
     })
-    patchLibraryScene(s.id, { custom_fields: data.sceneUpdate.custom_fields })
+    scenes.set(s.id, { custom_fields: data.sceneUpdate.custom_fields })
   }
+  patchLibraryScenes(scenes)
   await clearTier3()
   local.del(KEYS.signals)
   store.set({
