@@ -181,6 +181,11 @@ export function SetupSheet({ listFilter, choice: given, picked: wasPicked }) {
           ))}
         </div>
 
+        <p className="small text-muted cherrypick-new-faces">
+          Performers you haven&apos;t rated play first. The ones you&apos;ve
+          rated wait for the champion in a Challenge round.
+        </p>
+
         {!size ? (
           <PoolFixes gender={choice.gender} n={n} onSetGenders={toGenders} />
         ) : null}
@@ -423,6 +428,10 @@ export function ClipSetup({ ids, poolLabel, poolNote, short, origin }) {
         <h6 className="text-muted">Pool</h6>
         <p className="cherrypick-clip-pool mb-0">
           {poolLabel} <span className="small text-muted">{poolNote}</span>
+        </p>
+        <p className="small text-muted cherrypick-new-faces">
+          Scenes you haven&apos;t rated play first. The ones you&apos;ve rated
+          wait for the champion in a Challenge round.
         </p>
 
         {tooFew ? (

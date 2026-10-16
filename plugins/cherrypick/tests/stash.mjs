@@ -64,6 +64,34 @@ export function demoScene(ids, { rated, played }, plan = DEMO) {
   return ids.scenes[s.title]
 }
 
+// The demo performers a bracket counts as candidates: no rating of their
+// own (with ownRatings false, as if every performer were unrated) and fewer
+// than two rated scenes, which would anchor them at their average
+export function demoCandidates({ ownRatings = true } = {}, plan = DEMO) {
+  const ratedScenes = (name) =>
+    plan.scenes.filter(
+      (s) => s.performers.includes(name) && s.rating100 != null,
+    ).length
+  return new Set(
+    plan.performers
+      .filter((p) => !(ownRatings && p.rating100 != null))
+      .filter((p) => ratedScenes(p.name) < 2)
+      .map((p) => p.name),
+  )
+}
+
+// One bracket pick with the keyboard: the candidate when one meets a rated
+// performer, else the left side, so every candidate gets past its first
+// match against a rated one and Apply always has a row to show
+export async function pickCandidate(page, play, candidates) {
+  const [a, b] = await play
+    .locator('.cherrypick-contender .cherrypick-cont-title')
+    .allInnerTexts()
+  await page.keyboard.press(
+    candidates.has(b) && !candidates.has(a) ? 'ArrowRight' : 'ArrowLeft',
+  )
+}
+
 // The For you row is there once the library and the model are in.
 export const forYouCards = (page) =>
   page.locator(

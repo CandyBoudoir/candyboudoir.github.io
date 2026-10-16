@@ -117,6 +117,30 @@ test('card mark: crown with a count from two titles, else a medal', () => {
   )
 })
 
+test('card mark and line: a trophy for a champion who beat your favorites', () => {
+  assert.deepEqual(honoursMark({ champion: 1, finalist: 0, challenger: 1 }), {
+    kind: 'challenger',
+    count: null,
+    title: 'Bracket champion who beat your favorites',
+  })
+  assert.deepEqual(honoursMark({ champion: 3, finalist: 1, challenger: 1 }), {
+    kind: 'challenger',
+    count: 3,
+    title: 'Bracket champion ×3 who beat your favorites',
+  })
+  assert.equal(
+    honoursMark({ champion: 1, finalist: 0, challenger: 0 }).kind,
+    'champion',
+  )
+  assert.equal(
+    performerLine({
+      honours: { champion: 1, finalist: 0, challenger: 1 },
+      gender: 'FEMALE',
+    }),
+    'Bracket champion · beat your favorites',
+  )
+})
+
 const finished = (champion, finalist, kind = 'performer') => ({
   id: champion + finalist,
   kind,
@@ -134,7 +158,7 @@ test('honours are computed once per Hall of Fame', () => {
   ]
   const h = honoursOf(history)
   assert.equal(honoursOf(history), h, 'the same history gives the same object')
-  assert.deepEqual(h.a, { champion: 2, finalist: 0 })
+  assert.deepEqual(h.a, { champion: 2, finalist: 0, challenger: 0 })
   assert.equal(h.x, undefined, 'clip brackets give no performer honours')
   assert.notEqual(honoursOf([...history]), h)
 })

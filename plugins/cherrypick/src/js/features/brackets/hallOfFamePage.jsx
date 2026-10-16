@@ -1,7 +1,8 @@
 // The Hall of Fame on the plugin page: every finished bracket by gender,
-// with its champion, finalist and semifinalists, size and date; Champions
-// rounds once a gender has four different champions; clip champions; and
-// the applied-rating batches, each with Undo.
+// with its champion, finalist and semifinalists, size and date, and a mark
+// for a champion who won the Challenge round; Champions rounds once a
+// gender has four different champions; clip champions; and the
+// applied-rating batches, each with Undo.
 import {
   components,
   FontAwesomeSolid,
@@ -19,7 +20,18 @@ import { Icon, plural, useEntrant } from './parts.jsx'
 import { AppliedButton, keptText, WINNERS_URL } from './results.jsx'
 
 const { Link } = ReactRouterDOM
-const { faCrown } = FontAwesomeSolid
+const { faCrown, faTrophy } = FontAwesomeSolid
+
+// "Beat your favorites", beside a bracket whose champion won the Challenge
+// round
+function ChallengeMark({ b }) {
+  if (!BR.challengeWon(b)) return null
+  return (
+    <span className="badge badge-warning cherrypick-challenge-badge">
+      <Icon icon={faTrophy || faCrown} /> Beat your favorites
+    </span>
+  )
+}
 
 const day = (iso) =>
   new Date(iso).toLocaleDateString(undefined, {
@@ -112,7 +124,8 @@ function GenderGroup({ gender, label, runs }) {
                 {entrant(b.result.finalist).name} in the final
                 {semis.length ? `; semifinalists ${names(semis)}` : ''} ·{' '}
                 {b.size}
-              </span>
+              </span>{' '}
+              <ChallengeMark b={b} />
             </li>
           )
         })}
@@ -142,7 +155,8 @@ function ClipGroup({ runs }) {
             <span className="text-muted">
               beat {entrant(b.result.finalist).name} in the final ·{' '}
               {b.poolLabel} · {b.seeds.length}
-            </span>
+            </span>{' '}
+            <ChallengeMark b={b} />
           </li>
         ))}
       </ul>

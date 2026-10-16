@@ -35,6 +35,7 @@ export const VIEWS = {
   clipSetup: 'bracket-clip-setup',
   genders: 'bracket-genders',
   play: 'bracket-play',
+  challenge: 'bracket-challenge',
   result: 'bracket-result',
   apply: 'bracket-apply',
 }
@@ -159,6 +160,7 @@ export function startPerformerBracket(choice, listFilter, remember, origin) {
       size: r.size,
       ids: r.ids,
       origin: origin || '/performers',
+      recent: BR.recentEntrants(s.brackets.history, 'performer', choice.gender),
     }),
   )
   return true
@@ -188,7 +190,7 @@ export const openClipSetup = (pool) =>
 // size: the size picked in the sheet (16, 32 or 64); a pool under 16 plays
 // every scene, with byes
 export function startClipBracket({ ids, poolLabel, origin, size }) {
-  const { M } = store.get()
+  const { M, brackets } = store.get()
   const slots = M ? BR.clipSize(ids.length, size) : null
   if (!slots) return false
   begin(
@@ -198,6 +200,7 @@ export function startClipBracket({ ids, poolLabel, origin, size }) {
       size: slots,
       ids,
       origin: origin || null,
+      recent: BR.recentEntrants(brackets.history, 'clip'),
     }),
   )
   return true
@@ -233,12 +236,14 @@ export function startChampionsRound(gender) {
 const fieldWrites = new Map()
 
 function finish(next, result) {
-  const finished = {
+  const done = {
     ...next,
     status: 'done',
     finishedAt: new Date().toISOString(),
     result,
   }
+  const challenge = BR.challengeFor(store.get().M, done, genderOf)
+  const finished = challenge ? { ...done, challenge } : done
   store.set((s) => ({
     brackets: { active: null, history: [...s.brackets.history, finished] },
     lastFinished: finished.id,
@@ -328,6 +333,7 @@ export function undoPick() {
   const reopened = { ...last, championRating: null }
   delete reopened.fieldWrites
   delete reopened.result
+  delete reopened.challenge
   store.set((st) => ({
     brackets: {
       active: {
@@ -360,6 +366,56 @@ export const abandonBracket = () =>
     brackets: { ...s.brackets, active: null },
     dialog: null,
   }))
+
+// ------------------------------------------------------------ the Challenge round
+
+// A finished bracket changed in place (tier 1 keeps the Hall of Fame)
+function updateFinished(id, fn) {
+  store.set((s) => ({
+    brackets: {
+      ...s.brackets,
+      history: s.brackets.history.map((x) => (x.id === id ? fn(x) : x)),
+    },
+  }))
+}
+
+const finishedBracket = (id) =>
+  store.get().brackets.history.find((x) => x.id === id)
+
+// Plays (or goes on with) the champion's Challenge round. A rating the
+// user gave the champion by hand gives way to what the round measures.
+export function startChallenge(id) {
+  updateFinished(id, (b) => ({
+    ...BR.skipChallenge(b, false),
+    championRating: null,
+  }))
+  openDialog({ view: VIEWS.challenge, id })
+}
+
+// against: the anchor on screen, so a late second click is dropped. The
+// pick lands on the bracket as stored then, which the custom-field write of
+// the final may have changed since. Once the round is over, the champion
+// screen shows how it went.
+export function pickChallenge(id, winner, against) {
+  const before = finishedBracket(id)
+  updateFinished(id, (b) => BR.challengePick(b, winner, against))
+  const after = finishedBracket(id)
+  if (after !== before && BR.challengeState(after)?.done)
+    openDialog({ view: VIEWS.result, id })
+}
+
+export function undoChallengePick(id) {
+  updateFinished(id, BR.challengeUndo)
+  openDialog({ view: VIEWS.challenge, id })
+}
+
+// Rate the champion by hand instead
+export const skipChallenge = (id) =>
+  updateFinished(id, (b) => BR.skipChallenge(b))
+
+// Closing the round mid-way keeps its picks: the champion screen offers to
+// go on
+export const leaveChallenge = (id) => openDialog({ view: VIEWS.result, id })
 
 // ------------------------------------------------------------ Apply to my ratings
 
@@ -400,13 +456,9 @@ const patchRated = (kind, patches) =>
 // anchor played: the scale the rest step down from. Apply writes it with
 // them.
 export const setChampionRating = (bracketId, rating100) =>
-  store.set((s) => ({
-    brackets: {
-      ...s.brackets,
-      history: s.brackets.history.map((x) =>
-        x.id === bracketId ? { ...x, championRating: rating100 ?? null } : x,
-      ),
-    },
+  updateFinished(bracketId, (x) => ({
+    ...x,
+    championRating: rating100 ?? null,
   }))
 
 // changes: [{ id, to, provisional }] from the preview. Each record is read

@@ -21,9 +21,11 @@
 import { expect, test } from '@playwright/test'
 import { companionPluginIds } from '../../../tests/stash/companions.mjs'
 import {
+  demoCandidates,
   demoScene,
   forYouCards,
   gql,
+  pickCandidate,
   PLUGIN_ID,
   pluginConfig,
   setPluginSettings,
@@ -393,7 +395,8 @@ const covered = (page, theirs) =>
   }, theirs)
 
 // Plays a 16-performer bracket from the Performers list (or the one at
-// `list`) to its champion
+// `list`) to its champion, the demo's candidates winning past rated
+// performers
 async function playBracket(page, list = '/performers') {
   await page.goto(list)
   const bracket = page
@@ -402,11 +405,12 @@ async function playBracket(page, list = '/performers') {
     .first()
   await expect(bracket).toBeEnabled({ timeout: 20_000 })
   await bracket.click()
-  await expect(page.locator('.cherrypick-play-modal')).toContainText(
-    '16 performers',
-  )
+  const play = page.locator('.cherrypick-play-modal')
+  await expect(play).toContainText('16 performers')
+  // candidates past the rated: Apply always has a row
+  const candidates = demoCandidates()
   for (let i = 0; i < 15; i++) {
-    await page.keyboard.press('ArrowLeft')
+    await pickCandidate(page, play, candidates)
     await page.waitForTimeout(150)
   }
   const result = page.locator('.cherrypick-result-modal')

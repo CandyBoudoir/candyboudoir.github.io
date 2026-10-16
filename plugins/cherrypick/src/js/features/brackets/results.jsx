@@ -1,7 +1,7 @@
 // When a bracket ends: the champion screen (podium, where the results went,
-// the champion's rating when no anchor played, Undo of the final pick, a
-// Champions round when one is due) and the optional, previewed "Apply to my
-// ratings".
+// the Challenge round, the champion's rating when nothing else places it,
+// Undo of the final pick, a Champions round when one is due) and the
+// optional, previewed "Apply to my ratings".
 import {
   components,
   FontAwesomeSolid,
@@ -12,7 +12,7 @@ import { store } from '../../runtime/app.js'
 import { allDecisions, computeWithDecisions } from '../../runtime/engine.js'
 import * as BR from '../../model/brackets.js'
 import { championsRoundPool } from '../../model/bracketSetup.js'
-import { fmtStars, genderLabel, pronoun } from '../../model/util.js'
+import { andList, fmtStars, genderLabel, pronoun } from '../../model/util.js'
 import { customFieldUrl } from '../../data/listFilter.js'
 import { NAME_S } from '../../name.js'
 import { closeDialog, openDialog } from '../../ui/dialogs.jsx'
@@ -22,8 +22,11 @@ import {
   dismissApplied,
   installedRankingPlugins,
   setChampionRating,
+  skipChallenge,
+  startChallenge,
   startChampionsRound,
   undoApplied,
+  undoChallengePick,
   undoPick,
   VIEWS,
 } from './actions.js'
@@ -37,7 +40,7 @@ import {
 } from './parts.jsx'
 
 const { Link } = ReactRouterDOM
-const { faCrown, faCheck, faRotateLeft, faUndo } = FontAwesomeSolid
+const { faCrown, faCheck, faRotateLeft, faTrophy, faUndo } = FontAwesomeSolid
 
 const FIELD_LIST = `${BR.FIELDS.titles}, ${BR.FIELDS.best} and ${BR.FIELDS.last}`
 export const WINNERS_URL = customFieldUrl(BR.FIELDS.titles)
@@ -132,18 +135,127 @@ function ChampionStars({ b }) {
   )
 }
 
-// When no rated performer or scene played, the user's rating of the
-// champion sets the scale: the rest step down from it, half a star a round
-export function ChampionPrompt({ b, name, them }) {
+// When nothing places the champion from below (no rated performer or
+// scene played, and the Challenge round was skipped, lost at once or not
+// there), the user's rating of the champion sets the scale: the rest step
+// down from it, half a star a round. lost: the champion lost its first
+// challenge, which the card above says.
+export function ChampionPrompt({ b, name, them, lost = false }) {
   const value = b.championRating ?? null
+  const st = BR.challengeState(b)
   return (
     <div className="card cherrypick-fixes cherrypick-champ-rate">
       <p className="mb-2">
-        {value == null
-          ? `None of this bracket's ${b.kind === 'performer' ? 'performers' : 'scenes'} had a rating of yours to measure against. How many stars for ${name}? The rest are rated below ${them}.`
-          : `${name}: ${fmtStars(value / 20)}★. Apply to my ratings sets it, and the rest below it.`}
+        {value != null
+          ? `${name}: ${fmtStars(value / 20)}★. Apply to my ratings sets it, and the rest below it.`
+          : lost
+            ? `How many stars for ${name}? The rest are rated below ${them}.`
+            : `None of this bracket's ${b.kind === 'performer' ? 'performers' : 'scenes'} had a rating of yours to measure against. How many stars for ${name}? The rest are rated below ${them}.`}
       </p>
       <ChampionStars b={b} />
+      {st?.skipped ? (
+        <p className="small mb-0 mt-2">
+          <button
+            type="button"
+            className="btn btn-link btn-sm cherrypick-inline-link cherrypick-challenge-start"
+            onClick={() => startChallenge(b.id)}
+          >
+            Play the Challenge round instead
+          </button>
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
+// The Challenge round on the champion screen: offered, under way, or how
+// it went. proposal: the champion's row in Apply, once the round placed it.
+function ChallengeCard({ b, st, name, them, proposal }) {
+  const entrant = useEntrant(b.kind)
+  const n = st.rungs.length
+  const what = b.kind === 'performer' ? 'performers' : 'scenes'
+  if (!st.started)
+    return (
+      <div className="card cherrypick-fixes cherrypick-challenge">
+        <p className="mb-2">
+          <b>{name} has earned a shot at your favorites.</b>{' '}
+          {n === 1
+            ? `One of the ${what} you've rated waits`
+            : `${n} of the ${what} you've rated wait, lowest rated first`}
+          . Win to place {them} among your ratings; a loss ends the round.
+        </p>
+        <div className="cherrypick-fix-actions">
+          <button
+            type="button"
+            className="btn btn-primary cherrypick-challenge-start"
+            onClick={() => startChallenge(b.id)}
+          >
+            <Icon icon={faTrophy || faCrown} />
+            <span>Challenge round</span>
+          </button>
+          <button
+            type="button"
+            className="btn btn-link cherrypick-challenge-skip"
+            onClick={() => skipChallenge(b.id)}
+          >
+            Rate {them} myself
+          </button>
+        </div>
+      </div>
+    )
+  if (!st.done)
+    return (
+      <div className="card cherrypick-fixes cherrypick-challenge">
+        <p className="mb-2">
+          Challenge round: {name} has beaten {st.beaten.length} of {n}.
+        </p>
+        <div className="cherrypick-fix-actions">
+          <button
+            type="button"
+            className="btn btn-primary cherrypick-challenge-start"
+            onClick={() => startChallenge(b.id)}
+          >
+            <Icon icon={faTrophy || faCrown} />
+            <span>Go on with the Challenge round</span>
+          </button>
+        </div>
+      </div>
+    )
+  const beat = st.beaten.map((x) => entrant(x).name)
+  const lostTo = st.lostTo ? entrant(st.lostTo).name : null
+  const text = st.won
+    ? n === 1
+      ? `${name} beat your favorite, ${beat[0]}.`
+      : `${name} beat all ${n} of your favorites: ${andList(beat)}.`
+    : beat.length
+      ? `${name} beat ${andList(beat)}, then lost to ${lostTo}.`
+      : `${name} lost to ${lostTo}.`
+  return (
+    <div
+      className={`card cherrypick-fixes cherrypick-challenge ${st.won ? 'cherrypick-challenge-won' : ''}`}
+    >
+      {st.won ? (
+        <p className="mb-2">
+          <span className="badge badge-warning cherrypick-challenge-badge">
+            <Icon icon={faTrophy || faCrown} /> Beat your favorites
+          </span>
+        </p>
+      ) : null}
+      <p className="mb-1 cherrypick-challenge-outcome">
+        {text}
+        {proposal
+          ? ` Apply to my ratings sets ${them} at ${fmtStars(proposal.to / 20)}★, and the rest below.`
+          : ''}
+      </p>
+      <div>
+        <button
+          type="button"
+          className="btn btn-link btn-sm cherrypick-inline-link"
+          onClick={() => undoChallengePick(b.id)}
+        >
+          Undo the last pick
+        </button>
+      </div>
     </div>
   )
 }
@@ -169,7 +281,17 @@ export function ResultDialog({ id }) {
   const them = isP
     ? { her: 'her', his: 'him' }[pronoun(champ.p)] || 'them'
     : 'it'
-  const ask = proposals?.askChampion || b.championRating != null
+  const challenge = BR.challengeState(b)
+  // offered or under way: the card asks for the round before any stars
+  const challengeOpen = !!challenge && !challenge.skipped && !challenge.done
+  const ask =
+    !challengeOpen && (proposals?.askChampion || b.championRating != null)
+  const placed =
+    challenge?.started && challenge.done
+      ? proposals?.rows.find(
+          (x) => x.id === r.champion && !x.skip && x.to != null,
+        )
+      : null
   const wins = b.decisions.filter((d) => d.winner === r.champion).length
   const due =
     isP && b.gender && !b.champions && !active
@@ -237,7 +359,7 @@ export function ResultDialog({ id }) {
         >
           {champ.image ? <img src={champ.image} alt="" /> : null}
           <span className="cherrypick-crown text-warning">
-            <Icon icon={faCrown} />
+            <Icon icon={(challenge?.won && faTrophy) || faCrown} />
           </span>
         </Link>
         <div className="cherrypick-champ-body">
@@ -252,7 +374,7 @@ export function ResultDialog({ id }) {
               ? '.'
               : `: Your score moved on ${moved} unrated ${plural(moved, 'scene')}`}
             {moved != null && isP
-              ? `, and the crown now sits on ${champ.name}'s card.`
+              ? `, and the ${challenge?.won ? 'trophy' : 'crown'} now sits on ${champ.name}'s card.`
               : moved != null
                 ? '.'
                 : ''}
@@ -271,7 +393,23 @@ export function ResultDialog({ id }) {
               ) : null}
             </p>
           ) : null}
-          {ask ? <ChampionPrompt b={b} name={champ.name} them={them} /> : null}
+          {challenge && !challenge.skipped ? (
+            <ChallengeCard
+              b={b}
+              st={challenge}
+              name={champ.name}
+              them={them}
+              proposal={placed}
+            />
+          ) : null}
+          {ask ? (
+            <ChampionPrompt
+              b={b}
+              name={champ.name}
+              them={them}
+              lost={!!challenge?.lostTo}
+            />
+          ) : null}
           <Applied bracketId={b.id} />
         </div>
       </div>
@@ -339,11 +477,6 @@ function useRankingPlugins() {
   }, [])
   return names
 }
-
-const andList = (names) =>
-  names.length > 1
-    ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
-    : names[0]
 
 // "Ascension is installed. Its rankings start from Stash's ratings, so it
 // will pick up every rating you apply here."

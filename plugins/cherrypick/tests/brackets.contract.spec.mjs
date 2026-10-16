@@ -2,9 +2,17 @@
 // Performers and Scenes lists, a bracket played to its champion with the
 // keyboard, the custom fields written at the end, no ratings while you pick,
 // Apply's ratings for the unrated only, performers anchored by their scenes'
-// ratings, and pause and resume.
+// ratings, a bracket of unrated performers and its Challenge round, and
+// pause and resume.
 import { expect, test } from '@playwright/test'
-import { DEMO, gql, setUpCherryPick, tearDownCherryPick } from './stash.mjs'
+import {
+  DEMO,
+  demoCandidates,
+  gql,
+  pickCandidate,
+  setUpCherryPick,
+  tearDownCherryPick,
+} from './stash.mjs'
 
 let demo
 test.beforeAll(async () => {
@@ -63,8 +71,9 @@ test('an anchored bracket hides ratings while you pick and rates only the unrate
   await expect(play.locator('.rating-stars, .rating-number')).toHaveCount(0)
   await expect(play.locator('.cherrypick-match')).not.toContainText('seed')
   await expect(play.locator('.cherrypick-match')).not.toContainText('★')
+  const candidates = demoCandidates()
   for (let i = 0; i < 15; i++) {
-    await page.keyboard.press('ArrowLeft')
+    await pickCandidate(page, play, candidates)
     await page.waitForTimeout(150)
   }
   const result = page.locator('.cherrypick-result-modal')
@@ -80,7 +89,7 @@ test('an anchored bracket hides ratings while you pick and rates only the unrate
     // only the unrated, each placed by the rated ones around it
     await expect(row.locator('td.num').first()).toHaveText('unrated')
     await expect(row.locator('td').last()).toHaveText(
-      /^(Above|Below) .+★( from your scene ratings)?\)|under the champion$/,
+      /^(Above .+★( from your scene ratings)?\)|(Finalist|Semifinalist|Quarterfinalist), (below .+★( from your scene ratings)?\)|.+ under the champion))$/,
     )
   }
 })
@@ -116,6 +125,23 @@ const setPerformerRating = (id, rating100) =>
     { i: { id, rating100 } },
   )
 
+// The scenes' ratings in Stash, by id
+async function sceneRatings(ids) {
+  const { findScenes } = await gql(
+    `query ($ids: [ID!]) {
+      findScenes(ids: $ids, filter: { per_page: -1 }) {
+        scenes { id rating100 } }
+    }`,
+    { ids },
+  )
+  return Object.fromEntries(findScenes.scenes.map((x) => [x.id, x.rating100]))
+}
+
+const setSceneRating = (id, rating100) =>
+  gql('mutation ($i: SceneUpdateInput!) { sceneUpdate(input: $i) { id } }', {
+    i: { id, rating100 },
+  })
+
 test('performers rated only through their scenes anchor a bracket, and Apply never rates them', async ({
   page,
 }) => {
@@ -133,8 +159,9 @@ test('performers rated only through their scenes anchor a bracket, and Apply nev
     // an anchor looks like any other entrant
     await expect(play.locator('.rating-stars, .rating-number')).toHaveCount(0)
     await expect(play.locator('.cherrypick-match')).not.toContainText('★')
+    const candidates = demoCandidates({ ownRatings: false })
     for (let i = 0; i < 15; i++) {
-      await page.keyboard.press('ArrowLeft')
+      await pickCandidate(page, play, candidates)
       await page.waitForTimeout(150)
     }
     const result = page.locator('.cherrypick-result-modal')
@@ -146,22 +173,33 @@ test('performers rated only through their scenes anchor a bracket, and Apply nev
     const apply = page.locator('.cherrypick-apply-modal')
     await expect(apply).toContainText("or whose scenes you've rated")
     const rows = apply.locator('.cherrypick-apply-table tbody tr')
-    // eight candidates, each against an anchor in the first round; the
-    // anchors get no row
-    await expect(rows).toHaveCount(8)
-    // "Above A (4.3★ from your scene ratings), below B (...)", or one of the two
+    // the eight candidates play and scene-average anchors fill the other
+    // places; a candidate out in round one to an anchor gets no row
+    await expect(rows.first()).toBeVisible()
+    expect(await rows.count()).toBeLessThanOrEqual(8)
+    // "Above A (4.3★ from your scene ratings), below B (...)", or one of the
+    // two; a row with neither steps down from the champion
     const above = /^Above ([^,]+) \((\d\.\d)★ from your scene ratings\)/
     const below =
       /(?:^|, )[Bb]elow ([^,]+) \((\d\.\d)★ from your scene ratings\)$/
     const anchors = new Set()
     const expected = {}
+    const stepped = []
     for (const row of await rows.all()) {
       const name = await row.locator('td').nth(1).innerText()
       await expect(row.locator('td.num').first()).toHaveText('unrated')
       const why = await row.locator('td').last().innerText()
       const [, loName, loStars] = why.match(above) || []
       const [, hiName, hiStars] = why.match(below) || []
-      expect(loName || hiName, why).toBeTruthy()
+      if (!loName && !hiName) {
+        expect(why).toMatch(/ under the champion$/)
+        await expect(row.locator('.cherrypick-provisional')).toHaveCount(1)
+        stepped.push(name)
+        continue
+      }
+      // below an anchor alone: provisional, half a star under it
+      if (!loName)
+        await expect(row.locator('.cherrypick-provisional')).toHaveCount(1)
       // each anchor at the average of its scenes' ratings in the demo plan
       const lo = loName && sceneAverage(loName)
       const hi = hiName && sceneAverage(hiName)
@@ -179,21 +217,27 @@ test('performers rated only through their scenes anchor a bracket, and Apply nev
               : hi - 10,
         ),
       )
-      await expect(row.locator('td.num').nth(1)).toHaveText(`${stars(to)}★`)
+      await expect(row.locator('td.num').nth(1)).toContainText(`${stars(to)}★`)
       expected[name] = to
     }
     // no anchor among the rated
-    expect(Object.keys(expected).filter((name) => anchors.has(name))).toEqual(
-      [],
-    )
+    expect(
+      [...Object.keys(expected), ...stepped].filter((name) =>
+        anchors.has(name),
+      ),
+    ).toEqual([])
     const byId = (byName) =>
       Object.fromEntries(
         Object.entries(byName).map(([name, r]) => [demo.performers[name], r]),
       )
 
     await apply.locator('.cherrypick-apply-go').click()
-    const rated = Object.keys(byId(expected))
-    await expect.poll(() => performerRatings(rated)).toEqual(byId(expected))
+    const measured = Object.keys(byId(expected))
+    await expect.poll(() => performerRatings(measured)).toEqual(byId(expected))
+    const rated = [...measured, ...stepped.map((name) => demo.performers[name])]
+    expect(
+      Object.values(await performerRatings(rated)).every((r) => r != null),
+    ).toBe(true)
     // the anchors stay unrated, ready to anchor again
     const anchorIds = [...anchors].map((name) => demo.performers[name])
     expect(Object.values(await performerRatings(anchorIds))).toEqual(
@@ -208,6 +252,117 @@ test('performers rated only through their scenes anchor a bracket, and Apply nev
   } finally {
     for (const [id, r] of Object.entries(before))
       await setPerformerRating(id, r)
+  }
+})
+
+// The two names on the play cards now
+const contenders = (modal) =>
+  modal.locator('.cherrypick-contender .cherrypick-cont-title').allInnerTexts()
+
+test('a bracket of unrated performers, then its champion takes on your favorites', async ({
+  page,
+}) => {
+  // Every demo performer and scene unrated but three Female performers: the
+  // bracket plays only unrated performers, and the three wait for its
+  // champion, lowest rated first
+  const favorites = { 'Edie Flint': 20, 'Hana Ridge': 70, 'Bea Lark': 100 }
+  const ids = Object.values(demo.performers)
+  const sceneIds = Object.values(demo.scenes)
+  const before = await performerRatings(ids)
+  const scenesBefore = await sceneRatings(sceneIds)
+  try {
+    for (const id of ids) await setPerformerRating(id, null)
+    for (const id of sceneIds) await setSceneRating(id, null)
+    for (const [name, r] of Object.entries(favorites))
+      await setPerformerRating(demo.performers[name], r)
+    await page.goto('/performers')
+    const bracket = visible(page.locator('.cherrypick-bracket-button'))
+    await expect(bracket).toBeVisible({ timeout: 20_000 })
+    await bracket.click()
+    const play = page.locator('.cherrypick-play-modal')
+    await expect(play).toContainText('16 performers')
+    for (let i = 0; i < 15; i++) {
+      await expect(play.locator('.cherrypick-contender')).toHaveCount(2)
+      for (const name of await contenders(play))
+        expect(Object.keys(favorites)).not.toContain(name)
+      await page.keyboard.press('ArrowLeft')
+      await page.waitForTimeout(150)
+    }
+    const result = page.locator('.cherrypick-result-modal')
+    const champ = await result.locator('.cherrypick-champ-name').innerText()
+    const card = result.locator('.cherrypick-challenge')
+    await expect(card).toContainText(
+      `${champ} has earned a shot at your favorites.`,
+    )
+    await expect(card).toContainText(
+      "3 of the performers you've rated wait, lowest rated first",
+    )
+    // the round comes before any stars
+    await expect(result.locator('.cherrypick-champ-rate')).toHaveCount(0)
+    await card.locator('.cherrypick-challenge-start').click()
+
+    // Edie Flint first, with the champion on the left: the champion wins
+    const ch = page.locator('.cherrypick-challenge-modal')
+    await expect(ch).toContainText('Favorite 1 of 3')
+    expect(await contenders(ch)).toEqual([champ, 'Edie Flint'])
+    await expect(ch.locator('.cherrypick-match')).not.toContainText('★')
+    await page.keyboard.press('ArrowLeft')
+    // Hana Ridge next, on the left: she wins, and the round is over
+    await expect(ch).toContainText('Favorite 2 of 3')
+    expect(await contenders(ch)).toEqual(['Hana Ridge', champ])
+    await page.keyboard.press('ArrowLeft')
+    const outcome = result.locator('.cherrypick-challenge-outcome')
+    await expect(outcome).toHaveText(
+      `${champ} beat Edie Flint, then lost to Hana Ridge. Apply to my ratings sets her at 2.3★, and the rest below.`,
+    )
+    // Undo that pick, beat Hana Ridge and Bea Lark: every favorite beaten
+    await result.getByRole('button', { name: 'Undo the last pick' }).click()
+    await expect(ch).toContainText('Favorite 2 of 3')
+    await page.keyboard.press('ArrowRight')
+    await expect(ch).toContainText('Favorite 3 of 3')
+    expect(await contenders(ch)).toEqual([champ, 'Bea Lark'])
+    await page.keyboard.press('ArrowLeft')
+    await expect(result.locator('.cherrypick-challenge-badge')).toHaveText(
+      'Beat your favorites',
+    )
+    await expect(outcome).toHaveText(
+      `${champ} beat all 3 of your favorites: Edie Flint, Hana Ridge and Bea Lark. Apply to my ratings sets her at 5.0★, and the rest below.`,
+    )
+
+    // Apply: the champion above Bea Lark, the rest stepping down from her
+    await result.locator('.cherrypick-apply-open').click()
+    const apply = page.locator('.cherrypick-apply-modal')
+    const rows = apply.locator('.cherrypick-apply-table tbody tr')
+    await expect(rows).toHaveCount(8)
+    await expect(rows.first()).toContainText(champ)
+    await expect(rows.first()).toContainText('Above Bea Lark (5.0★)')
+    await expect(rows.nth(1)).toContainText('Finalist, ½★ under the champion')
+    await expect(apply.locator('.cherrypick-provisional')).toHaveCount(7)
+    await apply.locator('.cherrypick-apply-go').click()
+    const champId = demo.performers[champ]
+    await expect
+      .poll(async () => (await performerRatings([champId]))[champId])
+      .toBe(100)
+    await result.locator('.cherrypick-applied button').click()
+    await expect
+      .poll(async () => (await performerRatings([champId]))[champId])
+      .toBe(null)
+
+    // the champion's page says so. The centered dialog moves as Undo's line
+    // goes, so a click by position can land beside the link: wait for the
+    // line, then click the link itself
+    await expect(result.locator('.cherrypick-applied')).toHaveCount(0)
+    await result.locator('.cherrypick-champ-name a').dispatchEvent('click')
+    await expect(
+      visible(page.locator('.detail-item-value.cherrypick-performer-line')),
+    ).toContainText('Bracket champion · beat your favorites', {
+      timeout: 20_000,
+    })
+  } finally {
+    for (const [id, r] of Object.entries(before))
+      await setPerformerRating(id, r)
+    for (const [id, r] of Object.entries(scenesBefore))
+      await setSceneRating(id, r)
   }
 })
 
