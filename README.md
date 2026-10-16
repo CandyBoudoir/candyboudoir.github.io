@@ -2,12 +2,13 @@
 
 Plugins for [Stash](https://github.com/stashapp/stash), the self-hosted media organizer, published as one plugin source. Add the source once and every CandyBoudoir plugin appears under Available Plugins, including ones released later.
 
-| Plugin                      | What it does                                                                                                                  |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| [Juicy](plugins/juicy/)     | A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording. |
-| [Leather](plugins/leather/) | A black leather theme: saddle stitching, nickel studs for ratings, a collar for favourites and a strict voice in the wording. |
+| Plugin                             | What it does                                                                                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Juicy](plugins/juicy/)            | A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording.                    |
+| [Leather](plugins/leather/)        | A black leather theme: saddle stitching, nickel studs for ratings, a collar for favourites and a strict voice in the wording.                    |
+| [Cherry Pick](plugins/cherrypick/) | Learns what you like from your ratings and plays: a For you row, Your score on unrated scenes, More like this, and performer and scene brackets. |
 
-Each theme restyles all of Stash, so enable one theme at a time.
+Each theme restyles all of Stash, so enable one theme at a time. Cherry Pick works with either theme, or none.
 
 ## Install
 
@@ -57,6 +58,10 @@ pnpm test:compat contract
 
 `prepare.mjs` also points Stash at a mock stash-box (`tests/stash/stashbox.mjs`) that Playwright starts with the tests, so the Tagger, scrape dialogs and StashID links are checked against invented scenes, performers and studios with no stash-box account.
 
+The specs run in Chromium; `BROWSER=firefox` or `BROWSER=webkit` runs them in another engine, and the workflow has a leg for each that runs Cherry Pick's specs.
+
+Cherry Pick also has a walk through every feature on a library the size of a real one, which CI does not run. `plugins/cherrypick/tests/scale/library.mjs` seeds an invented library into its own throwaway Stash (`seed rater --scenes 25000 --performers 10000 --db <work>/config/stash-go.sqlite --summary <work>/summary.json`; the profiles are `rater`, `once`, `light` and `none`), and `STASH_URL=<that Stash> SCALE_SUMMARY=<work>/summary.json pnpm exec playwright test plugins/cherrypick/tests/scale` plays it from a first visit to Remove Cherry Pick data, writing timings to `SCALE_OUT`.
+
 ### Branches and releases
 
 `main` is the trunk and feeds the develop channel. `prod` is the release branch. Every push to either publishes the site to GitHub Pages and checks the live files against the build.
@@ -65,4 +70,4 @@ Each plugin releases on its own. When `prod` carries a plugin version with no `<
 
 ## License
 
-MIT. Juicy bundles Fredoka, and Leather bundles Grenze Gotisch and Oswald, under the SIL Open Font License 1.1 (each plugin's `assets/fonts` folder holds the license).
+MIT, except Cherry Pick, which is AGPL-3.0 (`plugins/cherrypick/LICENSE`). Juicy bundles Fredoka, and Leather bundles Grenze Gotisch and Oswald, under the SIL Open Font License 1.1 (each plugin's `assets/fonts` folder holds the license).

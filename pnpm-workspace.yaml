@@ -1,3 +1,6 @@
 # pnpm 11+ settings for this single-package repo (no `packages:` key needed).
 # Dependency build scripts are denied unless listed here (strictDepBuilds).
-allowBuilds: {}
+# esbuild's script only checks its platform binary, which pnpm installs as an
+# optional dependency, so it stays denied.
+allowBuilds:
+  esbuild: false

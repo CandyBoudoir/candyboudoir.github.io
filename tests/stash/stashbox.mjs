@@ -2,11 +2,21 @@
 // at it, Stash sends it the stash-box queries a real service would get, and it
 // answers from the invented catalogue in stashbox-data.mjs, so the Tagger, the
 // stash-box scrape dialogs and StashID links render without a real service.
+// It also stands in for StashDB for Cherry Pick's StashDB layer, which sends
+// its own queries from the browser (queryScenes by performer or studio in
+// popularity order, findScene by id with fingerprint submissions); those are
+// answered from the separate StashDB catalogue, with StashDB's CORS headers.
 // Playwright starts it (playwright.config.mjs); `node tests/stash/stashbox.mjs`
 // runs it by hand. Env: STASH_BOX_PORT (default 9998).
 import { createServer } from 'node:http'
 import { renderStickers } from './stickers.mjs'
-import { IMAGES, STASH_BOX_PORT, catalogue } from './stashbox-data.mjs'
+import {
+  IMAGES,
+  REFUSED_KEY,
+  STASH_BOX_PORT,
+  STASHDB,
+  catalogue,
+} from './stashbox-data.mjs'
 
 const { scenes, performers, studios, tags } = catalogue
 const images = await renderStickers(IMAGES)
@@ -23,6 +33,58 @@ function rank(list, term = '', key = 'name') {
 
 const named = (list, name) =>
   list.find((x) => x.name.toLowerCase() === String(name).toLowerCase())
+
+// StashDB's answers carry no hidden fields.
+const publicScene = (scene) =>
+  Object.fromEntries(Object.entries(scene).filter(([k]) => k !== 'popularity'))
+
+// queryScenes: scenes with any of the given performers and studios, sorted
+// as StashDB sorts them (POPULARITY: most users first, then newest id).
+function queryScenes(input = {}) {
+  const ids = (c) => (c?.value?.length ? new Set(c.value) : null)
+  const performers = ids(input.performers)
+  const studios = ids(input.studios)
+  const order = {
+    POPULARITY: (a, b) => b.popularity - a.popularity || (a.id < b.id ? 1 : -1),
+    DATE: (a, b) => b.release_date.localeCompare(a.release_date),
+    TITLE: (a, b) => b.title.localeCompare(a.title),
+  }[input.sort ?? 'DATE']
+  const list = STASHDB.scenes
+    .filter(
+      (s) =>
+        (!performers ||
+          s.performers.some((p) => performers.has(p.performer.id))) &&
+        (!studios || studios.has(s.studio?.id)),
+    )
+    .sort(order ?? (() => 0))
+  if (input.direction === 'ASC') list.reverse()
+  const perPage = input.per_page ?? 25
+  const start = ((input.page ?? 1) - 1) * perPage
+  return {
+    count: list.length,
+    scenes: list.slice(start, start + perPage).map(publicScene),
+  }
+}
+
+// The StashDB root fields Cherry Pick asks for, by alias:
+// `s0: findScene(id: $s0)` and `queryScenes(input: $input)`.
+function stashdbFields(query, variables) {
+  const data = {}
+  for (const [, alias, name, arg] of query.matchAll(
+    /(?:(\w+)\s*:\s*)?\b(findScene|queryScenes)\s*\(\s*\w+\s*:\s*\$(\w+)\s*\)/g,
+  )) {
+    const value = variables[arg]
+    const scene =
+      name === 'findScene' ? STASHDB.scenes.find((x) => x.id === value) : null
+    data[alias ?? name] =
+      name === 'queryScenes'
+        ? queryScenes(value)
+        : scene
+          ? publicScene(scene)
+          : null
+  }
+  return Object.keys(data).length ? data : null
+}
 
 const resolvers = {
   Me: () => ({ me: { name: 'candy' } }),
@@ -75,33 +137,46 @@ const resolvers = {
   }),
 }
 
-function graphql(body) {
+function graphql(body, apiKey) {
+  // A refused key fails as StashDB fails an expired one; Stash reports it
+  // as "Invalid or expired API key."
+  if (REFUSED_KEY.test(apiKey ?? ''))
+    return { errors: [{ message: 'token signature is invalid' }] }
   const name =
     body.operationName ||
     /^\s*(?:query|mutation)\s+(\w+)/m.exec(body.query ?? '')?.[1]
   const resolve = resolvers[name]
-  if (!resolve) {
-    console.error(
-      `stash-box mock: no answer for ${name ?? 'an anonymous query'}`,
-    )
-    return { errors: [{ message: `Unsupported operation ${name}` }] }
-  }
-  return { data: resolve(body.variables ?? {}) }
+  if (resolve) return { data: resolve(body.variables ?? {}) }
+  const data = stashdbFields(body.query ?? '', body.variables ?? {})
+  if (data) return { data }
+  console.error(`stash-box mock: no answer for ${name ?? 'an anonymous query'}`)
+  return { errors: [{ message: `Unsupported operation ${name}` }] }
+}
+
+// StashDB answers cross-origin requests from any page.
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'content-type,apikey',
+  'Access-Control-Allow-Methods': 'POST',
 }
 
 const server = createServer((req, res) => {
   const { pathname } = new URL(req.url, 'http://x')
+  if (req.method === 'OPTIONS' && pathname === '/graphql') {
+    res.writeHead(204, CORS).end()
+    return
+  }
   if (req.method === 'POST' && pathname === '/graphql') {
     let raw = ''
     req.on('data', (chunk) => (raw += chunk))
     req.on('end', () => {
       let reply
       try {
-        reply = graphql(JSON.parse(raw))
+        reply = graphql(JSON.parse(raw), req.headers.apikey)
       } catch (error) {
         reply = { errors: [{ message: String(error) }] }
       }
-      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.writeHead(200, { 'Content-Type': 'application/json', ...CORS })
       res.end(JSON.stringify(reply))
     })
     return

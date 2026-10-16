@@ -2,7 +2,10 @@
 # develop build, then checks that Stash still renders the elements each plugin
 # depends on and compares screenshots. Runs nightly, on pushes to main and on pull requests.
 # The report job keeps one issue per failing channel and opens a "Support
-# Stash vX.Y.Z" issue when Stash ships a stable release.
+# Stash vX.Y.Z" issue when Stash ships a stable release. Companion legs
+# (tests/stash/companions.mjs) install another author's plugin beside these
+# and run Cherry Pick's contract specs with it enabled; they never fail the
+# workflow.
 name: Compatibility
 
 on:
@@ -50,6 +53,8 @@ jobs:
     env:
       STASH_URL: http://127.0.0.1:9999
       WORK: ${{ github.workspace }}/stash-work
+      COMPANIONS: ${{ matrix.leg.companions || '' }}
+      BROWSER: ${{ matrix.leg.browser || 'chromium' }}
     steps:
       # Full history: build.mjs dates each plugin from its last commit.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -64,7 +69,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
-      - run: pnpm exec playwright install --with-deps chromium
+      # prepare.mjs draws the demo portraits with Chromium, so every leg needs it
+      - run: pnpm exec playwright install --with-deps chromium ${{ matrix.leg.browser || '' }}
+      # Stash Curator's manifest runs `python`; the runner may have only python3
+      - name: Python for companion plugins
+        if: matrix.leg.companions
+        run: command -v python || sudo ln -s "$(command -v python3)" /usr/local/bin/python
       - name: Start Stash ${{ matrix.leg.name }}
         id: prepare
         run: |
@@ -74,10 +84,10 @@ jobs:
       - name: Elements the plugins depend on
         id: contract
         if: steps.prepare.outcome == 'success'
-        run: pnpm exec playwright test contract
+        run: pnpm exec playwright test ${{ (matrix.leg.companions || matrix.leg.browser) && 'plugins/cherrypick/tests/.*contract' || 'contract' }}
       - name: Screenshots
         id: visual
-        if: always() && steps.prepare.outcome == 'success'
+        if: always() && steps.prepare.outcome == 'success' && !matrix.leg.companions && !matrix.leg.browser
         continue-on-error: ${{ matrix.leg.channel != 'stable' }}
         run: pnpm exec playwright test visual ${{ inputs.update_snapshots && matrix.leg.baseline && '--update-snapshots=all' || '' }}
       - name: Record result

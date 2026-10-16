@@ -2,6 +2,7 @@
 import js from '@eslint/js'
 import { defineConfig } from 'eslint/config'
 import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
 
 export default defineConfig(
   { ignores: ['node_modules/', 'dist/', 'stash-work/'] },
@@ -9,6 +10,22 @@ export default defineConfig(
   {
     files: ['plugins/*/src/js/**/*.js', 'plugins/*/design-system/**/*.js'],
     languageOptions: { sourceType: 'script', globals: globals.browser },
+  },
+  {
+    // Plugins built from ES modules (Cherry Pick): JSX compiled by esbuild
+    // against PluginApi.React, so React is a global the shim provides.
+    files: ['plugins/*/src/js/**/*.js', 'plugins/*/src/js/**/*.jsx'],
+    ignores: ['plugins/juicy/**', 'plugins/leather/**'],
+    languageOptions: {
+      sourceType: 'module',
+      globals: globals.browser,
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    plugins: { 'react-hooks': reactHooks },
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+    },
   },
   {
     files: [
