@@ -1,8 +1,10 @@
-// The changes every piece shares: Not interested, Don't learn and For you's
-// row signals. Each one is a store change; app.js persists it to its tier.
-import { store } from './app.js'
+// The changes every piece shares: Not interested, Don't learn, For you's
+// row signals and the answer to the offer beside Stash Curator. Each one is
+// a store change; app.js persists it to its tier.
+import { changeSettings, store } from './app.js'
 import { blameKey, keyLabel } from '../model/index.js'
 import { openSignals } from '../model/foryou.js'
+import { answerSettings } from '../model/curator.js'
 
 // ------------------------------------------------------------ Not interested
 
@@ -70,4 +72,20 @@ export function recordOpen(sceneId) {
   const s = store.get()
   const skip = new Set(s.dontLearn.map((d) => d.sceneId))
   store.set({ signals: openSignals(s.signals, sceneId, skip) })
+}
+
+// ------------------------------------------------------------ Stash Curator
+
+// The answer to the offer to hide Your score on cards ('hide' or 'keep'),
+// kept in tier 1 so the offer never returns. Hide on cards turns the badges
+// switch off. On Stash's Settings page, that page saves the switch and the
+// answer (features/settingsExtras.jsx) and `stashSaves` says so; elsewhere
+// Cherry Pick writes the switch over Stash's value.
+export function answerCuratorOffer(answer, { stashSaves = false } = {}) {
+  store.set({ curatorOffer: answer })
+  const settings = answerSettings(answer)
+  if (!Object.keys(settings).length) return
+  if (stashSaves)
+    store.set((s) => ({ settings: { ...s.settings, ...settings } }))
+  else changeSettings(settings)
 }

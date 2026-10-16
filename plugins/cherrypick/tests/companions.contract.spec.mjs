@@ -15,9 +15,11 @@
 import { expect, test } from '@playwright/test'
 import { companionPluginIds } from '../../../tests/stash/companions.mjs'
 import {
+  demoScene,
   forYouCards,
   gql,
   PLUGIN_ID,
+  pluginConfig,
   setPluginSettings,
   setUpCherryPick,
   tearDownCherryPick,
@@ -483,6 +485,31 @@ const curatorFilter = (path, type) =>
 // Curator's pieces on Stash's own cards and its controls on a list
 const CURATOR = '.curator-scene-card-badge, .curator-performer-card-badge'
 
+// The offer to hide Your score on cards beside Curator, on Cherry Pick's page
+// and under its settings in Settings › Plugins
+const offer = (page) => page.locator('.cherrypick-curator-offer')
+
+// Cherry Pick's settings in Settings › Plugins, open: develop collapses each
+// plugin's settings until its heading is clicked.
+async function cherryPickSettings(page) {
+  await page.goto('/settings?tab=plugins')
+  const badges = page.locator('#plugin-CherryPick-badges')
+  await expect(badges).toBeAttached({ timeout: 20_000 })
+  if (await badges.isHidden())
+    await page
+      .locator('.setting-group', { has: badges })
+      .locator(':scope > .setting')
+      .click()
+  await expect(badges).toBeVisible()
+  return badges
+}
+
+// What the offer leaves in the plugin's configuration
+async function answered() {
+  const c = await pluginConfig()
+  return { badges: c?.badges, curatorOffer: c?.curatorOffer ?? null }
+}
+
 // Stash's answers that rejected a query outright, as "400 CherryPickListScenes"
 function rejected(page) {
   const out = []
@@ -631,5 +658,144 @@ test.describe('beside Stash Curator', () => {
       { timeout: 20_000 },
     )
     await expect(bracket).toBeDisabled()
+  })
+
+  test("Cherry Pick's page offers to hide Your score on cards, and Hide on cards keeps it on scene pages only", async ({
+    page,
+  }) => {
+    const before = await pluginConfig()
+    const banners = page.locator('.scene-card .cherrypick-score-banner')
+    try {
+      await page.goto('/scenes?sortby=title&perPage=120')
+      await expect(banners.first()).toBeVisible({ timeout: 20_000 })
+
+      await page.goto('/plugins/cherrypick')
+      const card = page.locator('#your-score .cherrypick-curator-offer')
+      await expect(card).toContainText('Stash Curator also scores your cards', {
+        timeout: 20_000,
+      })
+      await card.getByRole('button', { name: 'Hide on cards' }).click()
+      await expect(card).toContainText('Your score is off on cards')
+      await expect
+        .poll(answered)
+        .toEqual({ badges: false, curatorOffer: JSON.stringify('hide') })
+
+      // Not offered again once the page knows the answer: the accuracy line
+      // comes after the configuration and the library
+      await page.reload()
+      await expect(page.locator('#your-score')).toContainText(
+        /within half a star \d+ times in 10/,
+        { timeout: 20_000 },
+      )
+      await expect(offer(page)).toHaveCount(0)
+
+      // No Your score on the Scenes list, once the model that draws them is
+      // in (Bracket's title counts the list's watched scenes)
+      await page.goto('/scenes?sortby=title&perPage=120')
+      await expect(
+        page.locator('.cherrypick-bracket-button').filter({ visible: true }),
+      ).toHaveAttribute('title', /watched scenes in this list/, {
+        timeout: 20_000,
+      })
+      await expect(
+        page.locator('.scene-card .curator-scene-card-badge').first(),
+      ).toBeVisible({ timeout: 20_000 })
+      await expect(banners).toHaveCount(0)
+
+      // It stays beside the stars on the scene page
+      await page.goto(
+        `/scenes/${demoScene(demo, { rated: false, played: true })}`,
+      )
+      await expect(
+        page
+          .locator(
+            '.scene-toolbar .cherrypick-score-line .cherrypick-line-button',
+          )
+          .first(),
+      ).toHaveText(/^likely .* for you$/, { timeout: 20_000 })
+
+      // Settings › Plugins shows the switch off, and no offer
+      const badges = await cherryPickSettings(page)
+      await expect(badges).not.toBeChecked()
+      await expect(offer(page)).toHaveCount(0)
+    } finally {
+      await setPluginSettings(PLUGIN_ID, before)
+    }
+  })
+
+  test('Settings › Plugins offers it too, and its answer survives the next switch there', async ({
+    page,
+  }) => {
+    const before = await pluginConfig()
+    try {
+      // Cherry Pick writes its defaults at first load, as it would long
+      // before anyone opens Settings
+      await page.goto('/plugins/cherrypick')
+      await expect(offer(page)).toBeVisible({ timeout: 20_000 })
+      await expect.poll(async () => (await pluginConfig())?.badges).toBe(true)
+
+      const badges = await cherryPickSettings(page)
+      await expect(badges).toBeChecked()
+      const row = page.locator('#plugin-CherryPick-curator-offer')
+      await expect(row).toContainText('Stash Curator also scores your cards', {
+        timeout: 20_000,
+      })
+      await row.getByRole('button', { name: 'Hide on cards' }).click()
+      await expect(badges).not.toBeChecked()
+      await expect(row).toHaveCount(0)
+      await expect
+        .poll(answered)
+        .toEqual({ badges: false, curatorOffer: JSON.stringify('hide') })
+
+      // Stash's page writes back its copy of the map on any switch: the
+      // copy carries the answer
+      // (Bootstrap draws the switch over its input, so the click is forced)
+      await page
+        .locator('#plugin-CherryPick-relativeBadges')
+        .check({ force: true })
+      await expect
+        .poll(async () => (await pluginConfig())?.relativeBadges)
+        .toBe(true)
+      expect(await answered()).toEqual({
+        badges: false,
+        curatorOffer: JSON.stringify('hide'),
+      })
+
+      await page.reload()
+      await expect(badges).not.toBeChecked({ timeout: 20_000 })
+      await expect(row).toHaveCount(0)
+    } finally {
+      await setPluginSettings(PLUGIN_ID, before)
+    }
+  })
+
+  test('Keep both leaves Your score on cards and the offer away', async ({
+    page,
+  }) => {
+    const before = await pluginConfig()
+    try {
+      await page.goto('/plugins/cherrypick')
+      await offer(page).getByRole('button', { name: 'Keep both' }).click({
+        timeout: 20_000,
+      })
+      await expect(offer(page)).toHaveCount(0)
+      await expect
+        .poll(answered)
+        .toEqual({ badges: true, curatorOffer: JSON.stringify('keep') })
+
+      await page.reload()
+      await expect(page.locator('#your-score')).toContainText(
+        /within half a star \d+ times in 10/,
+        { timeout: 20_000 },
+      )
+      await expect(offer(page)).toHaveCount(0)
+
+      await page.goto('/scenes?sortby=title&perPage=120')
+      await expect(
+        page.locator('.scene-card .cherrypick-score-banner').first(),
+      ).toBeVisible({ timeout: 20_000 })
+    } finally {
+      await setPluginSettings(PLUGIN_ID, before)
+    }
   })
 })
