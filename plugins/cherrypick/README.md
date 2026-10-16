@@ -119,7 +119,7 @@ Cherry Pick sends nothing to CandyBoudoir or anyone else.
 
 ### Removing it
 
-Cherry Pick's page has **Remove Cherry Pick data**: it clears the plugin configuration, removes the three custom fields from every performer and empties the browser cache. Ratings Cherry Pick applied stay, since they are your Stash ratings; undo them on the same page first if you want them gone. To remove the plugin itself, uninstall it in Settings > Plugins.
+Cherry Pick's page has **Remove Cherry Pick data**: it clears the plugin configuration, removes its custom fields (the three bracket fields and `cherrypick_provisional`) from every performer and scene and empties the browser cache. Ratings Cherry Pick applied stay, since they are your Stash ratings, and without the provisional mark they count as yours; undo them on the same page first if you want them gone. To remove the plugin itself, uninstall it in Settings > Plugins.
 
 ## Similar plugins
 
