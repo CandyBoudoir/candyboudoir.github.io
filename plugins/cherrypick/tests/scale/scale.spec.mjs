@@ -57,7 +57,15 @@ test.beforeAll(async ({ browser }) => {
     viewport: { width: 1440, height: 900 },
   })
   page = await context.newPage()
-  page.on('pageerror', (e) => errors.push(e.message.slice(0, 300)))
+  page.on('pageerror', (e) => {
+    // WebKit rejects a request a full page load cancels, and Stash's Apollo
+    // client leaves that rejection unhandled. The walk loads pages in full
+    // while Cherry Pick's queries are in flight; Stash's own navigation
+    // never unloads the page, so users don't hit it.
+    if (/cannot load .*\/graphql due to access control checks/.test(e.message))
+      return
+    errors.push(e.message.slice(0, 300))
+  })
   page.on('console', (m) => {
     if (m.type() === 'error' && /cherry/i.test(m.text()))
       errors.push(`console: ${m.text().slice(0, 300)}`)
@@ -261,11 +269,14 @@ test('Your score on cards and on a scene page, and More like this', async () => 
 })
 
 test("a performer's page and the Performers list", async () => {
-  const { findPerformers } = await gql(`{
-    findPerformers(filter: { per_page: 1, sort: "scenes_count", direction: DESC }) {
-      performers { id } } }`)
+  // A performer in the most-played scene: the line has something to say.
+  // (With no rating, play or bracket of theirs it says nothing.)
+  const { findScenes } = await gql(`{
+    findScenes(filter: { per_page: 1, sort: "play_count", direction: DESC },
+      scene_filter: { performer_count: { value: 0, modifier: GREATER_THAN } }) {
+      scenes { performers { id } } } }`)
   const t = Date.now()
-  await page.goto(`/performers/${findPerformers.performers[0].id}`)
+  await page.goto(`/performers/${findScenes.scenes[0].performers[0].id}`)
   await expect(page.locator('.cherrypick-performer-line').first()).toBeVisible({
     timeout: 30_000,
   })
@@ -378,11 +389,14 @@ test('a clip bracket from a filtered Scenes list pauses, resumes and applies', a
   metrics.steps.clipBracketStart = secs(t)
   await page.keyboard.press('ArrowRight')
   await page.waitForTimeout(200)
+  // Where the bracket stands after one pick; a small pool starts past round
+  // one, so the walk compares rather than expecting "match 2".
+  const at = await play.locator('.cherrypick-round').textContent()
   await page.keyboard.press('Escape')
   await expect(play).toBeHidden()
   await page.reload()
   await visible('.cherrypick-resume-pill').click({ timeout: 30_000 })
-  await expect(play).toContainText('match 2 of')
+  await expect(play.locator('.cherrypick-round')).toHaveText(at)
   await playOut()
   metrics.championAskedClip = await rateChampionIfAsked()
   metrics.sceneApply = await applyAndUndo('Scenes')
