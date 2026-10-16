@@ -136,7 +136,13 @@ export function cancelWrites() {
   unsavedSettings.clear()
 }
 
+// While the page is being left, the last save's request is cut off. The
+// browser mirror keeps what it carried and the next load puts it back
+// (storage/tier1.js), so that is no error to report.
+let leaving = false
+
 function reportError(e) {
+  if (leaving) return
   console.error(`${PLUGIN_ID}:`, e)
   store.set({ error: String(e?.message || e) })
 }
@@ -189,7 +195,12 @@ export function boot() {
   if (booted) return
   booted = true
   store.subscribe(persist)
-  window.addEventListener('pagehide', () => saveNow())
+  window.addEventListener('pagehide', () => {
+    leaving = true
+    saveNow()
+  })
+  // back from the browser's page cache
+  window.addEventListener('pageshow', () => (leaving = false))
   onLocation((loc, prev) => {
     if (inSettings(prev) && !inSettings(loc)) {
       tier1.flush(toConfig(store.get())).catch(reportError)
