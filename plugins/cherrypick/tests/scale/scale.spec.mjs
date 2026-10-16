@@ -35,6 +35,8 @@ const LIMIT = {
 let page
 let library
 test.describe.configure({ mode: 'serial' })
+// A missing element fails in seconds, not at the test's 15 minutes.
+test.use({ actionTimeout: 30_000 })
 test.setTimeout(900_000)
 
 test.beforeAll(async ({ browser }) => {
@@ -117,14 +119,18 @@ async function playOut(key = 'ArrowLeft') {
   return picks
 }
 
-// With no anchors in the bracket, the result asks for the champion's stars.
+// With no anchors in the bracket, the result asks for the champion's stars:
+// Stash's own star buttons, or a list where Stash has none. Four stars.
 async function rateChampionIfAsked() {
-  const prompt = page.locator('.cherrypick-champ-rate')
+  const prompt = page.locator('.cherrypick-result-modal .cherrypick-champ-rate')
   if (!(await prompt.count())) return false
-  const select = prompt.locator('.cherrypick-champ-select')
-  await select.selectOption({
-    index: (await select.locator('option').count()) - 3,
-  })
+  const stars = prompt.locator('.rating-stars button')
+  if (await stars.count()) await stars.nth(3).click()
+  else
+    await prompt
+      .locator('.cherrypick-champ-select')
+      .selectOption({ value: '80' })
+  await expect(prompt).toContainText('4.0★')
   return true
 }
 
@@ -143,8 +149,13 @@ async function applyAndUndo(kind) {
   const modal = page.locator('.cherrypick-apply-modal')
   await expect(modal).toBeVisible()
   const rows = await modal.locator('.cherrypick-apply-table tbody tr').count()
+  const fromScenes = await modal
+    .locator('.cherrypick-apply-table tbody tr', {
+      hasText: 'from your scene ratings',
+    })
+    .count()
   const go = modal.locator('.cherrypick-apply-go')
-  if (!rows || (await go.isDisabled())) return { rows, applied: 0 }
+  if (!rows || (await go.isDisabled())) return { rows, fromScenes, applied: 0 }
   const t = Date.now()
   await go.click()
   await expect(page.locator('.cherrypick-result-modal')).toBeVisible({
@@ -161,7 +172,7 @@ async function applyAndUndo(kind) {
   const t2 = Date.now()
   await undo.first().click()
   await expect.poll(() => ratedCount(kind), { timeout: 60_000 }).toBe(before)
-  return { rows, applied, applySecs, undoSecs: secs(t2) }
+  return { rows, fromScenes, applied, applySecs, undoSecs: secs(t2) }
 }
 
 async function closeDialogs() {
@@ -291,6 +302,13 @@ test('a 64-performer bracket from Options, with Apply and Undo', async () => {
   metrics.performerApply = await applyAndUndo('Performers')
   if (library.ratedPerformers || metrics.championAsked)
     expect(metrics.performerApply.applied).toBeGreaterThan(0)
+  // Someone who rates scenes and not performers: performers anchor at the
+  // average of their scene ratings, and the preview says so.
+  if (library.profile === 'light') {
+    expect(metrics.championAsked).toBe(false)
+    expect(metrics.performerApply.applied).toBeGreaterThan(0)
+    expect(metrics.performerApply.fromScenes).toBeGreaterThan(0)
+  }
   await closeDialogs()
 })
 
