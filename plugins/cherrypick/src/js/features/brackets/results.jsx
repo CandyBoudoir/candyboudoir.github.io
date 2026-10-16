@@ -441,6 +441,15 @@ export function ResultDialog({ id }) {
               <RankingWarning names={rankers} />
             </>
           ) : null}
+          {auto && !toSet && (challengeOpen || ask) ? (
+            // nothing places the champion yet, so nothing would apply
+            <p className="small text-warning cherrypick-auto-apply-none">
+              Closing now sets no ratings.{' '}
+              {challengeOpen
+                ? `Play the Challenge round, or rate ${them} yourself, first.`
+                : `Rate ${champ.name} first, and the rest step down from ${them}.`}
+            </p>
+          ) : null}
         </div>
       </div>
       <div className="cherrypick-podium">
