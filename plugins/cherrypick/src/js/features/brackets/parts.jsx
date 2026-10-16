@@ -99,16 +99,16 @@ export function SizePicker({ n, shown, onPick, floor = BR.DEFAULT_SIZE }) {
   )
 }
 
-// "Fewer than 16, so all 11 play; the top 5 seeds get a bye in the first
-// round." Under the clip sheet's sizes, and in the play dialog for a short
-// pool's whole first round.
+// "Fewer than 16, so all 11 play; 5 get a bye in the first round." Under
+// the clip sheet's sizes, and in the play dialog for a short pool's whole
+// first round. Who gets the byes stays unsaid: it would hint at ratings.
 export function ByesNote({ n, className = '' }) {
   const byes = BR.clipByes(n)
   return (
     <p className={`small text-muted cherrypick-byes ${className}`}>
       Fewer than {BR.DEFAULT_SIZE}, so all {n} play
       {byes
-        ? `; the top ${byes === 1 ? 'seed gets a bye' : `${byes} seeds get a bye`} in the first round.`
+        ? `; ${byes} ${byes === 1 ? 'gets a bye' : 'get a bye'} in the first round.`
         : '.'}
     </p>
   )
@@ -128,7 +128,7 @@ export function useEntrant(kind) {
   }
 }
 
-// The whole bracket, round by round, with byes marked
+// The whole bracket, round by round, with byes marked and no seeds
 export function BracketTree({ b, st }) {
   const entrant = useEntrant(b.kind)
   return (
@@ -164,9 +164,6 @@ export function BracketTree({ b, st }) {
                         ) : (
                           <span className="cherrypick-tree-noimg" />
                         )}
-                        <span className="cherrypick-tree-seed text-muted">
-                          {id ? st.seedOf(id) : ''}
-                        </span>
                         <span className="cherrypick-tree-label">
                           {id ? e.name : m.bye ? 'bye' : ''}
                         </span>

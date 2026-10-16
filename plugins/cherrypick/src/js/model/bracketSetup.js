@@ -1,13 +1,12 @@
 // The choices around a bracket: which gender it starts with, which pool a
-// choice resolves to, what the setup sheet remembers, and the one-line
-// reasons on the play dialog's cards. Pure: the UI passes the model, the
-// remembered choice (tier 1 bracketPrefs), the list's filter and each
-// performer's live gender.
+// choice resolves to and what the setup sheet remembers. Pure: the UI passes
+// the model, the remembered choice (tier 1 bracketPrefs), the list's filter
+// and each performer's live gender.
 //
 // The list's filter, as listFilter.js describes it, with the ids of what it
 // matches once loaded: { active, gender, label, fullLabel, ids: Set|null }.
 import * as BR from './brackets.js'
-import { fmtStars, GENDERS, genderLabel, pronoun } from './util.js'
+import { GENDERS, genderLabel } from './util.js'
 
 export const GENDER_KEYS = GENDERS.map(([g]) => g)
 const isGender = (g) => GENDER_KEYS.includes(g)
@@ -157,34 +156,6 @@ export function championsRoundPool(M, history, gender) {
     (id) => M.db.performers.get(id)?.local,
   )
   return { ids, size: BR.championsRoundSize(ids.length) }
-}
-
-// "You average 4.6★ on her scenes · 2× champion · rising in your brackets"
-export function affinityBits(M, p, history) {
-  const st = M.performerSceneStats(p.id)
-  const h = BR.performerHonours(history)[p.id]
-  const off = M.bt.bracketPerformerOffset.get(p.id) || 0
-  const bits = []
-  if (st.n && st.mean != null)
-    bits.push(`You average ${fmtStars(st.mean)}★ on ${pronoun(p)} scenes`)
-  else if (st.watched)
-    bits.push(`You've watched ${st.watched} of ${pronoun(p)} scenes`)
-  if (h?.champion)
-    bits.push(h.champion > 1 ? `${h.champion}× champion` : 'Bracket champion')
-  else if (h?.finalist)
-    bits.push(h.finalist > 1 ? `${h.finalist}× finalist` : 'Bracket finalist')
-  if (Math.abs(off) >= 0.05)
-    bits.push(off > 0 ? 'rising in your brackets' : 'slipping in your brackets')
-  return bits
-}
-
-// The one-line reason on a performer's card in the play dialog
-export function performerReason(M, p, history) {
-  const bits = affinityBits(M, p, history)
-  if (bits.length) return bits.slice(0, 2).join(' · ')
-  if (M.db.favoritePerformerIds.has(p.id)) return 'One of your favorites'
-  const n = p.local?.scene_count ?? p.ownedSceneIds.length
-  return `${n} scene${n === 1 ? '' : 's'} in your library, none rated yet`
 }
 
 // Placed performers or scenes of a finished bracket, best first

@@ -301,36 +301,6 @@ test('a Champions round seeds the distinct champions still in the library', () =
   })
 })
 
-test("reasons on the play dialog's cards", () => {
-  const rated = db.localPerformers.find(
-    (p) => M.performerSceneStats(p.id).n && p.image,
-  )
-  assert.match(
-    S.performerReason(M, rated, []),
-    /^You average \d\.\d★ on (her|his|their) scenes/,
-  )
-  const history = [
-    {
-      kind: 'performer',
-      result: { champion: rated.id, finalist: 'x', semifinalists: [] },
-    },
-    {
-      kind: 'performer',
-      result: { champion: rated.id, finalist: 'y', semifinalists: [] },
-    },
-  ]
-  assert.ok(S.affinityBits(M, rated, history).includes('2× champion'))
-  const plain = db.localPerformers.find(
-    (p) =>
-      !S.affinityBits(M, p, []).length && !db.favoritePerformerIds.has(p.id),
-  )
-  if (plain)
-    assert.match(
-      S.performerReason(M, plain, []),
-      /scenes? in your library, none rated yet$/,
-    )
-})
-
 test('placed ids and putting custom fields back', () => {
   assert.deepEqual(
     S.placedIds({

@@ -1,11 +1,19 @@
-// Single-elimination brackets: pools, sizes, 1-v-N seeding, byes, playing
-// order, undo, results, rating proposals. Pure functions over a plain bracket
-// object that the plugin persists (tier 1), so a paused bracket survives a
-// reload. Performer brackets are the main game; clip brackets ("Bracket her
-// scenes", the Scenes list's Bracket button) are secondary.
+// Single-elimination brackets: pools, sizes, anchors and candidates, the
+// first round, byes, playing order, undo, results, rating proposals. Pure
+// functions over a plain bracket object that the plugin persists (tier 1),
+// so a paused bracket survives a reload. Performer brackets are the main
+// game; clip brackets ("Bracket her scenes", the Scenes list's Bracket
+// button) are secondary.
+//
+// A bracket exists to add ratings for the model to learn from. It mixes
+// candidates (no rating of the user's own) with anchors (the user's own
+// rating), and a candidate's proposed rating comes from the anchors it beat
+// and lost to: a bracket only orders its own pool, so a finish alone says
+// nothing about stars. No rating or seed shows during play.
 
 import { behaviourOf } from './behaviour.js'
 import { pluginRating } from './rankings.js'
+import { fmtStars } from './util.js'
 import { FIELD_PREFIX } from '../name.js'
 
 export const SIZES = [16, 32, 64]
@@ -24,8 +32,13 @@ export const CHAMPIONS_MIN = 4
  * @property {number} size  slots: 4, 8, 16, 32 or 64 (byes fill the rest)
  * @property {boolean} champions  a Champions round
  * @property {string|null} origin  the page it was started from
- * @property {string[]} seeds  performer or scene ids, strongest first
- * @property {Record<string, number>} seedStrength
+ * @property {string[]} seeds  the entrants: performer or scene ids
+ * @property {(string|null)[]} [slots]  the first round, two slots per match
+ *   (null: a bye). Brackets from before anchors have none and seed 1 v N.
+ * @property {Record<string, number>} [anchors]  the anchors and their
+ *   rating100 when the bracket started
+ * @property {number|null} [championRating]  the user's rating of the
+ *   champion, asked when no anchor played
  * @property {{ winner: string, loser: string }[]} decisions  picks, in order
  * @property {string} createdAt  ISO
  * @property {string|null} finishedAt  ISO
@@ -106,9 +119,135 @@ export const clipByes = (n) =>
 
 export const watchedScenes = (db) => db.owned.filter((s) => behaviourOf(s))
 
-// ---------------------------------------------------------------- seeding
+// ---------------------------------------------------------------- anchors and candidates
 
-// 1 v N: [1,2] -> [1,4,2,3] -> [1,8,4,5,2,7,3,6] ... so 1 and 2 can only meet in the final
+// A rating a bracket stepped down from its champion's instead of measuring
+// it against an anchor. The field holds the rating100 Cherry Pick wrote, so
+// once the rating differs the user has changed it and it is theirs; until
+// then a later bracket treats the record as a candidate and may correct it.
+export const PROVISIONAL_FIELD = FIELD_PREFIX + 'provisional'
+
+// True while the record's rating is still the provisional one Cherry Pick
+// wrote (Stash may return the field as a number or a string)
+export function isProvisional(local, rating100 = local?.rating100) {
+  const v = local?.custom_fields?.[PROVISIONAL_FIELD]
+  if (rating100 == null || v == null || v === '') return false
+  return Number(v) === rating100
+}
+
+const recordOf = (M, kind, id) =>
+  kind === 'performer' ? M.db.performers.get(id) : M.db.scenes.get(id)
+
+// Stash's rating on a record now
+function stashRatingOf(M, kind, id) {
+  if (kind === 'performer') return M.stashPerformerRating(id)
+  const s = M.db.scenes.get(id)
+  return s ? M.stashRating(s) : null
+}
+
+// What an entrant is to a bracket. An anchor carries the user's own rating:
+// the bracket measures the others against it and never rewrites it. A
+// candidate has none of the user's own (unrated, primed by Ascension, or
+// provisional), so the bracket proposes one. A ranked record's rating
+// belongs to another plugin: it can play, but Apply never writes it.
+export function entrantRole(M, kind, id) {
+  const source = M.ratingSource(kind, id)
+  if (source && source !== 'primed') return 'ranked'
+  const r = stashRatingOf(M, kind, id)
+  if (r == null || source === 'primed') return 'candidate'
+  return isProvisional(recordOf(M, kind, id)?.local, r) ? 'candidate' : 'anchor'
+}
+
+// How strong the model thinks an entrant is: performer affinity, or a
+// scene's estimate in stars
+const strengthOf = (M, kind) =>
+  kind === 'performer'
+    ? (id) => M.performerAffinity(id)
+    : (id) => M.estimate(id)
+
+// k targets for spreadPick: evenly spaced from the highest value to the
+// lowest (linear), or the values at evenly spaced ranks (byRank), which
+// keeps a bunched distribution's shape and, when every value is equal,
+// leaves the order to decide
+export function linearTargets(vals, k) {
+  let hi = -Infinity
+  let lo = Infinity
+  for (const v of vals) {
+    if (v > hi) hi = v
+    if (v < lo) lo = v
+  }
+  return Array.from({ length: k }, (_, i) =>
+    k === 1 ? hi : hi - (i * (hi - lo)) / (k - 1),
+  )
+}
+export function byRankTargets(vals, k) {
+  const sorted = vals.slice().sort((a, b) => b - a)
+  return Array.from(
+    { length: k },
+    (_, i) =>
+      sorted[k === 1 ? 0 : Math.round((i * (sorted.length - 1)) / (k - 1))],
+  )
+}
+
+// k of ids, spread over their values: for each target in turn, the unused
+// id nearest it. ids come strongest first, so ties go to the stronger.
+export function spreadPick(ids, value, k, targetsFor = byRankTargets) {
+  if (k >= ids.length) return ids.slice()
+  if (k <= 0) return []
+  const vals = ids.map(value)
+  const used = new Uint8Array(ids.length)
+  const out = []
+  for (const t of targetsFor(vals, k)) {
+    let best = -1
+    for (let j = 0; j < ids.length; j++)
+      if (
+        !used[j] &&
+        (best < 0 || Math.abs(vals[j] - t) < Math.abs(vals[best] - t))
+      )
+        best = j
+    used[best] = 1
+    out.push(ids[best])
+  }
+  return out
+}
+
+// Who plays, out of a pool of ids: half the slots for candidates and half
+// for anchors (more candidates when anchors run short, more anchors when
+// candidates do), and ranked records only to fill what is left. Candidates
+// spread over the model's whole range, not only the likely favourites,
+// since ratings bunch at the top and the model learns from contrast;
+// anchors spread over the user's own scale, so each candidate has one near
+// it. Anchors come back highest rated first, the rest strongest first.
+export function composeEntrants(M, kind, ids, size) {
+  const strength = strengthOf(M, kind)
+  const byStrength = (a, b) => strength(b) - strength(a)
+  const role = { anchor: [], candidate: [], ranked: [] }
+  for (const id of ids) role[entrantRole(M, kind, id)].push(id)
+  for (const list of Object.values(role)) list.sort(byStrength)
+  const half = size / 2
+  const kC = Math.min(
+    role.candidate.length,
+    Math.max(half, size - role.anchor.length),
+  )
+  const kA = Math.min(role.anchor.length, size - kC)
+  const kR = Math.min(role.ranked.length, size - kC - kA)
+  const rating = (id) => stashRatingOf(M, kind, id)
+  const byRating = (a, b) => rating(b) - rating(a) || byStrength(a, b)
+  return {
+    anchors: spreadPick(
+      role.anchor.slice().sort(byRating),
+      rating,
+      kA,
+      linearTargets,
+    ).sort(byRating),
+    candidates: spreadPick(role.candidate, strength, kC),
+    ranked: role.ranked.slice(0, kR),
+  }
+}
+
+// 1 v N: [1,2] -> [1,4,2,3] -> [1,8,4,5,2,7,3,6] ... so 1 and 2 can only
+// meet in the final. Spreads the first round's matches, and seeds the
+// brackets played before anchors.
 export function seedOrder(n) {
   let s = [1]
   while (s.length < n) {
@@ -116,6 +255,66 @@ export function seedOrder(n) {
     s = s.flatMap((x) => [x, m + 1 - x])
   }
   return s
+}
+
+// A small seeded generator (mulberry32), so a bracket's sides are random
+// but the same for the same `now`
+function randomFrom(seed) {
+  let a = seed >>> 0
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0
+    let t = a
+    t = Math.imul(t ^ (t >>> 15), t | 1)
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+// Evenly spaced picks of k indexes out of n (k <= n), first and last kept
+const evenly = (k, n) =>
+  Array.from({ length: k }, (_, i) =>
+    k === 1 ? 0 : Math.round((i * (n - 1)) / (k - 1)),
+  )
+
+/**
+ * The first round's slots, two per match (null: a bye). Each candidate
+ * meets the anchor of matching rank, so its first pick already places it on
+ * the user's scale; byes go to anchors first, which need no measuring; what
+ * is left plays among itself. Seeds never show, so the order serves the
+ * measuring: matches spread like seeds (the top anchors' apart) and each
+ * match's sides are drawn at random.
+ * @param {string[]} anchors  highest rated first
+ * @param {string[]} unknowns  candidates and ranked records, strongest first
+ * @param {number} size
+ * @param {number} now  seeds the sides
+ */
+export function firstRoundSlots(anchors, unknowns, size, now = 0) {
+  const n = anchors.length + unknowns.length
+  const matches = n - size / 2
+  let byes = size - n
+  const x = Math.min(anchors.length, unknowns.length, matches)
+  const takeA = new Set(evenly(x, anchors.length))
+  const takeU = new Set(evenly(x, unknowns.length))
+  const pA = anchors.filter((_, i) => takeA.has(i))
+  const pU = unknowns.filter((_, i) => takeU.has(i))
+  const units = pA.map((a, i) => [a, pU[i]])
+  const restA = anchors.filter((_, i) => !takeA.has(i))
+  const restU = unknowns.filter((_, i) => !takeU.has(i))
+  for (const list of [restA, restU])
+    while (byes > 0 && list.length) {
+      units.push([list.shift(), null])
+      byes--
+    }
+  const left = [...restU, ...restA]
+  for (let i = 0; i < left.length; i += 2) units.push([left[i], left[i + 1]])
+  const rand = randomFrom(now)
+  const slots = []
+  for (const rank of seedOrder(size / 2)) {
+    const [p, q] = units[rank - 1]
+    if (q && rand() < 0.5) slots.push(q, p)
+    else slots.push(p, q)
+  }
+  return slots
 }
 
 // kind: 'performer' | 'clip'; ids: the pool; size: slots (byes fill the rest).
@@ -134,14 +333,12 @@ export function createBracket(
     now = Date.now(),
   },
 ) {
-  const strength =
-    kind === 'performer'
-      ? (id) => M.performerAffinity(id)
-      : (id) => M.estimate(id)
-  const seeds = ids
-    .slice()
-    .sort((a, b) => strength(b) - strength(a))
-    .slice(0, size)
+  const strength = strengthOf(M, kind)
+  const { anchors, candidates, ranked } = composeEntrants(M, kind, ids, size)
+  const unknowns = [...candidates, ...ranked].sort(
+    (a, b) => strength(b) - strength(a),
+  )
+  const slots = firstRoundSlots(anchors, unknowns, size, now)
   return {
     id: 'b' + now.toString(36),
     kind,
@@ -150,10 +347,12 @@ export function createBracket(
     size,
     champions,
     origin,
-    seeds,
-    seedStrength: Object.fromEntries(
-      seeds.map((id) => [id, Math.round(strength(id) * 100) / 100]),
+    seeds: slots.filter(Boolean),
+    slots,
+    anchors: Object.fromEntries(
+      anchors.map((id) => [id, stashRatingOf(M, kind, id)]),
     ),
+    championRating: null,
     decisions: [],
     createdAt: new Date(now).toISOString(),
     finishedAt: null,
@@ -170,11 +369,13 @@ export function roundName(slotsInRound) {
   return `Round of ${slotsInRound}`
 }
 
-// Rebuild the whole tree from the seeds and the picks made so far. A missing
-// entrant (smaller pools) is a bye: the other side goes through untouched.
+// Rebuild the whole tree from the first round and the picks made so far. A
+// missing entrant (smaller pools) is a bye: the other side goes through
+// untouched.
 export function bracketState(b) {
-  const order = seedOrder(b.size)
-  let entrants = order.map((seed) => b.seeds[seed - 1] || null)
+  let entrants = b.slots
+    ? b.slots.slice()
+    : seedOrder(b.size).map((seed) => b.seeds[seed - 1] || null)
   const rounds = []
   let di = 0
   let current = null
@@ -208,7 +409,6 @@ export function bracketState(b) {
     })
     entrants = matches.map((m) => m.winner)
   }
-  const seedOf = (id) => b.seeds.indexOf(id) + 1
   const loserOf = (m) => (m.winner === m.a ? m.b : m.a)
   const done = !current
   const n = rounds.length
@@ -238,7 +438,6 @@ export function bracketState(b) {
     current,
     done,
     result,
-    seedOf,
     played: b.decisions.length,
     totalMatches: b.seeds.length - 1,
     label,
@@ -322,11 +521,12 @@ export const FIELD_TYPES = {
 }
 const FINISH_ORDER = ['quarterfinal', 'semifinal', 'final', 'champion']
 
-// The plugin's own fields on a performer (custom_fields as Stash returns
-// them), for Remove Cherry Pick data: only these go, never another
+// The plugin's own fields on a performer or scene (custom_fields as Stash
+// returns them), for Remove Cherry Pick data: only these go, never another
 // plugin's, Ascension's and HotOrNot's included
+export const OWN_FIELDS = [...Object.values(FIELDS), PROVISIONAL_FIELD]
 export const ownFieldsOn = (customFields) =>
-  Object.values(FIELDS).filter((f) => f in (customFields || {}))
+  OWN_FIELDS.filter((f) => f in (customFields || {}))
 
 // The partial custom fields one finished performer bracket writes: one
 // performerUpdate per placed performer (quarterfinals and better, at most 8),
@@ -375,48 +575,188 @@ export function fieldsFromHistory(history) {
 
 // ---------------------------------------------------------------- Apply to my ratings
 
-// Tiers: champion 5★, finalist 4.5★, semifinalists 4★, quarterfinalists 3.5★.
-// By default only for what you haven't rated; includeRated also raises (never
-// lowers) ratings you set lower than the tier. A rating Ascension's Prime set
-// counts as unrated. A record Ascension, HotOrNot or Xenith ranks, or whose
-// rating is Restash's mirrored score, is never written: its row comes back
-// with skip: 'ranked' or 'mirrored', to show why it is left alone.
-export const TIERS = [
-  ['champion', 100, 'Champion'],
-  ['finalist', 90, 'Finalist'],
-  ['semifinalists', 80, 'Semifinalist'],
-  ['quarterfinalists', 70, 'Quarterfinalist'],
-]
+// A candidate's rating comes from the anchors around it in the tree: it
+// ranks above everyone it beat and everyone they beat, and below whoever
+// beat it and whoever beat them. Between two anchors it gets the midpoint
+// (to a quarter star); above only one, half a star more; below only one,
+// half a star less.
+//
+// A candidate no anchor bounds steps down from the champion's rating, half
+// a star per round it fell short of the title (a finalist ½★ under, a
+// semifinalist 1★ under), and is marked provisional; first-round losers get
+// nothing. The champion's rating is an anchor's, or half a star above the
+// best anchor (it beat them all, directly or through someone it beat), or,
+// when no anchor played, the user's own: Apply asks for it.
+//
+// Anchors are never written. A rating Ascension's Prime set counts as none.
+// A placed record Ascension, HotOrNot or Xenith ranks, or whose rating is
+// Restash's mirrored score, is listed with skip: 'ranked' or 'mirrored', to
+// show why it is left alone.
 
-export function ratingProposals(M, b, includeRated) {
-  const r = b.result
-  const out = []
-  for (const [key, to, why] of TIERS) {
-    const ids = Array.isArray(r[key]) ? r[key] : [r[key]]
-    for (const id of ids) {
-      if (!id) continue
-      // Stash's rating, what "Now" shows
-      const from =
-        b.kind === 'performer'
-          ? M.stashPerformerRating(id)
-          : M.stashRating(M.db.scenes.get(id))
-      const source = M.ratingSource(b.kind, id)
-      if (source === 'elo') out.push({ id, from, to, why, skip: 'ranked' })
-      else if (source === 'mirror')
-        out.push({ id, from, to, why, skip: 'mirrored' })
-      else if (source === 'primed')
-        out.push({ id, from, to, why, primed: true })
-      else if (from == null || (includeRated && to > from))
-        out.push({ id, from, to, why })
+const HALF = 10 // half a star in rating100
+const clampRating = (r) => Math.min(100, Math.max(HALF, r))
+// a midpoint, to the nearest quarter star: between a 4★ and a 4.5★ anchor
+// is 4.25★, not either anchor's rating
+const quarterStars = (r) => Math.round(r / 5) * 5
+
+// "½", "1", "1½": a rating100 difference in stars
+const starsText = (r) =>
+  (Math.floor(r / 20) ? String(Math.floor(r / 20)) : '') + (r % 20 ? '½' : '')
+
+// How far short of the title: 0 the champion, 1 the finalist, 2 a
+// semifinalist, 3 a quarterfinalist, then earlier rounds
+function finishLabel(short) {
+  return (
+    ['Champion', 'Finalist', 'Semifinalist', 'Quarterfinalist'][short] ||
+    `Round of ${2 ** short}`
+  )
+}
+
+// What the finished tree says about each entrant: everyone it beat
+// (directly or through someone it beat), everyone above it (whoever beat it,
+// and whoever beat them), and the round it went out in
+function treeOrder(st) {
+  const beaten = new Map()
+  const conqueror = new Map()
+  const outIn = new Map()
+  st.rounds.forEach((round, ri) => {
+    for (const m of round) {
+      if (m.bye || !m.winner || !m.a || !m.b) continue
+      const w = m.winner
+      const l = w === m.a ? m.b : m.a
+      const set = beaten.get(w) || new Set()
+      set.add(l)
+      for (const x of beaten.get(l) || []) set.add(x)
+      beaten.set(w, set)
+      conqueror.set(l, w)
+      outIn.set(l, ri)
     }
+  })
+  const above = (id) => {
+    const out = []
+    for (let c = conqueror.get(id); c; c = conqueror.get(c)) out.push(c)
+    return out
   }
-  return out
+  return { beaten: (id) => beaten.get(id) || new Set(), above, outIn }
+}
+
+/**
+ * A rating a finished bracket proposes.
+ * @typedef {object} RatingProposal
+ * @property {string} id
+ * @property {number|null} from  Stash's rating now
+ * @property {number|null} to  the proposed rating100 (null on a skipped row)
+ * @property {string} why  the anchors behind it, or its finish
+ * @property {boolean} provisional  stepped down from the champion's rating
+ * @property {true} [fromProvisional]  its rating now is a provisional one
+ * @property {number} short  rounds short of the title (0: the champion)
+ * @property {true} [primed]  its rating is Ascension's Prime
+ * @property {'ranked'|'mirrored'} [skip]  another plugin owns its rating
+ */
+
+/**
+ * @returns {{ rows: RatingProposal[], askChampion: boolean }} askChampion:
+ *   no anchor played and the champion is a candidate, so the user's rating
+ *   of the champion sets the scale (b.championRating)
+ */
+export function ratingProposals(M, b) {
+  const kind = b.kind
+  const st = bracketState(b)
+  if (!st.done) return { rows: [], askChampion: false }
+  const { beaten, above, outIn } = treeOrder(st)
+  const rounds = st.rounds.length
+  const champ = st.result.champion
+  const present = (id) =>
+    kind === 'performer'
+      ? !!M.db.performers.get(id)?.local
+      : !!M.db.scenes.get(id)?.owned
+  // The anchors as they were when the bracket started; a bracket from
+  // before anchors takes the entrants the user has rated since
+  const anchors =
+    b.anchors ||
+    Object.fromEntries(
+      b.seeds
+        .filter((id) => present(id) && entrantRole(M, kind, id) === 'anchor')
+        .map((id) => [id, stashRatingOf(M, kind, id)]),
+    )
+  const isAnchor = (id) => Object.prototype.hasOwnProperty.call(anchors, id)
+  const anchored = Object.keys(anchors).length > 0
+  const pickAnchor = (ids, better) => {
+    let out = null
+    for (const id of ids)
+      if (isAnchor(id) && (out == null || better(anchors[id], anchors[out])))
+        out = id
+    return out
+  }
+  const name = (id) =>
+    (kind === 'performer'
+      ? M.db.performers.get(id)?.name
+      : M.db.scenes.get(id)?.title) || 'Untitled'
+  const label = (id) => `${name(id)} (${fmtStars(anchors[id] / 20)}★)`
+  const champRole = present(champ) ? entrantRole(M, kind, champ) : null
+  // The top of the scale, for the steps
+  let top = null
+  if (isAnchor(champ)) top = anchors[champ]
+  else if (anchored)
+    top = clampRating(
+      anchors[pickAnchor(beaten(champ), (x, y) => x > y)] + HALF,
+    )
+  else if (b.championRating != null) top = b.championRating
+  const rows = []
+  for (const id of b.seeds) {
+    if (isAnchor(id) || !present(id)) continue
+    const role = entrantRole(M, kind, id)
+    if (role === 'anchor') continue // rated by the user since
+    const short = id === champ ? 0 : rounds - outIn.get(id)
+    let to = null
+    let why = finishLabel(short)
+    let provisional = false
+    const lo = pickAnchor(beaten(id), (x, y) => x > y)
+    const hi = pickAnchor(above(id), (x, y) => x < y)
+    if (id === champ && !anchored) {
+      to = b.championRating ?? null
+      why = 'Your rating for the champion'
+    } else if (lo != null && hi != null) {
+      to = clampRating(quarterStars((anchors[lo] + anchors[hi]) / 2))
+      why = `Above ${label(lo)}, below ${label(hi)}`
+    } else if (lo != null) {
+      to = clampRating(anchors[lo] + HALF)
+      why = `Above ${label(lo)}`
+    } else if (hi != null) {
+      to = clampRating(anchors[hi] - HALF)
+      why = `Below ${label(hi)}`
+    } else if (top != null && outIn.get(id) > 0) {
+      to = clampRating(top - short * HALF)
+      why = `${finishLabel(short)}, ${starsText(short * HALF)}★ under the champion`
+      provisional = true
+    }
+    const from = stashRatingOf(M, kind, id)
+    const row = { id, from, to, why, provisional, short }
+    if (isProvisional(recordOf(M, kind, id)?.local, from))
+      row.fromProvisional = true
+    if (role === 'ranked') {
+      if (short > 3) continue // listed only when placed
+      row.skip = M.ratingSource(kind, id) === 'mirror' ? 'mirrored' : 'ranked'
+      row.why = finishLabel(short)
+    } else if (to == null) continue
+    else if (M.ratingSource(kind, id) === 'primed') row.primed = true
+    else if (from === to) continue // its provisional rating already
+    rows.push(row)
+  }
+  rows.sort((x, y) => x.short - y.short)
+  return {
+    rows,
+    askChampion:
+      !anchored && b.championRating == null && champRole === 'candidate',
+  }
 }
 
 // The changes Apply may still write, against the records as Stash has them
 // right before the write (current: Map id -> { rating100, custom_fields }):
 // a record gone from Stash, or one another plugin started ranking or
 // mirroring since the preview, is left out (`ranked` lists the latter).
+// Each change keeps what it replaces: the rating, and the provisional mark
+// (fromProvisional), for Undo.
 export function writableChanges(changes, current) {
   const write = []
   const ranked = []
@@ -424,7 +764,30 @@ export function writableChanges(changes, current) {
     const rec = current.get(c.id)
     if (!rec) continue
     if (pluginRating(rec)) ranked.push(c.id)
-    else write.push({ ...c, from: rec.rating100 ?? null })
+    else
+      write.push({
+        ...c,
+        from: rec.rating100 ?? null,
+        fromProvisional: rec.custom_fields?.[PROVISIONAL_FIELD] ?? null,
+      })
   }
   return { write, ranked }
+}
+
+// The custom_fields input a rating write sends: a provisional rating marks
+// the record with the value written; a measured one clears an old mark.
+// had: the mark the record carries now.
+export function provisionalFieldsInput(to, provisional, had) {
+  if (provisional && to != null) return { partial: { [PROVISIONAL_FIELD]: to } }
+  if (had != null && had !== '') return { remove: [PROVISIONAL_FIELD] }
+  return null
+}
+
+// The custom_fields input that puts an applied change's mark back on Undo:
+// the mark it replaced, or none
+export function restoreProvisionalInput(change) {
+  const had = change.fromProvisional
+  if (had != null && had !== '')
+    return { partial: { [PROVISIONAL_FIELD]: had } }
+  return change.provisional ? { remove: [PROVISIONAL_FIELD] } : null
 }

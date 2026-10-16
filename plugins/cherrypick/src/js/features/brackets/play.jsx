@@ -1,10 +1,11 @@
 // The play dialog: two big cards, pick one. ←/→ or a tap picks, U or
 // Backspace undoes, Esc or × pauses. Every pick needs an answer: there is no
-// "Can't decide". No video plays in a bracket.
-import { components, FontAwesomeSolid, React } from '../../runtime/api.js'
+// "Can't decide". No video plays in a bracket. A card shows no rating, seed
+// or rating-based reason, so a pick is not pulled toward past ratings, and
+// an anchor looks like any other entrant.
+import { FontAwesomeSolid, React } from '../../runtime/api.js'
 import { store } from '../../runtime/app.js'
 import * as BR from '../../model/brackets.js'
-import { performerReason } from '../../model/bracketSetup.js'
 import { useAppState } from '../../ui/hooks.js'
 import {
   abandonBracket,
@@ -24,19 +25,8 @@ import {
 
 const { faRotateLeft, faUndo } = FontAwesomeSolid
 
-function Stars({ value }) {
-  const { RatingSystem } = components
-  if (value == null) return <span className="small text-muted">Not rated</span>
-  return RatingSystem ? (
-    <RatingSystem value={value} disabled />
-  ) : (
-    <span>{(value / 20).toFixed(1)}★</span>
-  )
-}
-
-function Contender({ b, id, side, seed, onPick }) {
+function Contender({ b, id, side, onPick }) {
   const M = useAppState((s) => s.M)
-  const history = useAppState((s) => s.brackets.history)
   if (!M) return null
   const key = (
     <span className="cherrypick-key badge badge-dark">
@@ -68,24 +58,14 @@ function Contender({ b, id, side, seed, onPick }) {
           <div className="cherrypick-cont-title">
             {p?.name || 'A removed performer'}
           </div>
-          <div className="cherrypick-cont-rating">
-            <Stars value={M.stashPerformerRating(id)} />
-          </div>
           <div className="small text-muted">
-            {n} {plural(n, 'scene')} · #{seed} seed
-          </div>
-          <div className="small cherrypick-cont-reason">
-            {p ? performerReason(M, p, history) : ''}
+            {n} {plural(n, 'scene')}
           </div>
         </div>
       </div>
     )
   }
   const s = M.db.scenes.get(id)
-  // Stash's rating shows; a reason shows where the model has no rating of
-  // the user's own
-  const r = s ? M.stashRating(s) : null
-  const why = s && M.rating(s) == null ? M.reason(id, true)?.text : null
   return (
     <div
       role="button"
@@ -102,20 +82,14 @@ function Contender({ b, id, side, seed, onPick }) {
         <div className="cherrypick-cont-title">
           {s?.title || 'A removed scene'}
         </div>
-        <div className="cherrypick-cont-rating">
-          <Stars value={r} />
-        </div>
         <div className="small text-muted">
-          {[s?.studio?.name, s?.date, `#${seed} seed`]
-            .filter(Boolean)
-            .join(' · ')}
+          {[s?.studio?.name, s?.date].filter(Boolean).join(' · ')}
         </div>
         <div className="small cherrypick-cont-reason">
-          {why ||
-            (s?.performers || [])
-              .slice(0, 3)
-              .map((p) => p.name)
-              .join(', ')}
+          {(s?.performers || [])
+            .slice(0, 3)
+            .map((p) => p.name)
+            .join(', ')}
         </div>
       </div>
     </div>
@@ -246,7 +220,6 @@ export function PlayDialog() {
               b={b}
               id={cur.a}
               side="left"
-              seed={st.seedOf(cur.a)}
               onPick={() => pickWinner(cur.a)}
             />
             <Contender
@@ -254,7 +227,6 @@ export function PlayDialog() {
               b={b}
               id={cur.b}
               side="right"
-              seed={st.seedOf(cur.b)}
               onPick={() => pickWinner(cur.b)}
             />
           </div>

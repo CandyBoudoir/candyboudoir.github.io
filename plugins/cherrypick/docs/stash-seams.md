@@ -47,6 +47,7 @@ Checked against the Stash source for v0.31.1 and the develop branch of 2026-10-1
 - `performerUpdate` fires `Performer.Update.Post` for other installed plugins with hooks (`internal/api/resolver_mutation_performer.go:433`), so Cherry Pick writes once per finished bracket.
 - The performer page shows every custom field, and `PerformerFilterType.custom_fields` filters on them (`EQUALS`, `GREATER_THAN`, `NOT_NULL` and others).
 - The performer edit form re-submits `custom_fields: { full }`, so a stale edit form can overwrite a concurrent plugin write.
+- Scenes take custom fields the same way: `sceneUpdate` accepts `custom_fields`, and `SceneFilterType.custom_fields` filters on them (checked on v0.31.1). Cherry Pick writes one there, `cherrypick_provisional`, in the same `sceneUpdate` or `performerUpdate` that sets a rating Apply stepped down from a champion's, so a provisional rating costs no extra write.
 
 ## StashDB
 

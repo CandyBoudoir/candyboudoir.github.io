@@ -1,7 +1,13 @@
 // When a bracket ends: the champion screen (podium, where the results went,
-// Undo of the final pick, a Champions round when one is due) and the
-// optional, previewed "Apply to my ratings".
-import { FontAwesomeSolid, React, ReactRouterDOM } from '../../runtime/api.js'
+// the champion's rating when no anchor played, Undo of the final pick, a
+// Champions round when one is due) and the optional, previewed "Apply to my
+// ratings".
+import {
+  components,
+  FontAwesomeSolid,
+  React,
+  ReactRouterDOM,
+} from '../../runtime/api.js'
 import { store } from '../../runtime/app.js'
 import { allDecisions, computeWithDecisions } from '../../runtime/engine.js'
 import * as BR from '../../model/brackets.js'
@@ -15,6 +21,7 @@ import {
   applyRatingChanges,
   dismissApplied,
   installedRankingPlugins,
+  setChampionRating,
   startChampionsRound,
   undoApplied,
   undoPick,
@@ -101,6 +108,46 @@ function Applied({ bracketId }) {
     ))
 }
 
+// Stash's own stars for the champion's rating, starting empty: a
+// preselected 5★ would make the top of the scale automatic again
+function ChampionStars({ b }) {
+  const { RatingSystem } = components
+  const value = b.championRating ?? null
+  const set = (v) => setChampionRating(b.id, v ?? null)
+  if (RatingSystem)
+    return <RatingSystem value={value} onSetRating={set} clickToRate />
+  return (
+    <select
+      className="form-control form-control-sm cherrypick-champ-select"
+      value={value ?? ''}
+      onChange={(e) => set(e.target.value ? Number(e.target.value) : null)}
+    >
+      <option value="">Stars…</option>
+      {[100, 90, 80, 70, 60, 50, 40, 30, 20, 10].map((r) => (
+        <option key={r} value={r}>
+          {fmtStars(r / 20)}★
+        </option>
+      ))}
+    </select>
+  )
+}
+
+// When no rated performer or scene played, the user's rating of the
+// champion sets the scale: the rest step down from it, half a star a round
+export function ChampionPrompt({ b, name, them }) {
+  const value = b.championRating ?? null
+  return (
+    <div className="card cherrypick-fixes cherrypick-champ-rate">
+      <p className="mb-2">
+        {value == null
+          ? `None of this bracket's ${b.kind === 'performer' ? 'performers' : 'scenes'} had a rating of yours to measure against. How many stars for ${name}? The rest are rated below ${them}.`
+          : `${name}: ${fmtStars(value / 20)}★. Apply to my ratings sets it, and the rest below it.`}
+      </p>
+      <ChampionStars b={b} />
+    </div>
+  )
+}
+
 export function ResultDialog({ id }) {
   const M = useAppState((s) => s.M)
   const history = useAppState((s) => s.brackets.history)
@@ -110,11 +157,19 @@ export function ResultDialog({ id }) {
   const [tree, setTree] = React.useState(false)
   const moved = useMoved(b?.id)
   const entrant = useEntrant(b?.kind || 'performer')
+  const proposals = React.useMemo(
+    () => (b && M ? BR.ratingProposals(M, b) : null),
+    [b, M],
+  )
   if (!b || !M) return null
   const r = b.result
   const isP = b.kind === 'performer'
   const champ = entrant(r.champion)
   const word = { her: 'she', his: 'he' }[pronoun(champ.p)] || 'they'
+  const them = isP
+    ? { her: 'her', his: 'him' }[pronoun(champ.p)] || 'them'
+    : 'it'
+  const ask = proposals?.askChampion || b.championRating != null
   const wins = b.decisions.filter((d) => d.winner === r.champion).length
   const due =
     isP && b.gender && !b.champions && !active
@@ -216,6 +271,7 @@ export function ResultDialog({ id }) {
               ) : null}
             </p>
           ) : null}
+          {ask ? <ChampionPrompt b={b} name={champ.name} them={them} /> : null}
           <Applied bracketId={b.id} />
         </div>
       </div>
@@ -268,24 +324,6 @@ export function ResultDialog({ id }) {
 
 // ------------------------------------------------------------ Apply (preview)
 
-// The result with only what is still in the library
-function present(M, b) {
-  const has = (x) =>
-    b.kind === 'performer'
-      ? !!M.db.performers.get(x)?.local
-      : !!M.db.scenes.get(x)?.owned
-  const r = b.result
-  return {
-    ...b,
-    result: {
-      champion: has(r.champion) ? r.champion : null,
-      finalist: has(r.finalist) ? r.finalist : null,
-      semifinalists: (r.semifinalists || []).filter(has),
-      quarterfinalists: (r.quarterfinalists || []).filter(has),
-    },
-  }
-}
-
 // Ascension, HotOrNot and Xenith, when installed and enabled (null while
 // Stash is asked)
 function useRankingPlugins() {
@@ -327,15 +365,19 @@ export function ApplyDialog({ id }) {
   const b = history.find((x) => x.id === id)
   const entrant = useEntrant(b?.kind || 'performer')
   const rankers = useRankingPlugins()
-  const [includeRated, setIncludeRated] = React.useState(false)
   const [unchecked, setUnchecked] = React.useState(() => new Set())
   const [busy, setBusy] = React.useState(false)
-  const rows = React.useMemo(
-    () => (b && M ? BR.ratingProposals(M, present(M, b), includeRated) : []),
-    [b, M, includeRated],
+  const { rows, askChampion } = React.useMemo(
+    () =>
+      b && M ? BR.ratingProposals(M, b) : { rows: [], askChampion: false },
+    [b, M],
   )
   if (!b || !M) return null
   const isP = b.kind === 'performer'
+  const champ = entrant(b.result.champion)
+  const them = isP
+    ? { her: 'her', his: 'him' }[pronoun(champ.p)] || 'them'
+    : 'it'
   const open = rows.filter((x) => !x.skip)
   const chosen = open.filter((x) => !unchecked.has(x.id))
   // Who ranks the records Apply leaves alone: the one installed, if one is
@@ -355,7 +397,7 @@ export function ApplyDialog({ id }) {
     setBusy(true)
     await applyRatingChanges(
       b,
-      chosen.map(({ id: x, to }) => ({ id: x, to })),
+      chosen.map(({ id: x, to, provisional }) => ({ id: x, to, provisional })),
     )
     back()
   }
@@ -383,26 +425,15 @@ export function ApplyDialog({ id }) {
       }
     >
       <p>
-        These are the Stash ratings this bracket would set. Untick anything
-        you&apos;d rather keep; you can undo the whole batch afterwards.
+        These are the Stash ratings this bracket would set, from where each
+        finished against {isP ? 'performers' : 'scenes'} you&apos;ve rated. Your
+        own ratings stay as they are. Untick anything you&apos;d rather keep;
+        you can undo the whole batch afterwards.
       </p>
       <RankingWarning names={rankers} />
-      <div className="custom-control custom-checkbox mb-2">
-        <input
-          type="checkbox"
-          className="custom-control-input"
-          id="cherrypick-apply-rated"
-          checked={includeRated}
-          onChange={(e) => setIncludeRated(e.target.checked)}
-        />
-        <label
-          className="custom-control-label"
-          htmlFor="cherrypick-apply-rated"
-        >
-          Also raise {isP ? 'performers' : 'scenes'} you&apos;ve rated lower
-          than the bracket says
-        </label>
-      </div>
+      {askChampion || b.championRating != null ? (
+        <ChampionPrompt b={b} name={champ.name} them={them} />
+      ) : null}
       {rows.length ? (
         <table className="table table-sm cherrypick-apply-table">
           <thead>
@@ -440,6 +471,13 @@ export function ApplyDialog({ id }) {
                     >
                       primed
                     </span>
+                  ) : x.fromProvisional ? (
+                    <span
+                      className="text-muted"
+                      title="Set by an earlier bracket, under its champion's rating"
+                    >
+                      {fmtStars(x.from / 20)}★ provisional
+                    </span>
                   ) : (
                     fmtStars(x.from / 20) + '★'
                   )}
@@ -448,7 +486,18 @@ export function ApplyDialog({ id }) {
                   {x.skip ? (
                     <span className="text-muted">kept</span>
                   ) : (
-                    <b>{fmtStars(x.to / 20)}★</b>
+                    <>
+                      <b>{fmtStars(x.to / 20)}★</b>
+                      {x.provisional ? (
+                        <span
+                          className="small text-muted cherrypick-provisional"
+                          title="No rating of yours placed it, so a later bracket can correct it"
+                        >
+                          {' '}
+                          provisional
+                        </span>
+                      ) : null}
+                    </>
                   )}
                 </td>
                 <td className="small text-muted">
@@ -459,11 +508,9 @@ export function ApplyDialog({ id }) {
           </tbody>
         </table>
       ) : null}
-      {open.length ? null : (
+      {open.length || askChampion ? null : (
         <p className="text-muted">
-          Nothing to set: you&apos;ve already rated everyone
-          {rows.length ? ' else' : ''} this bracket placed.
-          {includeRated ? '' : ' Tick the box to raise ratings too.'}
+          Nothing to set: this bracket has no new ratings to give.
         </p>
       )}
     </Dialog>

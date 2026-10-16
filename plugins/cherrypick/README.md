@@ -55,7 +55,11 @@ Your score needs 10 rated scenes before it can check itself. Until then, For you
 
 Bracket on the Performers list starts a 16-performer, single-elimination bracket in one click, from the performers in your library with a photo and a scene, of your library's largest gender or the one the list is filtered to. Options picks the gender, 16, 32 or 64, and the pool (your library, favorites, or the list's current filter). When a gender's pool is short, Set genders lets you set missing genders in Stash with a tap; Cherry Pick never guesses one. Bracket on the Scenes list, or "Bracket her scenes" on a performer page, does the same with scenes you have watched.
 
-Pick with a click, a tap or the arrow keys: U undoes, Esc pauses, and a paused bracket waits for you, even after a reload. Every pick teaches the model. When a performer bracket ends, the champion, finalist, semifinalists and quarterfinalists get three custom fields on their Stash record (`cherrypick_titles`, `cherrypick_best_finish`, `cherrypick_last_bracket`), which Stash shows on the performer page and can filter on. "Apply to my performer ratings" offers to rate them, with a preview and Undo; it changes nothing unless you ask. Four different champions of one gender unlock a Champions round.
+Pick with a click, a tap or the arrow keys: U undoes, Esc pauses, and a paused bracket waits for you, even after a reload. Every pick teaches the model. When a performer bracket ends, the champion, finalist, semifinalists and quarterfinalists get three custom fields on their Stash record (`cherrypick_titles`, `cherrypick_best_finish`, `cherrypick_last_bracket`), which Stash shows on the performer page and can filter on. Four different champions of one gender unlock a Champions round.
+
+A bracket's job is to add ratings for Cherry Pick to learn from. Half its places go to performers or scenes you haven't rated, picked across the range of what Cherry Pick expects you to think of them, and half to ones you have rated, picked across your stars. Each unrated one meets a rated one in the first round. No card shows a rating, a seed or a reason drawn from your ratings, so your earlier ratings don't steer your picks.
+
+"Apply to my ratings" then offers a Stash rating for each unrated one from where it finished against the rated ones: above your 4★ and below your 4.5★ gives 4.25★. Ratings you gave stay as they are. When none of a bracket's entrants has a rating of yours, Cherry Pick asks you to rate the champion, starting from no stars, and rates the others half a star lower for each round they fell short of the title. Those ratings carry a `cherrypick_provisional` custom field, so a later bracket can correct them; once you change one yourself, it is yours. Apply shows a preview and has Undo, and changes nothing unless you ask.
 
 | Playing                                                                   | The champion                                                                       |
 | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
@@ -101,8 +105,8 @@ Settings > Plugins > Cherry Pick switches each piece on or off. All start on exc
 Cherry Pick runs in Stash's web interface and keeps its data in your Stash:
 
 - **Stash's plugin configuration** (`config.yml`): the settings above, the Hall of Fame, a bracket in progress, Not interested, Don't learn, applied ratings and whether you turned StashDB off. A few kilobytes.
-- **Your performers' custom fields**: the three bracket fields above, written once when a bracket ends.
-- **Your Stash ratings**: only when you choose Apply to my performer ratings, never on a record another plugin ranks or whose rating Restash mirrors, and Undo puts them back.
+- **Custom fields**: the three bracket fields above on performers, written once when a bracket ends, and `cherrypick_provisional` on performers and scenes whose rating Apply set from the champion's.
+- **Your Stash ratings**: only when you choose Apply to my ratings, never on a record you rated yourself, another plugin ranks or whose rating Restash mirrors, and Undo puts them back.
 
 Your browser keeps only what Cherry Pick can rebuild from Stash: a copy of your library for a fast start, the taste model, the StashDB cache and which For you cards you opened. A new browser rebuilds them.
 
