@@ -183,3 +183,52 @@ test('a performer bracket moves For you in a cold library, not the gate', () => 
   assert.ok(after >= before, `${after} of their scenes, ${before} before`)
   assert.ok(after >= 1)
 })
+
+test('your average counts each rating Your score still needs as your plays suggest', () => {
+  const sum = (Mx) => Mx.fits.rated.reduce((a, x) => a + x.y, 0)
+  for (const rated of [0, 1, 2, 5, 9]) {
+    const Mx = engine({ rated })
+    close(
+      Mx.userMean,
+      (sum(Mx) + (MIN_RATED - rated) * Mx.fits.content.pseudoMean) / MIN_RATED,
+      `${rated} rated`,
+    )
+  }
+  // no plays to go by: your ratings' plain mean, or 3 with none
+  const unplayed = engine({ rated: 1, played: 0 })
+  assert.equal(unplayed.fits.content.pseudoMean, null)
+  assert.equal(unplayed.userMean, sum(unplayed))
+  assert.equal(engine({ rated: 0, played: 0 }).userMean, 3)
+  // ten ratings and up: the plain mean, so those libraries rank as before
+  const warm = createEngine(buildDb(input)).compute({})
+  for (const Mx of [engine({ rated: 10 }), warm])
+    assert.equal(Mx.userMean, sum(Mx) / Mx.fits.rated.length)
+})
+
+test('with one rating, unrated scenes sit around your average and the near-miss slot fills', () => {
+  const id = M.fits.rated[0].scene.id
+  const rerated = (rating100) =>
+    createEngine(db).compute({ overrides: { [id]: rating100 } })
+  for (const [label, Mx] of [
+    ['no ratings', engine({ rated: 0 })],
+    [`one ${M.rating(db.scenes.get(id)) / 20}★`, M],
+    ['one 2★', rerated(40)],
+    ['one 5★', rerated(100)],
+  ]) {
+    // your average cuts through Your score's guesses instead of sitting
+    // below or above them all, so For you's near-miss band and More like
+    // this's "well below your average" are about these scenes
+    const guesses = Mx.db.owned
+      .filter((s) => Mx.rating(s) == null)
+      .map((s) => Mx.prediction(s.id).value)
+    assert.ok(
+      Math.min(...guesses) < Mx.userMean && Mx.userMean < Math.max(...guesses),
+      `${label}: your average ${Mx.userMean}, guesses ${Math.min(...guesses)} to ${Math.max(...guesses)}`,
+    )
+    const row = forYou(Mx)
+    const near = row.filter((it) => it.kind === 'nearmiss')
+    assert.equal(near.length, 1, `${label}: ${row.map((it) => it.kind)}`)
+    assert.equal(near[0].slot, 9, label)
+    assert.match(near[0].reason, /^Worth a try/, label)
+  }
+})

@@ -184,6 +184,11 @@ export function fit(rated, watchedUnrated, params = PARAMS) {
   const ratedMean = rated.length
     ? rated.reduce((s, x) => s + x.y, 0) / rated.length
     : 3
+  // what the plays say you'd rate a played scene, on average (null: no plays)
+  const pseudo = samples.filter((s) => s.pseudo)
+  const pseudoMean = pseudo.length
+    ? pseudo.reduce((s, x) => s + x.y, 0) / pseudo.length
+    : null
   return {
     mu,
     W,
@@ -191,6 +196,7 @@ export function fit(rated, watchedUnrated, params = PARAMS) {
     bMean,
     calib: { a, c },
     ratedMean,
+    pseudoMean,
     nRated: rated.length,
     nPseudo: watchedUnrated.length,
     params,

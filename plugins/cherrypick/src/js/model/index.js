@@ -171,15 +171,28 @@ export function createEngine(db, shared = {}) {
     for (const s of db.scenes.values())
       predictions.set(s.id, predict(modelFor(s), s, extraFor(s)))
 
+    // Ratings Your score still needs before it can check itself (0 once it can)
+    const ratingsToGo = Math.max(0, MIN_RATED - F.rated.length)
+
     // your ratings and their spread
     const ratedStars = F.rated.map((x) => x.y)
-    const userMean = ratedStars.length
-      ? ratedStars.reduce((a, b) => a + b, 0) / ratedStars.length
-      : 3
+    const ratedSum = ratedStars.reduce((a, b) => a + b, 0)
+    const ratedMean = ratedStars.length ? ratedSum / ratedStars.length : 3
+    // Your average, the line For you's taste and More like this measure
+    // scenes against. Until Your score has its ten ratings, each one it still
+    // needs counts as what your plays suggest (the fit's pseudo-labels): with
+    // one or two ratings, their plain mean sits far from the guesses, which
+    // lean on the plays, and every unrated scene would share that offset.
+    // From ten ratings on, the plain mean, as before.
+    const userMean = ratingsToGo
+      ? (ratedSum + ratingsToGo * (F.content.pseudoMean ?? ratedMean)) /
+        MIN_RATED
+      : ratedMean
     const highShare = ratedStars.length
       ? ratedStars.filter((y) => y >= 4).length / ratedStars.length
       : 0
-    const inflated = userMean >= 3.6 && highShare >= 0.5
+    // how you rate, so your ratings alone
+    const inflated = ratedMean >= 3.6 && highShare >= 0.5
 
     // Relative labels rank a score among your Your scores: every owned scene
     // you haven't rated ("Top 10% for you" = top tenth of what's left to rate)
@@ -192,8 +205,6 @@ export function createEngine(db, shared = {}) {
     const cv = F.cv
     // Your score shows only when it beats your average on held-out ratings
     const gate = !!cv && cv.maeModel < cv.maeBase
-    // Ratings it still needs before it can check itself (0 once it can)
-    const ratingsToGo = Math.max(0, MIN_RATED - F.rated.length)
 
     const estimate = (id) => {
       const s = db.scenes.get(id)
