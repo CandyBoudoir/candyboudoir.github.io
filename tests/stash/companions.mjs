@@ -85,6 +85,23 @@ export const COMPANIONS = {
     enable: ['stash-curator'],
     disable: [],
   },
+  // Xenith 3.2.0, the Elo ranking plugin forked from Ascension 1.2.6, from
+  // https://github.com/gq1869/stashapp-xenith (GPL-3.0). The zip is the one
+  // attached to the v3.2.0 release; its GitHub Pages stable index lags
+  // behind the releases. Its stable and canary builds share the id xenith.
+  xenith: {
+    package: {
+      id: 'xenith',
+      name: 'Xenith',
+      version: '3.2.0',
+      date: '2026-10-09 22:27:05',
+      path: 'https://github.com/gq1869/stashapp-xenith/releases/download/v3.2.0/xenith.zip',
+      sha256:
+        '581af60e1461662cb8a3a20d87ca8a3131c55a24d8b7a95b7e2cbab79140fbba',
+    },
+    enable: ['xenith'],
+    disable: [],
+  },
 }
 
 export function companions() {
