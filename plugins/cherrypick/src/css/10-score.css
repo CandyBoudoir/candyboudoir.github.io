@@ -7,6 +7,14 @@
   text-transform: none;
 }
 
+/* Xenith hides Stash's rating on each card it marks .hon-processed
+   (.thumbnail-section.hon-processed .rating-banner) and puts its rank badge
+   at the bottom left. Your score is no rating of Stash's, so it stays,
+   displayed as Stash displays the banner. */
+.thumbnail-section.hon-processed .rating-banner.cherrypick-score-banner {
+  display: block;
+}
+
 .grid-card:hover .rating-banner.cherrypick-score-banner {
   opacity: 1;
 }
