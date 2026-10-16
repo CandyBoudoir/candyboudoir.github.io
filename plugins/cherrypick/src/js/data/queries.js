@@ -3,7 +3,8 @@
 // Apollo's gql before they reach Stash's client.
 
 // Owned scenes, with everything the taste model and For you read
-// (custom_fields: whether Ascension or HotOrNot ranks the scene).
+// (custom_fields: whether another plugin ranks the scene or mirrors its
+// rating).
 export const SCENES = `
   query CherryPickScenes($filter: FindFilterType, $scene_filter: SceneFilterType) {
     findScenes(filter: $filter, scene_filter: $scene_filter) {
@@ -35,8 +36,8 @@ export const SCENES = `
 `
 
 // Library performers, for brackets, affinity and the performer page
-// (custom_fields: Cherry Pick's own, and whether Ascension or HotOrNot ranks
-// the performer).
+// (custom_fields: Cherry Pick's own, and whether another plugin ranks the
+// performer or mirrors their rating).
 export const PERFORMERS = `
   query CherryPickPerformers($filter: FindFilterType, $performer_filter: PerformerFilterType) {
     findPerformers(filter: $filter, performer_filter: $performer_filter) {

@@ -37,7 +37,7 @@ const fmt1 = fmtStars
  * @property {string[]} [dontLearn]  ids of scenes marked "Don't learn from
  *   this": their ratings, plays and clip-bracket picks stay out of the model
  * @property {boolean} [learnFromRankings]  read ratings another plugin set
- *   (Ascension's and HotOrNot's Elo scores, Ascension's Prime; rankings.js)
+ *   (Elo scores, Restash's mirrored score, Ascension's Prime; rankings.js)
  *   as the user's own. Off by default: they stay out of the model, which
  *   then sees those records as unrated
  */
@@ -126,8 +126,8 @@ export function createEngine(db, shared = {}) {
         return performerOverrides[id]
       return db.performers.get(id)?.local?.rating100 ?? null
     }
-    // Who set a record's rating, when another plugin did ('elo', 'primed';
-    // rankings.js). An override is the user's own.
+    // Who set a record's rating, when another plugin did ('elo', 'mirror',
+    // 'primed'; rankings.js). An override is the user's own.
     const ratingSource = (kind, id) => {
       const over = kind === 'performer' ? performerOverrides : overrides
       if (Object.prototype.hasOwnProperty.call(over, id)) return null

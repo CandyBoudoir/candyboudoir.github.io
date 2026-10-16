@@ -1,6 +1,6 @@
-// Cherry Pick beside Ascension and HotOrNot: ratings those plugins set stay
-// out of the model, Apply never writes over a ranked record, and Cherry
-// Pick's custom-field writes leave theirs alone.
+// Cherry Pick beside Ascension, HotOrNot, Xenith and Restash: ratings those
+// plugins set stay out of the model, Apply never writes over a ranked or
+// mirrored record, and Cherry Pick's custom-field writes leave theirs alone.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readdir, readFile } from 'node:fs/promises'
@@ -32,6 +32,19 @@ const rankedScene = () => ({
 const rankedPerformer = () => ({
   ...RANKED,
   performer_record: JSON.stringify([{ opponentId: '9', won: true }]),
+})
+// What Xenith 3.2.0 writes after a few matches
+const xenithRanked = () => ({
+  xenith_stats: JSON.stringify({ total_matches: 3, wins: 2, losses: 1 }),
+  xenith_record: JSON.stringify([{ opponentId: '9', won: true }]),
+})
+// What Restash 0.3.0 writes on a record it scores; with its mirror on,
+// rating100 is set to the same score
+const restash = (score) => ({
+  restash_score: score,
+  restash_raw: 0.5521,
+  restash_components: '{"affinity":0.3}',
+  restash_updated: '2026-10-15T08:00:00Z',
 })
 // Prime's values for the i-th of n records: 70% / 25% / 5%
 const primeValue = (i, n, low = 6, mid = 31) =>
@@ -147,6 +160,92 @@ test('primed scenes count as unrated', () => {
     assert.equal(Mp.db.scenes.get(id).local.ratingSource, null)
 })
 
+test("scenes Xenith ranks or Restash mirrored count as unrated; Restash's score alone changes nothing", () => {
+  const rated = input.scenes.filter((s) => s.rating100 != null).slice(0, 16)
+  const xen = rated.slice(0, 8)
+  const mirrored = rated.slice(8)
+  const lib = copy()
+  const unrated = copy()
+  const scene = (l, id) => l.scenes.find((x) => x.id === id)
+  for (const [i, { id }] of xen.entries()) {
+    const s = scene(lib, id)
+    s.rating100 = 30 + ((i * 37) % 70)
+    s.custom_fields = xenithRanked()
+    scene(unrated, id).rating100 = null
+  }
+  for (const [i, { id }] of mirrored.entries()) {
+    const s = scene(lib, id)
+    s.rating100 = 20 + i * 9
+    // Stash may hand the score back as a string
+    s.custom_fields = restash(i % 2 ? String(s.rating100) : s.rating100)
+    scene(unrated, id).rating100 = null
+  }
+  // Scored by Restash with its mirror off: every rating is the user's own
+  const own = input.scenes.filter((s) => s.rating100 != null).slice(16, 26)
+  for (const [i, { id }] of own.entries()) {
+    const score = (scene(lib, id).rating100 + 7 + i) % 101
+    scene(lib, id).custom_fields = restash(score)
+    scene(unrated, id).custom_fields = restash(score)
+  }
+  const M = engineFor(lib)
+  sameModel(M, engineFor(unrated), 'Xenith and Restash scenes')
+  for (const { id } of xen) {
+    assert.equal(M.db.scenes.get(id).local.ratingSource, 'elo')
+    assert.equal(M.rating(M.db.scenes.get(id)), null)
+  }
+  for (const { id } of mirrored) {
+    const s = M.db.scenes.get(id)
+    assert.equal(s.local.ratingSource, 'mirror')
+    assert.equal(M.rating(s), null, 'the model reads none')
+    assert.equal(M.stashRating(s), scene(lib, id).rating100, "Stash's shows")
+  }
+  for (const { id } of own) {
+    const s = M.db.scenes.get(id)
+    assert.equal(s.local.ratingSource, null)
+    assert.equal(M.rating(s), scene(lib, id).rating100)
+  }
+  // Opting in reads both as the user's again
+  const Ml = engineFor(lib, { learnFromRankings: true })
+  assert.equal(
+    Ml.fits.rated.length,
+    M.fits.rated.length + xen.length + mirrored.length,
+  )
+})
+
+test('performer ratings Xenith ranks or Restash mirrored add no affinity', () => {
+  const base = copy()
+  for (const p of base.performers) p.rating100 = null
+  const hand = base.performers.slice(0, 5)
+  hand.forEach((p, i) => (p.rating100 = [100, 80, 20, 90, 60][i]))
+  const lib = structuredClone(base)
+  const xen = lib.performers.slice(5, 12)
+  xen.forEach((p, i) => {
+    p.rating100 = 25 + i * 9
+    p.custom_fields = xenithRanked()
+  })
+  const mirrored = lib.performers.slice(12, 20)
+  mirrored.forEach((p, i) => {
+    p.rating100 = 15 + i * 11
+    p.custom_fields = restash(p.rating100)
+  })
+  // Restash scores the hand-rated ones too, but its mirror is off
+  lib.performers
+    .slice(0, 5)
+    .forEach((p) => (p.custom_fields = restash((p.rating100 + 13) % 100)))
+  const M = engineFor(lib)
+  sameModel(M, engineFor(base), 'Xenith and Restash performers')
+  for (const p of xen) {
+    assert.equal(M.db.performers.get(p.id).local.ratingSource, 'elo')
+    assert.equal(M.performerRating(p.id), null)
+  }
+  for (const p of mirrored) {
+    assert.equal(M.db.performers.get(p.id).local.ratingSource, 'mirror')
+    assert.equal(M.performerRating(p.id), null)
+    assert.equal(M.stashPerformerRating(p.id), p.rating100)
+  }
+  for (const p of hand) assert.equal(M.performerRating(p.id), p.rating100)
+})
+
 // A 16-performer bracket played out (always the higher seed), and the
 // library as Stash has it afterwards
 function placedBracket() {
@@ -211,6 +310,58 @@ test('Apply skips a performer Ascension ranks, with the reason, and fills a prim
   }
 })
 
+test('Apply skips a performer Xenith ranks or Restash mirrored, with the reason', () => {
+  const done = placedBracket()
+  const r = done.result
+  const lib = copy()
+  for (const p of lib.performers) p.rating100 = null
+  const find = (id) => lib.performers.find((p) => p.id === id)
+  find(r.champion).rating100 = 58
+  find(r.champion).custom_fields = xenithRanked()
+  find(r.finalist).rating100 = 64
+  find(r.finalist).custom_fields = restash(64)
+  // Restash scored these, mirror off: one unrated, one rated by hand
+  const [semi1, semi2] = r.semifinalists
+  find(semi1).custom_fields = restash(71)
+  find(semi2).rating100 = 60
+  find(semi2).custom_fields = restash(52)
+  const M = engineFor(lib)
+
+  for (const includeRated of [false, true]) {
+    const by = new Map(
+      BR.ratingProposals(M, done, includeRated).map((x) => [x.id, x]),
+    )
+    assert.deepEqual(by.get(r.champion), {
+      id: r.champion,
+      from: 58,
+      to: 100,
+      why: 'Champion',
+      skip: 'ranked',
+    })
+    assert.deepEqual(by.get(r.finalist), {
+      id: r.finalist,
+      from: 64,
+      to: 90,
+      why: 'Finalist',
+      skip: 'mirrored',
+    })
+    assert.deepEqual(by.get(semi1), {
+      id: semi1,
+      from: null,
+      to: 80,
+      why: 'Semifinalist',
+    })
+    if (includeRated)
+      assert.deepEqual(by.get(semi2), {
+        id: semi2,
+        from: 60,
+        to: 80,
+        why: 'Semifinalist',
+      })
+    else assert.equal(by.has(semi2), false, "the user's rating stays")
+  }
+})
+
 test('Apply re-checks each record right before writing', () => {
   const changes = [
     { id: '1', to: 100 },
@@ -228,6 +379,36 @@ test('Apply re-checks each record right before writing', () => {
   assert.deepEqual(BR.writableChanges(changes, current), {
     write: [{ id: '1', to: 100, from: null }],
     ranked: ['2', '3'],
+  })
+})
+
+test('Apply and Undo re-check for Xenith and Restash too', () => {
+  const changes = ['1', '2', '3', '4', '5'].map((id) => ({ id, to: 90 }))
+  const current = new Map([
+    // Xenith ranked it since the preview
+    ['1', { id: '1', rating100: 47, custom_fields: xenithRanked() }],
+    // Restash mirrored its score since
+    ['2', { id: '2', rating100: 66, custom_fields: restash(66) }],
+    ['3', { id: '3', rating100: 66, custom_fields: restash('66') }],
+    // scored, mirror off
+    ['4', { id: '4', rating100: 80, custom_fields: restash(66) }],
+    ['5', { id: '5', rating100: null, custom_fields: restash(66) }],
+  ])
+  assert.deepEqual(BR.writableChanges(changes, current), {
+    write: [
+      { id: '4', to: 90, from: 80 },
+      { id: '5', to: 90, from: null },
+    ],
+    ranked: ['1', '2', '3'],
+  })
+  // Undo after Restash's next run wrote its score over the applied 90
+  const undo = [{ id: '6', from: null, to: 90 }]
+  const after = new Map([
+    ['6', { id: '6', rating100: 58, custom_fields: restash(58) }],
+  ])
+  assert.deepEqual(BR.writableChanges(undo, after), {
+    write: [],
+    ranked: ['6'],
   })
 })
 

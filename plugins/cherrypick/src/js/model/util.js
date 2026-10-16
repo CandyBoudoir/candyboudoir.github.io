@@ -39,7 +39,8 @@ export function sceneRating(scene, overrides) {
 }
 
 // The rating the model learns from: Stash's, unless another plugin set it
-// (an Elo ranking, Ascension's Prime; rankings.js), which counts as none
+// (an Elo ranking, Restash's mirror, Ascension's Prime; rankings.js), which
+// counts as none
 export function ownRating(scene, overrides) {
   if (!scene.owned) return null
   if (overrides && Object.prototype.hasOwnProperty.call(overrides, scene.id))

@@ -1,8 +1,8 @@
 // Everything a bracket changes: the bracket in progress and the Hall of Fame
 // (tier 1, through the store), the custom fields on placed performers
 // (tier 2, once per finished bracket), genders set from the grid and the
-// ratings an Apply sets (Stash's own records; never on a record Ascension or
-// HotOrNot ranks). After each Stash write the library copy is patched so the
+// ratings an Apply sets (Stash's own records; never on a record another
+// plugin ranks or mirrors). After each Stash write the library copy is patched so the
 // model sees it at once.
 import {
   patchLibraryPerformer,
@@ -366,8 +366,8 @@ export const abandonBracket = () =>
 
 // ------------------------------------------------------------ Apply to my ratings
 
-// Ascension and HotOrNot, when installed and enabled: they rank from Stash's
-// ratings, so Apply says that what it sets feeds them.
+// Ascension, HotOrNot and Xenith, when installed and enabled: they rank from
+// Stash's ratings, so Apply says that what it sets feeds them.
 export async function installedRankingPlugins() {
   const { plugins } = await run(PLUGINS)
   return rankingPlugins(plugins)
@@ -394,8 +394,8 @@ async function setRating(kind, id, rating100) {
 
 // changes: [{ id, to }] from the preview. Each record is read from Stash
 // right before the write, so Undo puts back exactly what was there (unrated
-// included), and one Ascension or HotOrNot started ranking since the preview
-// is left alone (the batch counts it in `kept`). The batch lands in tier 1.
+// included), and one another plugin started ranking or mirroring since the
+// preview is left alone (the batch counts it in `kept`). The batch lands in tier 1.
 export async function applyRatingChanges(bracket, changes) {
   if (!changes.length) return
   const kind = bracket.kind
@@ -426,7 +426,7 @@ export async function applyRatingChanges(bracket, changes) {
   store.set((s) => ({ applied: [...s.applied, batch] }))
 }
 
-// Puts each rating back. A record Ascension or HotOrNot has ranked since
+// Puts each rating back. A record another plugin has ranked or mirrored since
 // keeps its rating, which is that plugin's score now: the batch then stays,
 // with nothing left to undo, to say so until it is dismissed.
 export async function undoApplied(batchId) {

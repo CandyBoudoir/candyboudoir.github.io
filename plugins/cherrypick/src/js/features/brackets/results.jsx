@@ -58,13 +58,13 @@ function useMoved(bracketId) {
   }, [bracketId, M])
 }
 
-// What an applied batch left alone because Ascension or HotOrNot ranks it
-// (at Apply, or since, at Undo): "Left 2 as they are: Ascension or HotOrNot
-// ranks them."
+// What an applied batch left alone because another plugin ranks or mirrors
+// its rating (at Apply, or since, at Undo): "Left 2 as they are: another
+// plugin rates them."
 export function keptText(a) {
   const n = a.kept || 0
   if (!n) return null
-  return `Left ${n} as ${n === 1 ? 'it is' : 'they are'}: Ascension or HotOrNot ranks ${n === 1 ? 'it' : 'them'}.`
+  return `Left ${n} as ${n === 1 ? 'it is' : 'they are'}: another plugin rates ${n === 1 ? 'it' : 'them'}.`
 }
 
 // Undo while there is something to put back; Dismiss once only the note
@@ -286,8 +286,8 @@ function present(M, b) {
   }
 }
 
-// Ascension and HotOrNot, when installed and enabled (null while Stash is
-// asked)
+// Ascension, HotOrNot and Xenith, when installed and enabled (null while
+// Stash is asked)
 function useRankingPlugins() {
   const [names, setNames] = React.useState(null)
   React.useEffect(() => {
@@ -339,7 +339,11 @@ export function ApplyDialog({ id }) {
   const open = rows.filter((x) => !x.skip)
   const chosen = open.filter((x) => !unchecked.has(x.id))
   // Who ranks the records Apply leaves alone: the one installed, if one is
-  const ranker = rankers?.length === 1 ? rankers[0] : 'Ascension or HotOrNot'
+  const ranker = rankers?.length === 1 ? rankers[0] : 'Another plugin'
+  const skipped = (x) =>
+    x.skip === 'mirrored'
+      ? "Restash's score"
+      : `${ranker} ranks ${isP ? 'them' : 'it'}`
   const back = () => openDialog({ view: VIEWS.result, id })
   const toggle = (x) => {
     const n = new Set(unchecked)
@@ -448,7 +452,7 @@ export function ApplyDialog({ id }) {
                   )}
                 </td>
                 <td className="small text-muted">
-                  {x.skip ? `${ranker} ranks ${isP ? 'them' : 'it'}` : x.why}
+                  {x.skip ? skipped(x) : x.why}
                 </td>
               </tr>
             ))}

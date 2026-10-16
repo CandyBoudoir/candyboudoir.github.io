@@ -179,7 +179,7 @@ import { markRatingSources } from './rankings.js'
  * @property {number} o_counter
  * @property {StashId[]} stash_ids
  * @property {Record<string, unknown>} custom_fields
- * @property {'elo'|'primed'|null} ratingSource  who set rating100 when
+ * @property {'elo'|'mirror'|'primed'|null} ratingSource  who set rating100 when
  *   another plugin did (rankings.js): the model leaves it out
  */
 
@@ -209,7 +209,7 @@ import { markRatingSources } from './rankings.js'
  * @property {string|null} image_path
  * @property {StashId[]} stash_ids
  * @property {Record<string, unknown>} custom_fields
- * @property {'elo'|'primed'|null} ratingSource  as on SceneLocal
+ * @property {'elo'|'mirror'|'primed'|null} ratingSource  as on SceneLocal
  */
 
 /**
