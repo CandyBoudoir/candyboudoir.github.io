@@ -1,8 +1,9 @@
 // Everything a bracket changes: the bracket in progress and the Hall of Fame
 // (tier 1, through the store), the custom fields on placed performers
 // (tier 2, once per finished bracket), genders set from the grid and the
-// ratings an Apply sets (Stash's own records). After each Stash write the
-// library copy is patched so the model sees it at once.
+// ratings an Apply sets (Stash's own records; never on a record Ascension or
+// HotOrNot ranks). After each Stash write the library copy is patched so the
+// model sees it at once.
 import {
   patchLibraryPerformer,
   patchLibraryScene,
@@ -22,6 +23,7 @@ import {
   resolvePerformerPool,
   restoreFieldsInput,
 } from '../../model/bracketSetup.js'
+import { rankingPlugins } from '../../model/rankings.js'
 import { genderLabel } from '../../model/util.js'
 import { openDialog } from '../../ui/dialogs.jsx'
 
@@ -55,15 +57,20 @@ const PERFORMER_SET_FIELDS = `
 const PERFORMER_RATINGS = `
   query CherryPickPerformerRatings($ids: [ID!]) {
     findPerformers(ids: $ids, filter: { per_page: -1 }) {
-      performers { id rating100 }
+      performers { id rating100 custom_fields }
     }
   }
 `
 const SCENE_RATINGS = `
   query CherryPickSceneRatings($ids: [ID!]) {
     findScenes(ids: $ids, filter: { per_page: -1 }) {
-      scenes { id rating100 }
+      scenes { id rating100 custom_fields }
     }
+  }
+`
+const PLUGINS = `
+  query CherryPickPlugins {
+    plugins { id name enabled }
   }
 `
 const PERFORMER_RATE = `
@@ -359,13 +366,20 @@ export const abandonBracket = () =>
 
 // ------------------------------------------------------------ Apply to my ratings
 
-async function currentRatings(kind, ids) {
-  if (kind === 'performer') {
-    const { findPerformers } = await run(PERFORMER_RATINGS, { ids })
-    return new Map(findPerformers.performers.map((p) => [p.id, p.rating100]))
-  }
-  const { findScenes } = await run(SCENE_RATINGS, { ids })
-  return new Map(findScenes.scenes.map((x) => [x.id, x.rating100]))
+// Ascension and HotOrNot, when installed and enabled: they rank from Stash's
+// ratings, so Apply says that what it sets feeds them.
+export async function installedRankingPlugins() {
+  const { plugins } = await run(PLUGINS)
+  return rankingPlugins(plugins)
+}
+
+// The records as Stash has them now: id -> { rating100, custom_fields }
+async function currentRecords(kind, ids) {
+  const rows =
+    kind === 'performer'
+      ? (await run(PERFORMER_RATINGS, { ids })).findPerformers.performers
+      : (await run(SCENE_RATINGS, { ids })).findScenes.scenes
+  return new Map(rows.map((x) => [x.id, x]))
 }
 
 async function setRating(kind, id, rating100) {
@@ -378,27 +392,28 @@ async function setRating(kind, id, rating100) {
   }
 }
 
-// changes: [{ id, to }] from the preview. Each previous rating is read from
-// Stash right before the write, so Undo puts back exactly what was there
-// (unrated included). The batch lands in tier 1.
+// changes: [{ id, to }] from the preview. Each record is read from Stash
+// right before the write, so Undo puts back exactly what was there (unrated
+// included), and one Ascension or HotOrNot started ranking since the preview
+// is left alone (the batch counts it in `kept`). The batch lands in tier 1.
 export async function applyRatingChanges(bracket, changes) {
   if (!changes.length) return
   const kind = bracket.kind
-  const before = await currentRatings(
-    kind,
-    changes.map((c) => c.id),
+  const ids = changes.map((c) => c.id)
+  const { write, ranked } = BR.writableChanges(
+    changes,
+    await currentRecords(kind, ids),
   )
   const done = []
   try {
-    for (const c of changes) {
-      if (!before.has(c.id)) continue
+    for (const c of write) {
       await setRating(kind, c.id, c.to)
-      done.push({ id: c.id, from: before.get(c.id) ?? null, to: c.to })
+      done.push({ id: c.id, from: c.from, to: c.to })
     }
   } catch (e) {
     reportError(e)
   }
-  if (!done.length) return
+  if (!done.length && !ranked.length) return
   const batch = {
     id: 'a' + Date.now().toString(36),
     at: new Date().toISOString(),
@@ -406,15 +421,36 @@ export async function applyRatingChanges(bracket, changes) {
     kind,
     poolLabel: bracket.poolLabel,
     changes: done,
+    kept: ranked.length,
   }
   store.set((s) => ({ applied: [...s.applied, batch] }))
 }
 
+// Puts each rating back. A record Ascension or HotOrNot has ranked since
+// keeps its rating, which is that plugin's score now: the batch then stays,
+// with nothing left to undo, to say so until it is dismissed.
 export async function undoApplied(batchId) {
   const batch = store.get().applied.find((b) => b.id === batchId)
   if (!batch) return
+  let undo = batch.changes
+  let kept = batch.kept || 0
+  if (undo.length) {
+    try {
+      const now = await currentRecords(
+        batch.kind,
+        undo.map((c) => c.id),
+      )
+      const { write, ranked } = BR.writableChanges(undo, now)
+      const back = new Set(write.map((c) => c.id))
+      undo = undo.filter((c) => back.has(c.id))
+      kept += ranked.length
+    } catch (e) {
+      reportError(e)
+      return
+    }
+  }
   const left = []
-  for (const c of batch.changes) {
+  for (const c of undo) {
     try {
       await setRating(batch.kind, c.id, c.from ?? null)
     } catch (e) {
@@ -422,9 +458,16 @@ export async function undoApplied(batchId) {
       reportError(e)
     }
   }
+  const stays = left.length || kept > (batch.kept || 0)
   store.set((s) => ({
-    applied: left.length
-      ? s.applied.map((b) => (b.id === batchId ? { ...b, changes: left } : b))
+    applied: stays
+      ? s.applied.map((b) =>
+          b.id === batchId ? { ...b, changes: left, kept } : b,
+        )
       : s.applied.filter((b) => b.id !== batchId),
   }))
 }
+
+// Drops a batch with nothing left to undo
+export const dismissApplied = (batchId) =>
+  store.set((s) => ({ applied: s.applied.filter((b) => b.id !== batchId) }))

@@ -2,7 +2,8 @@
 // pure data code can be tested in Node; runtime/api.js parses them with
 // Apollo's gql before they reach Stash's client.
 
-// Owned scenes, with everything the taste model and For you read.
+// Owned scenes, with everything the taste model and For you read
+// (custom_fields: whether Ascension or HotOrNot ranks the scene).
 export const SCENES = `
   query CherryPickScenes($filter: FindFilterType, $scene_filter: SceneFilterType) {
     findScenes(filter: $filter, scene_filter: $scene_filter) {
@@ -27,12 +28,15 @@ export const SCENES = `
         studio { id name parent_studio { id name } }
         performers { id name disambiguation gender favorite image_path }
         tags { id name }
+        custom_fields
       }
     }
   }
 `
 
-// Library performers, for brackets, affinity and the performer page.
+// Library performers, for brackets, affinity and the performer page
+// (custom_fields: Cherry Pick's own, and whether Ascension or HotOrNot ranks
+// the performer).
 export const PERFORMERS = `
   query CherryPickPerformers($filter: FindFilterType, $performer_filter: PerformerFilterType) {
     findPerformers(filter: $filter, performer_filter: $performer_filter) {

@@ -92,3 +92,18 @@ test('a deleted scene triggers a full reload', async () => {
   })
   assert.equal(lib.scenes.length, 9)
 })
+
+test('a copy saved before scenes carried custom fields is read again in full', async () => {
+  const stash = fakeStash(10)
+  const now = Date.parse('2026-02-01T00:00:00Z')
+  const cache = memCache()
+  await cache.set('library', {
+    version: 1,
+    syncedAt: new Date(now).toISOString(),
+    scenes: stash.scenes.slice(0, 3),
+    performers: [],
+  })
+  const lib = await loadLibrary({ run: stash.run, cache, now: now + 1000 })
+  assert.equal(lib.fromCache, false)
+  assert.equal(lib.scenes.length, 10)
+})

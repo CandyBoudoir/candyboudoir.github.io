@@ -69,7 +69,7 @@ function Contender({ b, id, side, seed, onPick }) {
             {p?.name || 'A removed performer'}
           </div>
           <div className="cherrypick-cont-rating">
-            <Stars value={M.performerRating(id)} />
+            <Stars value={M.stashPerformerRating(id)} />
           </div>
           <div className="small text-muted">
             {n} {plural(n, 'scene')} · #{seed} seed
@@ -82,8 +82,10 @@ function Contender({ b, id, side, seed, onPick }) {
     )
   }
   const s = M.db.scenes.get(id)
-  const r = s ? M.rating(s) : null
-  const why = s && r == null ? M.reason(id, true)?.text : null
+  // Stash's rating shows; a reason shows where the model has no rating of
+  // the user's own
+  const r = s ? M.stashRating(s) : null
+  const why = s && M.rating(s) == null ? M.reason(id, true)?.text : null
   return (
     <div
       role="button"

@@ -5,6 +5,7 @@
 // scenes", the Scenes list's Bracket button) are secondary.
 
 import { behaviourOf } from './behaviour.js'
+import { isRanked } from './rankings.js'
 import { FIELD_PREFIX } from '../name.js'
 
 export const SIZES = [16, 32, 64]
@@ -321,6 +322,12 @@ export const FIELD_TYPES = {
 }
 const FINISH_ORDER = ['quarterfinal', 'semifinal', 'final', 'champion']
 
+// The plugin's own fields on a performer (custom_fields as Stash returns
+// them), for Remove Cherry Pick data: only these go, never another
+// plugin's, Ascension's and HotOrNot's included
+export const ownFieldsOn = (customFields) =>
+  Object.values(FIELDS).filter((f) => f in (customFields || {}))
+
 // The partial custom fields one finished performer bracket writes: one
 // performerUpdate per placed performer (quarterfinals and better, at most 8),
 // once, when the bracket ends. current: { [performerId]: fields } now.
@@ -370,7 +377,9 @@ export function fieldsFromHistory(history) {
 
 // Tiers: champion 5★, finalist 4.5★, semifinalists 4★, quarterfinalists 3.5★.
 // By default only for what you haven't rated; includeRated also raises (never
-// lowers) ratings you set lower than the tier.
+// lowers) ratings you set lower than the tier. A rating Ascension's Prime set
+// counts as unrated. A record Ascension or HotOrNot ranks is never written:
+// its row comes back with skip: 'ranked', to show why it is left alone.
 export const TIERS = [
   ['champion', 100, 'Champion'],
   ['finalist', 90, 'Finalist'],
@@ -385,13 +394,34 @@ export function ratingProposals(M, b, includeRated) {
     const ids = Array.isArray(r[key]) ? r[key] : [r[key]]
     for (const id of ids) {
       if (!id) continue
+      // Stash's rating, what "Now" shows
       const from =
         b.kind === 'performer'
-          ? M.performerRating(id)
-          : M.rating(M.db.scenes.get(id))
-      if (from == null || (includeRated && to > from))
+          ? M.stashPerformerRating(id)
+          : M.stashRating(M.db.scenes.get(id))
+      const source = M.ratingSource(b.kind, id)
+      if (source === 'elo') out.push({ id, from, to, why, skip: 'ranked' })
+      else if (source === 'primed')
+        out.push({ id, from, to, why, primed: true })
+      else if (from == null || (includeRated && to > from))
         out.push({ id, from, to, why })
     }
   }
   return out
+}
+
+// The changes Apply may still write, against the records as Stash has them
+// right before the write (current: Map id -> { rating100, custom_fields }):
+// a record gone from Stash, or one Ascension or HotOrNot started ranking
+// since the preview, is left out.
+export function writableChanges(changes, current) {
+  const write = []
+  const ranked = []
+  for (const c of changes) {
+    const rec = current.get(c.id)
+    if (!rec) continue
+    if (isRanked(rec.custom_fields)) ranked.push(c.id)
+    else write.push({ ...c, from: rec.rating100 ?? null })
+  }
+  return { write, ranked }
 }

@@ -38,6 +38,15 @@ export function sceneRating(scene, overrides) {
   return scene.local.rating100
 }
 
+// The rating the model learns from: Stash's, unless another plugin set it
+// (an Elo ranking, Ascension's Prime; rankings.js), which counts as none
+export function ownRating(scene, overrides) {
+  if (!scene.owned) return null
+  if (overrides && Object.prototype.hasOwnProperty.call(overrides, scene.id))
+    return overrides[scene.id]
+  return scene.local.ratingSource ? null : scene.local.rating100
+}
+
 // The calendar day of a timestamp in the browser's own time zone, so "came
 // back on another day" follows the user's evenings, not UTC's midnight
 const dayFmt = new Intl.DateTimeFormat('en-CA', {

@@ -4,12 +4,13 @@
 //             + Σ tag weights / √(tag count) + β · (behaviour − mean)
 //
 // Ridge (L2) shrinkage per feature group, fitted by coordinate descent.
-// Targets are the user's explicit ratings (rating100 / 20). Scenes that were
+// Targets are the user's explicit ratings (rating100 / 20; not ones another
+// plugin set, see rankings.js). Scenes that were
 // watched but never rated add weak pseudo-labels from their behaviour score
 // (weight 0.3). Accuracy is measured on held-out ratings: five 80/20 splits,
 // each rated scene held out once, against the "your average" baseline.
 
-import { isPlaceholderTag, sceneRating } from './util.js'
+import { isPlaceholderTag, ownRating } from './util.js'
 import { behaviourOf } from './behaviour.js'
 
 export const PARAMS = {
@@ -49,13 +50,15 @@ const group = (key) => key[0]
 
 // ratings: { sceneId: rating100|null } overrides on top of the library.
 // skip: scene ids marked "Don't learn from this": their ratings and plays
-// stay out of the model.
-export function buildSamples(db, overrides, skip) {
+// stay out of the model. rating: the scene's rating as the model reads it;
+// by default the user's own, so a rating another plugin set is no target
+// (its plays still count, as for any unrated scene).
+export function buildSamples(db, overrides, skip, rating = ownRating) {
   const rated = []
   const watchedUnrated = []
   for (const s of db.owned) {
     if (skip && skip.has(s.id)) continue
-    const r = sceneRating(s, overrides)
+    const r = rating(s, overrides)
     const b = behaviourOf(s)
     if (r != null) rated.push({ scene: s, y: r / 20, b: b?.score ?? null })
     else if (b) watchedUnrated.push({ scene: s, b: b.score })

@@ -13,6 +13,8 @@ import { closeDialog, openDialog } from '../../ui/dialogs.jsx'
 import { useAppState } from '../../ui/hooks.js'
 import {
   applyRatingChanges,
+  dismissApplied,
+  installedRankingPlugins,
   startChampionsRound,
   undoApplied,
   undoPick,
@@ -56,21 +58,45 @@ function useMoved(bracketId) {
   }, [bracketId, M])
 }
 
+// What an applied batch left alone because Ascension or HotOrNot ranks it
+// (at Apply, or since, at Undo): "Left 2 as they are: Ascension or HotOrNot
+// ranks them."
+export function keptText(a) {
+  const n = a.kept || 0
+  if (!n) return null
+  return `Left ${n} as ${n === 1 ? 'it is' : 'they are'}: Ascension or HotOrNot ranks ${n === 1 ? 'it' : 'them'}.`
+}
+
+// Undo while there is something to put back; Dismiss once only the note
+// about what was left alone remains
+export function AppliedButton({ a, className }) {
+  const undo = a.changes.length > 0
+  return (
+    <button
+      type="button"
+      className={className}
+      onClick={() => (undo ? undoApplied(a.id) : dismissApplied(a.id))}
+    >
+      {undo ? 'Undo' : 'Dismiss'}
+    </button>
+  )
+}
+
 function Applied({ bracketId }) {
   const applied = useAppState((s) => s.applied)
   return applied
     .filter((a) => a.bracketId === bracketId)
     .map((a) => (
       <p className="small cherrypick-applied" key={a.id}>
-        <Icon icon={faCheck} className="text-success" /> Applied{' '}
-        {a.changes.length} {plural(a.changes.length, 'rating')}.{' '}
-        <button
-          type="button"
+        <Icon icon={faCheck} className="text-success" />{' '}
+        {a.changes.length
+          ? `Applied ${a.changes.length} ${plural(a.changes.length, 'rating')}. `
+          : ''}
+        {keptText(a) ? `${keptText(a)} ` : ''}
+        <AppliedButton
+          a={a}
           className="btn btn-link btn-sm cherrypick-inline-link"
-          onClick={() => undoApplied(a.id)}
-        >
-          Undo
-        </button>
+        />
       </p>
     ))
 }
@@ -260,11 +286,47 @@ function present(M, b) {
   }
 }
 
+// Ascension and HotOrNot, when installed and enabled (null while Stash is
+// asked)
+function useRankingPlugins() {
+  const [names, setNames] = React.useState(null)
+  React.useEffect(() => {
+    let live = true
+    installedRankingPlugins()
+      .then((n) => live && setNames(n))
+      .catch(() => live && setNames([]))
+    return () => {
+      live = false
+    }
+  }, [])
+  return names
+}
+
+const andList = (names) =>
+  names.length > 1
+    ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
+    : names[0]
+
+// "Ascension is installed. Its rankings start from Stash's ratings, so it
+// will pick up every rating you apply here."
+function RankingWarning({ names }) {
+  if (!names?.length) return null
+  const one = names.length === 1
+  return (
+    <p className="alert alert-warning cherrypick-apply-ranking">
+      {andList(names)} {one ? 'is' : 'are'} installed. {one ? 'Its' : 'Their'}{' '}
+      rankings start from Stash&apos;s ratings, so {one ? 'it' : 'they'} will
+      pick up every rating you apply here.
+    </p>
+  )
+}
+
 export function ApplyDialog({ id }) {
   const M = useAppState((s) => s.M)
   const history = useAppState((s) => s.brackets.history)
   const b = history.find((x) => x.id === id)
   const entrant = useEntrant(b?.kind || 'performer')
+  const rankers = useRankingPlugins()
   const [includeRated, setIncludeRated] = React.useState(false)
   const [unchecked, setUnchecked] = React.useState(() => new Set())
   const [busy, setBusy] = React.useState(false)
@@ -274,7 +336,10 @@ export function ApplyDialog({ id }) {
   )
   if (!b || !M) return null
   const isP = b.kind === 'performer'
-  const chosen = rows.filter((x) => !unchecked.has(x.id))
+  const open = rows.filter((x) => !x.skip)
+  const chosen = open.filter((x) => !unchecked.has(x.id))
+  // Who ranks the records Apply leaves alone: the one installed, if one is
+  const ranker = rankers?.length === 1 ? rankers[0] : 'Ascension or HotOrNot'
   const back = () => openDialog({ view: VIEWS.result, id })
   const toggle = (x) => {
     const n = new Set(unchecked)
@@ -317,6 +382,7 @@ export function ApplyDialog({ id }) {
         These are the Stash ratings this bracket would set. Untick anything
         you&apos;d rather keep; you can undo the whole batch afterwards.
       </p>
+      <RankingWarning names={rankers} />
       <div className="custom-control custom-checkbox mb-2">
         <input
           type="checkbox"
@@ -346,12 +412,16 @@ export function ApplyDialog({ id }) {
           </thead>
           <tbody>
             {rows.map((x) => (
-              <tr key={x.id}>
+              <tr
+                key={x.id}
+                className={x.skip ? 'cherrypick-apply-skipped' : undefined}
+              >
                 <td>
                   <input
                     type="checkbox"
                     aria-label={'Apply to ' + entrant(x.id).name}
-                    checked={!unchecked.has(x.id)}
+                    checked={!x.skip && !unchecked.has(x.id)}
+                    disabled={!!x.skip}
                     onChange={() => toggle(x.id)}
                   />
                 </td>
@@ -359,22 +429,37 @@ export function ApplyDialog({ id }) {
                 <td className="num">
                   {x.from == null ? (
                     <span className="text-muted">unrated</span>
+                  ) : x.primed ? (
+                    <span
+                      className="text-muted"
+                      title="Set by Ascension's Prime task, not by you"
+                    >
+                      primed
+                    </span>
                   ) : (
                     fmtStars(x.from / 20) + '★'
                   )}
                 </td>
                 <td className="num">
-                  <b>{fmtStars(x.to / 20)}★</b>
+                  {x.skip ? (
+                    <span className="text-muted">kept</span>
+                  ) : (
+                    <b>{fmtStars(x.to / 20)}★</b>
+                  )}
                 </td>
-                <td className="small text-muted">{x.why}</td>
+                <td className="small text-muted">
+                  {x.skip ? `${ranker} ranks ${isP ? 'them' : 'it'}` : x.why}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
-      ) : (
+      ) : null}
+      {open.length ? null : (
         <p className="text-muted">
-          Nothing to set: you&apos;ve already rated everyone this bracket
-          placed.{includeRated ? '' : ' Tick the box to raise ratings too.'}
+          Nothing to set: you&apos;ve already rated everyone
+          {rows.length ? ' else' : ''} this bracket placed.
+          {includeRated ? '' : ' Tick the box to raise ratings too.'}
         </p>
       )}
     </Dialog>

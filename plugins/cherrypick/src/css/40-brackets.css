@@ -586,6 +586,11 @@
   white-space: nowrap;
 }
 
+/* A record Ascension or HotOrNot ranks: listed, never written */
+.cherrypick-apply-table .cherrypick-apply-skipped td:nth-child(-n + 2) {
+  opacity: 0.6;
+}
+
 /* ------------------------------------------------ Hall of Fame (plugin page) */
 .cherrypick-hof-group {
   margin-bottom: 1.25rem;
