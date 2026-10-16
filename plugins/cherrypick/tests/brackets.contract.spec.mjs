@@ -421,6 +421,88 @@ test('with auto-apply on, closing the champion screen sets its ratings, and Undo
   await expect.poll(changed).toBe(0)
 })
 
+// Takes the provisional mark off the demo performers that carry one
+async function clearProvisional(ids) {
+  const { findPerformers } = await gql(
+    `query ($ids: [ID!]) {
+      findPerformers(ids: $ids, filter: { per_page: -1 }) {
+        performers { id custom_fields } }
+    }`,
+    { ids },
+  )
+  for (const p of findPerformers.performers)
+    if (p.custom_fields?.cherrypick_provisional != null)
+      await gql(
+        'mutation ($i: PerformerUpdateInput!) { performerUpdate(input: $i) { id } }',
+        {
+          i: {
+            id: p.id,
+            custom_fields: { remove: ['cherrypick_provisional'] },
+          },
+        },
+      )
+}
+
+test('with auto-apply on, the champion screen says when closing would set nothing', async ({
+  page,
+}) => {
+  // A bracket of unrated performers: nothing places its champion until the
+  // Challenge round or the user's stars do
+  const favorites = { 'Edie Flint': 20, 'Hana Ridge': 70, 'Bea Lark': 100 }
+  await setAutoApply(true)
+  const ids = Object.values(demo.performers)
+  const sceneIds = Object.values(demo.scenes)
+  const before = await performerRatings(ids)
+  const scenesBefore = await sceneRatings(sceneIds)
+  try {
+    for (const id of ids) await setPerformerRating(id, null)
+    for (const id of sceneIds) await setSceneRating(id, null)
+    for (const [name, r] of Object.entries(favorites))
+      await setPerformerRating(demo.performers[name], r)
+    await page.goto('/performers')
+    const bracket = visible(page.locator('.cherrypick-bracket-button'))
+    await expect(bracket).toBeVisible({ timeout: 20_000 })
+    await bracket.click()
+    await expect(page.locator('.cherrypick-play-modal')).toContainText(
+      '16 performers',
+    )
+    for (let i = 0; i < 15; i++) {
+      await page.keyboard.press('ArrowLeft')
+      await page.waitForTimeout(150)
+    }
+    const result = page.locator('.cherrypick-result-modal')
+    const champ = await result.locator('.cherrypick-champ-name').innerText()
+    const none = result.locator('.cherrypick-auto-apply-none')
+    await expect(none).toHaveText(
+      'Closing now sets no ratings. Play the Challenge round, or rate her yourself, first.',
+    )
+    await expect(result.locator('.cherrypick-auto-apply')).toHaveCount(0)
+    // Rate her myself: the stars come next
+    await result.locator('.cherrypick-challenge-skip').click()
+    await expect(none).toHaveText(
+      `Closing now sets no ratings. Rate ${champ} first, and the rest step down from her.`,
+    )
+    const ask = result.locator('.cherrypick-champ-rate')
+    await ask.locator('.rating-stars button').nth(3).click()
+    await expect(ask).toContainText('4.0★, and the rest below her.')
+    await expect(none).toHaveCount(0)
+    await expect(result.locator('.cherrypick-auto-apply')).toContainText(
+      'Closing this sets 8 performer ratings in Stash.',
+    )
+    await result.getByRole('button', { name: 'Done' }).click()
+    const champId = demo.performers[champ]
+    await expect
+      .poll(async () => (await performerRatings([champId]))[champId])
+      .toBe(80)
+  } finally {
+    for (const [id, r] of Object.entries(before))
+      await setPerformerRating(id, r)
+    for (const [id, r] of Object.entries(scenesBefore))
+      await setSceneRating(id, r)
+    await clearProvisional(ids)
+  }
+})
+
 test('a scene bracket plays the unrated scenes and keeps the rated ones for the Challenge round', async ({
   page,
 }) => {
