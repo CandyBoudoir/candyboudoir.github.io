@@ -6,6 +6,8 @@ import { Bootstrap, React, ReactRouterDOM, register } from '../runtime/api.js'
 import { toggleDontLearn, undoNotInterested } from '../runtime/actions.js'
 import { allDecisions } from '../runtime/engine.js'
 import { rateMore } from '../model/index.js'
+import { sourcesText } from '../model/matches.js'
+import { andList } from '../model/util.js'
 import { MIN_RATED } from '../model/taste.js'
 import { toRateUrl } from '../data/listFilter.js'
 import { NAME_S, PLUGIN_NAME, PLUGIN_ROUTE } from '../name.js'
@@ -63,6 +65,10 @@ function YourScore() {
   const library = useAppState((s) => s.library)
   const brackets = useAppState((s) => s.brackets)
   const cv = M?.cv
+  // "412 matches in Ascension and Xenith", when the switch is on and found any
+  const matches = M?.matches.count
+    ? `${M.matches.count} match${M.matches.count === 1 ? '' : 'es'} in ${sourcesText(M.matches.sources)}`
+    : null
   let body
   if (!M)
     body = (
@@ -79,7 +85,7 @@ function YourScore() {
     body = (
       <SettingRow
         title={`${rateMore(M)} to start`}
-        sub={`Your score needs ${MIN_RATED} rated scenes to check its guesses against. Until then, For you goes by your favorites, performer ratings, brackets and plays.`}
+        sub={`Your score needs ${MIN_RATED} rated scenes to check its guesses against. Until then, For you goes by your favorites, performer ratings, brackets and plays.${matches ? ` It also learns from ${matches}.` : ''}`}
       >
         <Link
           className="btn btn-secondary btn-sm cherrypick-rate-link"
@@ -91,6 +97,13 @@ function YourScore() {
     )
   else {
     const decisions = allDecisions({ brackets }).length
+    const from = [
+      `${M.fits.rated.length} rated scenes`,
+      `${M.fits.watchedUnrated.length} watched but unrated`,
+      'your performer ratings',
+    ]
+    if (decisions) from.push(`${decisions} bracket picks`)
+    if (matches) from.push(matches)
     body = (
       <>
         <SettingRow
@@ -99,7 +112,7 @@ function YourScore() {
         />
         <SettingRow
           title="Learning from"
-          sub={`${M.fits.rated.length} rated scenes, ${M.fits.watchedUnrated.length} watched but unrated, your performer ratings${decisions ? ` and ${decisions} bracket picks` : ''}. Display only: it never writes your Stash ratings.`}
+          sub={`${andList(from)}. Display only: it never writes your Stash ratings.`}
         />
       </>
     )

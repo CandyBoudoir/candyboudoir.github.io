@@ -73,25 +73,28 @@ Ascension, HotOrNot and Xenith rank performers and scenes by Elo and keep the sc
 
 Apply never rates a performer or scene that Ascension, HotOrNot or Xenith ranks or whose rating is Restash's score, and its preview lists them as kept. When Ascension, HotOrNot or Xenith is installed, the preview says it will pick up every rating you apply, since its rankings start from Stash's ratings. Cherry Pick's custom fields sit beside theirs, and Remove Cherry Pick data removes only its own.
 
+Learn from Ascension, HotOrNot and Xenith matches, under Settings > Plugins, teaches Cherry Pick from the games those plugins play. Ascension, HotOrNot_V3 and Xenith keep each performer's and scene's recent matches in a custom field (`performer_record`, `scene_record` or `xenith_record`), and Cherry Pick reads each won or lost match as a bracket pick at half the weight of one of yours, oldest first and ahead of your own picks. Skips, draws and opponents no longer in your library are left out, a match both players recorded counts once, and Don't learn from this keeps a scene's matches out as well. HotOrNot 1.0 and V2 keep only totals, so they add nothing. The switch starts on, and turning it off leaves their matches out. Cherry Pick's page counts the matches it learned from, and a reason names the plugin they came from: "Won 7 of 11 matches in Ascension".
+
 ## Settings
 
 Settings > Plugins > Cherry Pick switches each piece on or off. All start on except Relative badge style.
 
 ![Cherry Pick's switches under Settings > Plugins](docs/screenshots/settings.png)
 
-| Setting                              | Effect                                                                                      |
-| ------------------------------------ | ------------------------------------------------------------------------------------------- |
-| For you row                          | The first row on the front page.                                                            |
-| Rows that follow your watching       | "More with ..." and "Back to ..." after For you.                                            |
-| Hall of Fame row                     | Your bracket champions on the front page.                                                   |
-| More like this                       | The rows under the player on scene pages.                                                   |
-| Show scenes you don't have           | StashDB scenes in More like this and on performer pages.                                    |
-| Score badges on cards                | Your score in the rating corner of unrated scenes.                                          |
-| Your score on scene pages            | "likely 4★ for you" beside the stars.                                                       |
-| Crowns and medals on performer cards | Bracket champions and finalists.                                                            |
-| For you line in performer details    | How you rate their scenes and how they do in your brackets.                                 |
-| Relative badge style                 | Shows where a scene ranks among your unrated scenes ("Top 10%") instead of a likely rating. |
-| Tags to keep out of my picks         | Comma-separated tag names. Scenes with any of them never appear in Cherry Pick's rows.      |
+| Setting                                           | Effect                                                                                      |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| For you row                                       | The first row on the front page.                                                            |
+| Rows that follow your watching                    | "More with ..." and "Back to ..." after For you.                                            |
+| Hall of Fame row                                  | Your bracket champions on the front page.                                                   |
+| More like this                                    | The rows under the player on scene pages.                                                   |
+| Show scenes you don't have                        | StashDB scenes in More like this and on performer pages.                                    |
+| Score badges on cards                             | Your score in the rating corner of unrated scenes.                                          |
+| Your score on scene pages                         | "likely 4★ for you" beside the stars.                                                       |
+| Crowns and medals on performer cards              | Bracket champions and finalists.                                                            |
+| For you line in performer details                 | How you rate their scenes and how they do in your brackets.                                 |
+| Relative badge style                              | Shows where a scene ranks among your unrated scenes ("Top 10%") instead of a likely rating. |
+| Tags to keep out of my picks                      | Comma-separated tag names. Scenes with any of them never appear in Cherry Pick's rows.      |
+| Learn from Ascension, HotOrNot and Xenith matches | Each match those plugins recorded counts as half a bracket pick.                            |
 
 ## Where your data lives
 

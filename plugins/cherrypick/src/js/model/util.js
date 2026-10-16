@@ -102,3 +102,9 @@ export function pronoun(performer) {
 
 // 4.25 -> "4.3": stars with one decimal, for reasons and badges
 export const fmtStars = (x) => (Math.round(x * 10) / 10).toFixed(1)
+
+// ["a", "b", "c"] -> "a, b and c"
+export const andList = (items) =>
+  items.length > 1
+    ? `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`
+    : items[0] || ''

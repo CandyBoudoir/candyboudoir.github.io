@@ -163,7 +163,7 @@ export function championsRoundPool(M, history, gender) {
 export function affinityBits(M, p, history) {
   const st = M.performerSceneStats(p.id)
   const h = BR.performerHonours(history)[p.id]
-  const off = M.bt.performerOffset.get(p.id) || 0
+  const off = M.bt.bracketPerformerOffset.get(p.id) || 0
   const bits = []
   if (st.n && st.mean != null)
     bits.push(`You average ${fmtStars(st.mean)}★ on ${pronoun(p)} scenes`)

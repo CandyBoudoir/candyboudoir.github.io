@@ -1,5 +1,6 @@
 // The taste model, kept current. Whenever the library, bracket picks, Not
-// interested or Don't learn change, the model is recomputed off the click
+// interested, Don't learn or the switch for other plugins' matches change,
+// the model is recomputed off the click
 // path (a timeout, so the page that triggered it renders first) and lands in
 // the store as `db` (buildDb) and `M` (the engine's answers). Pieces that
 // need a score render nothing until `M` is there.
@@ -49,6 +50,7 @@ function recompute() {
     decisions: allDecisions(s),
     notInterested: s.notInterested,
     dontLearn: s.dontLearn.map((d) => d.sceneId),
+    learnFromMatches: !!s.settings.learnFromMatches,
   })
   store.set({
     db: built.db,
@@ -71,6 +73,7 @@ export function computeWithDecisions(decisions) {
     decisions,
     notInterested: s.notInterested,
     dontLearn: s.dontLearn.map((d) => d.sceneId),
+    learnFromMatches: !!s.settings.learnFromMatches,
   })
 }
 
@@ -82,9 +85,17 @@ const INPUTS = [
   'dontLearn',
 ]
 
+// Settings the model reads. The settings object is new on every reload from
+// Stash, so these are compared one by one.
+const SETTINGS = ['learnFromMatches']
+
 export function keepModelCurrent() {
   store.subscribe((next, prev) => {
-    if (!INPUTS.some((k) => next[k] !== prev[k])) return
+    if (
+      !INPUTS.some((k) => next[k] !== prev[k]) &&
+      !SETTINGS.some((k) => next.settings?.[k] !== prev.settings?.[k])
+    )
+      return
     if (!pending) pending = setTimeout(recompute, 0)
   })
 }
