@@ -170,6 +170,15 @@ export const noGenderUrl = () => listUrl('/performers', [NO_GENDER])
 // the performers with no gender
 export const taggerUrl = () => listUrl('/performers', [NO_GENDER], 'disp=3')
 
+// The Scenes list's unrated scenes, most played first: where to rate the
+// scenes Your score needs
+export const toRateUrl = () =>
+  listUrl(
+    '/scenes',
+    [{ type: 'rating100', modifier: 'IS_NULL' }],
+    'sortby=play_count&sortdir=desc',
+  )
+
 // The Performers list filtered on a numeric custom field: field > 0
 export const customFieldUrl = (field) =>
   listUrl('/performers', [

@@ -7,6 +7,7 @@ import {
   fit,
   crossValidate,
   predict,
+  MIN_RATED,
   PARAMS,
   sceneFeatures,
 } from './taste.js'
@@ -191,6 +192,8 @@ export function createEngine(db, shared = {}) {
     const cv = F.cv
     // Your score shows only when it beats your average on held-out ratings
     const gate = !!cv && cv.maeModel < cv.maeBase
+    // Ratings it still needs before it can check itself (0 once it can)
+    const ratingsToGo = Math.max(0, MIN_RATED - F.rated.length)
 
     const estimate = (id) => {
       const s = db.scenes.get(id)
@@ -225,6 +228,7 @@ export function createEngine(db, shared = {}) {
       fits: F,
       cv,
       gate,
+      ratingsToGo,
       penalty,
       bt,
       predictions,
@@ -254,6 +258,16 @@ export function createEngine(db, shared = {}) {
 }
 
 // ---------------------------------------------------------------- labels
+
+// "Rate 9 more scenes" ("Rate 10 scenes" with none rated): what Your score
+// still needs before it can check itself. null once it has them. short:
+// "Rate 9 more", for beside the stars.
+export function rateMore(M, { short = false } = {}) {
+  const n = M?.ratingsToGo
+  if (!n) return null
+  if (n === MIN_RATED) return `Rate ${n} scenes`
+  return `Rate ${n} more` + (short ? '' : ` scene${n === 1 ? '' : 's'}`)
+}
 
 // Badge text. Stars: "~4.5" on the card corner, "likely 4.5★ for you" on the
 // scene page. Relative (a setting): where it ranks among your unrated scenes.
@@ -293,6 +307,8 @@ function reasonFor(db, F, bt, pred, scene, userMean) {
     const text = phrase(db, F, bt, part, scene, dir)
     if (text) return { text, key: part.key }
   }
+  // Too few ratings to compare a scene with what you rate well
+  if (F.rated.length < MIN_RATED) return null
   return {
     text:
       dir > 0
@@ -342,9 +358,11 @@ function phrase(db, F, bt, part, scene, dir) {
       return `You rated ${pronoun(p)} other scene ${fmt1(st.mean)}★`
     if (st && st.through >= 2 && dir > 0)
       return `You watch ${p.name}'s scenes all the way through`
+    // None of their scenes is rated: the weight comes from how you watch them
+    if (!st?.watched) return null
     return dir > 0
-      ? `${p.name} shows up in scenes you rate well`
-      : `${p.name} shows up in scenes you rate lower`
+      ? `You watch more of ${p.name}'s scenes than most`
+      : `You tend to stop ${p.name}'s scenes early`
   }
   if (k[0] === 's') {
     const s = db.studios.get(id)

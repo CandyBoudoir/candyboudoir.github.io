@@ -5,7 +5,10 @@
 // Each card's rank adds five parts, in star units:
 //   taste       long-term taste: Your score (or your rating, damped, since you
 //               already know those), nudged by implicit signals from the row
-//               (opened: a mild plus; passed over on 3+ visits: a small minus)
+//               (opened: a mild plus; passed over on 3+ visits: a small minus).
+//               Until Your score has ten ratings to check itself against, it
+//               also goes by the performers you favorite and rate in Stash
+//               (statedFor), fading as your ratings arrive
 //   momentum    performers, studios and tags you played in the last two weeks,
 //               each play decaying with a 7-day half-life ("now" is the
 //               library's asOf)
@@ -31,6 +34,7 @@ import {
 } from './util.js'
 import { behaviourOf, barelyPlayed } from './behaviour.js'
 import { popularity, popularityLine } from './signals.js'
+import { MIN_RATED } from './taste.js'
 
 export const FY = {
   size: 12,
@@ -269,13 +273,48 @@ export function openSignals(signals, sceneId, skip) {
 
 // ---------------------------------------------------------------- the five parts
 
+// What you told Stash about a scene's cast, for libraries with too few
+// ratings to learn from: a favorite adds 0.5 stars, a performer rating 0.25
+// per star above or below 3. The cast's best and worst performers count,
+// scaled by the share of the ten ratings Your score still needs, so it is
+// gone once Your score can check itself. Bracket picks need no share here:
+// they are already in Your score's prediction.
+export const STATED = { favorite: 0.5, perStar: 0.25 }
+
+export function statedFor(ctx, s) {
+  const { M, db } = ctx
+  const share = M.ratingsToGo / MIN_RATED
+  if (!share) return { value: 0, source: null }
+  let best = null
+  let worst = 0
+  for (const credit of s.performers) {
+    const favorite = db.favoritePerformerIds.has(credit.id)
+    const r = M.performerRating(credit.id)
+    const v =
+      (favorite ? STATED.favorite : 0) +
+      (r != null ? STATED.perStar * (r / 20 - 3) : 0)
+    if (v > 0 && (!best || v > best.value))
+      best = { performer: db.performers.get(credit.id), favorite, r, value: v }
+    worst = Math.min(worst, v)
+  }
+  return { value: share * ((best?.value || 0) + worst), source: best }
+}
+
 function tasteOf(ctx, s, signals) {
   const { M } = ctx
   const r = s.owned ? M.rating(s) : null
   const est = r != null ? r / 20 : M.prediction(s.id).value
   const base = r != null ? 0.6 * (est - M.userMean) : est - M.userMean
   const fb = ctx.skip.has(s.id) ? 0 : rowSignal(signals, s.id)
-  return { value: base + fb, base, feedback: fb, rated: r != null }
+  // your own rating says it all; the cast speaks for unrated scenes
+  const stated = r != null ? 0 : statedFor(ctx, s).value
+  return {
+    value: base + fb + stated,
+    base,
+    feedback: fb,
+    stated,
+    rated: r != null,
+  }
 }
 
 function momentumFor(ctx, s) {
@@ -368,6 +407,20 @@ function momentumPhrase(ctx, src, sceneId) {
   return `Like your last few plays: ${src.t.name}`
 }
 
+// Why the scene fits your taste: the favorite or rated performer that
+// carries a cold library's pick, else Your score's own reason. null when
+// neither has anything true to say.
+function tastePhrase(ctx, s) {
+  const st = statedFor(ctx, s)
+  if (st.source && st.value >= 0.1) {
+    const { performer: p, favorite, r } = st.source
+    if (r != null && (r >= 80 || !favorite))
+      return `You rated ${p.name} ${fmtStars(r / 20).replace('.0', '')}★`
+    return `With ${p.name}, one of your favorites`
+  }
+  return ctx.M.reason(s.id, true)?.text || null
+}
+
 function freshPhrase(ctx, s, f) {
   const r = ctx.M.rating(s)
   const rated =
@@ -376,7 +429,7 @@ function freshPhrase(ctx, s, f) {
       : ''
   if (f.kind === 'new') return 'New in your library'
   if (f.kind === 'never') {
-    const t = ctx.M.reason(s.id, true)?.text
+    const t = tastePhrase(ctx, s)
     return t
       ? `Never played · ${t[0].toLowerCase() + t.slice(1)}`
       : 'Never played'
@@ -402,7 +455,7 @@ function reasonOptions(ctx, it) {
       },
     ]
   if (it.kind === 'nearmiss') {
-    const t = ctx.M.reason(it.scene.id, true)?.text
+    const t = tastePhrase(ctx, it.scene)
     return [
       {
         kind: 'explore',
@@ -421,8 +474,10 @@ function reasonOptions(ctx, it) {
   out.push({
     kind: 'taste',
     text:
-      ctx.M.reason(it.scene.id, true)?.text ||
-      'A lot like scenes you rate well',
+      tastePhrase(ctx, it.scene) ||
+      (ctx.M.ratingsToGo
+        ? 'From your library'
+        : 'A lot like scenes you rate well'),
   })
   return out
 }
@@ -654,7 +709,7 @@ export function followRows(ctx, signals, shownIds) {
 function followReason(ctx, x) {
   return (
     freshPhrase(ctx, x.scene, x.f) ||
-    ctx.M.reason(x.scene.id, true)?.text ||
+    tastePhrase(ctx, x.scene) ||
     'From your library'
   )
 }

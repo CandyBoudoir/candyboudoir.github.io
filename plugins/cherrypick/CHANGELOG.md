@@ -6,6 +6,7 @@ First release, for Stash v0.31.1.
 
 - For you, the front page's first row: 12 scenes you own, ranked by your taste, your last two weeks of watching, how long since you played each and a little variety, each with the reason it is there. Up to two rows follow when your watching calls for them, then the Hall of Fame.
 - Your score, a likely rating learned from your ratings, how you watch and your bracket picks, on unrated scene cards and beside the stars on scene pages. It shows only once it predicts your ratings better than your average does, and it never changes your ratings.
+- With fewer than 10 rated scenes, For you ranks by the performers you favorite or rate, and For you, the scene page and Cherry Pick's page say how many ratings Your score still needs, with a link to your unrated scenes and a one-click bracket.
 - More like this under the player: barely played scenes in your library, then, with a StashDB key, scenes you don't have.
 - Performer and scene brackets beside the Performers and Scenes lists: one click starts 16, Options picks 32 or 64, the gender and the pool. Set genders fills a short pool by hand. Brackets pause and resume, write the results to performers' custom fields, offer to apply ratings with a preview and Undo, and build a Hall of Fame with Champions rounds.
 - A For you line on performer pages and crowns and medals on performer cards.

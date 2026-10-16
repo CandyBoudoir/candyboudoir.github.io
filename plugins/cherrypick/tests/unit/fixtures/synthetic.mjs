@@ -594,3 +594,39 @@ export function withRecentPlays(input, plays, days = 14) {
   }
   return out
 }
+
+// A copy of the input as someone who rarely rates and mostly watches outside
+// Stash's player would have it: `rated` scene ratings and `played` played
+// scenes kept (the first in id order that were played), every other rating
+// and play removed. favorites: false clears them, an array of performer ids
+// makes those the only ones; performerRatings: false clears those.
+export function withFewRatings(
+  input,
+  { rated = 1, played = 14, favorites = true, performerRatings = true } = {},
+) {
+  const out = structuredClone(input)
+  let keptRated = 0
+  let keptPlayed = 0
+  for (const s of out.scenes) {
+    const wasPlayed = s.play_count > 0
+    if (s.rating100 != null && wasPlayed && keptRated < rated) keptRated++
+    else s.rating100 = null
+    if (wasPlayed && keptPlayed < played) keptPlayed++
+    else
+      Object.assign(s, {
+        play_count: 0,
+        play_duration: 0,
+        play_history: [],
+        o_counter: 0,
+      })
+  }
+  for (const p of out.performers) {
+    if (Array.isArray(favorites)) p.favorite = favorites.includes(p.id)
+    else if (!favorites) p.favorite = false
+    if (!performerRatings) p.rating100 = null
+  }
+  const fav = new Map(out.performers.map((p) => [p.id, p.favorite]))
+  for (const s of out.scenes)
+    for (const c of s.performers) c.favorite = fav.get(c.id)
+  return out
+}
