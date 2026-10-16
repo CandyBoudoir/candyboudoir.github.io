@@ -408,3 +408,30 @@ test('no kind of reason, and no one sentence, dominates the row', () => {
   for (const [text, n] of count('reason'))
     assert.ok(n <= 2, `"${text}" on ${n} cards`)
 })
+
+test('a sentence the model gives every scene still shows on two cards at most', () => {
+  // As in a large library where watch time explains most scores and no card
+  // has a momentum or freshness sentence: every scene's strongest reason is
+  // the same sentence, with others behind it.
+  const same = 'You keep it playing longer than most'
+  const ctx = {
+    M: {
+      ratingsToGo: 0,
+      rating: () => null,
+      reason: () => ({ text: same, key: 'b' }),
+      reasons: (id) => [
+        { text: same, key: 'b' },
+        { text: `Another reason for ${id}`, key: 'p' },
+      ],
+    },
+  }
+  const cards = Array.from({ length: 12 }, (_, i) => ({
+    kind: 'main',
+    scene: { id: String(i + 1), performers: [] },
+    m: { source: null, value: 0 },
+    f: { kind: 'recent' },
+  }))
+  const texts = FY.assignReasons(ctx, cards).map((r) => r.text)
+  assert.equal(texts.filter((t) => t === same).length, 2)
+  assert.equal(new Set(texts).size, 11)
+})

@@ -411,14 +411,19 @@ function momentumPhrase(ctx, src, sceneId) {
 // carries a cold library's pick, else Your score's own reason. null when
 // neither has anything true to say.
 function tastePhrase(ctx, s) {
+  return tastePhrases(ctx, s)[0] ?? null
+}
+
+// The stated pick's sentence, then each of Your score's, strongest first.
+function tastePhrases(ctx, s) {
   const st = statedFor(ctx, s)
   if (st.source && st.value >= 0.1) {
     const { performer: p, favorite, r } = st.source
     if (r != null && (r >= 80 || !favorite))
-      return `You rated ${p.name} ${fmtStars(r / 20).replace('.0', '')}★`
-    return `With ${p.name}, one of your favorites`
+      return [`You rated ${p.name} ${fmtStars(r / 20).replace('.0', '')}★`]
+    return [`With ${p.name}, one of your favorites`]
   }
-  return ctx.M.reason(s.id, true)?.text || null
+  return (ctx.M.reasons?.(s.id, true) ?? []).map((r) => r.text)
 }
 
 function freshPhrase(ctx, s, f) {
@@ -471,13 +476,13 @@ function reasonOptions(ctx, it) {
   if (mp) out.push({ kind: 'momentum', text: mp })
   const fp = freshPhrase(ctx, it.scene, it.f)
   if (fp) out.push({ kind: 'fresh', text: fp })
+  for (const text of tastePhrases(ctx, it.scene))
+    out.push({ kind: 'taste', text })
   out.push({
     kind: 'taste',
-    text:
-      tastePhrase(ctx, it.scene) ||
-      (ctx.M.ratingsToGo
-        ? 'From your library'
-        : 'A lot like scenes you rate well'),
+    text: ctx.M.ratingsToGo
+      ? 'From your library'
+      : 'A lot like scenes you rate well',
   })
   return out
 }
@@ -488,7 +493,7 @@ function reasonOptions(ctx, it) {
 // repetitive. A card past a limit gives its next-best reason; only the text
 // changes, never the ranking.
 export const REASON_SHARE = 0.5
-function assignReasons(ctx, cards) {
+export function assignReasons(ctx, cards) {
   const cap = Math.ceil(cards.length * REASON_SHARE)
   const kinds = new Map()
   const texts = new Map()
@@ -497,7 +502,9 @@ function assignReasons(ctx, cards) {
     const pick =
       options.find(
         (o) => (kinds.get(o.kind) || 0) < cap && (texts.get(o.text) || 0) < 2,
-      ) || options[options.length - 1]
+      ) ||
+      options.find((o) => (texts.get(o.text) || 0) < 2) ||
+      options[options.length - 1]
     kinds.set(pick.kind, (kinds.get(pick.kind) || 0) + 1)
     texts.set(pick.text, (texts.get(pick.text) || 0) + 1)
     return pick
