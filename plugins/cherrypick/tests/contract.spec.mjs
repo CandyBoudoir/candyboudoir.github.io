@@ -1,6 +1,7 @@
 // Checks that Cherry Pick's pieces render in Stash's pages, on the seams
 // docs/stash-seams.md lists, and that what it stores reaches Stash.
 import { expect, test } from '@playwright/test'
+import { companionPluginIds } from '../../../tests/stash/companions.mjs'
 import {
   PLUGIN_ID,
   demoScene,
@@ -162,7 +163,10 @@ test("the navbar keeps Stash's items and another plugin's list beside the cherri
   // host of its dialog], and Stash hands the next after patch each item as
   // an argument of its own. A stand-in registers the same kind of patch as
   // soon as Stash sets PluginApi, before any plugin loads, so Cherry Pick's
-  // patch runs after it.
+  // patch runs after it. Beside Xenith itself, whose patch reads only the
+  // third argument and so drops the stand-in's element before Cherry Pick
+  // sees it, Xenith's dialog must open with its cards instead.
+  const xenith = companionPluginIds().includes('xenith')
   await page.addInitScript(() => {
     let api
     Object.defineProperty(window, 'PluginApi', {
@@ -184,10 +188,17 @@ test("the navbar keeps Stash's items and another plugin's list beside the cherri
   await expect(page.locator('.cherrypick-nav-icon').first()).toBeAttached({
     timeout: 20_000,
   })
-  await expect(page.locator('.list-patch-probe').first()).toBeAttached()
   await expect(
     page.locator('.navbar a.nav-utility[href="/settings"]').first(),
   ).toBeAttached()
+  if (xenith) {
+    await page.locator('#hon-floating-btn').click()
+    await expect(
+      page.locator('#hon-app-mount .hon-choose-btn').first(),
+    ).toBeVisible({ timeout: 20_000 })
+  } else {
+    await expect(page.locator('.list-patch-probe').first()).toBeAttached()
+  }
 })
 
 test('Settings › Plugins lists the switches, already on', async ({ page }) => {
