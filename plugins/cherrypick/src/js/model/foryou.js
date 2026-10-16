@@ -13,7 +13,8 @@
 //               each play decaying with a 7-day half-life ("now" is the
 //               library's asOf)
 //   freshness   never watched or not watched in a long time: up; watched
-//               recently: down, less so for people who rewatch a lot
+//               recently: down, less so for people who rewatch a lot; seen
+//               at all: down for people who rarely rewatch
 //   variety     at most 2 cards per performer, and a small minus for each card
 //               already in the row that shares one
 //   exploration 2 of the 12 cards are owned near-misses or forgotten favorites
@@ -361,10 +362,14 @@ function momentumFor(ctx, s) {
   }
 }
 
-// TODO(#28): the mockup's row mixes rewatch favourites with new picks (its
-// sample user rewatches 73% of what they play, so the damped penalty below
-// suits them); check the balance on a demo library with a non-rewatcher.
-function freshnessFor(ctx, s) {
+// How far a scene you have seen can come back, by how much you rewatch.
+// Someone who rewatches half of what they play or more (the mockup's sample
+// user: 73%) gets the full lift for scenes not watched in months. Someone who
+// never rewatches gets none, and a scene they have seen ranks SEEN below one
+// they haven't: on an invented 5,000-scene library with no rewatching, 10 of
+// 12 cards were scenes already watched once.
+const SEEN = 0.4
+export function freshnessFor(ctx, s) {
   if (!s.owned) return { value: 0.3, kind: 'never' }
   const last = lastPlay(ctx, s)
   const addedDays = (ctx.now - Date.parse(s.local.created_at)) / DAY
@@ -378,7 +383,11 @@ function freshnessFor(ctx, s) {
   }
   const d = (ctx.now - last) / DAY
   const P = 1.4 * (1 - 0.5 * ctx.rewatch)
-  const value = -P * 0.5 ** (d / 14) + 0.35 * clamp((d - 60) / 120, 0, 1)
+  const w = Math.min(1, ctx.rewatch / 0.5)
+  const value =
+    -P * 0.5 ** (d / 14) +
+    0.35 * w * clamp((d - 60) / 120, 0, 1) -
+    SEEN * (1 - w)
   return {
     value,
     kind: d < 14 ? 'recent' : d >= 90 ? 'long' : 'mid',

@@ -435,3 +435,25 @@ test('a sentence the model gives every scene still shows on two cards at most', 
   assert.equal(texts.filter((t) => t === same).length, 2)
   assert.equal(new Set(texts).size, 11)
 })
+
+test('a scene you saw months ago comes back only for people who rewatch', () => {
+  const now = input.asOf
+  const scene = (id) => ({
+    id,
+    owned: true,
+    local: { created_at: new Date(now - 400 * DAY).toISOString() },
+  })
+  const fresh = (rewatch) => {
+    const ctx = { now, rewatch, plays: new Map([['seen', [now - 200 * DAY]]]) }
+    return {
+      seen: FY.freshnessFor(ctx, scene('seen')).value,
+      never: FY.freshnessFor(ctx, scene('never')).value,
+    }
+  }
+  // the mockup's sample user rewatches 73% of what they play
+  const rewatcher = fresh(0.73)
+  assert.ok(rewatcher.seen > rewatcher.never)
+  // someone who never rewatches: a scene they saw ranks below one they didn't
+  const once = fresh(0)
+  assert.ok(once.seen < once.never - 0.5)
+})
