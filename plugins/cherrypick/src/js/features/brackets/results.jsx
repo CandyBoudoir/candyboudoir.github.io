@@ -426,7 +426,8 @@ export function ApplyDialog({ id }) {
     >
       <p>
         These are the Stash ratings this bracket would set, from where each
-        finished against {isP ? 'performers' : 'scenes'} you&apos;ve rated. Your
+        finished against {isP ? 'performers' : 'scenes'} you&apos;ve rated
+        {b.sceneAnchors?.length ? " or whose scenes you've rated" : ''}. Your
         own ratings stay as they are. Untick anything you&apos;d rather keep;
         you can undo the whole batch afterwards.
       </p>

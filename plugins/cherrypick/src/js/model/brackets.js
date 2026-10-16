@@ -7,7 +7,8 @@
 //
 // A bracket exists to add ratings for the model to learn from. It mixes
 // candidates (no rating of the user's own) with anchors (the user's own
-// rating), and a candidate's proposed rating comes from the anchors it beat
+// rating, or for a performer, the average of the user's ratings on their
+// scenes), and a candidate's proposed rating comes from the anchors it beat
 // and lost to: a bracket only orders its own pool, so a finish alone says
 // nothing about stars. No rating or seed shows during play.
 
@@ -37,6 +38,8 @@ export const CHAMPIONS_MIN = 4
  *   (null: a bye). Brackets from before anchors have none and seed 1 v N.
  * @property {Record<string, number>} [anchors]  the anchors and their
  *   rating100 when the bracket started
+ * @property {string[]} [sceneAnchors]  the anchors whose rating100 is the
+ *   average of the user's ratings on their scenes (performer brackets)
  * @property {number|null} [championRating]  the user's rating of the
  *   champion, asked when no anchor played
  * @property {{ winner: string, loser: string }[]} decisions  picks, in order
@@ -158,6 +161,39 @@ export function entrantRole(M, kind, id) {
   return isProvisional(recordOf(M, kind, id)?.local, r) ? 'candidate' : 'anchor'
 }
 
+// A performer the user never rated can still anchor a performer bracket,
+// at the average of the user's ratings on their scenes, so someone who
+// rates scenes and not performers gets anchors too. A scene's rating counts
+// when it would anchor a clip bracket (the user's own: no other plugin's,
+// no Prime's, not provisional) and the scene is not marked Don't learn from
+// this. Like any anchor it is never rewritten, so the performer stays
+// unrated and can anchor again.
+export const SCENE_ANCHOR_MIN = 2
+
+// The average of the user's own ratings on a performer's scenes, as a
+// whole rating100 (Stash's ratings are whole numbers), or null with fewer
+// than SCENE_ANCHOR_MIN of them
+export function sceneAverage(M, id) {
+  let n = 0
+  let sum = 0
+  for (const sid of M.db.performers.get(id)?.ownedSceneIds || []) {
+    if (M.dontLearn.has(sid) || entrantRole(M, 'clip', sid) !== 'anchor')
+      continue
+    n++
+    sum += stashRatingOf(M, 'clip', sid)
+  }
+  return n >= SCENE_ANCHOR_MIN ? Math.round(sum / n) : null
+}
+
+// The rating a performer candidate anchors at by their scenes: their scene
+// average when Stash has no rating for them or only Prime's. A provisional
+// rating keeps them a candidate, so a bracket can still correct it.
+function sceneAnchorRating(M, id) {
+  const r = M.stashPerformerRating(id)
+  if (isProvisional(M.db.performers.get(id)?.local, r)) return null
+  return sceneAverage(M, id)
+}
+
 // How strong the model thinks an entrant is: performer affinity, or a
 // scene's estimate in stars
 const strengthOf = (M, kind) =>
@@ -213,35 +249,51 @@ export function spreadPick(ids, value, k, targetsFor = byRankTargets) {
 
 // Who plays, out of a pool of ids: half the slots for candidates and half
 // for anchors (more candidates when anchors run short, more anchors when
-// candidates do), and ranked records only to fill what is left. Candidates
-// spread over the model's whole range, not only the likely favourites,
-// since ratings bunch at the top and the model learns from contrast;
-// anchors spread over the user's own scale, so each candidate has one near
-// it. Anchors come back highest rated first, the rest strongest first.
+// candidates do), and ranked records only to fill what is left. Anchors
+// with a rating of their own come first; performers anchored by their
+// scenes' ratings (sceneAverage) fill the anchor places left after them.
+// Candidates spread over the model's whole range, not only the likely
+// favourites, since ratings bunch at the top and the model learns from
+// contrast; anchors spread over the user's own scale, so each candidate has
+// one near it. Anchors come back highest rated first, the rest strongest
+// first; `ratings` holds each anchor's rating100 and `sceneAnchors` names
+// those from scene ratings.
 export function composeEntrants(M, kind, ids, size) {
   const strength = strengthOf(M, kind)
   const byStrength = (a, b) => strength(b) - strength(a)
-  const role = { anchor: [], candidate: [], ranked: [] }
-  for (const id of ids) role[entrantRole(M, kind, id)].push(id)
+  const role = { anchor: [], scene: [], candidate: [], ranked: [] }
+  const average = new Map()
+  for (const id of ids) {
+    const r = entrantRole(M, kind, id)
+    const avg =
+      r === 'candidate' && kind === 'performer'
+        ? sceneAnchorRating(M, id)
+        : null
+    if (avg != null) average.set(id, avg)
+    role[avg != null ? 'scene' : r].push(id)
+  }
   for (const list of Object.values(role)) list.sort(byStrength)
   const half = size / 2
   const kC = Math.min(
     role.candidate.length,
-    Math.max(half, size - role.anchor.length),
+    Math.max(half, size - role.anchor.length - role.scene.length),
   )
   const kA = Math.min(role.anchor.length, size - kC)
-  const kR = Math.min(role.ranked.length, size - kC - kA)
-  const rating = (id) => stashRatingOf(M, kind, id)
+  const kS = Math.min(role.scene.length, size - kC - kA)
+  const kR = Math.min(role.ranked.length, size - kC - kA - kS)
+  const rating = (id) =>
+    average.has(id) ? average.get(id) : stashRatingOf(M, kind, id)
   const byRating = (a, b) => rating(b) - rating(a) || byStrength(a, b)
+  const spread = (list, k) =>
+    spreadPick(list.slice().sort(byRating), rating, k, linearTargets)
+  const sceneAnchors = spread(role.scene, kS)
+  const anchors = [...spread(role.anchor, kA), ...sceneAnchors].sort(byRating)
   return {
-    anchors: spreadPick(
-      role.anchor.slice().sort(byRating),
-      rating,
-      kA,
-      linearTargets,
-    ).sort(byRating),
+    anchors,
     candidates: spreadPick(role.candidate, strength, kC),
     ranked: role.ranked.slice(0, kR),
+    ratings: Object.fromEntries(anchors.map((id) => [id, rating(id)])),
+    sceneAnchors,
   }
 }
 
@@ -334,7 +386,8 @@ export function createBracket(
   },
 ) {
   const strength = strengthOf(M, kind)
-  const { anchors, candidates, ranked } = composeEntrants(M, kind, ids, size)
+  const { anchors, candidates, ranked, ratings, sceneAnchors } =
+    composeEntrants(M, kind, ids, size)
   const unknowns = [...candidates, ...ranked].sort(
     (a, b) => strength(b) - strength(a),
   )
@@ -349,9 +402,8 @@ export function createBracket(
     origin,
     seeds: slots.filter(Boolean),
     slots,
-    anchors: Object.fromEntries(
-      anchors.map((id) => [id, stashRatingOf(M, kind, id)]),
-    ),
+    anchors: ratings,
+    sceneAnchors,
     championRating: null,
     decisions: [],
     createdAt: new Date(now).toISOString(),
@@ -588,7 +640,9 @@ export function fieldsFromHistory(history) {
 // best anchor (it beat them all, directly or through someone it beat), or,
 // when no anchor played, the user's own: Apply asks for it.
 //
-// Anchors are never written. A rating Ascension's Prime set counts as none.
+// Anchors are never written, those from scene ratings included, and the
+// preview names those apart: "Cleo Finch (3.8★ from your scene ratings)". A
+// rating Ascension's Prime set counts as none.
 // A placed record Ascension, HotOrNot or Xenith ranks, or whose rating is
 // Restash's mirrored score, is listed with skip: 'ranked' or 'mirrored', to
 // show why it is left alone.
@@ -692,7 +746,9 @@ export function ratingProposals(M, b) {
     (kind === 'performer'
       ? M.db.performers.get(id)?.name
       : M.db.scenes.get(id)?.title) || 'Untitled'
-  const label = (id) => `${name(id)} (${fmtStars(anchors[id] / 20)}★)`
+  const fromScenes = new Set(b.sceneAnchors || [])
+  const label = (id) =>
+    `${name(id)} (${fmtStars(anchors[id] / 20)}★${fromScenes.has(id) ? ' from your scene ratings' : ''})`
   const champRole = present(champ) ? entrantRole(M, kind, champ) : null
   // The top of the scale, for the steps
   let top = null
