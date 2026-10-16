@@ -392,15 +392,16 @@ export function startChallenge(id) {
   openDialog({ view: VIEWS.challenge, id })
 }
 
-// against: the anchor on screen, so a late second click is dropped. Once
-// the round is over, the champion screen shows how it went.
+// against: the anchor on screen, so a late second click is dropped. The
+// pick lands on the bracket as stored then, which the custom-field write of
+// the final may have changed since. Once the round is over, the champion
+// screen shows how it went.
 export function pickChallenge(id, winner, against) {
-  const b = finishedBracket(id)
-  if (!b) return
-  const next = BR.challengePick(b, winner, against)
-  if (next === b) return
-  updateFinished(id, () => next)
-  if (BR.challengeState(next).done) openDialog({ view: VIEWS.result, id })
+  const before = finishedBracket(id)
+  updateFinished(id, (b) => BR.challengePick(b, winner, against))
+  const after = finishedBracket(id)
+  if (after !== before && BR.challengeState(after)?.done)
+    openDialog({ view: VIEWS.result, id })
 }
 
 export function undoChallengePick(id) {
