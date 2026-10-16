@@ -145,4 +145,4 @@ The repo's [README](../../README.md) covers building, testing and releasing. Che
 
 ## License
 
-MIT, in the repo's [LICENSE](../../LICENSE).
+AGPL-3.0, in this folder's [LICENSE](LICENSE), the license Stash itself uses.

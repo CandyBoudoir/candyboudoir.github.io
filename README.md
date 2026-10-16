@@ -66,4 +66,4 @@ Each plugin releases on its own. When `prod` carries a plugin version with no `<
 
 ## License
 
-MIT. Juicy bundles Fredoka, and Leather bundles Grenze Gotisch and Oswald, under the SIL Open Font License 1.1 (each plugin's `assets/fonts` folder holds the license).
+MIT, except Cherry Pick, which is AGPL-3.0 (`plugins/cherrypick/LICENSE`). Juicy bundles Fredoka, and Leather bundles Grenze Gotisch and Oswald, under the SIL Open Font License 1.1 (each plugin's `assets/fonts` folder holds the license).

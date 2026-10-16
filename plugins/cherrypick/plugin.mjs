@@ -15,7 +15,7 @@ export const id = 'CherryPick'
 export const title = 'Cherry Pick'
 // Paths in this folder whose changes alter the plugin zip. Tests and docs are
 // left out so changing them offers users no update.
-export const inputs = ['src', 'plugin.mjs']
+export const inputs = ['src', 'plugin.mjs', 'LICENSE']
 
 export async function build(out) {
   await esbuild({

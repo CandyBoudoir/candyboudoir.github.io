@@ -2,7 +2,7 @@
 
 ## 0.1.0
 
-First release, for Stash v0.31.1.
+First release, for Stash v0.31.1, under the AGPL-3.0.
 
 - For you, the front page's first row: 12 scenes you own, ranked by your taste, your last two weeks of watching, how long since you played each and a little variety, each with the reason it is there. Up to two rows follow when your watching calls for them, then the Hall of Fame.
 - Your score, a likely rating learned from your ratings, how you watch and your bracket picks, on unrated scene cards and beside the stars on scene pages. It shows only once it predicts your ratings better than your average does, and it never changes your ratings.
