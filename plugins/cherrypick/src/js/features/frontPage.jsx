@@ -7,7 +7,7 @@
 // The rows are computed once per visit to the front page and then hold
 // still: Not interested turns a card into an Undo card in place, and nothing
 // reorders while the page is open.
-import { patch, ReactRouterDOM } from '../runtime/api.js'
+import { patchAfter, ReactRouterDOM } from '../runtime/api.js'
 import { store } from '../runtime/app.js'
 import { recordOpen, undoNotInterested } from '../runtime/actions.js'
 import {
@@ -203,7 +203,7 @@ const isRows = (el) =>
   String(el?.props?.className || '').includes('recommendations-container')
 
 export function registerFrontPage() {
-  patch.after('FrontPage', (props, _, result) =>
+  patchAfter('FrontPage', (props, result) =>
     isRows(result) ? (
       <>
         <Safe name="front page rows">

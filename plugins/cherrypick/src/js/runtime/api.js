@@ -7,6 +7,13 @@ export const { Bootstrap, Apollo, ReactRouterDOM, FontAwesomeSolid } =
   api.libraries
 export const components = api.components
 
+// patch.after, with fn(props, result). Stash calls an after patch with the
+// arguments the before patches left and then the result, so the result is
+// last but not always third: a before patch that returns [props] alone, as
+// Stash Curator's do, leaves it second (docs/stash-seams.md).
+export const patchAfter = (name, fn) =>
+  patch.after(name, (props, ...rest) => fn(props, rest[rest.length - 1]))
+
 // Stash's own Apollo client: its auth, its cache. Mutations made through it
 // update Stash's cached records, so Stash's pages show what the plugin wrote.
 export const client = () => utils.StashService.getClient()

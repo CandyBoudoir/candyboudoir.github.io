@@ -1,7 +1,7 @@
 // The cherries in the navbar's utility area, linking to the plugin page, and
 // the host for Cherry Pick's dialogs. During playback the icon keeps its
 // space but hides (watching.css).
-import { patch, ReactRouterDOM } from '../runtime/api.js'
+import { patchAfter, ReactRouterDOM } from '../runtime/api.js'
 import { PLUGIN_NAME, PLUGIN_ROUTE } from '../name.js'
 import { Cherries } from '../ui/Cherries.jsx'
 import { DialogHost } from '../ui/dialogs.jsx'
@@ -27,7 +27,7 @@ function NavIcon() {
 }
 
 export function registerNavbar() {
-  patch.after('MainNavBar.UtilityItems', (props, _, result) => (
+  patchAfter('MainNavBar.UtilityItems', (props, result) => (
     <>
       <Safe name="navbar icon">
         <NavIcon />

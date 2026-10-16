@@ -10,7 +10,13 @@
 // Where: the Performers page gets the performer pair; the Scenes page and
 // the scenes of a tag, studio or group get the scene pair; a performer's
 // Scenes tab gets "Bracket her scenes". No toolbar, no buttons.
-import { patch, React, ReactDOM, ReactRouterDOM } from '../../runtime/api.js'
+import {
+  patch,
+  patchAfter,
+  React,
+  ReactDOM,
+  ReactRouterDOM,
+} from '../../runtime/api.js'
 import { createStore, useStoreValue } from '../../runtime/store.js'
 import { run, store } from '../../runtime/app.js'
 import * as BR from '../../model/brackets.js'
@@ -44,13 +50,59 @@ function report(kind, filter) {
   })
 }
 
-function describe(filter) {
+function describe(filter, known) {
   try {
-    return describeFilter(filter)
+    return describeFilter(filter, known)
   } catch (e) {
     console.error('CherryPick: could not read the list filter', e)
     return null
   }
+}
+
+// ------------------------------------------------------------ what a filter may hold
+
+// The input fields of Stash's filter types, read once per page load. Another
+// plugin's criterion (Stash Curator's) puts a key of its own in the list's
+// filter, and Stash rejects a whole query that carries it, so the ids query
+// sends only these (describeFilter). null when Stash does not say: every
+// key is sent, and a failure shows on the button.
+const FILTER_FIELDS = `
+  query CherryPickFilterFields($name: String!) {
+    __type(name: $name) {
+      inputFields { name }
+    }
+  }
+`
+const FILTER_TYPES = {
+  scene: 'SceneFilterType',
+  performer: 'PerformerFilterType',
+}
+const filterFields = {}
+function knownFields(kind) {
+  filterFields[kind] ??= run(FILTER_FIELDS, { name: FILTER_TYPES[kind] }).then(
+    (d) => {
+      const fields = d.__type?.inputFields
+      return fields ? new Set(fields.map((f) => f.name)) : null
+    },
+    (e) => {
+      console.error("CherryPick: could not read Stash's filter fields", e)
+      return null
+    },
+  )
+  return filterFields[kind]
+}
+
+// The fields above: undefined while they load
+function useKnownFields(kind) {
+  const [known, setKnown] = React.useState(undefined)
+  React.useEffect(() => {
+    let live = true
+    knownFields(kind).then((k) => live && setKnown(k))
+    return () => {
+      live = false
+    }
+  }, [kind])
+  return known
 }
 
 // ------------------------------------------------------------ what a filter matches
@@ -98,31 +150,72 @@ function reportError(e) {
   store.set({ error: String(e?.message || e) })
 }
 
+// What Stash said about a failed query, with where: "unknown field
+// (scene_filter.curator_appeal)". Stash answers a query it rejects outright
+// with a 400, whose body holds the reason.
+function errorText(e) {
+  const err = e?.networkError?.result?.errors?.[0] || e?.graphQLErrors?.[0]
+  if (!err?.message) return String(e?.message || e)
+  const where = (err.path || []).filter((p) => p !== 'variable').join('.')
+  return where ? `${err.message} (${where})` : err.message
+}
+
+const failedTitle = (text) => `Can't bracket this list: ${text}`
+
+// A button's title, and the criteria the bracket leaves out
+const withNotes = (title, desc) =>
+  title && desc?.notApplied?.length
+    ? [title, ...desc.notApplied].join(' · ')
+    : title
+
 // ------------------------------------------------------------ the pairs
 
-function PerformerOps({ desc }) {
+// pending: the list reported its filter, but not yet what Stash can take
+function PerformerOps({ desc, pending }) {
   const ready = useAppState((s) => !!s.M)
   const active = useAppState((s) => !!s.brackets.active)
   const key = desc?.key
+  // The ids query's error for a filter: { key, text }
+  const [failed, setFailed] = React.useState(null)
   React.useEffect(() => {
-    if (desc?.active) matchIds('performer', desc).catch(() => {})
+    if (!desc?.active) return
+    let live = true
+    matchIds('performer', desc).catch(
+      (e) => live && setFailed({ key, text: errorText(e) }),
+    )
+    return () => {
+      live = false
+    }
     // desc is compared by its key
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key])
+  const error = failed && failed.key === key ? failed.text : null
   const withIds = async () =>
     desc?.active ? { ...desc, ids: await matchIds('performer', desc) } : desc
-  const go = (fn) => () => withIds().then(fn).catch(reportError)
+  const go = (fn) => () =>
+    withIds()
+      .then(fn)
+      .catch((e) => {
+        reportError(e)
+        setFailed({ key, text: errorText(e) })
+      })
+  const off = !ready || pending || !!error
   return (
     <div className="btn-group cherrypick-bracket-ops">
       {active ? null : (
         <button
           type="button"
           className="btn btn-secondary cherrypick-bracket-button"
-          disabled={!ready}
+          disabled={off}
           title={
-            desc?.active
-              ? 'Bracket the performers in this list'
-              : 'Bracket your performers'
+            error
+              ? failedTitle(error)
+              : withNotes(
+                  desc?.active
+                    ? 'Bracket the performers in this list'
+                    : 'Bracket your performers',
+                  desc,
+                )
           }
           onClick={go(quickStartPerformers)}
         >
@@ -133,7 +226,8 @@ function PerformerOps({ desc }) {
       <button
         type="button"
         className="btn btn-link cherrypick-options-link"
-        disabled={!ready}
+        disabled={off}
+        title={error ? failedTitle(error) : undefined}
         onClick={go(openPerformerSetup)}
       >
         Options
@@ -144,7 +238,8 @@ function PerformerOps({ desc }) {
 
 // The scenes a scene list's filter matches: all of them when the list is
 // unfiltered, a performer's own (known locally) on her Scenes tab, else
-// what Stash returns for the filter. null while unknown.
+// what Stash returns for the filter. { ids, error }: ids null while unknown,
+// error what Stash said when its query failed.
 function useListScenes(where, desc, M) {
   const [fetched, setFetched] = React.useState(null)
   const local =
@@ -157,7 +252,11 @@ function useListScenes(where, desc, M) {
     let live = true
     matchIds('scene', desc).then(
       (ids) => live && setFetched({ key, ids }),
-      (e) => live && reportError(e),
+      (e) => {
+        if (!live) return
+        reportError(e)
+        setFetched({ key, error: errorText(e) })
+      },
     )
     return () => {
       live = false
@@ -165,13 +264,20 @@ function useListScenes(where, desc, M) {
     // desc is compared by its key
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, remote])
-  if (!desc || !M) return null
-  if (!desc.active) return watchedPool(M.db, null)
+  const none = { ids: null, error: null }
+  if (!desc || !M) return none
+  if (!desc.active) return { ids: watchedPool(M.db, null), error: null }
   if (local) {
     const p = M.db.performers.get(where.performerId)
-    return watchedPool(M.db, new Set(p?.ownedSceneIds || []))
+    return {
+      ids: watchedPool(M.db, new Set(p?.ownedSceneIds || [])),
+      error: null,
+    }
   }
-  return fetched?.key === key ? watchedPool(M.db, fetched.ids) : null
+  if (!fetched || fetched.key !== key) return none
+  return fetched.error
+    ? { ids: null, error: fetched.error }
+    : { ids: watchedPool(M.db, fetched.ids), error: null }
 }
 
 const cap = (s) => s[0].toUpperCase() + s.slice(1)
@@ -179,7 +285,7 @@ const cap = (s) => s[0].toUpperCase() + s.slice(1)
 function SceneOps({ where, desc, pathname }) {
   const M = useAppState((s) => s.M)
   const active = useAppState((s) => !!s.brackets.active)
-  const ids = useListScenes(where, desc, M)
+  const { ids, error } = useListScenes(where, desc, M)
   const n = ids ? ids.length : null
   const ok = n != null && n >= BR.MIN_CLIP_POOL
   let pool
@@ -188,19 +294,23 @@ function SceneOps({ where, desc, pathname }) {
   if (where.place === 'performer-scenes') {
     const p = M?.db.performers.get(where.performerId)
     // A performer with no watched scenes shows no button
-    if (!p || !n) return null
+    if (!p || (!n && !error)) return null
     const her = pronoun(p)
     pool = {
-      ids,
-      poolLabel: `${p.name}'s scenes`,
+      ids: ids || [],
+      poolLabel: [`${p.name}'s scenes`, ...(desc?.notApplied || [])].join(
+        ' · ',
+      ),
       poolNote: `${cap(her)} scenes you've watched`,
       short: `Watch ${BR.MIN_CLIP_POOL - n} more of ${her} scenes to bracket them.`,
       origin: pathname,
     }
     label = `Bracket ${her} scenes`
-    title = ok
-      ? `A bracket of ${BR.clipPoolPhrase(n)} scenes of ${her} you've watched`
-      : `Needs ${BR.MIN_CLIP_POOL} watched scenes; you've watched ${n}`
+    title = error
+      ? failedTitle(error)
+      : ok
+        ? `A bracket of ${BR.clipPoolPhrase(n)} scenes of ${her} you've watched`
+        : `Needs ${BR.MIN_CLIP_POOL} watched scenes; you've watched ${n}`
   } else {
     pool = {
       ids: ids || [],
@@ -212,8 +322,9 @@ function SceneOps({ where, desc, pathname }) {
       origin: pathname,
     }
     label = 'Bracket'
-    title =
-      n == null
+    title = error
+      ? failedTitle(error)
+      : n == null
         ? undefined
         : ok
           ? `Bracket ${BR.clipPoolPhrase(n)} watched scenes in this list`
@@ -227,7 +338,7 @@ function SceneOps({ where, desc, pathname }) {
           type="button"
           className="btn btn-secondary cherrypick-bracket-button"
           disabled={n == null || (herTab && active)}
-          title={title}
+          title={error ? title : withNotes(title, desc)}
           onClick={() => quickStartClip(pool)}
         >
           <BracketIcon />
@@ -238,6 +349,7 @@ function SceneOps({ where, desc, pathname }) {
         type="button"
         className="btn btn-link cherrypick-options-link"
         disabled={n == null}
+        title={error ? failedTitle(error) : undefined}
         onClick={() => openClipSetup(pool)}
       >
         Options
@@ -298,7 +410,12 @@ function ListBracket({ kind, since: listStart }) {
   const [since] = React.useState(listStart)
   const entry = useStoreValue(lists, (s) => s[kind])
   const filter = entry && entry.seq > since ? entry.filter : null
-  const desc = React.useMemo(() => (filter ? describe(filter) : null), [filter])
+  const known = useKnownFields(kind)
+  const pending = !!filter && known === undefined
+  const desc = React.useMemo(
+    () => (filter && known !== undefined ? describe(filter, known) : null),
+    [filter, known],
+  )
   const anchor = React.useRef(null)
   const slots = useToolbarSlots(anchor, !!where)
   if (!where) return null
@@ -309,7 +426,7 @@ function ListBracket({ kind, since: listStart }) {
         ? ReactDOM.createPortal(
             <Safe name="bracket buttons">
               {kind === 'performer' ? (
-                <PerformerOps desc={desc} />
+                <PerformerOps desc={desc} pending={pending} />
               ) : (
                 <SceneOps where={where} desc={desc} pathname={pathname} />
               )}
@@ -338,7 +455,7 @@ export function registerListOps() {
     report('scene', args[0]?.filter)
     return args
   })
-  patch.after('FilteredPerformerList', (props, _, result) => (
+  patchAfter('FilteredPerformerList', (props, result) => (
     <>
       {result}
       <Safe name="performer bracket buttons">
@@ -346,7 +463,7 @@ export function registerListOps() {
       </Safe>
     </>
   ))
-  patch.after('FilteredSceneList', (props, _, result) => (
+  patchAfter('FilteredSceneList', (props, result) => (
     <>
       {result}
       <Safe name="scene bracket buttons">

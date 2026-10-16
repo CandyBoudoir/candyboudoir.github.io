@@ -9,6 +9,7 @@ import {
   Bootstrap,
   components,
   patch,
+  patchAfter,
   React,
   ReactRouterDOM,
 } from '../runtime/api.js'
@@ -95,7 +96,7 @@ export function registerSettingsExtras() {
       ? [{ ...props, settings: inManifestOrder(props.settings) }, ...rest]
       : [props, ...rest],
   )
-  patch.after('PluginSettings', (props, _, result) => {
+  patchAfter('PluginSettings', (props, result) => {
     if (props.pluginID !== PLUGIN_ID) return result
     const rows = (
       <Safe key="cherrypick-settings-extras" name="settings extras">

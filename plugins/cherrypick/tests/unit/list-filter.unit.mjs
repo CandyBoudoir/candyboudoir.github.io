@@ -141,6 +141,67 @@ test('describing a filter: active, its gender, labels with and without it', () =
   )
 })
 
+test("another plugin's criterion: left out of the query, named in the labels", () => {
+  const known = new Set(['rating100', 'gender', 'performers'])
+  const list = filterOf(
+    [
+      crit('rating100', 'GREATER_THAN', { value: 60 }),
+      crit('curator_appeal', 'GREATER_THAN', '0'),
+    ],
+    {
+      rating100: { value: 60, modifier: 'GREATER_THAN' },
+      curator_appeal: { value: 0, modifier: 'GREATER_THAN' },
+    },
+  )
+  const f = describeFilter(list, known)
+  assert.deepEqual(f.criteria, {
+    rating100: { value: 60, modifier: 'GREATER_THAN' },
+  })
+  assert.deepEqual(f.notApplied, ['Curator Appeal not applied'])
+  assert.equal(f.label, 'Rating > 60 · Curator Appeal not applied')
+  assert.equal(f.fullLabel, 'Rating > 60 · Curator Appeal not applied')
+  assert.equal(f.active, true, 'the list is still filtered')
+  assert.equal(f.count, 2)
+  assert.equal(
+    f.key,
+    describeFilter(
+      filterOf([crit('rating100', 'GREATER_THAN', { value: 60 })], {
+        rating100: { value: 60, modifier: 'GREATER_THAN' },
+      }),
+      known,
+    ).key,
+    'the same query, the same key',
+  )
+
+  const alone = describeFilter(
+    filterOf(
+      [
+        crit('gender', 'INCLUDES', ['Female']),
+        crit('curator_affinity', 'GREATER_THAN', '0'),
+      ],
+      {
+        gender: { value_list: ['FEMALE'], modifier: 'INCLUDES' },
+        curator_affinity: { value: 0, modifier: 'GREATER_THAN' },
+      },
+    ),
+    known,
+  )
+  assert.equal(alone.label, 'Curator affinity not applied')
+  assert.equal(alone.fullLabel, 'Female · Curator affinity not applied')
+  assert.equal(alone.gender, 'FEMALE')
+
+  assert.deepEqual(
+    describeFilter(filterOf([], { some_field: { value: 1 } }), known)
+      .notApplied,
+    ['Some field not applied'],
+    'a key no criterion carries as its type',
+  )
+
+  const unknown = describeFilter(list)
+  assert.ok('curator_appeal' in unknown.criteria, 'no fields: every key goes')
+  assert.deepEqual(unknown.notApplied, [])
+})
+
 test("criteria in URLs, encoded as Stash's ListFilterModel does", () => {
   assert.equal(
     encodeCriterion({ type: 'gender', modifier: 'IS_NULL' }),

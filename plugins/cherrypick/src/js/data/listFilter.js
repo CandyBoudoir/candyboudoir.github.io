@@ -34,6 +34,9 @@ const NAMES = {
   has_markers: 'Has markers',
   organized: 'Organized',
   interactive: 'Interactive',
+  // Stash Curator's criteria, as its filter dialog names them
+  curator_appeal: 'Curator Appeal',
+  curator_affinity: 'Curator affinity',
 }
 const SYMBOLS = {
   EQUALS: '=',
@@ -89,25 +92,46 @@ export function criterionLabel(c) {
 
 /**
  * What brackets need from a list's filter.
+ *
+ * Another plugin can add a criterion of its own to Stash's list (Stash
+ * Curator's Curator Appeal and Curator affinity) and take its key out of
+ * the list's own query before it reaches Stash. Any other query with that
+ * key fails, so given the fields Stash's filter type has, the criteria keep
+ * only those, and the labels say which criteria were left out.
  * @param {{ makeFilter: () => object, searchTerm?: string, criteria?: object[] }} filter
  *   Stash's ListFilterModel (or anything shaped like it)
+ * @param {Set<string>|null} [known] the input fields of Stash's
+ *   SceneFilterType or PerformerFilterType; null keeps every key
  * @returns {{ key: string, criteria: object, q: string, active: boolean,
- *   gender: string|null, label: string, fullLabel: string, count: number }}
+ *   gender: string|null, label: string, fullLabel: string, count: number,
+ *   notApplied: string[] }}
  *   label leaves the gender out (the bracket names its gender already);
- *   fullLabel keeps it
+ *   fullLabel keeps it; notApplied names each criterion left out, as
+ *   "Curator Appeal not applied", and both labels end with them
  */
-export function describeFilter(filter) {
-  const criteria = filter.makeFilter() || {}
+export function describeFilter(filter, known = null) {
+  const all = filter.makeFilter() || {}
+  const dropped = known ? Object.keys(all).filter((k) => !known.has(k)) : []
+  const criteria = Object.fromEntries(
+    Object.entries(all).filter(([k]) => !dropped.includes(k)),
+  )
   const q = filter.searchTerm || ''
   const parts = (filter.criteria || []).map((c) => ({
     type: c?.criterionOption?.type,
     label: criterionLabel(c),
   }))
+  const notApplied = dropped.map((k) => `${humanize(k)} not applied`)
   const labels = (withGender) =>
     [
       ...parts
-        .filter((p) => p.label && (withGender || p.type !== 'gender'))
+        .filter(
+          (p) =>
+            p.label &&
+            !dropped.includes(p.type) &&
+            (withGender || p.type !== 'gender'),
+        )
         .map((p) => p.label),
+      ...notApplied,
       q ? `"${q}"` : null,
     ]
       .filter(Boolean)
@@ -121,6 +145,7 @@ export function describeFilter(filter) {
     gender: listGender(criteria),
     label: labels(false),
     fullLabel: labels(true),
+    notApplied,
   }
 }
 

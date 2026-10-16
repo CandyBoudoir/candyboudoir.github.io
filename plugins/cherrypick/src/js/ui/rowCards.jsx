@@ -2,7 +2,7 @@
 // gives way to the reason the card is there, and its popover row gains the
 // ⋯ menu. The patches apply to every SceneCard, so they read a context only
 // Cherry Pick's rows provide and render nothing anywhere else.
-import { components, patch, React } from '../runtime/api.js'
+import { components, patchAfter, React } from '../runtime/api.js'
 import { CardMenu } from './CardMenu.jsx'
 import { Safe } from './Safe.jsx'
 
@@ -67,7 +67,7 @@ function withMenu(node, depth = 0) {
 }
 
 export function registerRowCards() {
-  patch.after('SceneCard.Details', (props, _, result) => (
+  patchAfter('SceneCard.Details', (props, result) => (
     <>
       {result}
       <Safe name="row reason">
@@ -75,9 +75,9 @@ export function registerRowCards() {
       </Safe>
     </>
   ))
-  patch.after(
+  patchAfter(
     'SceneCard.Popovers',
-    (props, _, result) =>
+    (props, result) =>
       withMenu(result) || (
         <>
           {result}

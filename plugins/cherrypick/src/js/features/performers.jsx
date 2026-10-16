@@ -8,7 +8,12 @@
 // right), the rating banner (top left), the country flag (bottom right) and,
 // when Stash's "show links on performer cards" is on, the links (bottom
 // left); the crown sits bottom left and steps aside for the links (CSS).
-import { components, FontAwesomeSolid, patch, React } from '../runtime/api.js'
+import {
+  components,
+  FontAwesomeSolid,
+  patchAfter,
+  React,
+} from '../runtime/api.js'
 import { Cherries } from '../ui/Cherries.jsx'
 import { useAppState } from '../ui/hooks.js'
 import { Safe } from '../ui/Safe.jsx'
@@ -57,7 +62,7 @@ function Honours({ performer }) {
 }
 
 export function registerPerformers() {
-  patch.after('PerformerDetailsPanel.DetailGroup', (props, _, result) => {
+  patchAfter('PerformerDetailsPanel.DetailGroup', (props, result) => {
     if (!props.performer) return result
     const line = (
       <Safe key="cherrypick-performer-line" name="For you line">
@@ -81,7 +86,7 @@ export function registerPerformers() {
     )
   })
 
-  patch.after('PerformerCard.Overlays', (props, _, result) => (
+  patchAfter('PerformerCard.Overlays', (props, result) => (
     <>
       {result}
       <Safe name="crowns and medals">
