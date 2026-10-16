@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { buildDb } from '../../src/js/model/db.js'
-import { createEngine } from '../../src/js/model/index.js'
+import { createEngine, unratedByYou } from '../../src/js/model/index.js'
 import * as BR from '../../src/js/model/brackets.js'
 import {
   placedIds,
@@ -210,6 +210,44 @@ test("scenes Xenith ranks or Restash mirrored count as unrated; Restash's score 
     Ml.fits.rated.length,
     M.fits.rated.length + xen.length + mirrored.length,
   )
+})
+
+test('Your score shows on a scene whose only rating another plugin set, until the user rates it', () => {
+  // Most scenes primed, a few ranked by Ascension, a few mirrored by
+  // Restash, ten rated by hand
+  const lib = copy()
+  const mine = lib.scenes.filter((s) => s.rating100 >= 50).slice(0, 10)
+  const keep = new Set(mine.map((s) => s.id))
+  const others = lib.scenes.filter((s) => !keep.has(s.id))
+  const ranked = others.slice(0, 4)
+  const mirrored = others.slice(4, 8)
+  const primed = others.slice(8)
+  for (const s of ranked) {
+    s.rating100 = 64
+    s.custom_fields = rankedScene()
+  }
+  for (const s of mirrored) {
+    s.rating100 = 47
+    s.custom_fields = restash(47)
+  }
+  primed.forEach((s, i) => (s.rating100 = primeValue(i, primed.length, 3, 28)))
+  const M = engineFor(lib)
+  const card = (s, rating100 = s.rating100) => ({ id: s.id, rating100 })
+  for (const s of [...ranked, ...mirrored, ...primed])
+    assert.ok(unratedByYou(M, card(s)), `${s.id} reads as unrated`)
+  for (const s of mine) assert.ok(!unratedByYou(M, card(s)), `${s.id} is rated`)
+  // A rating the user sets on the card hides it before the library reloads
+  assert.ok(!unratedByYou(M, card(primed[0], 90)))
+  assert.ok(!unratedByYou(M, card(ranked[0], 90)))
+  // As does one Apply set (an override)
+  const Mo = engineFor(lib, { overrides: { [primed[0].id]: 70 } })
+  assert.ok(!unratedByYou(Mo, card(primed[0], 70)))
+  // Unrated in Stash, in the library or not
+  assert.ok(unratedByYou(M, { id: 'not-in-library', rating100: null }))
+  assert.ok(!unratedByYou(M, { id: 'not-in-library', rating100: 60 }))
+  // Opting in to learn from other plugins' ratings makes them the user's
+  const Ml = engineFor(lib, { learnFromRankings: true })
+  assert.ok(!unratedByYou(Ml, card(ranked[0])))
 })
 
 test('performer ratings Xenith ranks or Restash mirrored add no affinity', () => {

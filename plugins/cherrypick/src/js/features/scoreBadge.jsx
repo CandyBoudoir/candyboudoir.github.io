@@ -1,17 +1,19 @@
-// Your score in the rating corner of unrated scene cards, wherever Stash
-// draws a scene card. Stash's own RatingBanner sits in SceneCard.Image, so
-// the badge goes there too, in the same markup (.rating-banner) so themes
-// style it, outlined to set it apart from a real rating.
+// Your score in the rating corner of scene cards you haven't rated,
+// wherever Stash draws a scene card. Stash's own RatingBanner sits in
+// SceneCard.Image, so the badge goes there too, in the same markup
+// (.rating-banner) so themes style it, outlined to set it apart from a real
+// rating.
 import { patchAfter, React } from '../runtime/api.js'
-import { badgeLabel, fmtStars } from '../model/index.js'
+import { badgeLabel, fmtStars, unratedByYou } from '../model/index.js'
 import { NAME_S } from '../name.js'
 import { useModel, useSettings } from '../ui/hooks.js'
 import { Safe } from '../ui/Safe.jsx'
 
-// A Your score for this scene right now, or null: unrated scenes only, once
-// the model is ready and beats the user's average on held-out ratings.
+// A Your score for this scene right now, or null: scenes the user hasn't
+// rated only (another plugin's rating counts as none), once the model is
+// ready and beats the user's average on held-out ratings.
 export function scoreFor(M, scene, relative) {
-  if (!M?.gate || scene.rating100 != null) return null
+  if (!M?.gate || !unratedByYou(M, scene)) return null
   const p = M.prediction(scene.id)
   if (!p) return null
   return { value: p.value, label: badgeLabel(M, p.value, relative) }

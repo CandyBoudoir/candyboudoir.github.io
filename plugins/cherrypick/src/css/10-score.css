@@ -16,6 +16,16 @@
   display: block;
 }
 
+/* Your score shows only on scenes you haven't rated, so on a card that also
+   has Stash's banner, the rating there is another plugin's (an Elo ranking,
+   Restash's mirror, Ascension's Prime). Your score takes the corner, as
+   Ascension and Xenith take it for their own badges, which already hide
+   Stash's banner while they are enabled. */
+.scene-card-link:has(> .cherrypick-score-banner)
+  > .rating-banner:not(.cherrypick-score-banner) {
+  display: none;
+}
+
 .grid-card:hover .rating-banner.cherrypick-score-banner {
   opacity: 1;
 }

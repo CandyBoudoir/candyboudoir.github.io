@@ -3,6 +3,7 @@
 import { expect, test } from '@playwright/test'
 import { companionPluginIds } from '../../../tests/stash/companions.mjs'
 import {
+  DEMO,
   PLUGIN_ID,
   demoScene,
   forYouCards,
@@ -91,6 +92,66 @@ test('Your score shows on unrated scene cards only', async ({ page }) => {
   await expect(banner(unrated)).toHaveCount(1)
   await expect(banner(unrated)).toHaveText(/^~\d\.\d/)
   await expect(banner(rated)).toHaveCount(0)
+})
+
+test("Your score shows where another plugin set the rating, in place of Stash's banner", async ({
+  page,
+}) => {
+  // Two unrated, played demo scenes: one an Elo plugin ranks (Ascension's
+  // marks), one whose rating is Restash's mirrored score
+  const [ranked, mirrored] = DEMO.scenes
+    .filter((s) => !s.rating100 && s.plays.length)
+    .slice(0, 2)
+    .map((s) => demo.scenes[s.title])
+  const marks = {
+    [ranked]: {
+      rating100: 64,
+      fields: {
+        hotornot_stats: JSON.stringify({ total_matches: 1, wins: 1 }),
+        scene_record: JSON.stringify([
+          { date: '2026-10-15T20:00:00.000Z', opponentId: '0', won: true },
+        ]),
+      },
+    },
+    [mirrored]: { rating100: 47, fields: { restash_score: 47 } },
+  }
+  const set = (id, rating100, custom_fields) =>
+    gql('mutation ($i: SceneUpdateInput!) { sceneUpdate(input: $i) { id } }', {
+      i: { id, rating100, custom_fields },
+    })
+  for (const [id, m] of Object.entries(marks))
+    await set(id, m.rating100, { partial: m.fields })
+  try {
+    await page.goto('/scenes?sortby=title&perPage=120')
+    await expect(page.locator('.cherrypick-score-banner').first()).toBeVisible({
+      timeout: 20_000,
+    })
+    for (const id of [ranked, mirrored]) {
+      const card = page.locator(
+        `.scene-card:has(a[href="/scenes/${id}"], a[href^="/scenes/${id}?"])`,
+      )
+      await expect(card.locator('.cherrypick-score-banner')).toHaveText(
+        /^~\d\.\d/,
+      )
+      await expect(card.locator('.cherrypick-score-banner')).toBeVisible()
+      // Stash's banner carries the other plugin's number: Your score takes
+      // the corner
+      await expect(
+        card.locator('.rating-banner:not(.cherrypick-score-banner)'),
+      ).toBeHidden()
+    }
+    await page.goto(`/scenes/${mirrored}`)
+    await expect(
+      page
+        .locator(
+          '.scene-toolbar .cherrypick-score-line .cherrypick-line-button',
+        )
+        .first(),
+    ).toHaveText(/^likely .* for you$/, { timeout: 20_000 })
+  } finally {
+    for (const [id, m] of Object.entries(marks))
+      await set(id, null, { remove: Object.keys(m.fields) })
+  }
 })
 
 test("the scene page shows the score line, Don't learn and More like this", async ({

@@ -338,6 +338,18 @@ export function rateMore(M, { short = false } = {}) {
   return `Rate ${n} more` + (short ? '' : ` scene${n === 1 ? '' : 's'}`)
 }
 
+// True when the user hasn't rated the scene themselves, so Your score has a
+// place on its card and page: Stash has no rating for it, or only one that
+// another plugin set (an Elo ranking, Restash's mirror, Ascension's Prime;
+// rankings.js), which the model reads as none. The card's rating must be the
+// one the model read, so a rating the user sets on it counts at once.
+// scene: { id, rating100 } as Stash hands it to the card.
+export function unratedByYou(M, scene) {
+  if (scene.rating100 == null) return true
+  const s = M.db.scenes.get(scene.id)
+  return !!s && M.rating(s) == null && M.stashRating(s) === scene.rating100
+}
+
 // Badge text. Stars: "~4.5" on the card corner, "likely 4.5★ for you" on the
 // scene page. Relative (a setting): where it ranks among your unrated scenes.
 export function badgeLabel(M, value, relativeStyle) {
