@@ -348,8 +348,11 @@ test('a bracket of unrated performers, then its champion takes on your favorites
       .poll(async () => (await performerRatings([champId]))[champId])
       .toBe(null)
 
-    // the champion's page says so
-    await result.locator('.cherrypick-champ-name a').click()
+    // the champion's page says so. The centered dialog moves as Undo's line
+    // goes, so a click by position can land beside the link: wait for the
+    // line, then click the link itself
+    await expect(result.locator('.cherrypick-applied')).toHaveCount(0)
+    await result.locator('.cherrypick-champ-name a').dispatchEvent('click')
     await expect(
       visible(page.locator('.detail-item-value.cherrypick-performer-line')),
     ).toContainText('Bracket champion · beat your favorites', {
