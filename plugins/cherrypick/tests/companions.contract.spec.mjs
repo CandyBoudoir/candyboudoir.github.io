@@ -9,15 +9,19 @@
 // overlap, Your score stays on cards whose rating the other plugin hides, a
 // dialog's buttons are never covered, and Apply never writes over a
 // performer the other plugin ranks and says that plugin will pick up what it
-// sets. Beside Curator, whose patches change the list components' arguments
-// and whose criteria Stash's schema lacks, the lists render and Bracket works
-// on a list it filters.
+// sets. Matches played in the other plugin's own dialog (HotOrNot's and
+// Xenith's) leave what Apply looks for and keep both plugins' navbar items;
+// Cherry Pick counts Xenith's, and a bracket of the performers Xenith played
+// leaves every one alone. Beside Curator, whose patches change the list
+// components' arguments and whose criteria Stash's schema lacks, the lists
+// render and Bracket works on a list it filters.
 import { expect, test } from '@playwright/test'
 import { companionPluginIds } from '../../../tests/stash/companions.mjs'
 import {
   forYouCards,
   gql,
   PLUGIN_ID,
+  pluginConfig,
   setPluginSettings,
   setUpCherryPick,
   tearDownCherryPick,
@@ -26,6 +30,8 @@ import {
 // What each plugin writes on a performer after a few matches, the pieces it
 // puts on the pages Cherry Pick also decorates, and where. `theirs` matches
 // everything of its own on the page; `seen` says what each page shows.
+// `play` plays in the plugin's own dialog; `played` is the field each match
+// writes on both players, and `matches` the list Cherry Pick learns from.
 const SIDE = {
   ascension: {
     name: 'Ascension',
@@ -81,6 +87,7 @@ const SIDE = {
       performers: (page) => page.locator('#hon-floating-btn'),
       performer: (page) => page.locator('#hon-battle-rank-badge'),
     },
+    played: 'hotornot_stats',
     // One match in its own dialog, the left performer winning. It draws a
     // gender at random from every chip but Male, and the demo performers
     // are all Female, so the others come off first.
@@ -141,13 +148,74 @@ const SIDE = {
         page.locator('.performer-card .hon-compact-badge').first(),
       performer: (page) => page.locator('#hon-battle-rank-badge'),
     },
+    played: 'xenith_stats',
+    matches: 'xenith_record',
+    // Head to head in its own dialog, among female performers, until
+    // BRACKET of them who can enter a bracket have played, so a bracket of
+    // performers it ranks can follow. Its cards re-render one side at a
+    // time, so the pair on screen at a click can be stale: each pick waits
+    // for a new match in the records, whichever pair it was.
+    play: async (page) => {
+      await page.goto('/performers')
+      await page.locator('#hon-floating-btn').click()
+      const app = page.locator('#hon-app-mount')
+      await app.locator('button[aria-controls="hon-gender-panel"]').click()
+      await app
+        .locator('#hon-gender-panel button', { hasText: /^Female$/ })
+        .click()
+      const choose = app.locator(
+        '.hon-scene-card[data-side="left"] .hon-choose-btn',
+      )
+      for (let picks = 0; ; picks++) {
+        const { bracketable, entries } = await xenithPlayed()
+        if (bracketable >= BRACKET) break
+        expect(picks, `${bracketable} of ${BRACKET} played`).toBeLessThan(40)
+        await expect(async () => {
+          await choose.click()
+          await expect
+            .poll(async () => (await xenithPlayed()).entries, {
+              timeout: 5_000,
+            })
+            .toBeGreaterThan(entries)
+        }).toPass({ timeout: 30_000 })
+      }
+      await page.locator('#hon-modal .hon-modal-close').click()
+      await expect(page.locator('#hon-modal')).toBeHidden()
+    },
   },
 }
 
-// Performers by id, with the rating and the fields a ranking plugin writes
+// Performers in a bracket from a list
+const BRACKET = 16
+
+// What Xenith has played so far: the female performers with its stats who
+// can enter a bracket (a real photo and a scene), and every entry in its
+// match lists
+async function xenithPlayed() {
+  const { findPerformers } = await gql(
+    '{ findPerformers(filter: { per_page: -1 }) { performers { gender scene_count image_path custom_fields } } }',
+  )
+  let bracketable = 0
+  let entries = 0
+  for (const p of findPerformers.performers) {
+    const f = p.custom_fields || {}
+    if (!f.xenith_stats) continue
+    entries += JSON.parse(f.xenith_record || '[]').length
+    if (
+      p.gender === 'FEMALE' &&
+      p.scene_count >= 1 &&
+      !/[?&]default=true/.test(p.image_path)
+    )
+      bracketable++
+  }
+  return { bracketable, entries }
+}
+
+// Performers by id, with the name, the rating and the fields a ranking
+// plugin writes
 async function performerState() {
   const { findPerformers } = await gql(
-    '{ findPerformers(filter: { per_page: -1 }) { performers { id rating100 custom_fields } } }',
+    '{ findPerformers(filter: { per_page: -1 }) { performers { id name rating100 custom_fields } } }',
   )
   return Object.fromEntries(findPerformers.performers.map((p) => [p.id, p]))
 }
@@ -171,6 +239,42 @@ async function rankEveryPerformer(side, on) {
       },
     )
 }
+
+// Puts back each performer's rating as `before` had it and takes off the
+// custom fields added since: the other plugin's, and a bracket's results
+async function putBack(before) {
+  for (const p of Object.values(await performerState())) {
+    const was = before[p.id]
+    if (!was) continue
+    const added = Object.keys(p.custom_fields || {}).filter(
+      (k) => was.custom_fields?.[k] == null,
+    )
+    if (p.rating100 === was.rating100 && !added.length) continue
+    await gql(
+      'mutation ($i: PerformerUpdateInput!) { performerUpdate(input: $i) { id } }',
+      {
+        i: {
+          id: p.id,
+          rating100: was.rating100,
+          custom_fields: { remove: added },
+        },
+      },
+    )
+  }
+}
+
+// The keys of a field's JSON: the object's, or each entry's in a list
+const shapeOf = (raw) => {
+  const v = JSON.parse(raw)
+  return new Set(
+    (Array.isArray(v) ? v : [v]).map((e) => Object.keys(e).sort().join()),
+  )
+}
+
+// The Performers list filtered to those with a custom field, in Stash's URL
+// encoding
+const withField = (field) =>
+  `/performers?c=(%22type%22:%22custom_fields%22,%22value%22:%5B(%22field%22:%22${field}%22,%22modifier%22:%22NOT_NULL%22,%22value%22:%5B%5D)%5D)`
 
 async function performerRatings() {
   const { findPerformers } = await gql(
@@ -257,14 +361,15 @@ const covered = (page, theirs) =>
     return [...out]
   }, theirs)
 
-// Plays a 16-performer bracket from the Performers list to its champion
-async function playBracket(page) {
-  await page.goto('/performers')
+// Plays a 16-performer bracket from the Performers list (or the one at
+// `list`) to its champion
+async function playBracket(page, list = '/performers') {
+  await page.goto(list)
   const bracket = page
     .locator('.cherrypick-bracket-button')
     .filter({ visible: true })
     .first()
-  await expect(bracket).toBeVisible({ timeout: 20_000 })
+  await expect(bracket).toBeEnabled({ timeout: 20_000 })
   await bracket.click()
   await expect(page.locator('.cherrypick-play-modal')).toContainText(
     '16 performers',
@@ -340,41 +445,110 @@ for (const [key, side] of Object.entries(SIDE)) {
       expect(errors).toEqual([])
     })
 
-    test('a match in its own dialog leaves what Apply looks for, and the page still works', async ({
+    test('matches in its own dialog leave what Apply looks for, and the page still works', async ({
       page,
+      browser,
     }) => {
       test.skip(!side.play, `${side.name}'s dialog is not scripted`)
+      test.slow(!!side.matches, 'enough matches for a bracket')
       const errors = []
-      page.on('pageerror', (e) => errors.push(`${page.url()}: ${e.message}`))
+      const watch = (p) =>
+        p.on('pageerror', (e) => errors.push(`${p.url()}: ${e.message}`))
+      watch(page)
       const before = await performerState()
-      await side.play(page)
-      const ranked = () =>
-        performerState().then((now) =>
-          Object.values(now).filter(
-            (p) =>
-              p.custom_fields?.hotornot_stats &&
-              !before[p.id].custom_fields?.hotornot_stats,
-          ),
-        )
-      await expect.poll(async () => (await ranked()).length).toBeGreaterThan(0)
-      const now = await ranked()
-      // Its record is what the fixtures say it is
-      for (const p of now)
-        expect(
-          Object.keys(JSON.parse(p.custom_fields.hotornot_stats)).sort(),
-        ).toEqual(Object.keys(JSON.parse(side.ranked.hotornot_stats)).sort())
-      // Put the ratings back
-      for (const p of now)
-        await gql(
-          'mutation ($i: PerformerUpdateInput!) { performerUpdate(input: $i) { id } }',
-          {
-            i: {
-              id: p.id,
-              rating100: before[p.id].rating100,
-              custom_fields: { remove: rankedKeys(side) },
-            },
-          },
-        )
+      const config = await pluginConfig()
+      let later
+      try {
+        await side.play(page)
+        // Cherry Pick's cherries and Stash's Settings link outlast the dialog
+        await expect(
+          page
+            .locator('.cherrypick-nav-icon')
+            .filter({ visible: true })
+            .first(),
+        ).toBeVisible()
+        await expect(
+          page
+            .locator('.navbar a.nav-utility[href="/settings"]')
+            .filter({ visible: true })
+            .first(),
+        ).toBeVisible()
+
+        const played = () =>
+          performerState().then((now) =>
+            Object.values(now).filter(
+              (p) =>
+                p.custom_fields?.[side.played] &&
+                !before[p.id].custom_fields?.[side.played],
+            ),
+          )
+        await expect
+          .poll(async () => (await played()).length)
+          .toBeGreaterThan(0)
+        const now = await played()
+        // Its records are what the fixtures say they are
+        for (const p of now)
+          for (const key of rankedKeys(side))
+            expect(shapeOf(p.custom_fields[key]), `${key} of ${p.id}`).toEqual(
+              shapeOf(side.ranked[key]),
+            )
+
+        if (side.matches) {
+          // Each match as both players recorded it: the same date, each
+          // the other's opponent, one of them the winner
+          const state = await performerState()
+          const list = (p) =>
+            JSON.parse(p?.custom_fields?.[side.matches] || '[]')
+          const matches = new Set()
+          for (const p of now)
+            for (const e of list(p)) {
+              const them = e.opponent.split(':')[0]
+              const mirror = list(state[them]).find(
+                (x) => x.date === e.date && x.opponent.split(':')[0] === p.id,
+              )
+              expect(mirror?.won, `${p.id} v ${them} at ${e.date}`).toBe(!e.won)
+              matches.add([e.date, ...[p.id, them].sort()].join(' '))
+            }
+
+          // Cherry Pick keeps the library it read for two minutes, so it
+          // sees the matches on a later visit: a browser of its own
+          later = await browser.newContext()
+          const visit = await later.newPage()
+          watch(visit)
+          await setPluginSettings(PLUGIN_ID, {
+            ...config,
+            learnFromMatches: true,
+          })
+          await visit.goto('/plugins/cherrypick')
+          await expect(visit.locator('#your-score')).toContainText(
+            `${matches.size} matches in ${side.name}`,
+            { timeout: 20_000 },
+          )
+
+          // A bracket of the performers it played leaves every one alone
+          const ratings = await performerRatings()
+          const result = await playBracket(visit, withField(side.played))
+          await result.locator('.cherrypick-apply-open').click()
+          const apply = visit.locator('.cherrypick-apply-modal')
+          const rows = apply.locator('.cherrypick-apply-table tbody tr')
+          await expect(rows).toHaveCount(8)
+          await expect(apply.locator('.cherrypick-apply-skipped')).toHaveCount(
+            8,
+          )
+          await expect(rows.first()).toContainText(`${side.name} ranks them`)
+          const names = now.map((p) => p.name)
+          for (const name of await rows
+            .locator('td:nth-child(2)')
+            .allTextContents())
+            expect(names).toContain(name)
+          await expect(apply.locator('.cherrypick-apply-go')).toBeDisabled()
+          expect(await performerRatings()).toEqual(ratings)
+        }
+      } finally {
+        await later?.close()
+        await setPluginSettings(PLUGIN_ID, config ?? {})
+        await putBack(before)
+      }
       await page.goto('/performers')
       await expect(
         page.locator('.cherrypick-bracket-button').filter({ visible: true }),
