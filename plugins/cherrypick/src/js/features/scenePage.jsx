@@ -6,7 +6,7 @@
 // into the toolbar's first group, from a component added after ScenePage.
 import { Bootstrap, patchAfter, React, ReactDOM } from '../runtime/api.js'
 import { toggleDontLearn, isDontLearn } from '../runtime/actions.js'
-import { badgeLabel, fmtStars, rateMore } from '../model/index.js'
+import { badgeLabel, fmtStars, rateMore, unratedByYou } from '../model/index.js'
 import { popularity, performerRankPhrase } from '../model/signals.js'
 import { moreLikeThis } from '../model/recs.js'
 import { NAME_S, PLUGIN_NAME } from '../name.js'
@@ -26,7 +26,7 @@ function ScoreLine({ scene }) {
   const M = useAppState((s) => s.M)
   const db = useAppState((s) => s.db)
   const settings = useAppState((s) => s.settings)
-  if (!settings.sceneLine || !M || scene.rating100 != null) return null
+  if (!settings.sceneLine || !M || !unratedByYou(M, scene)) return null
   // Too few ratings to check a guess: say how many it takes
   if (!M.gate)
     return M.ratingsToGo ? (
