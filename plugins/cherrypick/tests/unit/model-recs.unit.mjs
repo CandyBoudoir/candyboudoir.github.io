@@ -206,3 +206,17 @@ test('popularity lines', () => {
   assert.equal(popularityLine(bare), null)
   assert.equal(performerRankPhrase(bare), null)
 })
+
+test('More like this on a scene with no studio leaves studio-less scenes unrelated', () => {
+  // Every scene loses its studio: before, "no studio" matched "no studio"
+  // and the reason read the missing studio's id.
+  const bare = {
+    ...input,
+    scenes: input.scenes.map((s) => ({ ...s, studio: null })),
+  }
+  const Mb = createEngine(buildDb(bare)).compute({})
+  for (const scene of [...Mb.db.owned].slice(0, 40)) {
+    const r = moreLikeThis(Mb, STATE, scene)
+    for (const it of r.inLibrary) assert.doesNotMatch(it.reason, /^Also from/)
+  }
+})
