@@ -23,8 +23,9 @@ export const COMPANIONS = {
     enable: ['ascension'],
     disable: ['ascension-beta'],
   },
-  // HotOrNot 1.0.0, the Elo ranking plugin the Ascension, HotOrNotV2 and
-  // HotOrNot_V3 forks start from, from https://github.com/lowgrade12/hot-or-not
+  // HotOrNot 1.0.0, the Elo ranking plugin Ascension was forked from and
+  // whose hotornot_stats field HotOrNotV2 and HotOrNot_V3 also write, from
+  // https://github.com/lowgrade12/hot-or-not
   // (plugins/hotornot at c4106bf; the zip is the build GitHub Pages serves
   // from that commit, whose four files hash to the same git blobs). It has
   // the longest forum thread of the HotOrNot builds, and its author handed
