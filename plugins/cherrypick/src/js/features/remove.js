@@ -14,7 +14,7 @@ import { PERFORMER_UPDATE, PERFORMERS_WITH_FIELD } from '../data/queries.js'
 import { fromConfig } from '../storage/tier1.js'
 import { clearTier3, KEYS, local } from '../storage/tier3.js'
 import { EMPTY_SIGNALS } from '../model/foryou.js'
-import { FIELDS } from '../model/brackets.js'
+import { FIELDS, ownFieldsOn } from '../model/brackets.js'
 
 const FIELD_NAMES = Object.values(FIELDS)
 
@@ -41,7 +41,7 @@ export async function removePluginData() {
   cancelWrites()
   await tier1.remove()
   for (const p of await performersWithFields()) {
-    const remove = FIELD_NAMES.filter((f) => f in (p.custom_fields || {}))
+    const remove = ownFieldsOn(p.custom_fields)
     await runMutation(PERFORMER_UPDATE, {
       input: { id: p.id, custom_fields: { remove } },
     })

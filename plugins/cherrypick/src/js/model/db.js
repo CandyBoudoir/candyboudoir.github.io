@@ -9,6 +9,7 @@
 //
 // Rows are read once: the model treats the database as immutable and caches
 // per-scene values on it, so a change in Stash means a new buildDb.
+import { markRatingSources } from './rankings.js'
 
 /**
  * What buildDb takes.
@@ -39,6 +40,7 @@
  * @property {{ id: string, name: string }[]} [tags]
  * @property {StashId[]} [stash_ids]
  * @property {{ screenshot: string|null }} [paths]
+ * @property {Record<string, unknown>} [custom_fields]
  */
 
 /**
@@ -176,6 +178,9 @@
  * @property {string[]} play_history
  * @property {number} o_counter
  * @property {StashId[]} stash_ids
+ * @property {Record<string, unknown>} custom_fields
+ * @property {'elo'|'primed'|null} ratingSource  who set rating100 when
+ *   another plugin did (rankings.js): the model leaves it out
  */
 
 /**
@@ -204,6 +209,7 @@
  * @property {string|null} image_path
  * @property {StashId[]} stash_ids
  * @property {Record<string, unknown>} custom_fields
+ * @property {'elo'|'primed'|null} ratingSource  as on SceneLocal
  */
 
 /**
@@ -324,6 +330,7 @@ export function buildDb(input) {
         play_history: row.play_history || [],
         o_counter: row.o_counter || 0,
         stash_ids: row.stash_ids || [],
+        custom_fields: row.custom_fields || {},
       },
       localId: row.id,
       stashId: stashIdOn(row.stash_ids, endpoint),
@@ -413,6 +420,15 @@ export function buildDb(input) {
   for (const p of localPerformers)
     if (p.local.scene_count == null)
       p.local.scene_count = p.ownedSceneIds.length
+  // Ratings another plugin set: performers by gender (Prime treats them all
+  // alike, but a gender the user rated by hand keeps its ratings), scenes
+  // as one library
+  markRatingSources(
+    localPerformers,
+    (p) => p.local,
+    (p) => p.local.gender,
+  )
+  markRatingSources(owned, (s) => s.local)
   localPerformers.sort(
     (a, b) =>
       b.local.scene_count - a.local.scene_count || a.name.localeCompare(b.name),

@@ -1,7 +1,10 @@
 // Prints the compatibility matrix for GitHub Actions as `legs=<json>`, plus
 // `new_stable=<tag>` when Stash has a stable release that
-// tests/stash-versions.json does not list yet.
+// tests/stash-versions.json does not list yet. Each companion plugin
+// (companions.mjs) adds an optional leg on the baseline version with it
+// installed.
 import { readFile } from 'node:fs/promises'
+import { COMPANIONS } from './companions.mjs'
 
 const versions = JSON.parse(
   await readFile(new URL('../stash-versions.json', import.meta.url), 'utf8'),
@@ -35,6 +38,16 @@ if (newStable) {
     baseline: false,
   })
 }
+const baseline = legs.find((l) => l.baseline)
+if (baseline)
+  for (const key of Object.keys(COMPANIONS))
+    legs.push({
+      name: `${baseline.tag}+${key}`,
+      tag: baseline.tag,
+      channel: 'companion',
+      baseline: false,
+      companions: key,
+    })
 if (versions.develop) {
   legs.push({
     name: 'develop',

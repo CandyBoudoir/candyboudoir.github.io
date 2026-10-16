@@ -15,7 +15,8 @@ const FULL_RELOAD_MS = 24 * 3600 * 1000
 export const REFRESH_MS = 2 * 60 * 1000
 // Plays and edits that land while a page is loading: fetch a little overlap.
 const OVERLAP_MS = 60 * 1000
-const CACHE_VERSION = 1
+// 2: scenes carry custom_fields
+const CACHE_VERSION = 2
 
 // Every page of one find query, sorted by id so pages never shift.
 async function fetchPages(run, query, field, list, variables, onPage) {

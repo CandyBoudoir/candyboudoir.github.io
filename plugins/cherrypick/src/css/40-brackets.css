@@ -93,6 +93,14 @@
   vertical-align: baseline;
 }
 
+/* HotOrNot's floating button (z-index 9999) sits above Stash's modal layer
+   (1040 and up), so beside a full-screen dialog on a phone it covers the
+   buttons at the bottom right. While a dialog is open it goes under the
+   backdrop, like the rest of the page. */
+body:has(.cherrypick-dialog) #hon-floating-btn {
+  z-index: 1000;
+}
+
 @media (width <= 575.98px) {
   .cherrypick-modal-phone.modal-dialog {
     height: 100%;
@@ -584,6 +592,11 @@
   font-variant-numeric: tabular-nums;
   text-align: right;
   white-space: nowrap;
+}
+
+/* A record Ascension or HotOrNot ranks: listed, never written */
+.cherrypick-apply-table .cherrypick-apply-skipped td:nth-child(-n + 2) {
+  opacity: 0.6;
 }
 
 /* ------------------------------------------------ Hall of Fame (plugin page) */

@@ -2,7 +2,10 @@
 # develop build, then checks that Stash still renders the elements each plugin
 # depends on and compares screenshots. Runs nightly, on pushes to main and on pull requests.
 # The report job keeps one issue per failing channel and opens a "Support
-# Stash vX.Y.Z" issue when Stash ships a stable release.
+# Stash vX.Y.Z" issue when Stash ships a stable release. Companion legs
+# (tests/stash/companions.mjs) install another author's plugin beside these
+# and run Cherry Pick's contract specs with it enabled; they never fail the
+# workflow.
 name: Compatibility
 
 on:
@@ -50,6 +53,7 @@ jobs:
     env:
       STASH_URL: http://127.0.0.1:9999
       WORK: ${{ github.workspace }}/stash-work
+      COMPANIONS: ${{ matrix.leg.companions || '' }}
     steps:
       # Full history: build.mjs dates each plugin from its last commit.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -74,10 +78,10 @@ jobs:
       - name: Elements the plugins depend on
         id: contract
         if: steps.prepare.outcome == 'success'
-        run: pnpm exec playwright test contract
+        run: pnpm exec playwright test ${{ matrix.leg.companions && 'plugins/cherrypick/tests/.*contract' || 'contract' }}
       - name: Screenshots
         id: visual
-        if: always() && steps.prepare.outcome == 'success'
+        if: always() && steps.prepare.outcome == 'success' && !matrix.leg.companions
         continue-on-error: ${{ matrix.leg.channel != 'stable' }}
         run: pnpm exec playwright test visual ${{ inputs.update_snapshots && matrix.leg.baseline && '--update-snapshots=all' || '' }}
       - name: Record result

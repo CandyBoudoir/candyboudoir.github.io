@@ -14,9 +14,9 @@ import { useAppState } from '../../ui/hooks.js'
 import { useStashRecords } from '../../ui/records.js'
 import { useRowComponents } from '../../ui/Row.jsx'
 import { SettingRow } from '../pluginPage.jsx'
-import { startChampionsRound, undoApplied } from './actions.js'
+import { startChampionsRound } from './actions.js'
 import { Icon, plural, useEntrant } from './parts.jsx'
-import { WINNERS_URL } from './results.jsx'
+import { AppliedButton, keptText, WINNERS_URL } from './results.jsx'
 
 const { Link } = ReactRouterDOM
 const { faCrown } = FontAwesomeSolid
@@ -161,16 +161,19 @@ function AppliedBatches() {
         .map((a) => (
           <SettingRow
             key={a.id}
-            title={`Applied ${a.changes.length} ${a.kind === 'performer' ? 'performer ' : ''}${plural(a.changes.length, 'rating')}`}
-            sub={`${when(a.at)}${a.poolLabel ? ` · ${a.poolLabel}` : ''}`}
+            title={
+              a.changes.length
+                ? `Applied ${a.changes.length} ${a.kind === 'performer' ? 'performer ' : ''}${plural(a.changes.length, 'rating')}`
+                : keptText(a)
+            }
+            sub={[
+              when(a.at) + (a.poolLabel ? ` · ${a.poolLabel}` : ''),
+              a.changes.length ? keptText(a) : null,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
           >
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => undoApplied(a.id)}
-            >
-              Undo
-            </button>
+            <AppliedButton a={a} className="btn btn-secondary btn-sm" />
           </SettingRow>
         ))}
     </div>

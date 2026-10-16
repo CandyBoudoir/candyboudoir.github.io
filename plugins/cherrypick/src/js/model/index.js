@@ -13,13 +13,13 @@ import {
 } from './taste.js'
 import { replay } from './bt.js'
 import { behaviourOf } from './behaviour.js'
-import { sceneRating, pronoun, fmtStars } from './util.js'
+import { ownRating, sceneRating, pronoun, fmtStars } from './util.js'
 
 export { fmtStars }
 
 export const NI_PENALTY = 0.18 // stars taken off whatever made a "Not interested" card appear
 const FAVOURITE_BONUS = 0.15
-const PERFORMER_RATING_WEIGHT = 0.3 // stars of affinity per star of performer rating above 3.5
+const PERFORMER_RATING_WEIGHT = 0.3 // stars of affinity per star of your own performer rating above 3.5
 
 const fmt1 = fmtStars
 
@@ -36,6 +36,10 @@ const fmt1 = fmtStars
  * @property {NotInterested[]} [notInterested]
  * @property {string[]} [dontLearn]  ids of scenes marked "Don't learn from
  *   this": their ratings, plays and clip-bracket picks stay out of the model
+ * @property {boolean} [learnFromRankings]  read ratings another plugin set
+ *   (Ascension's and HotOrNot's Elo scores, Ascension's Prime; rankings.js)
+ *   as the user's own. Off by default: they stay out of the model, which
+ *   then sees those records as unrated
  */
 
 /**
@@ -47,7 +51,7 @@ const fmt1 = fmtStars
  *   ("p:<id>", "s:<id>" or "t:<id>": the row item's key, else blameKey)
  */
 
-function featureStats(db, overrides, skip) {
+function featureStats(db, overrides, skip, rate) {
   const stats = new Map()
   const bump = (k, scene, r, b) => {
     let st = stats.get(k)
@@ -68,7 +72,7 @@ function featureStats(db, overrides, skip) {
   }
   for (const s of db.owned) {
     if (skip.has(s.id)) continue
-    const r = sceneRating(s, overrides)
+    const r = rate(s, overrides)
     const b = behaviourOf(s)
     for (const [k] of sceneFeatures(s)) bump(k, s, r, b)
   }
@@ -83,19 +87,25 @@ function featureStats(db, overrides, skip) {
 export function createEngine(db, shared = {}) {
   const cache = shared.fits || {}
 
-  // skip: Set of scene ids marked "Don't learn from this"
-  function fits(overrides, skip = new Set()) {
+  // skip: Set of scene ids marked "Don't learn from this". rate: how the
+  // model reads a scene's rating (ownRating, or sceneRating to learn from
+  // ratings other plugins set)
+  function fits(overrides, skip = new Set(), rate = ownRating) {
     const key =
-      JSON.stringify(overrides || {}) + '|' + [...skip].sort().join(',')
+      JSON.stringify(overrides || {}) +
+      '|' +
+      [...skip].sort().join(',') +
+      '|' +
+      (rate === ownRating ? 'own' : 'all')
     if (cache.key === key) return cache.fits
-    const { rated, watchedUnrated } = buildSamples(db, overrides, skip)
+    const { rated, watchedUnrated } = buildSamples(db, overrides, skip, rate)
     const f = {
       rated,
       watchedUnrated,
       full: fit(rated, watchedUnrated, { ...PARAMS, useBehaviour: true }),
       content: fit(rated, watchedUnrated, { ...PARAMS, useBehaviour: false }),
       cv: crossValidate(rated, watchedUnrated, PARAMS),
-      stats: featureStats(db, overrides, skip),
+      stats: featureStats(db, overrides, skip, rate),
     }
     cache.key = key
     cache.fits = f
@@ -107,13 +117,29 @@ export function createEngine(db, shared = {}) {
     const overrides = input.overrides || {}
     const performerOverrides = input.performerOverrides || {}
     const dontLearn = new Set(input.dontLearn || [])
-    const F = fits(overrides, dontLearn)
+    const learnAll = !!input.learnFromRankings
+    const rate = learnAll ? sceneRating : ownRating
+    const F = fits(overrides, dontLearn, rate)
     // Stash's performer rating, after edits made since the library was read
-    const performerRating = (id) => {
+    const stashPerformerRating = (id) => {
       if (Object.prototype.hasOwnProperty.call(performerOverrides, id))
         return performerOverrides[id]
       return db.performers.get(id)?.local?.rating100 ?? null
     }
+    // Who set a record's rating, when another plugin did ('elo', 'primed';
+    // rankings.js). An override is the user's own.
+    const ratingSource = (kind, id) => {
+      const over = kind === 'performer' ? performerOverrides : overrides
+      if (Object.prototype.hasOwnProperty.call(over, id)) return null
+      const rec =
+        kind === 'performer' ? db.performers.get(id) : db.scenes.get(id)
+      return rec?.local?.ratingSource ?? null
+    }
+    // The performer rating the model reads: the user's own
+    const performerRating = (id) =>
+      !learnAll && ratingSource('performer', id)
+        ? null
+        : stashPerformerRating(id)
     // How you rate their scenes: the model's weight where their scenes are in
     // the sample. (The mockup fell back to a summary of scenes outside its
     // 119-scene sample. Every scene in the library is in db.owned here, so a
@@ -123,7 +149,9 @@ export function createEngine(db, shared = {}) {
     for (const ni of input.notInterested || [])
       if (ni.key) penalty.set(ni.key, (penalty.get(ni.key) || 0) - NI_PENALTY)
 
-    const rating = (scene) => sceneRating(scene, overrides)
+    // The scene rating the model reads (the user's own), and Stash's
+    const rating = (scene) => rate(scene, overrides)
+    const stashRating = (scene) => sceneRating(scene, overrides)
     const modelFor = (scene) =>
       scene.owned && behaviourOf(scene) ? F.full : F.content
 
@@ -235,6 +263,8 @@ export function createEngine(db, shared = {}) {
       performerOverrides,
       dontLearn,
       performerRating,
+      stashPerformerRating,
+      ratingSource,
       performerSceneStats,
       fits: F,
       cv,
@@ -247,6 +277,7 @@ export function createEngine(db, shared = {}) {
       highShare,
       inflated,
       rating,
+      stashRating,
       estimate,
       performerAffinity,
       prediction: (id) => predictions.get(id),

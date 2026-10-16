@@ -2,7 +2,7 @@
 // draws a scene card. Stash's own RatingBanner sits in SceneCard.Image, so
 // the badge goes there too, in the same markup (.rating-banner) so themes
 // style it, outlined to set it apart from a real rating.
-import { patch } from '../runtime/api.js'
+import { patch, React } from '../runtime/api.js'
 import { badgeLabel, fmtStars } from '../model/index.js'
 import { NAME_S } from '../name.js'
 import { useModel, useSettings } from '../ui/hooks.js'
@@ -17,9 +17,27 @@ export function scoreFor(M, scene, relative) {
   return { value: p.value, label: badgeLabel(M, p.value, relative) }
 }
 
+// Ascension hides the first .rating-banner on each card with inline styles,
+// to put its own score in place of Stash's rating. On an unrated scene the
+// only one is this badge. It sets no inline style itself, so any that
+// appears comes from another plugin and is dropped.
+function useNoInlineStyle() {
+  const [el, ref] = React.useState(null)
+  React.useEffect(() => {
+    if (!el) return
+    const drop = () => el.hasAttribute('style') && el.removeAttribute('style')
+    drop()
+    const watch = new MutationObserver(drop)
+    watch.observe(el, { attributes: true, attributeFilter: ['style'] })
+    return () => watch.disconnect()
+  }, [el])
+  return ref
+}
+
 function ScoreCorner({ scene }) {
   const M = useModel()
   const settings = useSettings()
+  const ref = useNoInlineStyle()
   if (!settings.badges) return null
   const s = scoreFor(M, scene, settings.relativeBadges)
   if (!s) return null
@@ -27,6 +45,7 @@ function ScoreCorner({ scene }) {
   const title = `Your score ${fmtStars(s.value)}★${r ? ': ' + r.text : ''}. ${NAME_S} guess; never written to your rating.`
   return (
     <div
+      ref={ref}
       className="rating-banner cherrypick-score-banner cherrypick-ui"
       title={title}
     >
