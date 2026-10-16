@@ -16,8 +16,11 @@
 //     the dialog, has its endpoint swapped for the mock's on its way to
 //     Stash, so Stash validates against the mock and then stores
 //     https://stashdb.org/graphql, as it would for a user;
-//   - the test browser cannot resolve stashdb.org (--host-resolver-rules),
-//     so a request the routes missed fails instead of reaching StashDB.
+//   - in Chromium, the test browser cannot resolve stashdb.org
+//     (--host-resolver-rules), so a request the routes missed fails instead
+//     of reaching StashDB. Firefox and WebKit have no such switch (Linux
+//     WebKit refuses to launch with it); there, the routes' catch-all, which
+//     aborts every other stashdb.org request, is the only guard.
 // Nothing ships for the tests: no localhost CSP entry, no hidden switch.
 //
 // The tests add their own performer, studio and three scenes linked to the
@@ -47,11 +50,19 @@ const HERS = CATALOGUE.scenes
 const MISSING = HERS.filter((s) => !OWNED.includes(s.title))
 
 test.use({
-  launchOptions: {
-    args: [
-      '--host-resolver-rules=MAP stashdb.org ~NOTFOUND, MAP *.stashdb.org ~NOTFOUND',
-    ],
-  },
+  launchOptions: [
+    async ({ browserName }, use) =>
+      use(
+        browserName === 'chromium'
+          ? {
+              args: [
+                '--host-resolver-rules=MAP stashdb.org ~NOTFOUND, MAP *.stashdb.org ~NOTFOUND',
+              ],
+            }
+          : {},
+      ),
+    { scope: 'worker' },
+  ],
 })
 test.describe.configure({ mode: 'serial' })
 
