@@ -135,7 +135,11 @@ export function fit(rated, watchedUnrated, params = PARAMS) {
 
   let beta = 0
   const sw = samples.reduce((s, x) => s + x.w, 0)
-  let mu = samples.reduce((s, x) => s + x.w * x.y, 0) / sw
+  // No ratings and no plays: nothing to fit. μ is 3 stars, the fallback
+  // ratedMean and userMean use, and the descent is skipped (each pass
+  // divides by sw), so every weight stays 0 and every scene predicts 3.
+  // For you then goes by favorites and performer ratings alone.
+  let mu = sw ? samples.reduce((s, x) => s + x.w * x.y, 0) / sw : 3
   const r = Float64Array.from(samples, (s) => s.y - mu)
   const n = r.length
 
@@ -143,7 +147,7 @@ export function fit(rated, watchedUnrated, params = PARAMS) {
   // jointly (the model for played scenes). Without it, the content weights
   // stand alone: that is the model for never-played and un-owned scenes,
   // where behaviour is missing and content has to carry the taste.
-  for (let it = 0; it < params.iterations; it++) {
+  for (let it = 0; sw && it < params.iterations; it++) {
     let d = 0
     for (let i = 0; i < n; i++) d += wts[i] * r[i]
     d /= sw
