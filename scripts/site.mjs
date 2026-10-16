@@ -45,7 +45,12 @@ export async function buildPlugin(site, { name, dir, mod }) {
   const out = join(site, id)
   await mkdir(out, { recursive: true })
   await mod.build(out)
-  await cp(join(root, 'LICENSE'), join(out, 'LICENSE'))
+  // A plugin with a LICENSE of its own ships that one, the rest the repo's.
+  const ownLicense = join(dir, 'LICENSE')
+  await cp(
+    existsSync(ownLicense) ? ownLicense : join(root, 'LICENSE'),
+    join(out, 'LICENSE'),
+  )
 
   // Stash offers an update when `date` moves forward; `version` is display only.
   // Both come from the last commit that changed what goes into the zip, so a
