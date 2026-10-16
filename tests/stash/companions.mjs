@@ -102,6 +102,27 @@ export const COMPANIONS = {
     enable: ['xenith'],
     disable: [],
   },
+  // Restash 0.3.0, which scores scenes and performers for freshness into
+  // custom fields and can mirror that score to rating100, from
+  // https://github.com/Espionage9248/Restash (MIT). Its GitHub Pages source
+  // is the only build it publishes: the zip holds `restash/` at commit
+  // 55c1cb2, the same files as the v0.3.0 tag. Pages keeps no history and
+  // rebuilds the zip on every push to main, so a republished zip fails the
+  // sha256 check instead of changing what the leg tests. Its backend runs on
+  // `python` and needs stashapp-tools (the stashapi package).
+  restash: {
+    package: {
+      id: 'restash',
+      name: 'Restash',
+      version: '0.3.0-55c1cb2',
+      date: '2026-06-15 08:04:38',
+      path: 'https://espionage9248.github.io/Restash/restash.zip',
+      sha256:
+        '8aa124d99bcb1b2df1a516f72f715fe1e57880d8ee0e660b8e9af7b6fba7b3e8',
+    },
+    enable: ['restash'],
+    disable: [],
+  },
 }
 
 export function companions() {

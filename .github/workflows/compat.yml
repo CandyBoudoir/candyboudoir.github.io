@@ -75,6 +75,10 @@ jobs:
       - name: Python for companion plugins
         if: matrix.leg.companions
         run: command -v python || sudo ln -s "$(command -v python3)" /usr/local/bin/python
+      # Restash's backend imports stashapi, from stashapp-tools
+      - name: Python packages for Restash
+        if: matrix.leg.companions == 'restash'
+        run: python3 -m pip install --user --break-system-packages stashapp-tools==0.2.59
       - name: Start Stash ${{ matrix.leg.name }}
         id: prepare
         run: |

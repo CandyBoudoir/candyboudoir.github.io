@@ -1,20 +1,23 @@
 // Cherry Pick beside the plugins the compatibility tests can install
 // (companions.mjs): the Elo ranking plugins Ascension 1.4.1, HotOrNot 1.0.0
-// and Xenith 3.2.0, and Stash Curator 0.36.0. Each block runs when
-// prepare.mjs installed its plugin alone (COMPANIONS=ascension, hotornot,
-// xenith or curator) and is skipped otherwise: Ascension is a fork of
-// HotOrNot and the two claim the same element ids, so they fight over a
-// performer's page whatever Cherry Pick does. Beside a ranking plugin, both
-// plugins' pieces render on the pages they share, nothing throws, they don't
-// overlap, Your score stays on cards whose rating the other plugin hides, a
-// dialog's buttons are never covered, and Apply never writes over a
-// performer the other plugin ranks and says that plugin will pick up what it
-// sets. Matches played in the other plugin's own dialog (HotOrNot's and
-// Xenith's) leave what Apply looks for and keep both plugins' navbar items;
-// Cherry Pick counts Xenith's, and a bracket of the performers Xenith played
-// leaves every one alone. Beside Curator, whose patches change the list
-// components' arguments and whose criteria Stash's schema lacks, the lists
-// render and Bracket works on a list it filters.
+// and Xenith 3.2.0, Stash Curator 0.36.0 and Restash 0.3.0. Each block runs
+// when prepare.mjs installed its plugin alone (COMPANIONS=ascension,
+// hotornot, xenith, curator or restash) and is skipped otherwise: Ascension
+// is a fork of HotOrNot and the two claim the same element ids, so they
+// fight over a performer's page whatever Cherry Pick does. Beside a ranking
+// plugin, both plugins' pieces render on the pages they share, nothing
+// throws, they don't overlap, Your score stays on cards whose rating the
+// other plugin hides, a dialog's buttons are never covered, and Apply never
+// writes over a performer the other plugin ranks and says that plugin will
+// pick up what it sets. Matches played in the other plugin's own dialog
+// (Ascension's, HotOrNot's and Xenith's) leave what Apply looks for and keep
+// both plugins' navbar items; Cherry Pick counts Xenith's, and a bracket of
+// the performers Xenith played leaves every one alone. Beside Curator, whose
+// patches change the list components' arguments and whose criteria Stash's
+// schema lacks, the lists render and Bracket works on a list it filters.
+// Beside Restash, its own tasks score the library: with its mirror off
+// every rating stays the user's, and with it on Apply leaves each mirrored
+// performer alone and checks again before it writes and before an Undo.
 import { expect, test } from '@playwright/test'
 import { companionPluginIds } from '../../../tests/stash/companions.mjs'
 import {
@@ -36,16 +39,28 @@ import {
 const SIDE = {
   ascension: {
     name: 'Ascension',
+    // As Ascension 1.4.1's matches leave a performer, against an opponent no
+    // longer in the library
     ranked: {
       hotornot_stats: JSON.stringify({
         total_matches: 4,
         wins: 3,
         losses: 1,
         draws: 0,
+        win_margin: 22,
+        streaks_killed: 0,
         current_streak: 2,
+        best_streak: 2,
+        worst_streak: -1,
+        last_match: '2026-10-15T20:00:00.000Z',
       }),
       performer_record: JSON.stringify([
-        { date: '2026-10-15T20:00:00.000Z', opponentId: '1', won: true },
+        {
+          date: '2026-10-15T20:00:00.000Z',
+          opponent: '0:Unknown',
+          won: true,
+          AscRatingAfter: 6.2,
+        },
       ]),
     },
     theirs: '.hon-asc-score-display',
@@ -65,6 +80,21 @@ const SIDE = {
       performers: (page) => page.locator('.hon-asc-score-display').first(),
       performer: (page) =>
         page.locator('.detail-header .hon-asc-score-display'),
+    },
+    played: 'performer_record',
+    // One match in its own dialog, which the navbar's Ascension item opens
+    // on Head to Head among every performer: the left card wins
+    play: async (page) => {
+      await page.goto('/performers')
+      await page.locator('#plugin_hon').click()
+      await page
+        .locator(
+          '#hon-comparison-area .hon-scene-card[data-side="left"] [data-winner]',
+        )
+        .first()
+        .click()
+      await page.locator('#hon-modal .hon-modal-close').click()
+      await expect(page.locator('#hon-modal')).toBeHidden()
     },
   },
   hotornot: {
@@ -969,6 +999,204 @@ test.describe('beside Stash Curator', () => {
       ).toBeVisible({ timeout: 20_000 })
     } finally {
       await setPluginSettings(PLUGIN_ID, before)
+    }
+  })
+})
+
+// Runs one of Restash's tasks as Settings › Tasks does, after setting its
+// "Also mirror score to rating100" switch when `mirror` is given, and waits
+// for it to finish
+async function runRestash(task, mirror) {
+  if (mirror != null)
+    await setPluginSettings('restash', { mirrorToRating100: mirror })
+  await gql(
+    'mutation ($t: String!) { runPluginTask(plugin_id: "restash", task_name: $t) }',
+    { t: task },
+  )
+  await expect
+    .poll(async () => (await gql('{ jobQueue { id } }')).jobQueue?.length, {
+      timeout: 120_000,
+    })
+    .toBeFalsy()
+}
+
+// Scenes by id, with the rating and custom fields
+async function sceneState() {
+  const { findScenes } = await gql(
+    '{ findScenes(filter: { per_page: -1 }) { scenes { id rating100 custom_fields } } }',
+  )
+  return Object.fromEntries(findScenes.scenes.map((s) => [s.id, s]))
+}
+
+// Puts back each scene's rating as `before` had it
+async function putBackScenes(before) {
+  for (const s of Object.values(await sceneState())) {
+    const was = before[s.id]
+    if (!was || s.rating100 === was.rating100) continue
+    await gql(
+      'mutation ($i: SceneUpdateInput!) { sceneUpdate(input: $i) { id } }',
+      { i: { id: s.id, rating100: was.rating100 } },
+    )
+  }
+}
+
+// A rating that is the record's Restash score
+const isScore = (r) =>
+  r.rating100 != null &&
+  r.custom_fields?.restash_score != null &&
+  Number(r.custom_fields.restash_score) === r.rating100
+
+// The rated scenes Cherry Pick learns from: all but those whose rating is
+// Restash's score
+const learnedScenes = async () =>
+  Object.values(await sceneState()).filter(
+    (s) => s.rating100 != null && !isScore(s),
+  ).length
+
+// What Cherry Pick's page says it learns from
+const learning = (n) => new RegExp(`Learning from\\s*${n} rated scenes`)
+
+// Restash keeps its score in custom fields and, with its mirror on, writes
+// it over Stash's rating. It has no UI of its own, so the checks run its
+// tasks and watch what Cherry Pick learns and what Apply writes.
+test.describe('beside Restash', () => {
+  test.skip(
+    companionPluginIds().length !== 1 ||
+      !companionPluginIds().includes('restash'),
+    'Restash is not installed alone (COMPANIONS=restash)',
+  )
+
+  test.beforeAll(async () => {
+    await setUpCherryPick()
+    await setPluginSettings('restash', { mirrorToRating100: false })
+  })
+  test.afterAll(async () => {
+    await setPluginSettings('restash', { mirrorToRating100: false })
+    await runRestash('Clear Restash Data')
+    await tearDownCherryPick()
+  })
+  // A bracket left paused hides the list's Bracket button
+  test.beforeEach(() => setPluginSettings(PLUGIN_ID, {}))
+
+  test("with its mirror off, its scores leave every rating the user's", async ({
+    page,
+  }) => {
+    const performers = await performerRatings()
+    const scenes = await sceneState()
+    await runRestash('Recompute All', false)
+    const now = await performerState()
+    // It scores every performer, into its own fields only
+    for (const p of Object.values(now)) {
+      expect(p.custom_fields.restash_score, p.name).toBeGreaterThanOrEqual(1)
+      expect(Object.keys(p.custom_fields)).toEqual(
+        expect.arrayContaining([
+          'restash_score',
+          'restash_raw',
+          'restash_components',
+          'restash_updated',
+        ]),
+      )
+    }
+    expect(await performerRatings()).toEqual(performers)
+    for (const s of Object.values(await sceneState()))
+      expect(s.rating100, s.id).toBe(scenes[s.id].rating100)
+    // Cherry Pick learns from every rated scene but one that equals its
+    // score by chance
+    await page.goto('/plugins/cherrypick')
+    await expect(page.locator('#your-score')).toContainText(
+      learning(await learnedScenes()),
+      { timeout: 20_000 },
+    )
+  })
+
+  test('with its mirror on, Apply leaves every performer it mirrored alone, and says why', async ({
+    page,
+  }) => {
+    const before = await performerState()
+    const scenes = await sceneState()
+    try {
+      await runRestash('Recompute All', true)
+      const now = await performerState()
+      for (const p of Object.values(now))
+        expect(isScore(p), `${p.name} carries Restash's score`).toBe(true)
+      const learned = await learnedScenes()
+      expect(learned).toBeLessThan(
+        Object.values(scenes).filter((s) => s.rating100 != null).length,
+      )
+      await page.goto('/plugins/cherrypick')
+      await expect(page.locator('#your-score')).toContainText(
+        learning(learned),
+        { timeout: 20_000 },
+      )
+
+      const ratings = await performerRatings()
+      const result = await playBracket(page)
+      await result.locator('.cherrypick-apply-open').click()
+      const apply = page.locator('.cherrypick-apply-modal')
+      const rows = apply.locator('.cherrypick-apply-table tbody tr')
+      await expect(rows.first()).toContainText("Restash's score")
+      await expect(apply.locator('.cherrypick-apply-skipped')).toHaveCount(
+        await rows.count(),
+      )
+      await expect(apply.locator('.cherrypick-apply-go')).toBeDisabled()
+      expect(await performerRatings()).toEqual(ratings)
+    } finally {
+      await setPluginSettings('restash', { mirrorToRating100: false })
+      await putBack(before)
+      await putBackScenes(scenes)
+    }
+  })
+
+  test('Apply and Undo check again for its mirror right before they write', async ({
+    page,
+  }) => {
+    const before = await performerState()
+    const scenes = await sceneState()
+    try {
+      // Restash mirrors while the preview is open: Apply writes nothing
+      let result = await playBracket(page)
+      await result.locator('.cherrypick-apply-open').click()
+      let apply = page.locator('.cherrypick-apply-modal')
+      let go = apply.locator('.cherrypick-apply-go')
+      await expect(go).toBeEnabled()
+      await runRestash('Recompute All', true)
+      let ratings = await performerRatings()
+      await go.click()
+      await expect(page.locator('.cherrypick-applied').first()).toContainText(
+        'another plugin rates',
+      )
+      expect(await performerRatings()).toEqual(ratings)
+
+      await putBack(before)
+      await putBackScenes(scenes)
+      await setPluginSettings('restash', { mirrorToRating100: false })
+      await setPluginSettings(PLUGIN_ID, {})
+
+      // Restash mirrors over what Apply wrote: Undo leaves its scores
+      result = await playBracket(page)
+      await result.locator('.cherrypick-apply-open').click()
+      apply = page.locator('.cherrypick-apply-modal')
+      go = apply.locator('.cherrypick-apply-go')
+      await expect(go).toBeEnabled()
+      const unrated = await performerRatings()
+      await go.click()
+      const applied = page.locator('.cherrypick-applied').first()
+      await expect(applied).toContainText('Applied')
+      await expect
+        .poll(async () => {
+          const now = await performerRatings()
+          return Object.keys(now).filter((id) => now[id] !== unrated[id]).length
+        })
+        .toBeGreaterThan(0)
+      await runRestash('Recompute All', true)
+      ratings = await performerRatings()
+      await applied.getByRole('button', { name: 'Undo' }).click()
+      await expect(applied).toContainText('another plugin rates')
+      expect(await performerRatings()).toEqual(ratings)
+    } finally {
+      await setPluginSettings('restash', { mirrorToRating100: false })
+      await putBack(before)
+      await putBackScenes(scenes)
     }
   })
 })
