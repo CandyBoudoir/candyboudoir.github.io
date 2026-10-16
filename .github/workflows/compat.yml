@@ -69,7 +69,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
-      - run: pnpm exec playwright install --with-deps ${{ matrix.leg.browser || 'chromium' }}
+      # prepare.mjs draws the demo portraits with Chromium, so every leg needs it
+      - run: pnpm exec playwright install --with-deps chromium ${{ matrix.leg.browser || '' }}
       # Stash Curator's manifest runs `python`; the runner may have only python3
       - name: Python for companion plugins
         if: matrix.leg.companions
