@@ -24,5 +24,7 @@ export default defineConfig({
     baseURL: process.env.STASH_URL ?? 'http://127.0.0.1:9999',
     viewport: { width: 1440, height: 900 },
     channel: process.env.PW_CHANNEL || undefined,
+    // BROWSER=firefox or webkit runs the same specs in another engine.
+    browserName: /** @type {any} */ (process.env.BROWSER) || 'chromium',
   },
 })

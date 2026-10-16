@@ -2,7 +2,8 @@
 // `new_stable=<tag>` when Stash has a stable release that
 // tests/stash-versions.json does not list yet. Each companion plugin
 // (companions.mjs) adds an optional leg on the baseline version with it
-// installed.
+// installed, and Firefox and WebKit each add one that runs Cherry Pick's
+// contract specs in that browser (the screenshots stay Chromium's).
 import { readFile } from 'node:fs/promises'
 import { COMPANIONS } from './companions.mjs'
 
@@ -47,6 +48,15 @@ if (baseline)
       channel: 'companion',
       baseline: false,
       companions: key,
+    })
+if (baseline)
+  for (const browser of ['firefox', 'webkit'])
+    legs.push({
+      name: `${baseline.tag} ${browser}`,
+      tag: baseline.tag,
+      channel: 'browser',
+      baseline: false,
+      browser,
     })
 if (versions.develop) {
   legs.push({

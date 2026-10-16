@@ -41,7 +41,7 @@ export function moreLikeThis(M, state, scene) {
 
   const relate = (s) => {
     const shared = s.performers.filter((p) => perfIds.has(p.id))
-    const sameStudio = s.studio?.id === studioId
+    const sameStudio = studioId != null && s.studio?.id === studioId
     const sameParent =
       !!parentId &&
       (s.studio?.parent?.id === parentId || s.studio?.id === parentId)

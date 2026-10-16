@@ -13,7 +13,8 @@
 //               each play decaying with a 7-day half-life ("now" is the
 //               library's asOf)
 //   freshness   never watched or not watched in a long time: up; watched
-//               recently: down, less so for people who rewatch a lot
+//               recently: down, less so for people who rewatch a lot; seen
+//               at all: down for people who rarely rewatch
 //   variety     at most 2 cards per performer, and a small minus for each card
 //               already in the row that shares one
 //   exploration 2 of the 12 cards are owned near-misses or forgotten favorites
@@ -361,10 +362,14 @@ function momentumFor(ctx, s) {
   }
 }
 
-// TODO(#28): the mockup's row mixes rewatch favourites with new picks (its
-// sample user rewatches 73% of what they play, so the damped penalty below
-// suits them); check the balance on a demo library with a non-rewatcher.
-function freshnessFor(ctx, s) {
+// How far a scene you have seen can come back, by how much you rewatch.
+// Someone who rewatches half of what they play or more (the mockup's sample
+// user: 73%) gets the full lift for scenes not watched in months. Someone who
+// never rewatches gets none, and a scene they have seen ranks SEEN below one
+// they haven't: on an invented 5,000-scene library with no rewatching, 10 of
+// 12 cards were scenes already watched once.
+const SEEN = 0.4
+export function freshnessFor(ctx, s) {
   if (!s.owned) return { value: 0.3, kind: 'never' }
   const last = lastPlay(ctx, s)
   const addedDays = (ctx.now - Date.parse(s.local.created_at)) / DAY
@@ -378,7 +383,11 @@ function freshnessFor(ctx, s) {
   }
   const d = (ctx.now - last) / DAY
   const P = 1.4 * (1 - 0.5 * ctx.rewatch)
-  const value = -P * 0.5 ** (d / 14) + 0.35 * clamp((d - 60) / 120, 0, 1)
+  const w = Math.min(1, ctx.rewatch / 0.5)
+  const value =
+    -P * 0.5 ** (d / 14) +
+    0.35 * w * clamp((d - 60) / 120, 0, 1) -
+    SEEN * (1 - w)
   return {
     value,
     kind: d < 14 ? 'recent' : d >= 90 ? 'long' : 'mid',
@@ -411,14 +420,19 @@ function momentumPhrase(ctx, src, sceneId) {
 // carries a cold library's pick, else Your score's own reason. null when
 // neither has anything true to say.
 function tastePhrase(ctx, s) {
+  return tastePhrases(ctx, s)[0] ?? null
+}
+
+// The stated pick's sentence, then each of Your score's, strongest first.
+function tastePhrases(ctx, s) {
   const st = statedFor(ctx, s)
   if (st.source && st.value >= 0.1) {
     const { performer: p, favorite, r } = st.source
     if (r != null && (r >= 80 || !favorite))
-      return `You rated ${p.name} ${fmtStars(r / 20).replace('.0', '')}★`
-    return `With ${p.name}, one of your favorites`
+      return [`You rated ${p.name} ${fmtStars(r / 20).replace('.0', '')}★`]
+    return [`With ${p.name}, one of your favorites`]
   }
-  return ctx.M.reason(s.id, true)?.text || null
+  return (ctx.M.reasons?.(s.id, true) ?? []).map((r) => r.text)
 }
 
 function freshPhrase(ctx, s, f) {
@@ -471,13 +485,13 @@ function reasonOptions(ctx, it) {
   if (mp) out.push({ kind: 'momentum', text: mp })
   const fp = freshPhrase(ctx, it.scene, it.f)
   if (fp) out.push({ kind: 'fresh', text: fp })
+  for (const text of tastePhrases(ctx, it.scene))
+    out.push({ kind: 'taste', text })
   out.push({
     kind: 'taste',
-    text:
-      tastePhrase(ctx, it.scene) ||
-      (ctx.M.ratingsToGo
-        ? 'From your library'
-        : 'A lot like scenes you rate well'),
+    text: ctx.M.ratingsToGo
+      ? 'From your library'
+      : 'A lot like scenes you rate well',
   })
   return out
 }
@@ -488,7 +502,7 @@ function reasonOptions(ctx, it) {
 // repetitive. A card past a limit gives its next-best reason; only the text
 // changes, never the ranking.
 export const REASON_SHARE = 0.5
-function assignReasons(ctx, cards) {
+export function assignReasons(ctx, cards) {
   const cap = Math.ceil(cards.length * REASON_SHARE)
   const kinds = new Map()
   const texts = new Map()
@@ -497,7 +511,9 @@ function assignReasons(ctx, cards) {
     const pick =
       options.find(
         (o) => (kinds.get(o.kind) || 0) < cap && (texts.get(o.text) || 0) < 2,
-      ) || options[options.length - 1]
+      ) ||
+      options.find((o) => (texts.get(o.text) || 0) < 2) ||
+      options[options.length - 1]
     kinds.set(pick.kind, (kinds.get(pick.kind) || 0) + 1)
     texts.set(pick.text, (texts.get(pick.text) || 0) + 1)
     return pick

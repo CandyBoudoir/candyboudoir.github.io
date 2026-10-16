@@ -311,6 +311,15 @@ export function createEngine(db, shared = {}) {
           db.scenes.get(id),
           positive ? -Infinity : userMean,
         ),
+      reasons: (id, positive) =>
+        reasonsFor(
+          db,
+          F,
+          bt,
+          predictions.get(id),
+          db.scenes.get(id),
+          positive ? -Infinity : userMean,
+        ),
     }
   }
 
@@ -359,23 +368,33 @@ export function badgeLabel(M, value, relativeStyle) {
 // One plain sentence from the biggest contribution pointing the same way
 // as the score (above your average: biggest plus; below: biggest minus).
 function reasonFor(db, F, bt, pred, scene, userMean) {
-  if (!pred) return null
+  return reasonsFor(db, F, bt, pred, scene, userMean)[0] ?? null
+}
+
+// Every such sentence, biggest contribution first, then the general one
+// once there are enough ratings to compare with. For you takes the next
+// when a row already carries the first twice.
+function reasonsFor(db, F, bt, pred, scene, userMean) {
+  if (!pred) return []
   const dir = pred.value >= userMean ? 1 : -1
   const parts = pred.parts.slice().sort((a, b) => dir * b.value - dir * a.value)
+  const out = []
   for (const part of parts) {
     if (dir * part.value < 0.03) break
     const text = phrase(db, F, bt, part, scene, dir)
-    if (text) return { text, key: part.key }
+    if (text && !out.some((o) => o.text === text))
+      out.push({ text, key: part.key })
   }
   // Too few ratings to compare a scene with what you rate well
-  if (F.rated.length < MIN_RATED) return null
-  return {
+  if (F.rated.length < MIN_RATED) return out
+  out.push({
     text:
       dir > 0
         ? 'A lot like scenes you rate well'
         : 'Not much like what you rate well',
     key: null,
-  }
+  })
+  return out
 }
 
 function phrase(db, F, bt, part, scene, dir) {

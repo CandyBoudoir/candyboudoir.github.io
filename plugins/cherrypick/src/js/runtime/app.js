@@ -136,7 +136,14 @@ export function cancelWrites() {
   unsavedSettings.clear()
 }
 
+// While the page is being left, requests still in flight are cut off: a
+// query, or the last save, whose content the browser mirror keeps for the
+// next load to put back (storage/tier1.js). Neither is an error to report.
+// Firefox cuts them off when the navigation starts, before pagehide.
+let leaving = false
+
 function reportError(e) {
+  if (leaving) return
   console.error(`${PLUGIN_ID}:`, e)
   store.set({ error: String(e?.message || e) })
 }
@@ -189,7 +196,13 @@ export function boot() {
   if (booted) return
   booted = true
   store.subscribe(persist)
-  window.addEventListener('pagehide', () => saveNow())
+  window.addEventListener('beforeunload', () => (leaving = true))
+  window.addEventListener('pagehide', () => {
+    leaving = true
+    saveNow()
+  })
+  // back from the browser's page cache
+  window.addEventListener('pageshow', () => (leaving = false))
   onLocation((loc, prev) => {
     if (inSettings(prev) && !inSettings(loc)) {
       tier1.flush(toConfig(store.get())).catch(reportError)
@@ -220,16 +233,23 @@ export function boot() {
 // After the plugin changes a record in Stash (a gender, a rating, custom
 // fields), it patches its copy of the library so the model sees the change at
 // once, without waiting for the next refresh.
-function patchLibrary(list, id, fields) {
+// patches: a Map of id to fields. Every change to the library rebuilds the
+// model (runtime/engine.js), about half a second on a 25,000-scene library,
+// so a loop of writes collects its patches and lands them in one update.
+function patchLibrary(list, patches) {
+  if (!patches.size) return
   store.set((s) => {
     if (!s.library) return null
     const rows = s.library[list].map((r) =>
-      r.id === id ? { ...r, ...fields } : r,
+      patches.has(r.id) ? { ...r, ...patches.get(r.id) } : r,
     )
     return { library: { ...s.library, [list]: rows } }
   })
 }
 export const patchLibraryScene = (id, fields) =>
-  patchLibrary('scenes', id, fields)
+  patchLibrary('scenes', new Map([[id, fields]]))
 export const patchLibraryPerformer = (id, fields) =>
-  patchLibrary('performers', id, fields)
+  patchLibrary('performers', new Map([[id, fields]]))
+export const patchLibraryScenes = (patches) => patchLibrary('scenes', patches)
+export const patchLibraryPerformers = (patches) =>
+  patchLibrary('performers', patches)

@@ -58,6 +58,10 @@ pnpm test:compat contract
 
 `prepare.mjs` also points Stash at a mock stash-box (`tests/stash/stashbox.mjs`) that Playwright starts with the tests, so the Tagger, scrape dialogs and StashID links are checked against invented scenes, performers and studios with no stash-box account.
 
+The specs run in Chromium; `BROWSER=firefox` or `BROWSER=webkit` runs them in another engine, and the workflow has a leg for each that runs Cherry Pick's specs.
+
+Cherry Pick also has a walk through every feature on a library the size of a real one, which CI does not run. `plugins/cherrypick/tests/scale/library.mjs` seeds an invented library into its own throwaway Stash (`seed rater --scenes 25000 --performers 10000 --db <work>/config/stash-go.sqlite --summary <work>/summary.json`; the profiles are `rater`, `once`, `light` and `none`), and `STASH_URL=<that Stash> SCALE_SUMMARY=<work>/summary.json pnpm exec playwright test plugins/cherrypick/tests/scale` plays it from a first visit to Remove Cherry Pick data, writing timings to `SCALE_OUT`.
+
 ### Branches and releases
 
 `main` is the trunk and feeds the develop channel. `prod` is the release branch. Every push to either publishes the site to GitHub Pages and checks the live files against the build.

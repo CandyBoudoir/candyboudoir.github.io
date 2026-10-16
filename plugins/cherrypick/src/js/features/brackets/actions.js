@@ -6,7 +6,8 @@
 // model sees it at once.
 import {
   patchLibraryPerformer,
-  patchLibraryScene,
+  patchLibraryPerformers,
+  patchLibraryScenes,
   run,
   runMutation,
   store,
@@ -252,6 +253,7 @@ function finish(next, result) {
 // other plugins' update hooks, so never per pick.
 async function writeFields(b) {
   const written = {}
+  const patches = new Map()
   try {
     const { findPerformers } = await run(PERFORMER_FIELDS, {
       ids: placedIds(b.result),
@@ -268,13 +270,12 @@ async function writeFields(b) {
       written[id] = Object.fromEntries(
         Object.keys(partial).map((k) => [k, current[id][k] ?? null]),
       )
-      patchLibraryPerformer(id, {
-        custom_fields: data.performerUpdate.custom_fields,
-      })
+      patches.set(id, { custom_fields: data.performerUpdate.custom_fields })
     }
   } catch (e) {
     reportError(e)
   }
+  patchLibraryPerformers(patches)
   store.set((s) => ({
     brackets: {
       ...s.brackets,
@@ -290,18 +291,18 @@ async function writeFields(b) {
 async function restoreFields(b) {
   const written = (await fieldWrites.get(b.id)) || b.fieldWrites || {}
   fieldWrites.delete(b.id)
+  const patches = new Map()
   for (const [id, prev] of Object.entries(written)) {
     try {
       const data = await runMutation(PERFORMER_SET_FIELDS, {
         input: { id, custom_fields: restoreFieldsInput(prev) },
       })
-      patchLibraryPerformer(id, {
-        custom_fields: data.performerUpdate.custom_fields,
-      })
+      patches.set(id, { custom_fields: data.performerUpdate.custom_fields })
     } catch (e) {
       reportError(e)
     }
   }
+  patchLibraryPerformers(patches)
 }
 
 function updateActive(fn) {
@@ -379,23 +380,21 @@ async function currentRecords(kind, ids) {
 }
 
 // One write: the rating, and the provisional mark when it changes (fields:
-// a custom_fields input, or null)
+// a custom_fields input, or null). Returns the record's new fields for the
+// library copy, which the caller patches once for the whole batch.
 async function setRating(kind, id, rating100, fields) {
   const input = { id, rating100, ...(fields ? { custom_fields: fields } : {}) }
-  if (kind === 'performer') {
-    const data = await runMutation(PERFORMER_RATE, { input })
-    patchLibraryPerformer(id, {
-      rating100,
-      custom_fields: data.performerUpdate.custom_fields,
-    })
-  } else {
-    const data = await runMutation(SCENE_RATE, { input })
-    patchLibraryScene(id, {
-      rating100,
-      custom_fields: data.sceneUpdate.custom_fields,
-    })
-  }
+  const data =
+    kind === 'performer'
+      ? (await runMutation(PERFORMER_RATE, { input })).performerUpdate
+      : (await runMutation(SCENE_RATE, { input })).sceneUpdate
+  return { rating100, custom_fields: data.custom_fields }
 }
+
+const patchRated = (kind, patches) =>
+  kind === 'performer'
+    ? patchLibraryPerformers(patches)
+    : patchLibraryScenes(patches)
 
 // The champion's rating the user gave on the champion screen, when no
 // anchor played: the scale the rest step down from. Apply writes it with
@@ -424,14 +423,18 @@ export async function applyRatingChanges(bracket, changes) {
     await currentRecords(kind, ids),
   )
   const done = []
+  const patches = new Map()
   try {
     for (const c of write) {
       const provisional = !!c.provisional
-      await setRating(
-        kind,
+      patches.set(
         c.id,
-        c.to,
-        BR.provisionalFieldsInput(c.to, provisional, c.fromProvisional),
+        await setRating(
+          kind,
+          c.id,
+          c.to,
+          BR.provisionalFieldsInput(c.to, provisional, c.fromProvisional),
+        ),
       )
       done.push({
         id: c.id,
@@ -444,6 +447,7 @@ export async function applyRatingChanges(bracket, changes) {
   } catch (e) {
     reportError(e)
   }
+  patchRated(kind, patches)
   if (!done.length && !ranked.length) return
   const batch = {
     id: 'a' + Date.now().toString(36),
@@ -482,19 +486,24 @@ export async function undoApplied(batchId) {
     }
   }
   const left = []
+  const patches = new Map()
   for (const c of undo) {
     try {
-      await setRating(
-        batch.kind,
+      patches.set(
         c.id,
-        c.from ?? null,
-        BR.restoreProvisionalInput(c),
+        await setRating(
+          batch.kind,
+          c.id,
+          c.from ?? null,
+          BR.restoreProvisionalInput(c),
+        ),
       )
     } catch (e) {
       left.push(c)
       reportError(e)
     }
   }
+  patchRated(batch.kind, patches)
   const stays = left.length || kept > (batch.kept || 0)
   store.set((s) => ({
     applied: stays

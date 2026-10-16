@@ -408,3 +408,52 @@ test('no kind of reason, and no one sentence, dominates the row', () => {
   for (const [text, n] of count('reason'))
     assert.ok(n <= 2, `"${text}" on ${n} cards`)
 })
+
+test('a sentence the model gives every scene still shows on two cards at most', () => {
+  // As in a large library where watch time explains most scores and no card
+  // has a momentum or freshness sentence: every scene's strongest reason is
+  // the same sentence, with others behind it.
+  const same = 'You keep it playing longer than most'
+  const ctx = {
+    M: {
+      ratingsToGo: 0,
+      rating: () => null,
+      reason: () => ({ text: same, key: 'b' }),
+      reasons: (id) => [
+        { text: same, key: 'b' },
+        { text: `Another reason for ${id}`, key: 'p' },
+      ],
+    },
+  }
+  const cards = Array.from({ length: 12 }, (_, i) => ({
+    kind: 'main',
+    scene: { id: String(i + 1), performers: [] },
+    m: { source: null, value: 0 },
+    f: { kind: 'recent' },
+  }))
+  const texts = FY.assignReasons(ctx, cards).map((r) => r.text)
+  assert.equal(texts.filter((t) => t === same).length, 2)
+  assert.equal(new Set(texts).size, 11)
+})
+
+test('a scene you saw months ago comes back only for people who rewatch', () => {
+  const now = input.asOf
+  const scene = (id) => ({
+    id,
+    owned: true,
+    local: { created_at: new Date(now - 400 * DAY).toISOString() },
+  })
+  const fresh = (rewatch) => {
+    const ctx = { now, rewatch, plays: new Map([['seen', [now - 200 * DAY]]]) }
+    return {
+      seen: FY.freshnessFor(ctx, scene('seen')).value,
+      never: FY.freshnessFor(ctx, scene('never')).value,
+    }
+  }
+  // the mockup's sample user rewatches 73% of what they play
+  const rewatcher = fresh(0.73)
+  assert.ok(rewatcher.seen > rewatcher.never)
+  // someone who never rewatches: a scene they saw ranks below one they didn't
+  const once = fresh(0)
+  assert.ok(once.seen < once.never - 0.5)
+})
