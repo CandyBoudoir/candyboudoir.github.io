@@ -217,6 +217,39 @@ test('Settings › Plugins lists the switches, already on', async ({ page }) => 
   ).toBeChecked()
 })
 
+test('without Stash Curator, nothing offers to hide Your score on cards', async ({
+  page,
+}) => {
+  test.skip(
+    companionPluginIds().includes('stash-curator'),
+    'Stash Curator is installed',
+  )
+  // Cherry Pick asks Stash which plugins are installed, and Curator is not
+  const asked = () =>
+    page.waitForResponse(
+      (r) =>
+        r.url().endsWith('/graphql') &&
+        r.request().postDataJSON()?.operationName === 'CherryPickPlugins',
+    )
+  const offer = page.locator('.cherrypick-curator-offer')
+  let answer = asked()
+  await page.goto('/plugins/cherrypick')
+  await answer
+  await expect(page.locator('#your-score')).toContainText(
+    /within half a star \d+ times in 10/,
+    { timeout: 20_000 },
+  )
+  await expect(offer).toHaveCount(0)
+  answer = asked()
+  await page.goto('/settings?tab=plugins')
+  await answer
+  await expect(page.locator('#plugin-CherryPick-badges')).toBeAttached({
+    timeout: 20_000,
+  })
+  await page.waitForTimeout(500)
+  await expect(offer).toHaveCount(0)
+})
+
 test('switching For you off removes the row', async ({ page }) => {
   // Through the configuration, as Stash's Settings page saves it: develop
   // collapses each plugin's settings, so the switch is not always visible.

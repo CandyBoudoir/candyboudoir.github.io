@@ -12,6 +12,7 @@ import {
   runMutation,
   store,
 } from '../../runtime/app.js'
+import { PLUGINS } from '../../data/queries.js'
 import * as BR from '../../model/brackets.js'
 import {
   championsRoundPool,
@@ -67,11 +68,6 @@ const SCENE_RATINGS = `
     findScenes(ids: $ids, filter: { per_page: -1 }) {
       scenes { id rating100 custom_fields }
     }
-  }
-`
-const PLUGINS = `
-  query CherryPickPlugins {
-    plugins { id name enabled }
   }
 `
 const PERFORMER_RATE = `

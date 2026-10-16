@@ -1,9 +1,14 @@
 // The plugin's one page, at /plugins/cherrypick, reached from the navbar's
 // cherries and from Settings › Plugins. A plain Stash settings page: setting
 // sections and cards. Features add their own sections (registerPageSection);
-// this file holds Your score, Not interested, Don't learn and Remove.
+// this file holds Your score (with the offer beside Stash Curator), Not
+// interested, Don't learn and Remove.
 import { Bootstrap, React, ReactRouterDOM, register } from '../runtime/api.js'
-import { toggleDontLearn, undoNotInterested } from '../runtime/actions.js'
+import {
+  answerCuratorOffer,
+  toggleDontLearn,
+  undoNotInterested,
+} from '../runtime/actions.js'
 import { allDecisions } from '../runtime/engine.js'
 import { rateMore } from '../model/index.js'
 import { sourcesText } from '../model/matches.js'
@@ -16,6 +21,7 @@ import { closeDialog, openDialog, registerDialog } from '../ui/dialogs.jsx'
 import { useAppState } from '../ui/hooks.js'
 import { Safe } from '../ui/Safe.jsx'
 import { removePluginData, removalCounts } from './remove.js'
+import { OFFER, useCuratorOffer } from './curatorOffer.js'
 
 const { Button, Modal } = Bootstrap
 const { Link } = ReactRouterDOM
@@ -56,6 +62,51 @@ export function SettingRow({ title, sub, children }) {
       </div>
       {/* Stash's .setting lays out two columns; keep the second even when empty. */}
       <div>{children}</div>
+    </div>
+  )
+}
+
+// Beside Stash Curator, the offer to hide Your score on cards
+// (curatorOffer.js). After Hide on cards, the card says where to undo it
+// for the rest of the visit.
+function CuratorOffer() {
+  const badges = useAppState((s) => s.settings.badges)
+  const answer = useAppState((s) => s.curatorOffer)
+  const show = useCuratorOffer(badges)
+  const [hid, setHid] = React.useState(false)
+  if (hid && answer === 'hide')
+    return (
+      <div className="card setting-card cherrypick-curator-offer">
+        <SettingRow
+          title="Your score is off on cards"
+          sub="It stays beside the stars on scene pages. Score badges on cards, in Settings › Plugins, brings it back."
+        />
+      </div>
+    )
+  if (!show) return null
+  return (
+    <div className="card setting-card cherrypick-curator-offer">
+      <SettingRow title={OFFER.title} sub={OFFER.sub}>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="cherrypick-curator-hide"
+          onClick={() => {
+            setHid(true)
+            answerCuratorOffer('hide')
+          }}
+        >
+          {OFFER.hide}
+        </Button>{' '}
+        <Button
+          variant="secondary"
+          size="sm"
+          className="cherrypick-curator-keep"
+          onClick={() => answerCuratorOffer('keep')}
+        >
+          {OFFER.keep}
+        </Button>
+      </SettingRow>
     </div>
   )
 }
@@ -117,7 +168,12 @@ function YourScore() {
       </>
     )
   }
-  return <div className="card setting-card">{body}</div>
+  return (
+    <>
+      <CuratorOffer />
+      <div className="card setting-card">{body}</div>
+    </>
+  )
 }
 
 function NotInterested() {

@@ -79,21 +79,35 @@ export const tier1 = createTier1({
 })
 
 // Writes what changed to where it lives: tier 1 for the plugin's own data,
-// tier 3 for row signals. Settings are Stash's to write. Tier 1 writes wait
+// tier 3 for row signals. Settings are Stash's to write, except one the user
+// changes through Cherry Pick itself (changeSettings). Tier 1 writes wait
 // for a second of quiet (every write makes Stash refetch its
 // configuration, and bracket picks come quickly); the mirror takes each
 // change at once.
 const WRITE_DELAY_MS = 1000
 const unsaved = new Set()
+const unsavedSettings = new Set()
 let saveTimer = null
 
 function saveNow() {
   clearTimeout(saveTimer)
   saveTimer = null
-  if (!unsaved.size) return Promise.resolve()
-  const keys = [...unsaved]
+  if (!unsaved.size && !unsavedSettings.size) return Promise.resolve()
+  const own = [...unsavedSettings]
+  const keys = [...unsaved, ...own]
   unsaved.clear()
-  return tier1.save(toConfig(store.get()), keys).catch(reportError)
+  unsavedSettings.clear()
+  return tier1.save(toConfig(store.get()), keys, own).catch(reportError)
+}
+
+// Settings the user changes through Cherry Pick, off Stash's Settings page
+// (Hide on cards, beside Stash Curator): the store at once, then Stash, now
+// and with anything else waiting. On Stash's Settings page, that page saves
+// them instead (features/settingsExtras.jsx).
+export function changeSettings(changes) {
+  store.set((s) => ({ settings: { ...s.settings, ...changes } }))
+  Object.keys(changes).forEach((k) => unsavedSettings.add(k))
+  return saveNow()
 }
 
 function persist(next, prev) {
@@ -119,6 +133,7 @@ export function cancelWrites() {
   clearTimeout(saveTimer)
   saveTimer = null
   unsaved.clear()
+  unsavedSettings.clear()
 }
 
 function reportError(e) {
