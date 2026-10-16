@@ -495,11 +495,12 @@ test('StashDB: popularity and scenes you do not have', async () => {
       performers { id } } }`)
   const t = Date.now()
   await page.goto(`/performers/${findPerformers.performers[0].id}`)
+  // The performer credited most has scenes StashDB knows that the library
+  // lacks: the row fills with cards once StashDB answers.
   const missing = page.locator('.cherrypick-not-in-library')
-  await expect(missing.first()).toBeVisible({ timeout: 60_000 })
-  await expect(
-    missing.locator('.scene-card, .cherrypick-row-empty').first(),
-  ).toBeVisible({ timeout: 60_000 })
+  await expect(missing.locator('.scene-card').first()).toBeVisible({
+    timeout: 60_000,
+  })
   metrics.steps.stashdbPerformer = secs(t)
   metrics.stashdbMissing = await missing.locator('.scene-card').count()
 })
