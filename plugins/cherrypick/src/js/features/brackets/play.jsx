@@ -25,7 +25,8 @@ import {
 
 const { faRotateLeft, faUndo } = FontAwesomeSolid
 
-function Contender({ b, id, side, onPick }) {
+// One side of a match, as a big card. Also the Challenge round's.
+export function Contender({ b, id, side, onPick }) {
   const M = useAppState((s) => s.M)
   if (!M) return null
   const key = (
@@ -96,37 +97,47 @@ function Contender({ b, id, side, onPick }) {
   )
 }
 
-// Keys while the dialog is up. They go no further, so Stash's own
+// Keys while a dialog of `view` is up. They go no further, so Stash's own
 // shortcuts (page keys, "e" to edit) don't act on the page behind. Esc is
 // left to the Modal, which pauses; Tab, Enter and Space to the focused
-// control.
+// control. onKey(key) acts on the store as it is now and returns whether
+// it took the key.
 const PASS = new Set(['Escape', 'Tab', 'Enter', ' '])
 
-function useBracketKeys(setTree) {
+export function usePickKeys(view, onKey) {
+  const latest = React.useRef(onKey)
+  latest.current = onKey
   React.useEffect(() => {
-    const onKey = (e) => {
-      if (store.get().dialog?.view !== VIEWS.play) return
+    const listener = (e) => {
+      if (store.get().dialog?.view !== view) return
       if (PASS.has(e.key)) return
       e.stopPropagation()
       if (e.type !== 'keydown' || e.altKey || e.ctrlKey || e.metaKey) return
-      const a = store.get().brackets.active
-      const cur = a ? BR.bracketState(a).current : null
-      if (!cur) return
-      const k = e.key
-      if (k === 'ArrowLeft') pickWinner(cur.a)
-      else if (k === 'ArrowRight') pickWinner(cur.b)
-      else if (k === 'Backspace' || k === 'u' || k === 'U') undoPick()
-      else if (k === 't' || k === 'T') setTree((x) => !x)
-      else return
-      e.preventDefault()
+      if (latest.current(e.key)) e.preventDefault()
     }
-    window.addEventListener('keydown', onKey, true)
-    window.addEventListener('keypress', onKey, true)
+    window.addEventListener('keydown', listener, true)
+    window.addEventListener('keypress', listener, true)
     return () => {
-      window.removeEventListener('keydown', onKey, true)
-      window.removeEventListener('keypress', onKey, true)
+      window.removeEventListener('keydown', listener, true)
+      window.removeEventListener('keypress', listener, true)
     }
-  }, [setTree])
+  }, [view])
+}
+
+export const isUndoKey = (k) => k === 'Backspace' || k === 'u' || k === 'U'
+
+function useBracketKeys(setTree) {
+  usePickKeys(VIEWS.play, (k) => {
+    const a = store.get().brackets.active
+    const cur = a ? BR.bracketState(a).current : null
+    if (!cur) return false
+    if (k === 'ArrowLeft') pickWinner(cur.a)
+    else if (k === 'ArrowRight') pickWinner(cur.b)
+    else if (isUndoKey(k)) undoPick()
+    else if (k === 't' || k === 'T') setTree((x) => !x)
+    else return false
+    return true
+  })
 }
 
 export function PlayDialog() {

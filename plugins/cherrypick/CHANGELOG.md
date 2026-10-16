@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Brackets play the performers and scenes you haven't rated. People rate their favorites, so the rated ones won their way to nearly every final; they now play only when there aren't enough unrated ones to fill a bracket. Performers and scenes from your last three brackets of the same kind and gender sit out while others can take their places.
+- The Challenge round: after the final, a champion with no rating of yours meets up to three performers or scenes you have rated, lowest rated first, until one beats it. Where it stops sets the champion's rating in Apply, and the finalist and semifinalists step down from it. A champion that beats every one gets a trophy on its performer card, "beat your favorites" in its For you line and a mark in the Hall of Fame. Rate them myself skips it.
+- A loss to a rated performer or scene no longer sets a rating on its own. A first-round loser to your 5★ favorite was offered 4.5★.
+
 ## 0.1.2
 
 - On a browser's first visit, and after a day away, For you's header says what is happening while its row of placeholder cards waits: "Reading your library: 4,500 of 25,000 scenes", then "Learning your taste from 25,000 scenes". On a library of 25,000 scenes that takes about 6 seconds. Other visits start from the browser's copy of your library, take about 2 to 3 seconds and show no line.

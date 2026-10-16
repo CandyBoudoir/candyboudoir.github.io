@@ -1,6 +1,6 @@
 // Brackets: single-elimination games that feed the taste model. Bracket and
 // Options beside the Performers and Scenes lists, the dialogs (setup, Set
-// genders, play, champion, Apply), the Hall of Fame section on the plugin
+// genders, play, Challenge round, champion, Apply), the Hall of Fame section on the plugin
 // page, and the resume pill.
 import { store } from '../../runtime/app.js'
 import { registerDialog } from '../../ui/dialogs.jsx'
@@ -8,6 +8,7 @@ import { registerPageSection } from '../pluginPage.jsx'
 import { pauseBracket, VIEWS } from './actions.js'
 import { registerListOps } from './listOps.jsx'
 import { PlayDialog } from './play.jsx'
+import { ChallengeDialog } from './challenge.jsx'
 import { ApplyDialog, ResultDialog } from './results.jsx'
 import { ClipSetup, GenderGrid, SetupSheet } from './setup.jsx'
 import { HallOfFameSection } from './hallOfFamePage.jsx'
@@ -21,6 +22,7 @@ export function registerBrackets() {
   registerDialog(VIEWS.clipSetup, ClipSetup)
   registerDialog(VIEWS.genders, GenderGrid)
   registerDialog(VIEWS.play, PlayDialog)
+  registerDialog(VIEWS.challenge, ChallengeDialog)
   registerDialog(VIEWS.result, ResultDialog)
   registerDialog(VIEWS.apply, ApplyDialog)
   registerPageSection('hall-of-fame', 20, 'Hall of Fame', HallOfFameSection)

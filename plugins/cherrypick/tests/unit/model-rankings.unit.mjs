@@ -341,7 +341,7 @@ function clearedPool() {
 }
 
 test('Apply never writes a performer Ascension ranks, and says why', () => {
-  // four rated by hand, six unrated, the rest ranked
+  // four rated by hand, six unrated (with rated scenes), the rest ranked
   const { lib, pool } = clearedPool()
   pool.slice(0, 4).forEach((p, i) => (p.rating100 = [100, 80, 60, 30][i]))
   const ranked = new Set(pool.slice(10).map((p) => p.id))
@@ -356,8 +356,8 @@ test('Apply never writes a performer Ascension ranks, and says why', () => {
     ['anchor', 'candidate', 'ranked'].map(
       (r) => roles.filter((x) => x === r).length,
     ),
-    [4, 6, 6],
-    'ranked records fill only what the others leave',
+    [0, 0, 16],
+    'the six unrated count as rated by their scenes, so ranked records fill every place before them',
   )
   const { rows } = BR.ratingProposals(M, b)
   const by = new Map(rows.map((x) => [x.id, x]))
@@ -422,7 +422,10 @@ test('Apply skips a performer Xenith ranks or Restash mirrored, with the reason'
     if (mirrored.has(id)) assert.equal(by.get(id).skip, 'mirrored')
   }
   assert.equal(by.has(pool[8].id), false, "the user's rating stays")
-  assert.ok(b.seeds.includes(pool[4].id))
+  // every candidate plays; the anchors wait
+  for (const p of pool)
+    if (role(p.id) === 'candidate' && BR.sceneAverage(M, p.id) == null)
+      assert.ok(b.seeds.includes(p.id))
   for (const x of by.values())
     if (!x.skip) assert.equal(role(x.id), 'candidate')
 })

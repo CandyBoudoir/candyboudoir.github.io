@@ -5,12 +5,17 @@
 // game; clip brackets ("Bracket her scenes", the Scenes list's Bracket
 // button) are secondary.
 //
-// A bracket exists to add ratings for the model to learn from. It mixes
-// candidates (no rating of the user's own) with anchors (the user's own
-// rating, or for a performer, the average of the user's ratings on their
-// scenes), and a candidate's proposed rating comes from the anchors it beat
-// and lost to: a bracket only orders its own pool, so a finish alone says
-// nothing about stars. No rating or seed shows during play.
+// A bracket exists to add ratings for the model to learn from, and to find
+// new favourites. People rate the performers and scenes they like most, so
+// a bracket plays candidates (no rating of the user's own) and keeps anchors
+// (the user's own rating, or for a performer, the average of the user's
+// ratings on their scenes) for the places candidates can't fill: rated
+// entrants would win their way to every final. The champion then meets up
+// to three anchors in a Challenge round, which places it on the user's
+// scale; the rest step down from it. A candidate's proposed rating comes
+// from the anchors it beat and lost to: a bracket only orders its own pool,
+// so a finish alone says nothing about stars. No rating or seed shows
+// during play.
 
 import { behaviourOf } from './behaviour.js'
 import { pluginRating } from './rankings.js'
@@ -48,6 +53,19 @@ export const CHAMPIONS_MIN = 4
  * @property {'active'|'done'} status
  * @property {BracketResult} [result]  set by the plugin when it finishes
  *   (bracketState's result)
+ * @property {Challenge} [challenge]  the Challenge round offered when it
+ *   finished (challengeFor)
+ */
+
+/**
+ * The champion's Challenge round: the anchors it meets, in order.
+ * @typedef {object} Challenge
+ * @property {string[]} rungs  lowest rated first, the highest rated last
+ * @property {Record<string, number>} ratings  each one's rating100 when the
+ *   round was offered
+ * @property {string[]} sceneRungs  those rated by their scenes' ratings
+ * @property {{ winner: string, loser: string }[]} decisions  picks, in order
+ * @property {boolean} [skipped]  the user chose to rate the champion instead
  */
 
 /**
@@ -247,18 +265,56 @@ export function spreadPick(ids, value, k, targetsFor = byRankTargets) {
   return out
 }
 
-// Who plays, out of a pool of ids: half the slots for candidates and half
-// for anchors (more candidates when anchors run short, more anchors when
-// candidates do), and ranked records only to fill what is left. Anchors
-// with a rating of their own come first; performers anchored by their
-// scenes' ratings (sceneAverage) fill the anchor places left after them.
-// Candidates spread over the model's whole range, not only the likely
-// favourites, since ratings bunch at the top and the model learns from
-// contrast; anchors spread over the user's own scale, so each candidate has
-// one near it. Anchors come back highest rated first, the rest strongest
-// first; `ratings` holds each anchor's rating100 and `sceneAnchors` names
-// those from scene ratings.
-export function composeEntrants(M, kind, ids, size) {
+// How many past brackets of a kind (and gender) hold their entrants back
+export const RECENT_BRACKETS = 3
+
+// Who played in the last RECENT_BRACKETS finished brackets of a kind (and,
+// for performers, of one gender), Champions rounds aside: they wait while
+// others can fill a bracket, so the next one shows new faces
+export function recentEntrants(history, kind, gender = null) {
+  return new Set(
+    history
+      .filter(
+        (b) =>
+          b.kind === kind &&
+          b.result &&
+          !b.champions &&
+          (kind !== 'performer' || b.gender === gender),
+      )
+      .sort((a, b) => (b.finishedAt || '').localeCompare(a.finishedAt || ''))
+      .slice(0, RECENT_BRACKETS)
+      .flatMap((b) => b.seeds || []),
+  )
+}
+
+// k of ids by pickK(ids, k): those not in `recent` first, the recent ones
+// only for the places left
+function freshFirst(ids, k, recent, pickK) {
+  if (!recent?.size) return pickK(ids, k)
+  const fresh = ids.filter((id) => !recent.has(id))
+  const kf = Math.min(k, fresh.length)
+  return [
+    ...pickK(fresh, kf),
+    ...pickK(
+      ids.filter((id) => recent.has(id)),
+      k - kf,
+    ),
+  ]
+}
+
+// Who plays, out of a pool of ids: candidates take every place they can,
+// records another plugin ranks come next, and anchors only fill what is
+// left. People rate their favourites, so anchors in the bracket would win
+// their way to every final. Anchors with a rating of their own come first;
+// performers anchored by their scenes' ratings (sceneAverage) fill the
+// anchor places left after them. Candidates spread over the model's whole
+// range, not only the likely favourites, since the model learns from
+// contrast; anchors spread over the user's own scale, so each candidate
+// that meets one has one near it. Entrants of recent brackets (`recent`)
+// wait while others can fill their places. Anchors come back highest rated
+// first, the rest strongest first; `ratings` holds each anchor's rating100
+// and `sceneAnchors` names those from scene ratings.
+export function composeEntrants(M, kind, ids, size, recent = null) {
   const strength = strengthOf(M, kind)
   const byStrength = (a, b) => strength(b) - strength(a)
   const role = { anchor: [], scene: [], candidate: [], ranked: [] }
@@ -273,14 +329,10 @@ export function composeEntrants(M, kind, ids, size) {
     role[avg != null ? 'scene' : r].push(id)
   }
   for (const list of Object.values(role)) list.sort(byStrength)
-  const half = size / 2
-  const kC = Math.min(
-    role.candidate.length,
-    Math.max(half, size - role.anchor.length - role.scene.length),
-  )
-  const kA = Math.min(role.anchor.length, size - kC)
-  const kS = Math.min(role.scene.length, size - kC - kA)
-  const kR = Math.min(role.ranked.length, size - kC - kA - kS)
+  const kC = Math.min(role.candidate.length, size)
+  const kR = Math.min(role.ranked.length, size - kC)
+  const kA = Math.min(role.anchor.length, size - kC - kR)
+  const kS = Math.min(role.scene.length, size - kC - kR - kA)
   const rating = (id) =>
     average.has(id) ? average.get(id) : stashRatingOf(M, kind, id)
   const byRating = (a, b) => rating(b) - rating(a) || byStrength(a, b)
@@ -290,8 +342,10 @@ export function composeEntrants(M, kind, ids, size) {
   const anchors = [...spread(role.anchor, kA), ...sceneAnchors].sort(byRating)
   return {
     anchors,
-    candidates: spreadPick(role.candidate, strength, kC),
-    ranked: role.ranked.slice(0, kR),
+    candidates: freshFirst(role.candidate, kC, recent, (list, k) =>
+      spreadPick(list, strength, k),
+    ),
+    ranked: freshFirst(role.ranked, kR, recent, (list, k) => list.slice(0, k)),
     ratings: Object.fromEntries(anchors.map((id) => [id, rating(id)])),
     sceneAnchors,
   }
@@ -370,8 +424,10 @@ export function firstRoundSlots(anchors, unknowns, size, now = 0) {
 }
 
 // kind: 'performer' | 'clip'; ids: the pool; size: slots (byes fill the rest).
-// now: when it is created, for its id and createdAt: the time of the click,
-// not the library's asOf, so two brackets in one session get different ids.
+// recent: entrants of recent brackets (recentEntrants), who wait while
+// others can fill the bracket. now: when it is created, for its id and
+// createdAt: the time of the click, not the library's asOf, so two brackets
+// in one session get different ids.
 export function createBracket(
   M,
   {
@@ -382,12 +438,13 @@ export function createBracket(
     ids,
     champions = false,
     origin = null,
+    recent = null,
     now = Date.now(),
   },
 ) {
   const strength = strengthOf(M, kind)
   const { anchors, candidates, ranked, ratings, sceneAnchors } =
-    composeEntrants(M, kind, ids, size)
+    composeEntrants(M, kind, ids, size, recent)
   const unknowns = [...candidates, ...ranked].sort(
     (a, b) => strength(b) - strength(a),
   )
@@ -509,32 +566,184 @@ export function undo(b) {
   return { ...b, decisions: b.decisions.slice(0, -1) }
 }
 
-// A bracket's picks as the engine takes them (EngineInput.decisions)
+// A bracket's picks as the engine takes them (EngineInput.decisions), its
+// Challenge round's included
 export function modelDecisions(b) {
-  return (b.decisions || []).map((d) => ({
-    kind: b.kind,
-    winner: d.winner,
-    loser: d.loser,
-    bracket: b.id,
-  }))
+  return [...(b.decisions || []), ...(b.challenge?.decisions || [])].map(
+    (d) => ({
+      kind: b.kind,
+      winner: d.winner,
+      loser: d.loser,
+      bracket: b.id,
+    }),
+  )
 }
+
+// ---------------------------------------------------------------- the Challenge round
+
+// The most anchors a champion meets
+export const CHALLENGE_RUNGS = 3
+
+const has = (o, k) => !!o && Object.prototype.hasOwnProperty.call(o, k)
+
+/**
+ * The Challenge round a finished bracket offers its champion, or null. The
+ * champion must have no rating of the user's own (an anchor needs no
+ * measuring), and the user must have rated records of the bracket's kind,
+ * and for performers its gender, that did not play in it: up to
+ * CHALLENGE_RUNGS of them, spread over the user's stars like a bracket's
+ * anchors (own ratings first, scene averages filling), each above every
+ * anchor the champion already beat in the bracket, met lowest rated first
+ * so the highest rated comes last. Champions rounds have none.
+ * @param {object} M
+ * @param {Bracket} b  finished: b.result set
+ * @param {(p: object) => string|null} [genderOf]
+ * @returns {Challenge|null}
+ */
+export function challengeFor(M, b, genderOf = stashGender) {
+  const champ = b.result?.champion
+  const kind = b.kind
+  if (!champ || b.champions || has(b.anchors, champ)) return null
+  if (entrantRole(M, kind, champ) === 'anchor') return null
+  const played = new Set(b.seeds)
+  // a champion beat every anchor in its bracket, directly or through
+  // someone it beat
+  const floor = Math.max(-Infinity, ...Object.values(b.anchors || {}))
+  const pool =
+    kind === 'performer'
+      ? M.db.localPerformers
+          .filter(eligible)
+          .filter((p) => genderOf(p) === b.gender)
+          .map((p) => p.id)
+      : M.db.owned.filter((s) => !M.dontLearn.has(s.id)).map((s) => s.id)
+  const rating = new Map()
+  const own = []
+  const scene = []
+  for (const id of pool) {
+    if (played.has(id)) continue
+    const role = entrantRole(M, kind, id)
+    const r =
+      role === 'anchor'
+        ? stashRatingOf(M, kind, id)
+        : role === 'candidate' && kind === 'performer'
+          ? sceneAnchorRating(M, id)
+          : null
+    if (r == null || r <= floor) continue
+    rating.set(id, r)
+    ;(role === 'anchor' ? own : scene).push(id)
+  }
+  const strength = strengthOf(M, kind)
+  const value = (id) => rating.get(id)
+  const byRating = (x, y) => value(y) - value(x) || strength(y) - strength(x)
+  const spread = (list, k) =>
+    spreadPick(list.sort(byRating), value, k, linearTargets)
+  const kOwn = Math.min(own.length, CHALLENGE_RUNGS)
+  const sceneRungs = spread(scene, CHALLENGE_RUNGS - kOwn)
+  const rungs = [...spread(own, kOwn), ...sceneRungs].sort(byRating).reverse()
+  if (!rungs.length) return null
+  return {
+    rungs,
+    ratings: Object.fromEntries(rungs.map((id) => [id, value(id)])),
+    sceneRungs,
+    decisions: [],
+  }
+}
+
+/**
+ * Where a bracket's Challenge round stands, or null when it has none. The
+ * champion meets the anchors in order until one beats it.
+ * @param {Bracket} b
+ * @returns {{ rungs: string[], beaten: string[], lostTo: string|null,
+ *   current: string|null, started: boolean, done: boolean, won: boolean,
+ *   skipped: boolean }|null}  current: the anchor the champion meets now;
+ *   won: it beat every one
+ */
+export function challengeState(b) {
+  const c = b?.challenge
+  const champ = b?.result?.champion
+  if (!c || !champ) return null
+  const beaten = []
+  let lostTo = null
+  for (const [i, d] of c.decisions.entries()) {
+    if (i >= c.rungs.length) break
+    if (d.winner !== champ) {
+      lostTo = c.rungs[i]
+      break
+    }
+    beaten.push(c.rungs[i])
+  }
+  const current =
+    lostTo || beaten.length >= c.rungs.length ? null : c.rungs[beaten.length]
+  return {
+    rungs: c.rungs,
+    beaten,
+    lostTo,
+    current,
+    started: c.decisions.length > 0,
+    done: !current,
+    won: !lostTo && c.rungs.length > 0 && beaten.length === c.rungs.length,
+    skipped: !!c.skipped && !c.decisions.length,
+  }
+}
+
+// The champion beat every anchor its Challenge round put up
+export const challengeWon = (b) => !!challengeState(b)?.won
+
+// One Challenge round pick: the champion or the anchor it meets now.
+// against: the anchor on screen when the pick was made, so a second click
+// that lands after the next match showed is dropped. What the round
+// measures replaces a rating the user gave the champion by hand.
+export function challengePick(b, winner, against = null) {
+  const st = challengeState(b)
+  if (!st?.current || (against != null && against !== st.current)) return b
+  const champ = b.result.champion
+  if (winner !== champ && winner !== st.current) return b
+  const loser = winner === champ ? st.current : champ
+  return {
+    ...b,
+    championRating: null,
+    challenge: {
+      ...b.challenge,
+      skipped: false,
+      decisions: [...b.challenge.decisions, { winner, loser }],
+    },
+  }
+}
+
+export function challengeUndo(b) {
+  if (!b.challenge?.decisions.length) return b
+  return {
+    ...b,
+    challenge: {
+      ...b.challenge,
+      decisions: b.challenge.decisions.slice(0, -1),
+    },
+  }
+}
+
+// Skip: the user rates the champion by hand; skipped false offers the
+// round again
+export const skipChallenge = (b, skipped = true) =>
+  b.challenge ? { ...b, challenge: { ...b.challenge, skipped } } : b
 
 // ---------------------------------------------------------------- results across brackets
 
 const performerBrackets = (history) =>
   history.filter((b) => b.kind === 'performer' && b.result)
 
-// { [performerId]: { champion: n, finalist: n } }
+// { [performerId]: { champion: n, finalist: n, challenger: n } }:
+// challenger counts the Challenge rounds won (challengeWon)
 export function performerHonours(history) {
   const out = {}
   const bump = (id, k) => {
     if (!id) return
-    out[id] = out[id] || { champion: 0, finalist: 0 }
+    out[id] = out[id] || { champion: 0, finalist: 0, challenger: 0 }
     out[id][k]++
   }
   for (const b of performerBrackets(history)) {
     bump(b.result.champion, 'champion')
     bump(b.result.finalist, 'finalist')
+    if (challengeWon(b)) bump(b.result.champion, 'challenger')
   }
   return out
 }
@@ -630,15 +839,18 @@ export function fieldsFromHistory(history) {
 // A candidate's rating comes from the anchors around it in the tree: it
 // ranks above everyone it beat and everyone they beat, and below whoever
 // beat it and whoever beat them. Between two anchors it gets the midpoint
-// (to a quarter star); above only one, half a star more; below only one,
-// half a star less.
+// (to a quarter star); above only one, half a star more. Below only one
+// says too little: a loss to a favourite fits any rating under it, so it
+// sets nothing on its own.
 //
-// A candidate no anchor bounds steps down from the champion's rating, half
-// a star per round it fell short of the title (a finalist ½★ under, a
-// semifinalist 1★ under), and is marked provisional; first-round losers get
-// nothing. The champion's rating is an anchor's, or half a star above the
-// best anchor (it beat them all, directly or through someone it beat), or,
-// when no anchor played, the user's own: Apply asks for it.
+// The champion is measured by its Challenge round as well: between the
+// last anchor it beat and the one that beat it, or half a star above the
+// highest it beat. With no anchor below it (no anchor played and it lost
+// its first challenge, or it skipped the round) the user rates it: Apply
+// asks. A candidate no anchor places steps down from the champion's
+// rating, half a star per round it fell short of the title (a finalist ½★
+// under, a semifinalist 1★ under), never above half a star under an anchor
+// that beat it, and is marked provisional; first-round losers get nothing.
 //
 // Anchors are never written, those from scene ratings included, and the
 // preview names those apart: "Cleo Finch (3.8★ from your scene ratings)". A
@@ -710,8 +922,8 @@ function treeOrder(st) {
 
 /**
  * @returns {{ rows: RatingProposal[], askChampion: boolean }} askChampion:
- *   no anchor played and the champion is a candidate, so the user's rating
- *   of the champion sets the scale (b.championRating)
+ *   nothing places the champion from below and it is a candidate, so the
+ *   user's rating of the champion sets the scale (b.championRating)
  */
 export function ratingProposals(M, b) {
   const kind = b.kind
@@ -733,30 +945,48 @@ export function ratingProposals(M, b) {
         .filter((id) => present(id) && entrantRole(M, kind, id) === 'anchor')
         .map((id) => [id, stashRatingOf(M, kind, id)]),
     )
-  const isAnchor = (id) => Object.prototype.hasOwnProperty.call(anchors, id)
-  const anchored = Object.keys(anchors).length > 0
-  const pickAnchor = (ids, better) => {
+  const isAnchor = (id) => has(anchors, id)
+  // What measures: the bracket's anchors, and for the champion alone the
+  // anchors of its Challenge round
+  const cs = challengeState(b)
+  const ref = { ...(b.challenge?.ratings || {}), ...anchors }
+  const pickRef = (ids, better) => {
     let out = null
     for (const id of ids)
-      if (isAnchor(id) && (out == null || better(anchors[id], anchors[out])))
-        out = id
+      if (has(ref, id) && (out == null || better(ref[id], ref[out]))) out = id
     return out
   }
+  const lowOf = (id) =>
+    pickRef(
+      id === champ && cs ? [...beaten(id), ...cs.beaten] : beaten(id),
+      (x, y) => x > y,
+    )
+  const highOf = (id) =>
+    pickRef(
+      id === champ && cs?.lostTo ? [...above(id), cs.lostTo] : above(id),
+      (x, y) => x < y,
+    )
+  // Between two anchors, or half a star above the only one below
+  const measured = (lo, hi) =>
+    hi != null
+      ? clampRating(quarterStars((ref[lo] + ref[hi]) / 2))
+      : clampRating(ref[lo] + HALF)
   const name = (id) =>
     (kind === 'performer'
       ? M.db.performers.get(id)?.name
       : M.db.scenes.get(id)?.title) || 'Untitled'
-  const fromScenes = new Set(b.sceneAnchors || [])
+  const fromScenes = new Set([
+    ...(b.sceneAnchors || []),
+    ...(b.challenge?.sceneRungs || []),
+  ])
   const label = (id) =>
-    `${name(id)} (${fmtStars(anchors[id] / 20)}★${fromScenes.has(id) ? ' from your scene ratings' : ''})`
+    `${name(id)} (${fmtStars(ref[id] / 20)}★${fromScenes.has(id) ? ' from your scene ratings' : ''})`
   const champRole = present(champ) ? entrantRole(M, kind, champ) : null
+  const champLo = isAnchor(champ) ? null : lowOf(champ)
   // The top of the scale, for the steps
   let top = null
   if (isAnchor(champ)) top = anchors[champ]
-  else if (anchored)
-    top = clampRating(
-      anchors[pickAnchor(beaten(champ), (x, y) => x > y)] + HALF,
-    )
+  else if (champLo != null) top = measured(champLo, highOf(champ))
   else if (b.championRating != null) top = b.championRating
   const rows = []
   for (const id of b.seeds) {
@@ -767,23 +997,26 @@ export function ratingProposals(M, b) {
     let to = null
     let why = finishLabel(short)
     let provisional = false
-    const lo = pickAnchor(beaten(id), (x, y) => x > y)
-    const hi = pickAnchor(above(id), (x, y) => x < y)
-    if (id === champ && !anchored) {
-      to = b.championRating ?? null
-      why = 'Your rating for the champion'
-    } else if (lo != null && hi != null) {
-      to = clampRating(quarterStars((anchors[lo] + anchors[hi]) / 2))
-      why = `Above ${label(lo)}, below ${label(hi)}`
-    } else if (lo != null) {
-      to = clampRating(anchors[lo] + HALF)
-      why = `Above ${label(lo)}`
-    } else if (hi != null) {
-      to = clampRating(anchors[hi] - HALF)
-      why = `Below ${label(hi)}`
+    const lo = lowOf(id)
+    const hi = highOf(id)
+    if (lo != null) {
+      to = measured(lo, hi)
+      why =
+        hi != null
+          ? `Above ${label(lo)}, below ${label(hi)}`
+          : `Above ${label(lo)}`
+    } else if (id === champ) {
+      if (b.championRating != null) {
+        to = b.championRating
+        why = 'Your rating for the champion'
+      }
     } else if (top != null && outIn.get(id) > 0) {
       to = clampRating(top - short * HALF)
       why = `${finishLabel(short)}, ${starsText(short * HALF)}★ under the champion`
+      if (hi != null && ref[hi] - HALF < to) {
+        to = clampRating(ref[hi] - HALF)
+        why = `${finishLabel(short)}, below ${label(hi)}`
+      }
       provisional = true
     }
     const from = stashRatingOf(M, kind, id)
@@ -803,7 +1036,10 @@ export function ratingProposals(M, b) {
   return {
     rows,
     askChampion:
-      !anchored && b.championRating == null && champRole === 'candidate',
+      !isAnchor(champ) &&
+      champLo == null &&
+      b.championRating == null &&
+      champRole === 'candidate',
   }
 }
 

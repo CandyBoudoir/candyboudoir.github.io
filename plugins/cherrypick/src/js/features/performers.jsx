@@ -1,6 +1,7 @@
 // Cherry Pick on Stash's performer pages and cards: the For you line among
-// the performer's details, and a crown or medal on the photo of bracket
-// champions and finalists.
+// the performer's details, and a trophy, crown or medal on the photo of
+// bracket champions who won a Challenge round, other champions and
+// finalists.
 //
 // PerformerDetailsPanel renders one DetailGroup, a .detail-group holding
 // every detail item, so the line goes inside it, last, in Stash's own
@@ -48,14 +49,14 @@ function Honours({ performer }) {
   const mark = honoursMark(honoursOf(history)[performer.id])
   if (!mark) return null
   const { Icon } = components
-  const { faCrown, faMedal } = FontAwesomeSolid
-  const champion = mark.kind === 'champion'
+  const { faCrown, faMedal, faTrophy } = FontAwesomeSolid
+  const icon = { challenger: faTrophy || faCrown, champion: faCrown }[mark.kind]
   return (
     <div
-      className={`cherrypick-honours cherrypick-ui ${champion ? 'text-warning' : 'text-light'}`}
+      className={`cherrypick-honours cherrypick-ui ${icon ? 'text-warning' : 'text-light'} ${mark.kind}`}
       title={mark.title}
     >
-      <Icon icon={champion ? faCrown : faMedal} />
+      <Icon icon={icon || faMedal} />
       {mark.count ? <small>{mark.count}</small> : null}
     </div>
   )

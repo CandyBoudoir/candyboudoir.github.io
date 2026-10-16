@@ -189,7 +189,7 @@ test('performer pools: in the library, with a photo and a scene, of one gender',
   )
 })
 
-test('a performer bracket: half anchors, half candidates, each candidate meets an anchor first', () => {
+test('a performer bracket: candidates take every place they can, anchors fill the rest', () => {
   const ids = BR.performerPool(M, { gender: 'FEMALE', pool: 'library' })
   const role = (id) => BR.entrantRole(M, 'performer', id)
   const anchorsIn = ids.filter((id) => role(id) === 'anchor')
@@ -198,8 +198,25 @@ test('a performer bracket: half anchors, half candidates, each candidate meets a
   const candidatesIn = ids.filter(
     (id) => role(id) === 'candidate' && !byScenes(id),
   )
-  assert.ok(anchorsIn.length >= 8 && candidatesIn.length >= 6, 'the fixture')
+  assert.ok(anchorsIn.length >= 10 && candidatesIn.length === 6, 'the fixture')
   assert.ok(ids.some((id) => role(id) === 'candidate' && byScenes(id)))
+  const aff = (id) => M.performerAffinity(id)
+  const byAff = candidatesIn.slice().sort((x, y) => aff(y) - aff(x))
+  // Four places: candidates only, spread over the model's range
+  const small = BR.createBracket(M, {
+    kind: 'performer',
+    gender: 'FEMALE',
+    poolLabel: 'Female',
+    size: 4,
+    ids,
+    now: 7,
+  })
+  assert.equal(small.id, 'b' + (7).toString(36))
+  assert.deepEqual(small.anchors, {}, 'no rated performer plays')
+  assert.ok(small.seeds.every((id) => candidatesIn.includes(id)))
+  assert.ok(small.seeds.includes(byAff[0]), 'the strongest candidate')
+  assert.ok(small.seeds.includes(byAff.at(-1)), 'and the weakest')
+  // Eight places: all six candidates, and two anchors fill the rest
   const b = BR.createBracket(M, {
     kind: 'performer',
     gender: 'FEMALE',
@@ -208,52 +225,43 @@ test('a performer bracket: half anchors, half candidates, each candidate meets a
     ids,
     now: 7,
   })
-  assert.equal(b.id, 'b' + (7).toString(36))
   assert.equal(b.seeds.length, 8)
+  assert.ok(candidatesIn.every((id) => b.seeds.includes(id)))
   const anchors = Object.keys(b.anchors)
-  assert.equal(anchors.length, 4)
+  assert.equal(anchors.length, 2)
   for (const id of anchors) {
     assert.equal(role(id), 'anchor', 'rated by the user: scene averages wait')
     assert.equal(b.anchors[id], M.stashPerformerRating(id))
   }
   assert.deepEqual(b.sceneAnchors, [])
-  const candidates = b.seeds.filter((id) => !(id in b.anchors))
-  assert.ok(candidates.every((id) => candidatesIn.includes(id)))
-  // anchors span the user's scale; candidates the model's whole range
+  // the anchors span the user's scale
   const rating = (id) => M.stashPerformerRating(id)
   const ratings = anchorsIn.map(rating)
   assert.equal(Math.max(...anchors.map(rating)), Math.max(...ratings))
   assert.equal(Math.min(...anchors.map(rating)), Math.min(...ratings))
-  const aff = (id) => M.performerAffinity(id)
-  const byAff = candidatesIn.slice().sort((x, y) => aff(y) - aff(x))
-  assert.ok(candidates.includes(byAff[0]), 'the strongest candidate')
-  assert.ok(candidates.includes(byAff.at(-1)), 'and the weakest')
-  // every first-round match is an anchor against a candidate, by rank
+  // each anchor meets a candidate first, the top one the strongest
   const first = BR.bracketState(b).rounds[0]
   for (const m of first)
-    assert.notEqual(m.a in b.anchors, m.b in b.anchors, 'one of each')
+    assert.ok(!(m.a in b.anchors && m.b in b.anchors), 'never two anchors')
   const top = anchors.slice().sort((x, y) => rating(y) - rating(x))[0]
-  const strongest = candidates.slice().sort((x, y) => aff(y) - aff(x))[0]
   const topMatch = first.find((m) => m.a === top || m.b === top)
-  assert.ok([topMatch.a, topMatch.b].includes(strongest))
-  // the sides are drawn from `now`: the same each time, not always the anchor's
+  assert.ok([topMatch.a, topMatch.b].includes(byAff[0]))
+  // the sides are drawn from `now`: the same each time
   assert.deepEqual(
     BR.createBracket(M, { kind: 'performer', size: 8, ids, now: 7 }).slots,
     b.slots,
   )
-  assert.ok(first.some((m) => m.a in b.anchors))
-  assert.ok(first.some((m) => m.b in b.anchors))
   const done = playOut(b)
   assert.equal(done.decisions.length, 7)
   assert.ok(done.result.champion)
-  // At 16 the candidates run short: rated anchors fill the places they leave
+  // At 16 rated anchors fill the ten places the candidates leave
   const big = BR.createBracket(M, { kind: 'performer', size: 16, ids, now: 7 })
   assert.equal(Object.keys(big.anchors).length, 16 - candidatesIn.length)
   assert.ok(Object.keys(big.anchors).every((id) => role(id) === 'anchor'))
   assert.ok(candidatesIn.every((id) => big.seeds.includes(id)))
 })
 
-test('who plays: candidates and anchors share the slots, ranked records only fill', () => {
+test('who plays: candidates first, ranked records next, anchors fill what is left', () => {
   const ids = Array.from({ length: 30 }, (_, i) => 'p' + i)
   const fake = (ratings, ranked = new Set()) => ({
     db: { performers: new Map(ids.map((id) => [id, { local: {} }])) },
@@ -266,32 +274,93 @@ test('who plays: candidates and anchors share the slots, ranked records only fil
   const count = (r) => [r.anchors.length, r.candidates.length, r.ranked.length]
   assert.deepEqual(
     count(BR.composeEntrants(fake(rated(10)), 'performer', ids, 16)),
-    [8, 8, 0],
-  )
-  assert.deepEqual(
-    count(BR.composeEntrants(fake(rated(3)), 'performer', ids, 16)),
-    [3, 13, 0],
-    'few anchors: more candidates',
+    [0, 16, 0],
+    'enough candidates: no anchor plays',
   )
   assert.deepEqual(
     count(BR.composeEntrants(fake(rated(26)), 'performer', ids, 16)),
     [12, 4, 0],
-    'few candidates: more anchors',
+    'few candidates: anchors fill',
   )
   const ranked = new Set(ids.slice(10))
   assert.deepEqual(
     count(BR.composeEntrants(fake(rated(4), ranked), 'performer', ids, 16)),
-    [4, 6, 6],
-    'ranked fill what is left',
+    [0, 6, 10],
+    'ranked records before anchors',
   )
-  const r = BR.composeEntrants(fake(rated(20)), 'performer', ids, 16)
+  assert.deepEqual(
+    count(
+      BR.composeEntrants(
+        fake(rated(20), new Set(ids.slice(20, 26))),
+        'performer',
+        ids,
+        16,
+      ),
+    ),
+    [6, 4, 6],
+  )
+  const r = BR.composeEntrants(fake(rated(26)), 'performer', ids, 16)
   assert.deepEqual(
     r.anchors.map((id) => 100 - Number(id.slice(1)) * 3),
     r.anchors.map((id) => 100 - Number(id.slice(1)) * 3).sort((a, b) => b - a),
     'highest rated first',
   )
   assert.equal(r.anchors[0], 'p0', 'the top of the scale')
-  assert.equal(r.anchors.at(-1), 'p19', 'and the bottom')
+  assert.equal(r.anchors.at(-1), 'p25', 'and the bottom')
+})
+
+test('rotation: entrants of the last three brackets wait while others can play', () => {
+  const ids = Array.from({ length: 30 }, (_, i) => 'p' + i)
+  const fake = {
+    db: { performers: new Map(ids.map((id) => [id, { local: {} }])) },
+    ratingSource: () => null,
+    stashPerformerRating: () => null,
+    performerAffinity: (id) => -Number(id.slice(1)),
+  }
+  const pick = (recent) =>
+    BR.composeEntrants(fake, 'performer', ids, 16, recent).candidates
+  const some = new Set(ids.slice(0, 10))
+  assert.ok(
+    pick(some).every((id) => !some.has(id)),
+    '20 fresh fill all 16 places',
+  )
+  const most = new Set(ids.slice(0, 20))
+  const c = pick(most)
+  assert.equal(c.length, 16)
+  assert.equal(c.filter((id) => !most.has(id)).length, 10, 'every fresh one')
+  // who counts as recent: the last three finished brackets of the kind and
+  // gender, Champions rounds aside
+  const run = (id, gender, finishedAt, seeds, extra = {}) => ({
+    id,
+    kind: 'performer',
+    gender,
+    finishedAt,
+    seeds,
+    result: { champion: seeds[0] },
+    ...extra,
+  })
+  const history = [
+    run('1', 'FEMALE', '2026-10-01', ['a']),
+    run('2', 'FEMALE', '2026-10-02', ['b']),
+    run('3', 'MALE', '2026-10-03', ['m']),
+    run('4', 'FEMALE', '2026-10-04', ['c'], { champions: true }),
+    run('5', 'FEMALE', '2026-10-05', ['d']),
+    run('6', 'FEMALE', '2026-10-06', ['e']),
+    {
+      id: '7',
+      kind: 'clip',
+      finishedAt: '2026-10-07',
+      seeds: ['s'],
+      result: {},
+    },
+  ]
+  assert.equal(BR.RECENT_BRACKETS, 3)
+  assert.deepEqual(
+    [...BR.recentEntrants(history, 'performer', 'FEMALE')].sort(),
+    ['b', 'd', 'e'],
+  )
+  assert.deepEqual([...BR.recentEntrants(history, 'performer', 'MALE')], ['m'])
+  assert.deepEqual([...BR.recentEntrants(history, 'clip')], ['s'])
 })
 
 test('spreading: by rank keeps ties in order; linear spans the scale', () => {
@@ -377,8 +446,8 @@ const history = [
 
 test('honours, champions and the Champions round', () => {
   const h = BR.performerHonours(history)
-  assert.deepEqual(h.a, { champion: 2, finalist: 3 })
-  assert.deepEqual(h.e, { champion: 1, finalist: 0 })
+  assert.deepEqual(h.a, { champion: 2, finalist: 3, challenger: 0 })
+  assert.deepEqual(h.e, { champion: 1, finalist: 0, challenger: 0 })
   assert.equal(h.x, undefined, 'clip brackets are not performer honours')
   assert.deepEqual(
     BR.championsOf(history, 'FEMALE'),
@@ -488,26 +557,20 @@ test('Apply: each candidate rated from the anchors around it in the tree', () =>
   assert.equal(askChampion, false)
   const by = Object.fromEntries(rows.map((x) => [x.id, x]))
   const name = (k) => Mx.db.performers.get(ids[k]).name
-  assert.deepEqual(
-    Object.keys(by).sort(),
-    [ids.C1, ids.C2, ids.C3, ids.C4].sort(),
-    'anchors never',
-  )
+  // anchors never; C2 and C4 lost round one to an anchor, which fits any
+  // rating under it, so it sets nothing
+  assert.deepEqual(Object.keys(by).sort(), [ids.C1, ids.C3].sort())
   // above A1 (3★) and A2 (4★), below A4 (5★): between the closest two
   assert.equal(by[ids.C1].to, 90)
   assert.equal(
     by[ids.C1].why,
     `Above ${name('A2')} (4.0★), below ${name('A4')} (5.0★)`,
   )
-  // lost to A2, who lost to C1, who lost to A4: below A2
-  assert.equal(by[ids.C2].to, 70)
-  assert.equal(by[ids.C2].why, `Below ${name('A2')} (4.0★)`)
   assert.equal(by[ids.C3].to, 70, 'between 2★ and 5★')
-  assert.equal(by[ids.C4].to, 90, 'just below the 5★ that beat it')
   assert.ok(rows.every((x) => !x.provisional && x.from == null))
   assert.deepEqual(
     rows.map((x) => x.short),
-    [1, 2, 3, 3],
+    [1, 2],
     'best finish first',
   )
   // a midpoint off the half-star grid keeps its quarter
@@ -610,7 +673,10 @@ test('Apply: ranked records and those rated since are left out', () => {
     rows.find((x) => x.id === ids.C3),
     undefined,
   )
-  assert.equal(rows.length, 3)
+  assert.deepEqual(
+    rows.map((x) => x.id),
+    [ids.C1],
+  )
 })
 
 test('a provisional rating counts as a candidate until the user changes it', () => {
@@ -671,7 +737,7 @@ test('the provisional mark on write and on Undo', () => {
   )
 })
 
-test('clip brackets propose scene ratings the same way', () => {
+test('clip brackets play unrated scenes, and the champion sets the scale', () => {
   const watched = BR.watchedScenes(db).map((s) => s.id)
   const b = playOut(
     BR.createBracket(M, {
@@ -682,12 +748,31 @@ test('clip brackets propose scene ratings the same way', () => {
       now: 9,
     }),
   )
-  const { rows } = BR.ratingProposals(M, b)
-  assert.ok(rows.length > 0)
+  assert.deepEqual(b.anchors, {}, 'unrated scenes fill all 16 places')
+  for (const id of b.seeds)
+    assert.equal(BR.entrantRole(M, 'clip', id), 'candidate')
+  const asked = BR.ratingProposals(M, b)
+  assert.equal(asked.askChampion, true)
+  assert.deepEqual(asked.rows, [])
+  const { rows } = BR.ratingProposals(M, { ...b, championRating: 80 })
+  assert.equal(rows.length, 8, 'the champion and seven placed')
   for (const x of rows) {
     assert.equal(BR.entrantRole(M, 'clip', x.id), 'candidate')
     assert.ok(x.to >= 10 && x.to <= 100)
-    assert.ok(!(x.id in b.anchors))
+  }
+  // the Challenge round: three rated scenes that did not play, lowest first
+  const c = BR.challengeFor(M, b)
+  assert.equal(c.rungs.length, BR.CHALLENGE_RUNGS)
+  assert.deepEqual(c.sceneRungs, [])
+  const r = c.rungs.map((id) => c.ratings[id])
+  assert.deepEqual(
+    r,
+    r.slice().sort((x, y) => x - y),
+  )
+  for (const id of c.rungs) {
+    assert.ok(!b.seeds.includes(id))
+    assert.equal(BR.entrantRole(M, 'clip', id), 'anchor')
+    assert.equal(c.ratings[id], M.stashRating(db.scenes.get(id)))
   }
 })
 
@@ -880,16 +965,15 @@ test('pools: rated anchors first, scene-average anchors next, ranked records las
     {},
   )
   const ids = Object.keys(ORDER_PERFORMERS)
-  // Four anchor places: both rated ones, then the scene averages spread
-  // from the top (S1, 4.25★) to the bottom (S3, 1.75★)
+  // Four candidates and the ranked record, then three anchor places: both
+  // rated ones, then the top of the scene averages (S1, 4.25★)
   const c = BR.composeEntrants(M, 'performer', ids, 8)
-  assert.deepEqual(c.anchors, ['A1', 'S1', 'A2', 'S3'])
-  assert.deepEqual(c.ratings, { A1: 90, S1: 85, A2: 50, S3: 35 })
-  assert.deepEqual(c.sceneAnchors, ['S1', 'S3'])
   assert.deepEqual(c.candidates.slice().sort(), ['C1', 'C2', 'C3', 'C4'])
-  assert.deepEqual(c.ranked, [])
-  // Short of candidates: every scene-average anchor plays before the
-  // ranked record fills the last place
+  assert.deepEqual(c.ranked, ['R1'])
+  assert.deepEqual(c.anchors, ['A1', 'S1', 'A2'])
+  assert.deepEqual(c.ratings, { A1: 90, S1: 85, A2: 50 })
+  assert.deepEqual(c.sceneAnchors, ['S1'])
+  // Short of candidates: every anchor plays, rated ones and scene averages
   const few = BR.composeEntrants(
     M,
     'performer',
@@ -904,20 +988,26 @@ test('pools: rated anchors first, scene-average anchors next, ranked records las
     sceneLibrary({ ...ORDER_PERFORMERS, S2: 70, S3: 60, S4: 40 }, ORDER_SCENES),
   ).compute({})
   const full = BR.composeEntrants(rated, 'performer', ids, 8)
-  assert.deepEqual(full.anchors, ['A1', 'S2', 'S3', 'S4'])
+  assert.deepEqual(full.anchors, ['A1', 'S2', 'S4'])
   assert.deepEqual(full.sceneAnchors, [])
-  // The bracket keeps them, and each candidate meets the anchor of its rank
+  // The bracket keeps them, and each anchor meets a candidate or the ranked
+  // record: the top one the strongest, the bottom one the weakest
   const b = BR.createBracket(M, { kind: 'performer', size: 8, ids, now: 3 })
   assert.deepEqual(b.anchors, c.ratings)
-  assert.deepEqual(b.sceneAnchors, ['S1', 'S3'])
+  assert.deepEqual(b.sceneAnchors, ['S1'])
   const strength = (id) => M.performerAffinity(id)
-  const byRank = c.candidates.slice().sort((x, y) => strength(y) - strength(x))
-  for (const m of BR.bracketState(b).rounds[0]) {
-    const anchor = m.a in b.anchors ? m.a : m.b
-    const other = anchor === m.a ? m.b : m.a
-    assert.ok(!(other in b.anchors), 'an anchor against a candidate')
-    assert.equal(byRank.indexOf(other), c.anchors.indexOf(anchor))
+  const byRank = [...c.candidates, ...c.ranked].sort(
+    (x, y) => strength(y) - strength(x),
+  )
+  const opponent = (anchor) => {
+    const m = BR.bracketState(b).rounds[0].find(
+      (x) => x.a === anchor || x.b === anchor,
+    )
+    return m.a === anchor ? m.b : m.a
   }
+  for (const a of c.anchors) assert.ok(!(opponent(a) in b.anchors))
+  assert.equal(opponent('A1'), byRank[0])
+  assert.equal(opponent('A2'), byRank.at(-1))
 })
 
 // A bracket of 8 where no performer has a rating of their own: four
@@ -952,32 +1042,44 @@ function sceneAnchored(winner) {
 }
 
 test('Apply measures against scene-average anchors and never rates one', () => {
-  // Anchors beat candidates, and the higher anchor beats the lower
+  // A candidate beats an anchor under 3.25★ and loses to the others; the
+  // higher anchor beats the lower
   const { M, b, st } = sceneAnchored((x, y, anchors) => {
     if (x in anchors && y in anchors) return anchors[x] > anchors[y] ? x : y
-    return x in anchors ? x : y
+    if (x in anchors) return anchors[x] < 65 ? y : x
+    if (y in anchors) return anchors[y] < 65 ? x : y
+    return x
   })
   assert.deepEqual(b.anchors, { S1: 90, S2: 75, S3: 60, S4: 35 })
   assert.deepEqual(b.sceneAnchors, ['S1', 'S2', 'S3', 'S4'])
   assert.equal(b.result.champion, 'S1')
   const { rows, askChampion } = BR.ratingProposals(M, b)
   assert.equal(askChampion, false, 'an anchored bracket: no stars asked')
-  assert.deepEqual(rows.map((x) => x.id).sort(), ['C1', 'C2', 'C3', 'C4'])
-  // each candidate half a star under the anchor that beat it in round one
+  const by = Object.fromEntries(rows.map((x) => [x.id, x]))
   for (const m of st.rounds[0]) {
-    const anchor = m.winner
-    const x = rows.find((r) => r.id === (m.a === anchor ? m.b : m.a))
-    assert.equal(x.to, b.anchors[anchor] - 10)
-    assert.equal(
+    const anchor = m.a in b.anchors ? m.a : m.b
+    const other = anchor === m.a ? m.b : m.a
+    if (m.winner === anchor) {
+      // out in round one to an anchor: nothing
+      assert.equal(by[other], undefined)
+      continue
+    }
+    // above the anchor it beat, below the one that beat it next
+    const x = by[other]
+    assert.match(
       x.why,
-      `Below Performer ${anchor} (${fmtStars(b.anchors[anchor] / 20)}★ from your scene ratings)`,
+      new RegExp(
+        `^Above Performer ${anchor} \\(${fmtStars(b.anchors[anchor] / 20)}★ from your scene ratings\\), below Performer S[12] \\(\\d\\.\\d★ from your scene ratings\\)$`,
+      ),
     )
     assert.equal(x.from, null)
     assert.equal(x.provisional, false)
   }
-  const s2 = rows.find((r) => r.why.includes('Performer S2'))
-  assert.equal(s2.why, 'Below Performer S2 (3.8★ from your scene ratings)')
-  assert.equal(s2.to, 65)
+  assert.deepEqual(
+    rows.map((x) => x.to).sort(),
+    [65, 70],
+    '1.75★ to 4.5★, and 3★ to 3.75★: midpoints to the quarter star',
+  )
   // the anchors stay unrated in Stash, ready to anchor again
   for (const id of b.sceneAnchors)
     assert.equal(M.stashPerformerRating(id), null)
@@ -1001,4 +1103,196 @@ test('Apply: a candidate that beats scene-average anchors goes above them', () =
   }
   const top = rows.find((x) => x.id === champion)
   assert.equal(top.to, 100, 'half a star above the 4.5★ it beat')
+})
+
+// ---------------------------------------------------------------- the Challenge round
+
+// Four Female performers rated by hand (A 4.5★, B 3.5★, C 2.5★, D 1.5★)
+// and four unrated candidates N1 to N4, each in one unrated scene; extra
+// overrides or adds performers, and scenes adds rated scenes
+function challengeLibrary(extra = {}, scenes = []) {
+  const performers = {
+    A: 90,
+    B: 70,
+    C: 50,
+    D: 30,
+    N1: null,
+    N2: null,
+    N3: null,
+    N4: null,
+    ...extra,
+  }
+  return createEngine(
+    sceneLibrary(performers, [
+      ...Object.keys(performers).flatMap((id) => scenesOf(id, null)),
+      ...scenes,
+    ]),
+  ).compute({})
+}
+
+// A bracket of the given ids at size 4, played out with `winner(a, b)`
+function playedWith(M, ids, winner = (a) => a, extra = {}) {
+  let b = BR.createBracket(M, {
+    kind: 'performer',
+    gender: 'FEMALE',
+    poolLabel: 'Female',
+    size: 4,
+    ids,
+    now: 5,
+    ...extra,
+  })
+  let st = BR.bracketState(b)
+  while (st.current) {
+    b = BR.pick(b, winner(st.current.a, st.current.b, b.anchors))
+    st = BR.bracketState(b)
+  }
+  return { ...b, result: st.result, status: 'done', finishedAt: '2026-10-16' }
+}
+
+test('the Challenge round: three of your rated, lowest first, a loss ends it', () => {
+  const M = challengeLibrary()
+  const b = playedWith(M, ['N1', 'N2', 'N3', 'N4'])
+  assert.deepEqual(b.anchors, {}, 'only new faces played')
+  const champ = b.result.champion
+  const c = BR.challengeFor(M, b)
+  // spread over 1.5★ to 4.5★: the top, the nearest 3★ (B before C on a tie,
+  // higher rated first) and the bottom; met lowest first
+  assert.deepEqual(c.rungs, ['D', 'B', 'A'])
+  assert.deepEqual(c.ratings, { D: 30, B: 70, A: 90 })
+  assert.deepEqual(c.sceneRungs, [])
+  assert.deepEqual(c.decisions, [])
+  let x = { ...b, challenge: c }
+  let st = BR.challengeState(x)
+  assert.equal(st.current, 'D')
+  assert.equal(st.started, false)
+  assert.equal(st.done, false)
+  // the champion beats D; a late second click against D is dropped
+  x = BR.challengePick(x, champ, 'D')
+  assert.equal(BR.challengePick(x, champ, 'D'), x)
+  assert.equal(BR.challengePick(x, 'N4', 'B'), x, 'not in this match')
+  assert.deepEqual(BR.challengeState(x).beaten, ['D'])
+  // then loses to B: over
+  x = BR.challengePick(x, 'B', 'B')
+  st = BR.challengeState(x)
+  assert.equal(st.lostTo, 'B')
+  assert.equal(st.current, null)
+  assert.equal(st.done, true)
+  assert.equal(st.won, false)
+  // every challenge pick feeds the model
+  assert.deepEqual(BR.modelDecisions(x).slice(-2), [
+    { kind: 'performer', winner: champ, loser: 'D', bracket: b.id },
+    { kind: 'performer', winner: 'B', loser: champ, bracket: b.id },
+  ])
+  // Apply: the champion between D and B, the finalist ½★ under it
+  const { rows, askChampion } = BR.ratingProposals(M, x)
+  assert.equal(askChampion, false)
+  const by = Object.fromEntries(rows.map((r) => [r.id, r]))
+  assert.equal(by[champ].to, 50)
+  assert.equal(
+    by[champ].why,
+    'Above Performer D (1.5★), below Performer B (3.5★)',
+  )
+  assert.equal(by[champ].provisional, false)
+  assert.equal(by[b.result.finalist].to, 40)
+  assert.equal(by[b.result.finalist].provisional, true)
+  assert.equal(rows.length, 2, 'first-round losers get nothing')
+  // Undo, then beat B and A: every favorite beaten, half a star above A
+  x = BR.challengeUndo(x)
+  assert.equal(BR.challengeState(x).current, 'B')
+  x = BR.challengePick(x, champ, 'B')
+  x = BR.challengePick(x, champ, 'A')
+  st = BR.challengeState(x)
+  assert.equal(st.won, true)
+  assert.equal(BR.challengeWon(x), true)
+  const won = Object.fromEntries(
+    BR.ratingProposals(M, x).rows.map((r) => [r.id, r]),
+  )
+  assert.equal(won[champ].to, 100)
+  assert.equal(won[champ].why, 'Above Performer A (4.5★)')
+  assert.equal(won[b.result.finalist].to, 90)
+  assert.deepEqual(BR.performerHonours([x])[champ], {
+    champion: 1,
+    finalist: 0,
+    challenger: 1,
+  })
+  assert.equal(BR.performerHonours([b])[champ].challenger, 0)
+})
+
+test('the Challenge round: a first loss or a skip leaves the stars to the user', () => {
+  const M = challengeLibrary()
+  const b = playedWith(M, ['N1', 'N2', 'N3', 'N4'])
+  const champ = b.result.champion
+  let x = { ...b, challenge: BR.challengeFor(M, b) }
+  // before the round, as with no Challenge round, the user is asked
+  assert.equal(BR.ratingProposals(M, x).askChampion, true)
+  x = BR.challengePick(x, 'D', 'D')
+  assert.equal(BR.challengeState(x).lostTo, 'D')
+  const lost = BR.ratingProposals(M, x)
+  assert.equal(lost.askChampion, true, 'a loss alone places nothing')
+  assert.deepEqual(lost.rows, [])
+  const rated = BR.ratingProposals(M, { ...x, championRating: 40 })
+  assert.equal(rated.askChampion, false)
+  const top = rated.rows.find((r) => r.id === champ)
+  assert.equal(top.to, 40)
+  assert.equal(top.why, 'Your rating for the champion')
+  // a pick replaces a rating given by hand; Skip offers the stars instead
+  const given = { ...b, challenge: BR.challengeFor(M, b), championRating: 60 }
+  assert.equal(BR.challengePick(given, champ, 'D').championRating, null)
+  const skipped = BR.skipChallenge(given)
+  assert.equal(BR.challengeState(skipped).skipped, true)
+  assert.equal(
+    BR.challengeState(BR.skipChallenge(skipped, false)).skipped,
+    false,
+  )
+  assert.equal(
+    BR.challengeState(BR.challengePick(skipped, champ, 'D')).skipped,
+    false,
+    'playing after all',
+  )
+})
+
+test('who the champion challenges', () => {
+  const M = challengeLibrary()
+  const ids = ['N1', 'N2', 'N3', 'N4']
+  // an anchor that played: the champion beat it, so only those above it
+  const mixed = playedWith(M, ['N1', 'N2', 'N3', 'C'], (a, bb, anchors) =>
+    a in anchors ? bb : bb in anchors ? a : a,
+  )
+  assert.deepEqual(mixed.anchors, { C: 50 })
+  assert.ok(!(mixed.result.champion in mixed.anchors))
+  assert.deepEqual(BR.challengeFor(M, mixed).rungs, ['B', 'A'])
+  // a rated champion needs no measuring
+  const anchorWins = playedWith(M, ['N1', 'N2', 'N3', 'C'], (a, bb, anchors) =>
+    a in anchors ? a : bb in anchors ? bb : a,
+  )
+  assert.equal(anchorWins.result.champion, 'C')
+  assert.equal(BR.challengeFor(M, anchorWins), null)
+  // none for a Champions round, or with nothing rated of that gender
+  assert.equal(
+    BR.challengeFor(M, { ...playedWith(M, ids), champions: true }),
+    null,
+  )
+  assert.equal(
+    BR.challengeFor(M, { ...playedWith(M, ids), gender: 'MALE' }),
+    null,
+  )
+  // one rated performer: one rung; scene averages fill to three
+  const few = challengeLibrary(
+    { A: 90, B: null, C: null, D: null, S: null, T: null },
+    [...scenesOf('S', 80, 60), ...scenesOf('T', 40, 20)],
+  )
+  const c = BR.challengeFor(few, playedWith(few, ids))
+  assert.deepEqual(c.rungs, ['T', 'S', 'A'])
+  assert.deepEqual(c.ratings, { T: 30, S: 70, A: 90 })
+  assert.deepEqual(c.sceneRungs.slice().sort(), ['S', 'T'])
+  // the preview says where a scene-average rating came from
+  const x = BR.challengePick(
+    { ...playedWith(few, ids), challenge: c },
+    playedWith(few, ids).result.champion,
+    'T',
+  )
+  const won = BR.ratingProposals(few, x).rows.find(
+    (r) => r.id === x.result.champion,
+  )
+  assert.equal(won.why, 'Above Performer T (1.5★ from your scene ratings)')
 })

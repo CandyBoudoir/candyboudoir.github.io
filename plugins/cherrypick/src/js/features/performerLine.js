@@ -16,8 +16,9 @@ const theirOf = (gender) => pronoun({ local: { gender: gender ?? null } })
  * @param {object} input
  * @param {{ n: number, mean: number|null, watched: number }|null} [input.stats]
  *   how the user rates the performer's scenes (M.performerSceneStats)
- * @param {{ champion: number, finalist: number }|null} [input.honours]
- *   finished performer brackets they won or reached the final of
+ * @param {{ champion: number, finalist: number, challenger?: number }|null} [input.honours]
+ *   finished performer brackets they won or reached the final of, and the
+ *   Challenge rounds they won
  * @param {number} [input.offset]  how far bracket picks moved them, in stars
  *   (M.bt.bracketPerformerOffset: not other plugins' matches)
  * @param {string|null} [input.gender]  the performer's gender in Stash
@@ -44,6 +45,7 @@ export function performerLineParts({ stats, honours, offset = 0, gender }) {
         ? `${honours.finalist}× finalist`
         : 'Bracket finalist',
     )
+  if (honours?.challenger) parts.push('beat your favorites')
   if (Math.abs(offset) >= MOVING)
     parts.push(
       offset > 0 ? 'rising in your brackets' : 'slipping in your brackets',
@@ -83,12 +85,22 @@ export function performerLineFor(M, history, performer) {
 }
 
 /**
- * The mark on a performer's card: a crown for a champion (with the count
- * from two titles), else a medal for a finalist; null for neither.
- * @param {{ champion: number, finalist: number }|null|undefined} honours
- * @returns {{ kind: 'champion'|'finalist', count: number|null, title: string }|null}
+ * The mark on a performer's card: a trophy for a champion who won a
+ * Challenge round, a crown for any other champion (each with the count from
+ * two titles), else a medal for a finalist; null for none.
+ * @param {{ champion: number, finalist: number, challenger?: number }|null|undefined} honours
+ * @returns {{ kind: 'challenger'|'champion'|'finalist', count: number|null, title: string }|null}
  */
 export function honoursMark(honours) {
+  if (honours?.challenger)
+    return {
+      kind: 'challenger',
+      count: honours.champion > 1 ? honours.champion : null,
+      title:
+        honours.champion > 1
+          ? `Bracket champion ×${honours.champion} who beat your favorites`
+          : 'Bracket champion who beat your favorites',
+    }
   if (honours?.champion)
     return {
       kind: 'champion',
