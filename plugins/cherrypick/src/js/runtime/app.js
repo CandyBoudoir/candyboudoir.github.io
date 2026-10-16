@@ -45,6 +45,10 @@ export const store = createStore({
   stashdbLookups: {},
   // For you's row signals (tier 3)
   signals: { ...EMPTY_SIGNALS, ...(local.get(KEYS.signals) || {}) },
+  // A full read of the library, page by page ({ kind, n, of }), so For
+  // you's first build can say how far it is. It stays null when the page
+  // starts from the browser's copy of the library.
+  loadProgress: null,
   // session only
   watching: false,
   dialog: null,
@@ -181,7 +185,12 @@ async function reloadSettings() {
 let loading = null
 export function refreshLibrary(force = false) {
   if (loading) return loading
-  loading = loadLibrary({ run, cache, force })
+  loading = loadLibrary({
+    run,
+    cache,
+    force,
+    onProgress: (p) => store.set({ loadProgress: p }),
+  })
     .then((library) => {
       const cur = store.get().library
       if (!cur || library.syncedAt !== cur.syncedAt) store.set({ library })

@@ -29,17 +29,21 @@
   justify-content: flex-end;
 }
 
-/* For you's header line while Your score has too few ratings: the line
-   wraps, the row's title never does. Its two links take the line's size. */
-.cherrypick-for-you .recommendation-row-head {
+/* For you's header line while Your score has too few ratings, or during its
+   first build: the line wraps, the row's title never does. Its two links
+   take the line's size. */
+.cherrypick-for-you .recommendation-row-head,
+.cherrypick-for-you-building .recommendation-row-head {
   gap: 1rem;
 }
 
-.cherrypick-for-you .recommendation-row-head h2 {
+.cherrypick-for-you .recommendation-row-head h2,
+.cherrypick-for-you-building .recommendation-row-head h2 {
   white-space: nowrap;
 }
 
-.cherrypick-sharpen {
+.cherrypick-sharpen,
+.cherrypick-building {
   text-align: right;
 }
 

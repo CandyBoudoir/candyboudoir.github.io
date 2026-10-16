@@ -120,6 +120,25 @@ function SceneRow({ id, title, items, className, onOpen, extra }) {
 
 const { Link } = ReactRouterDOM
 
+const count = (n) => n.toLocaleString('en-US')
+
+// One line in For you's header during its first build in a browser: the
+// library read page by page, then the model fitting, which takes several
+// seconds on a library of tens of thousands of scenes. Later visits start
+// from the browser's copy and show the skeleton row alone.
+function BuildingLine() {
+  const progress = useAppState((s) => s.loadProgress)
+  const library = useAppState((s) => s.library)
+  if (!progress) return null
+  return (
+    <span className="text-muted small cherrypick-building">
+      {library
+        ? `Learning your taste from ${count(library.scenes.length)} scenes…`
+        : `Reading your library: ${count(progress.n)} of ${count(progress.of)} ${progress.kind}…`}
+    </span>
+  )
+}
+
 // One line in For you's header while Your score has too few ratings to
 // check itself: the two quickest ways to sharpen the row, each one click.
 // The ratings link opens your unrated scenes, most played first; a bracket
@@ -160,7 +179,13 @@ function CherryPickRows() {
   if (!v)
     return s.settings.showForYou ? (
       <div className="recommendations-container cherrypick-front">
-        <SceneRow id="foryou" title="For you" items={null} />
+        <SceneRow
+          id="foryou"
+          title="For you"
+          items={null}
+          className="cherrypick-for-you-building"
+          extra={<BuildingLine />}
+        />
       </div>
     ) : null
   return (

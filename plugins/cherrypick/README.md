@@ -39,6 +39,8 @@ Cards in Cherry Pick's rows have a menu with **Not interested**, which hides the
 
 Nothing appears while a scene plays. Once you press play, every Cherry Pick piece on the page steps out until you leave it.
 
+The first time a browser opens Stash with Cherry Pick, For you's header says how far it has got reading your library and learning your taste, about 6 seconds on a library of 25,000 scenes. Later visits start from the browser's copy and take about 2 to 3 seconds.
+
 | Scene page                                                                         | More like this                                                                               |
 | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | ![The likely rating beside the stars, with its reason](docs/screenshots/scene.png) | ![Barely played scenes like this one, under the player](docs/screenshots/more-like-this.png) |
