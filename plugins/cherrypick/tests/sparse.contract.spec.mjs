@@ -171,7 +171,8 @@ test("a bracket of performers you never rated asks for the champion's stars and 
   // The bracket the front page's test left paused reaches Stash only if
   // that test outlasts the plugin's write delay, and a paused bracket hides
   // the Bracket button. Start from none.
-  const config = { ...(await pluginConfig()) }
+  // Apply's preview, with Apply bracket ratings automatically off
+  const config = { ...(await pluginConfig()), autoApply: false }
   delete config.bracket
   await setPluginSettings(PLUGIN_ID, config)
   await page.goto('/performers')

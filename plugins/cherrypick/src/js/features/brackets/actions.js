@@ -187,18 +187,21 @@ export const openPerformerSetup = (listFilter) =>
 export const openClipSetup = (pool) =>
   openDialog({ view: VIEWS.clipSetup, ...pool })
 
-// size: the size picked in the sheet (16, 32 or 64); a pool under 16 plays
-// every scene, with byes
+// size: the size picked in the sheet (16, 32 or 64). The pool's rated
+// scenes wait for the Challenge round while 4 unrated ones can play
+// (clipEntrants); under 16 every scene that plays gets in, with byes.
 export function startClipBracket({ ids, poolLabel, origin, size }) {
   const { M, brackets } = store.get()
-  const slots = M ? BR.clipSize(ids.length, size) : null
+  const entrants = M ? BR.clipEntrants(M, ids) : []
+  const slots = M ? BR.clipSize(entrants.length, size) : null
   if (!slots) return false
   begin(
     BR.createBracket(M, {
       kind: 'clip',
       poolLabel,
       size: slots,
-      ids,
+      ids: entrants,
+      pool: ids,
       origin: origin || null,
       recent: BR.recentEntrants(brackets.history, 'clip'),
     }),
@@ -451,6 +454,21 @@ const patchRated = (kind, patches) =>
   kind === 'performer'
     ? patchLibraryPerformers(patches)
     : patchLibraryScenes(patches)
+
+// Apply bracket ratings automatically (the autoApply setting): every rating
+// a finished bracket proposes, written once its champion screen is
+// dismissed (features/brackets/index.jsx), once per bracket. The batch lands
+// with the others, so Cherry Pick's page can undo it.
+export async function autoApplyBracket(id) {
+  const s = store.get()
+  const b = s.brackets.history.find((x) => x.id === id)
+  if (!b || b.autoApplied || !s.M || !s.settings.autoApply) return
+  updateFinished(id, (x) => ({ ...x, autoApplied: true }))
+  const changes = BR.ratingProposals(s.M, b)
+    .rows.filter((x) => !x.skip && x.to != null)
+    .map(({ id: x, to, provisional }) => ({ id: x, to, provisional }))
+  if (changes.length) await applyRatingChanges(b, changes)
+}
 
 // The champion's rating the user gave on the champion screen, when no
 // anchor played: the scale the rest step down from. Apply writes it with

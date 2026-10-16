@@ -9,6 +9,8 @@ import {
   PRIME_MIN_SHARED,
   primedIds,
   rankingPlugins,
+  ratingManagers,
+  RESTASH_MIRROR,
 } from '../../src/js/model/rankings.js'
 import { FIELD_PREFIX } from '../../src/js/name.js'
 
@@ -270,4 +272,46 @@ test('rating sources: Xenith is elo, a Restash mirror is mirror, and neither cou
   assert.equal(by.mine, null)
   assert.equal(by.unrated, null)
   for (const r of primed(30)) assert.equal(by[r.id], 'primed', r.id)
+})
+
+test('who manages Stash ratings: the ranking plugins, and Restash with its mirror on', () => {
+  const p = (id, enabled = true, name = id) => ({ id, name, enabled })
+  assert.equal(RESTASH_MIRROR, 'mirrorToRating100')
+  const on = { restash: { [RESTASH_MIRROR]: true } }
+  assert.deepEqual(ratingManagers([p('xenith', true, 'Xenith')], {}), [
+    'Xenith',
+  ])
+  assert.deepEqual(ratingManagers([p('restash', true, 'Restash')], on), [
+    'Restash',
+  ])
+  assert.deepEqual(
+    ratingManagers([p('restash', true, 'Restash')], {
+      restash: { [RESTASH_MIRROR]: 'true' },
+    }),
+    ['Restash'],
+    'a setting Stash returns as text',
+  )
+  assert.deepEqual(
+    ratingManagers([p('restash', true, 'Restash')], {
+      restash: { [RESTASH_MIRROR]: false },
+    }),
+    [],
+    'mirror off: its score stays in its own fields',
+  )
+  assert.deepEqual(
+    ratingManagers([p('restash', true, 'Restash')], {}),
+    [],
+    'mirror never set',
+  )
+  assert.deepEqual(
+    ratingManagers([p('restash', false, 'Restash')], on),
+    [],
+    'disabled',
+  )
+  assert.deepEqual(
+    ratingManagers([p('hotornot', false), p('stash-curator', true)], on),
+    [],
+    'Curator writes no rating',
+  )
+  assert.deepEqual(ratingManagers(null, null), [])
 })

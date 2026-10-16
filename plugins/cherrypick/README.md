@@ -55,17 +55,19 @@ Your score needs 10 rated scenes before it can check itself. Until then, For you
 
 ### Brackets
 
-Bracket on the Performers list starts a 16-performer, single-elimination bracket in one click, from the performers in your library with a photo and a scene, of your library's largest gender or the one the list is filtered to. Options picks the gender, 16, 32 or 64, and the pool (your library, favorites, or the list's current filter). When a gender's pool is short, Set genders lets you set missing genders in Stash with a tap; Cherry Pick never guesses one. Bracket on the Scenes list, or "Bracket her scenes" on a performer page, does the same with scenes you have watched.
+Bracket on the Performers list starts a 16-performer, single-elimination bracket in one click, from the performers in your library with a photo and a scene, of your library's largest gender or the one the list is filtered to. Options picks the gender, 16, 32 or 64, and the pool (your library, favorites, or the list's current filter). When a gender's pool is short, Set genders lets you set missing genders in Stash with a tap; Cherry Pick never guesses one. Bracket on the Scenes list, or "Bracket her scenes" on a performer page, does the same with scenes you have watched. Scenes you have rated sit out while four unrated ones can play, and a pool under 16 plays every unrated scene, with byes.
 
 Pick with a click, a tap or the arrow keys: U undoes, Esc pauses, and a paused bracket waits for you, even after a reload. Every pick teaches the model. When a performer bracket ends, the champion, finalist, semifinalists and quarterfinalists get three custom fields on their Stash record (`cherrypick_titles`, `cherrypick_best_finish`, `cherrypick_last_bracket`), which Stash shows on the performer page and can filter on. Four different champions of one gender unlock a Champions round.
 
 A bracket's job is to add ratings for Cherry Pick to learn from and to turn up performers and scenes you don't know well yet. Its places go to the ones you haven't rated, picked across the range of what Cherry Pick expects you to think of them. People rate their favorites, and a rated favorite would win its way to most finals, so the ones you have rated play only when there aren't enough unrated ones to fill the bracket; each then meets an unrated one in the first round. Performers and scenes from your last three brackets of the same kind (and gender) sit out while others can take their places. No card shows a rating, a seed or a reason drawn from your ratings, so your earlier ratings don't steer your picks.
 
-When the champion has no rating of yours, the champion screen offers a Challenge round. The champion meets up to three performers or scenes you have rated that didn't play in the bracket (of the same gender, for performers), picked across your stars and met lowest rated first, so your highest rated comes last. A loss ends the round. A champion that beats every one gets a trophy in place of the crown on its performer card, "beat your favorites" in its For you line and a mark in the Hall of Fame. Rate them myself skips the round.
+When the champion has no rating of yours, the champion screen offers a Challenge round. The champion meets up to three performers or scenes you have rated that didn't play in the bracket (of the same gender, for performers), the ones from the list the bracket came from first, picked across your stars and met lowest rated first, so your highest rated comes last. A loss ends the round. A champion that beats every one gets a trophy in place of the crown on its performer card, "beat your favorites" in its For you line and a mark in the Hall of Fame. Rate them myself skips the round.
 
 In a performer bracket, a performer you haven't rated who is in two or more scenes you have rated counts as rated, at the average of those scene ratings: two scenes at 4★ and 3.5★ make 3.75★. Your performer brackets then have ratings to measure against when you rate scenes and leave performers unrated. Performers you rated yourself come first, in a bracket's places and in the Challenge round, and performers counted from their scenes fill what is left. Only your own scene ratings count, so ratings Ascension, HotOrNot, Xenith, Restash or Ascension's Prime set, provisional ratings and scenes marked Don't learn from this are left out.
 
 "Apply to my ratings" then offers a Stash rating for each unrated one. The champion's comes from where its Challenge round stopped: above your 2.5★ and below your 3.5★ gives 3★, and beating your 5★ gives 5★. The others get half a star less than the champion for each round they fell short of the title, and first-round losers get none. A rated performer or scene that played in the bracket places the ones around it the same way: above your 4★ and below your 4.5★ gives 4.25★. A loss to one says only that the loser rates lower, so a loss alone sets no rating. When nothing places the champion (it lost its first challenge, you skipped the round, or you have nothing rated to challenge), Cherry Pick asks you to rate the champion, starting from no stars. Ratings stepped down from the champion's carry a `cherrypick_provisional` custom field, so a later bracket can correct them; once you change one yourself, it is yours. Ratings you gave stay as they are. A performer counted from their scenes stays unrated in Stash and counts again in the next bracket, and the preview names where that rating came from: "Cleo Finch (4.0★ from your scene ratings)". Apply shows a preview and has Undo, and changes nothing unless you ask.
+
+With Apply bracket ratings automatically on, under Settings > Plugins, the champion screen has no Apply button: closing it sets those ratings, and says how many first. Cherry Pick's page lists each batch with Undo. The switch starts on, and off while Ascension, HotOrNot, Xenith or Restash's mirror writes your ratings, since their rankings would take up every rating without a preview. It follows those plugins until you set it yourself.
 
 | Playing                                                                   | The champion                                                                       |
 | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
@@ -93,24 +95,25 @@ Bracket on a list filtered by Curator Appeal or Curator affinity leaves that cri
 
 ## Settings
 
-Settings > Plugins > Cherry Pick switches each piece on or off. All start on except Relative badge style.
+Settings > Plugins > Cherry Pick switches each piece on or off. All start on except Relative badge style, and Apply bracket ratings automatically starts off beside a plugin that writes your ratings.
 
 ![Cherry Pick's switches under Settings > Plugins](docs/screenshots/settings.png)
 
-| Setting                                           | Effect                                                                                      |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| For you row                                       | The first row on the front page.                                                            |
-| Rows that follow your watching                    | "More with ..." and "Back to ..." after For you.                                            |
-| Hall of Fame row                                  | Your bracket champions on the front page.                                                   |
-| More like this                                    | The rows under the player on scene pages.                                                   |
-| Show scenes you don't have                        | StashDB scenes in More like this and on performer pages.                                    |
-| Score badges on cards                             | Your score in the rating corner of scenes you haven't rated. See With Stash Curator above.  |
-| Your score on scene pages                         | "likely 4★ for you" beside the stars.                                                       |
-| Crowns and medals on performer cards              | Bracket champions and finalists.                                                            |
-| For you line in performer details                 | How you rate their scenes and how they do in your brackets.                                 |
-| Relative badge style                              | Shows where a scene ranks among your unrated scenes ("Top 10%") instead of a likely rating. |
-| Tags to keep out of my picks                      | Comma-separated tag names. Scenes with any of them never appear in Cherry Pick's rows.      |
-| Learn from Ascension, HotOrNot and Xenith matches | Each match those plugins recorded counts as half a bracket pick.                            |
+| Setting                                           | Effect                                                                                                                                     |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| For you row                                       | The first row on the front page.                                                                                                           |
+| Rows that follow your watching                    | "More with ..." and "Back to ..." after For you.                                                                                           |
+| Hall of Fame row                                  | Your bracket champions on the front page.                                                                                                  |
+| More like this                                    | The rows under the player on scene pages.                                                                                                  |
+| Show scenes you don't have                        | StashDB scenes in More like this and on performer pages.                                                                                   |
+| Score badges on cards                             | Your score in the rating corner of scenes you haven't rated. See With Stash Curator above.                                                 |
+| Your score on scene pages                         | "likely 4★ for you" beside the stars.                                                                                                      |
+| Crowns and medals on performer cards              | Bracket champions and finalists.                                                                                                           |
+| For you line in performer details                 | How you rate their scenes and how they do in your brackets.                                                                                |
+| Relative badge style                              | Shows where a scene ranks among your unrated scenes ("Top 10%") instead of a likely rating.                                                |
+| Tags to keep out of my picks                      | Comma-separated tag names. Scenes with any of them never appear in Cherry Pick's rows.                                                     |
+| Learn from Ascension, HotOrNot and Xenith matches | Each match those plugins recorded counts as half a bracket pick.                                                                           |
+| Apply bracket ratings automatically               | Closing a bracket's champion screen sets the ratings it found, with Undo on Cherry Pick's page. Off, Apply to my ratings shows them first. |
 
 ## Where your data lives
 
@@ -118,7 +121,7 @@ Cherry Pick runs in Stash's web interface and keeps its data in your Stash:
 
 - **Stash's plugin configuration** (`config.yml`): the settings above, the Hall of Fame, a bracket in progress, Not interested, Don't learn, applied ratings, whether you turned StashDB off and your answer about Your score beside Stash Curator. A few kilobytes.
 - **Custom fields**: the three bracket fields above on performers, written once when a bracket ends, and `cherrypick_provisional` on performers and scenes whose rating Apply set from the champion's.
-- **Your Stash ratings**: only when you choose Apply to my ratings, never on a record you rated yourself, another plugin ranks or whose rating Restash mirrors, and Undo puts them back.
+- **Your Stash ratings**: only through Apply to my ratings, or when you close a bracket's champion screen with Apply bracket ratings automatically on; never on a record you rated yourself, another plugin ranks or whose rating Restash mirrors; and Undo puts them back.
 
 Your browser keeps only what Cherry Pick can rebuild from Stash: a copy of your library for a fast start, the taste model, the StashDB cache and which For you cards you opened. A new browser rebuilds them.
 

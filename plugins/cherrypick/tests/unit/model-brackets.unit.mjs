@@ -1296,3 +1296,62 @@ test('who the champion challenges', () => {
   )
   assert.equal(won.why, 'Above Performer T (1.5★ from your scene ratings)')
 })
+
+test('clip brackets: rated scenes wait while four unrated ones can play', () => {
+  const watched = BR.watchedScenes(db).map((s) => s.id)
+  const role = (id) => BR.entrantRole(M, 'clip', id)
+  const unrated = watched.filter((id) => role(id) !== 'anchor')
+  const rated = watched.filter((id) => role(id) === 'anchor')
+  assert.deepEqual(BR.clipEntrants(M, watched), unrated)
+  // seven of them and three rated: the seven play, with one bye
+  const pool = [...unrated.slice(0, 7), ...rated.slice(0, 3)]
+  const plays = BR.clipEntrants(M, pool)
+  assert.deepEqual(plays, unrated.slice(0, 7))
+  assert.equal(BR.clipSize(plays.length), 8)
+  const b = BR.createBracket(M, {
+    kind: 'clip',
+    poolLabel: 'Hers',
+    size: BR.clipSize(plays.length),
+    ids: plays,
+    pool,
+    now: 4,
+  })
+  assert.deepEqual(b.anchors, {})
+  assert.equal(b.slots.filter((x) => x == null).length, 1, 'one bye')
+  assert.deepEqual(b.waiting.slice().sort(), rated.slice(0, 3).sort())
+  // fewer than four unrated: the whole pool plays, as before
+  const few = [...unrated.slice(0, 3), ...rated.slice(0, 5)]
+  assert.deepEqual(BR.clipEntrants(M, few), few)
+  // the champion meets the pool's rated scenes first
+  const done = playOut(b)
+  const c = BR.challengeFor(M, done)
+  assert.deepEqual(c.rungs.slice().sort(), rated.slice(0, 3).sort())
+})
+
+test('the Challenge round puts up the rated ones its pool held back, then the library', () => {
+  const M = challengeLibrary({ E: 80 })
+  // A filtered pool: four candidates and C and D, rated; A, B and E are
+  // rated but outside it
+  const pool = ['N1', 'N2', 'N3', 'N4', 'C', 'D']
+  const b = playedWith(M, ['N1', 'N2', 'N3', 'N4'], (a) => a, { pool })
+  assert.deepEqual(b.waiting, ['C', 'D'])
+  const c = BR.challengeFor(M, b)
+  // C and D first, then the library's top for the third place
+  assert.deepEqual(c.rungs, ['D', 'C', 'A'])
+  assert.deepEqual(c.ratings, { D: 30, C: 50, A: 90 })
+  // a bracket from before the waiting list: the library alone
+  const old = { ...b }
+  delete old.waiting
+  assert.deepEqual(BR.challengeFor(M, old).rungs, ['D', 'B', 'A'])
+  // Champions rounds keep none
+  assert.deepEqual(
+    BR.createBracket(M, {
+      kind: 'performer',
+      size: 4,
+      ids: ['N1', 'N2', 'N3', 'N4'],
+      pool,
+      champions: true,
+    }).waiting,
+    [],
+  )
+})

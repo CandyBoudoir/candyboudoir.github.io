@@ -19,7 +19,8 @@ import {
   toConfig,
 } from '../storage/tier1.js'
 import { cache, KEYS, local } from '../storage/tier3.js'
-import { SETTING_KEYS } from '../storage/settings.js'
+import { autoApplyToWrite, SETTING_KEYS } from '../storage/settings.js'
+import { ratingManagers } from '../model/rankings.js'
 import { EMPTY_SIGNALS } from '../model/foryou.js'
 import { isStashdbEndpoint } from '../stashdb/queries.js'
 
@@ -170,10 +171,39 @@ async function loadConfig() {
     await tier1.save(toConfig(store.get()), Object.keys(toConfig(store.get())))
     store.set({ notice: { kind: 'restored', restored } })
   }
+  // Apply bracket ratings automatically starts on unless another plugin
+  // manages Stash's ratings, and follows that rule until the user sets it
+  const auto = await autoApplyNow(map, configuration.plugins)
+  if (auto != null)
+    store.set((s) => ({
+      settings: { ...s.settings, autoApply: auto },
+      autoApplyDefault: auto,
+    }))
   // Stash shows a setting nobody has touched as off, and its first click
   // would turn it on. Writing the defaults once makes its switches match.
   const missing = SETTING_KEYS.filter((k) => map?.[k] == null)
-  if (missing.length) await tier1.save(toConfig(store.get()), missing)
+  const moved = auto != null && map?.autoApply != null ? ['autoApply'] : []
+  const keys = [
+    ...missing,
+    ...moved,
+    ...(auto != null ? ['autoApplyDefault'] : []),
+  ]
+  if (keys.length) await tier1.save(toConfig(store.get()), keys, moved)
+}
+
+// The value to write for autoApply, or null to leave it (storage/settings.js)
+async function autoApplyNow(map, configs) {
+  try {
+    const { plugins } = await run(Q.PLUGINS)
+    return autoApplyToWrite({
+      value: map?.autoApply,
+      wrote: store.get().autoApplyDefault ?? null,
+      managed: ratingManagers(plugins, configs).length > 0,
+    })
+  } catch (e) {
+    reportError(e)
+    return null
+  }
 }
 
 // Settings changed on Stash's own page: read them again.

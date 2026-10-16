@@ -299,6 +299,9 @@ function SceneOps({ where, desc, pathname }) {
   const { ids, error } = useListScenes(where, desc, M)
   const n = ids ? ids.length : null
   const ok = n != null && n >= BR.MIN_CLIP_POOL
+  // what one click plays: the unrated ones, when 4 of them can play
+  const plays = ids && M ? BR.clipEntrants(M, ids).length : n
+  const unrated = plays != null && plays < n ? ' unrated' : ''
   let pool
   let label
   let title
@@ -320,7 +323,7 @@ function SceneOps({ where, desc, pathname }) {
     title = error
       ? failedTitle(error)
       : ok
-        ? `A bracket of ${BR.clipPoolPhrase(n)} scenes of ${her} you've watched`
+        ? `A bracket of ${BR.clipPoolPhrase(plays)}${unrated} scenes of ${her} you've watched`
         : `Needs ${BR.MIN_CLIP_POOL} watched scenes; you've watched ${n}`
   } else {
     pool = {
@@ -340,7 +343,7 @@ function SceneOps({ where, desc, pathname }) {
         : n == null
           ? undefined
           : ok
-            ? `Bracket ${BR.clipPoolPhrase(n)} watched scenes in this list`
+            ? `Bracket ${BR.clipPoolPhrase(plays)}${unrated} watched scenes in this list`
             : `Needs ${BR.MIN_CLIP_POOL} watched scenes in this list`
   }
   const herTab = where.place === 'performer-scenes'

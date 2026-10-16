@@ -10,6 +10,7 @@ import {
   demoCandidates,
   gql,
   pickCandidate,
+  setAutoApply,
   setUpCherryPick,
   tearDownCherryPick,
 } from './stash.mjs'
@@ -62,6 +63,7 @@ test('one click plays a 16-performer bracket to its champion', async ({
 test('an anchored bracket hides ratings while you pick and rates only the unrated', async ({
   page,
 }) => {
+  await setAutoApply(false)
   await page.goto('/performers')
   const bracket = visible(page.locator('.cherrypick-bracket-button'))
   await expect(bracket).toBeVisible({ timeout: 20_000 })
@@ -146,6 +148,7 @@ test('performers rated only through their scenes anchor a bracket, and Apply nev
   page,
 }) => {
   // Every demo performer unrated; their scenes keep their ratings
+  await setAutoApply(false)
   const ids = Object.values(demo.performers)
   const before = await performerRatings(ids)
   for (const id of ids) await setPerformerRating(id, null)
@@ -266,6 +269,7 @@ test('a bracket of unrated performers, then its champion takes on your favorites
   // bracket plays only unrated performers, and the three wait for its
   // champion, lowest rated first
   const favorites = { 'Edie Flint': 20, 'Hana Ridge': 70, 'Bea Lark': 100 }
+  await setAutoApply(false)
   const ids = Object.values(demo.performers)
   const sceneIds = Object.values(demo.scenes)
   const before = await performerRatings(ids)
@@ -364,6 +368,101 @@ test('a bracket of unrated performers, then its champion takes on your favorites
     for (const [id, r] of Object.entries(scenesBefore))
       await setSceneRating(id, r)
   }
+})
+
+test('with auto-apply on, closing the champion screen sets its ratings, and Undo puts them back', async ({
+  page,
+}) => {
+  await setAutoApply(true)
+  const ids = Object.values(demo.performers)
+  const before = await performerRatings(ids)
+  const changed = async () => {
+    const now = await performerRatings(ids)
+    return ids.filter((id) => now[id] !== before[id]).length
+  }
+  await page.goto('/performers')
+  const bracket = visible(page.locator('.cherrypick-bracket-button'))
+  await expect(bracket).toBeVisible({ timeout: 20_000 })
+  await bracket.click()
+  const play = page.locator('.cherrypick-play-modal')
+  await expect(play).toContainText('16 performers')
+  const candidates = demoCandidates()
+  for (let i = 0; i < 15; i++) {
+    await pickCandidate(page, play, candidates)
+    await page.waitForTimeout(150)
+  }
+  const result = page.locator('.cherrypick-result-modal')
+  await expect(result.locator('.cherrypick-champ-name')).not.toBeEmpty()
+  // no Apply button: the screen says what closing it sets
+  await expect(result.locator('.cherrypick-apply-open')).toHaveCount(0)
+  const note = result.locator('.cherrypick-auto-apply')
+  await expect(note).toContainText(
+    /^Closing this sets \d+ performer ratings? in Stash\. You can undo (it|them) on Cherry Pick's page\.$/,
+  )
+  const n = Number((await note.innerText()).match(/sets (\d+)/)[1])
+  expect(n).toBeGreaterThan(0)
+  expect(await changed()).toBe(0)
+  await result.getByRole('button', { name: 'Done' }).click()
+  await expect(result).toBeHidden()
+  await expect.poll(changed).toBe(n)
+
+  // Cherry Pick's page lists the batch, with Undo
+  await visible(page.locator('a.cherrypick-nav-icon')).click()
+  await expect(page.locator('#your-score')).toContainText(
+    'within half a star',
+    { timeout: 20_000 },
+  )
+  const batches = page.locator('.cherrypick-applied-batches')
+  await expect(batches).toContainText(
+    `Applied ${n} performer ${n === 1 ? 'rating' : 'ratings'}`,
+  )
+  await batches.getByRole('button', { name: 'Undo' }).first().click()
+  await expect.poll(changed).toBe(0)
+})
+
+test('a scene bracket plays the unrated scenes and keeps the rated ones for the Challenge round', async ({
+  page,
+}) => {
+  await setAutoApply(false)
+  await page.goto('/scenes')
+  const options = visible(page.locator('.cherrypick-options-link'))
+  await expect(options).toBeEnabled({ timeout: 20_000 })
+  await options.click()
+  const sheet = page.locator('.cherrypick-clip-dialog')
+  await expect(sheet.locator('.cherrypick-new-faces')).toContainText(
+    /^\d+ scenes you've rated sit out, and the champion meets up to 3 of them in a Challenge round\.$/,
+  )
+  await sheet.locator('.cherrypick-start').click()
+  const play = page.locator('.cherrypick-play-modal')
+  // no rated scene plays (the shared library's clips are rated too)
+  const { findScenes } = await gql(
+    '{ findScenes(filter: { per_page: -1 }) { scenes { title rating100 } } }',
+  )
+  const rated = new Set(
+    findScenes.scenes.filter((s) => s.rating100 != null).map((s) => s.title),
+  )
+  let picks = 0
+  while (picks < 64 && (await play.isVisible())) {
+    await expect(play.locator('.cherrypick-contender')).toHaveCount(2)
+    for (const title of await contenders(play))
+      expect(rated.has(title), title).toBe(false)
+    await page.keyboard.press('ArrowLeft')
+    await page.waitForTimeout(150)
+    picks++
+  }
+  const result = page.locator('.cherrypick-result-modal')
+  await expect(result.locator('.cherrypick-challenge')).toContainText(
+    "3 of the scenes you've rated wait, lowest rated first",
+  )
+  await result.locator('.cherrypick-challenge-start').click()
+  const ch = page.locator('.cherrypick-challenge-modal')
+  await expect(ch).toContainText('Favorite 1 of 3')
+  const rung = (await contenders(ch))[1]
+  expect(rated.has(rung), rung).toBe(true)
+  await page.keyboard.press('ArrowRight')
+  await expect(result.locator('.cherrypick-challenge-outcome')).toContainText(
+    `lost to ${rung}.`,
+  )
 })
 
 test('a clip bracket pauses and resumes after a reload', async ({ page }) => {

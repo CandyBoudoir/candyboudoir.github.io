@@ -434,6 +434,23 @@ for (const [key, side] of Object.entries(SIDE)) {
       await tearDownCherryPick()
     })
 
+    test(`${side.name} writes Stash's ratings, so Apply bracket ratings automatically starts off`, async ({
+      page,
+    }) => {
+      const config = await pluginConfig()
+      await setPluginSettings(PLUGIN_ID, {})
+      try {
+        await page.goto('/performers')
+        await expect
+          .poll(async () => (await pluginConfig())?.autoApply, {
+            timeout: 20_000,
+          })
+          .toBe(false)
+      } finally {
+        await setPluginSettings(PLUGIN_ID, config ?? {})
+      }
+    })
+
     test('both plugins render on the pages they share, apart and error-free', async ({
       page,
     }) => {
@@ -1132,6 +1149,11 @@ test.describe('beside Restash', () => {
         learning(learned),
         { timeout: 20_000 },
       )
+      // with its mirror on, Restash writes Stash's ratings, so Apply bracket
+      // ratings automatically starts off
+      await expect
+        .poll(async () => (await pluginConfig())?.autoApply)
+        .toBe(false)
 
       const ratings = await performerRatings()
       const result = await playBracket(page)
@@ -1156,6 +1178,8 @@ test.describe('beside Restash', () => {
   }) => {
     const before = await performerState()
     const scenes = await sceneState()
+    // Apply's preview: with the mirror off, auto-apply would start on
+    await setPluginSettings(PLUGIN_ID, { autoApply: false })
     try {
       // Restash mirrors while the preview is open: Apply writes nothing
       let result = await playBracket(page)
@@ -1174,7 +1198,7 @@ test.describe('beside Restash', () => {
       await putBack(before)
       await putBackScenes(scenes)
       await setPluginSettings('restash', { mirrorToRating100: false })
-      await setPluginSettings(PLUGIN_ID, {})
+      await setPluginSettings(PLUGIN_ID, { autoApply: false })
 
       // Restash mirrors over what Apply wrote: Undo leaves its scores
       result = await playBracket(page)
