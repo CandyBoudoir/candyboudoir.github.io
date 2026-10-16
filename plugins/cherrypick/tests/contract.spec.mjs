@@ -429,6 +429,14 @@ test("with the switch on, other plugins' matches reach the model", async ({
 
 test('Remove Cherry Pick data leaves a tombstone', async ({ page }) => {
   await page.goto('/plugins/cherrypick')
+  // Every section renders at once, Your score as "Learning your taste…", and
+  // grows by a row when the model lands, which moves Remove down. A click
+  // that Playwright dispatches in that moment lands on the section beside the
+  // button, and Playwright does not retry it: the dialog never opens.
+  await expect(page.locator('#your-score')).toContainText(
+    /within half a star \d+ times in 10/,
+    { timeout: 20_000 },
+  )
   await page.locator('#remove .btn-danger').click()
   const dialog = page.locator('.modal-dialog')
   await expect(dialog).toContainText('Remove Cherry Pick data?')
