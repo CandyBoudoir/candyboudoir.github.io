@@ -7,13 +7,15 @@
 //
 // Env: STASH_URL (default http://127.0.0.1:9999), WORK (the folder stash.sh
 // used), SITE (default dist/site), PLUGINS (plugin IDs to install, comma
-// separated, default every plugin in SITE's index.yml), PW_CHANNEL (optional
-// Playwright channel).
+// separated, default every plugin in SITE's index.yml), COMPANIONS (other
+// authors' plugins to install beside them, companions.mjs), PW_CHANNEL
+// (optional Playwright channel).
 import { createReadStream } from 'node:fs'
 import { readFile, stat } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { extname, join, resolve } from 'node:path'
 import { BOX_NAME, ENDPOINT, LINKS } from './stashbox-data.mjs'
+import { companionIndex, companions } from './companions.mjs'
 import { renderStickers } from './stickers.mjs'
 
 const STASH = process.env.STASH_URL ?? 'http://127.0.0.1:9999'
@@ -244,10 +246,14 @@ const TYPES = { '.yml': 'text/yaml', '.zip': 'application/zip' }
 
 async function install() {
   const server = createServer(async (req, res) => {
-    const file = join(
-      SITE,
-      decodeURIComponent(new URL(req.url, 'http://x').pathname),
-    )
+    const path = decodeURIComponent(new URL(req.url, 'http://x').pathname)
+    // The companions' source: their pinned packages, served from here
+    if (path === '/companions/index.yml') {
+      res.writeHead(200, { 'Content-Type': TYPES['.yml'] })
+      res.end(companionIndex())
+      return
+    }
+    const file = join(SITE, path)
     try {
       if (!file.startsWith(SITE) || !(await stat(file)).isFile())
         throw new Error()
@@ -260,32 +266,56 @@ async function install() {
     }
   })
   await new Promise((r) => server.listen(0, '127.0.0.1', r))
-  const source = `http://127.0.0.1:${server.address().port}/index.yml`
+  const origin = `http://127.0.0.1:${server.address().port}`
+  const source = `${origin}/index.yml`
+  const extra = companions()
+  const extraSource = `${origin}/companions/index.yml`
 
   await gql(
     `mutation ($s: [PackageSourceInput!]) {
       configureGeneral(input: { pluginPackageSources: $s }) { pluginPackageSources { url } } }`,
-    { s: [{ name: 'CandyBoudoir', url: source, local_path: 'candyboudoir' }] },
+    {
+      s: [
+        { name: 'CandyBoudoir', url: source, local_path: 'candyboudoir' },
+        ...(extra.length
+          ? [{ name: 'Companions', url: extraSource, local_path: 'companions' }]
+          : []),
+      ],
+    },
   )
   await gql(
     'mutation ($p: [PackageSpecInput!]!) { installPackages(type: Plugin, packages: $p) }',
-    { p: PLUGIN_IDS.map((id) => ({ id, sourceURL: source })) },
+    {
+      p: [
+        ...PLUGIN_IDS.map((id) => ({ id, sourceURL: source })),
+        ...extra.map((c) => ({ id: c.package.id, sourceURL: extraSource })),
+      ],
+    },
   )
+  const wanted = [...PLUGIN_IDS, ...extra.flatMap((c) => c.enable)]
   let installed = []
-  for (let i = 0; i < 60 && installed.length < PLUGIN_IDS.length; i++) {
+  for (let i = 0; i < 90 && installed.length < wanted.length; i++) {
     await sleep(1000)
     const { plugins } = await gql('{ plugins { id version enabled } }')
     installed = (plugins ?? []).filter(
-      (p) => PLUGIN_IDS.includes(p.id) && p.enabled,
+      (p) => wanted.includes(p.id) && p.enabled,
     )
   }
   server.close()
-  if (installed.length < PLUGIN_IDS.length)
+  if (installed.length < wanted.length)
     throw new Error(
-      `${PLUGIN_IDS.join(', ')} did not install from the plugin source`,
+      `${wanted.join(', ')} did not install from the plugin source`,
     )
+  // Builds a companion ships that must not run beside the one under test
+  const off = extra.flatMap((c) => c.disable)
+  if (off.length)
+    await gql('mutation ($m: BoolMap!) { setPluginsEnabled(enabledMap: $m) }', {
+      m: Object.fromEntries(off.map((id) => [id, false])),
+    })
   for (const p of installed)
-    console.log(`Installed ${p.id} ${p.version} from ${source}`)
+    console.log(
+      `Installed ${p.id} ${p.version} from ${PLUGIN_IDS.includes(p.id) ? source : extraSource}`,
+    )
 }
 
 await setup()

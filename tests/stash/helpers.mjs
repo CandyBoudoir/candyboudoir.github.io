@@ -4,6 +4,7 @@
 // own on top.
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { BOX_NAME } from './stashbox-data.mjs'
+import { companionPluginIds } from './companions.mjs'
 
 export const STASH = process.env.STASH_URL ?? 'http://127.0.0.1:9999'
 
@@ -43,18 +44,21 @@ export const setPluginSettings = (id, input) =>
     },
   )
 
-// Enables the named plugins and disables every other installed plugin.
-// prepare.mjs installs every plugin in the source into one Stash, and two
-// themes enabled together would each see the other's CSS, so each plugin's
-// spec files call this in a beforeAll. Stash loads a plugin's CSS and
-// JavaScript when a page loads, so the next page.goto picks up the change.
+// Enables the named plugins and disables every other installed plugin,
+// except the companions (COMPANIONS, companions.mjs), which stay enabled
+// beside them. prepare.mjs installs every plugin in the source into one
+// Stash, and two themes enabled together would each see the other's CSS, so
+// each plugin's spec files call this in a beforeAll. Stash loads a plugin's
+// CSS and JavaScript when a page loads, so the next page.goto picks up the
+// change.
 export async function usePlugins(...ids) {
   const { plugins } = await gql('{ plugins { id } }')
-  for (const id of ids)
+  const on = [...ids, ...companionPluginIds()]
+  for (const id of on)
     if (!plugins.some((p) => p.id === id))
       throw new Error(`${id} is not installed in this Stash`)
   await gql('mutation ($m: BoolMap!) { setPluginsEnabled(enabledMap: $m) }', {
-    m: Object.fromEntries(plugins.map((p) => [p.id, ids.includes(p.id)])),
+    m: Object.fromEntries(plugins.map((p) => [p.id, on.includes(p.id)])),
   })
 }
 
