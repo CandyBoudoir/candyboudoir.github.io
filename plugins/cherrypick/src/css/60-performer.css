@@ -27,3 +27,9 @@
 .performer-card__links ~ .cherrypick-honours {
   left: 3rem;
 }
+
+/* Xenith puts its rank badge at the bottom left of each card it marks
+   .hon-processed, over the crown: the crown goes above it. */
+.thumbnail-section.hon-processed .cherrypick-honours {
+  bottom: 3rem;
+}

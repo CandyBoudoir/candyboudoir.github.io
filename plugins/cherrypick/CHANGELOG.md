@@ -14,6 +14,6 @@ First release, for Stash v0.31.1.
 - Not interested and Don't learn from this, eleven switches and a tag exclusion list under Settings > Plugins, and Cherry Pick's own page with Remove Cherry Pick data.
 - Nothing appears while a scene plays.
 - Beside Ascension, HotOrNot, Xenith or Restash: the ratings they set (the Elo scores of the first three, Ascension's Prime, and Restash's score when its mirror writes it to Stash's rating) stay out of what Cherry Pick learns. Apply never rates a record whose rating they set, and says when Ascension, HotOrNot or Xenith will pick up its ratings.
-- Your score shows beside Ascension's and Xenith's badges on scene cards, and HotOrNot's floating button goes under Cherry Pick's dialogs so it can't cover their buttons on a phone.
+- Your score shows beside Ascension's and Xenith's badges on scene cards, crowns and medals sit above Xenith's badge on performer cards, and HotOrNot's floating button goes under Cherry Pick's dialogs so it can't cover their buttons on a phone.
 - Learn from Ascension, HotOrNot and Xenith matches, a switch under Settings > Plugins that starts on: each match those plugins recorded teaches Your score and For you as half a bracket pick, and Cherry Pick's page counts them.
 - Beside Stash Curator: the Scenes and Performers lists render with both installed, and Bracket on a list filtered by Curator Appeal or Curator affinity leaves that criterion out and says so in the pool's name.
