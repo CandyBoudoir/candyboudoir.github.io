@@ -594,7 +594,7 @@ body:has(.cherrypick-dialog) #hon-floating-btn {
   white-space: nowrap;
 }
 
-/* A record Ascension or HotOrNot ranks: listed, never written */
+/* A record another plugin ranks or mirrors: listed, never written */
 .cherrypick-apply-table .cherrypick-apply-skipped td:nth-child(-n + 2) {
   opacity: 0.6;
 }
