@@ -24,6 +24,10 @@ export const PARAMS = {
   seed: 20261015,
 }
 
+// Rated scenes the holdout needs before it can say whether Your score beats
+// your average (two per fold). Below it, Your score stays hidden.
+export const MIN_RATED = 10
+
 // ---------------------------------------------------------------- features
 
 export function sceneFeatures(scene, params = PARAMS) {
@@ -237,7 +241,7 @@ function shuffled(arr, seed) {
 }
 
 export function crossValidate(rated, watchedUnrated, params = PARAMS) {
-  if (rated.length < 10) return null
+  if (rated.length < MIN_RATED) return null
   const order = shuffled(rated, params.seed)
   const k = params.folds
   const rows = []
