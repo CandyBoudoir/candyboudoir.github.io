@@ -43,7 +43,8 @@ const fmt1 = fmtStars
  *   then sees those records as unrated
  * @property {boolean} [learnFromMatches]  replay the matches Ascension,
  *   HotOrNot and Xenith recorded (matches.js) as picks, ahead of
- *   `decisions` and at BT.external of their weight. Off by default. With
+ *   `decisions` and at BT.external of their weight. Off unless given; the
+ *   setting that gives it starts on (storage/settings.js). With
  *   learnFromRankings on as well, the same matches count twice: once as
  *   picks and once in the scores they made
  */

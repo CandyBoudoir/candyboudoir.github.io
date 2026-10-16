@@ -165,6 +165,10 @@ test('Settings › Plugins lists the switches, already on', async ({ page }) => 
   const toggle = page.locator('#plugin-CherryPick-showForYou')
   await expect(toggle).toBeAttached({ timeout: 20_000 })
   await expect(toggle).toBeChecked()
+  // Learning from other plugins' matches starts on too
+  await expect(
+    page.locator('#plugin-CherryPick-learnFromMatches'),
+  ).toBeChecked()
 })
 
 test('switching For you off removes the row', async ({ page }) => {

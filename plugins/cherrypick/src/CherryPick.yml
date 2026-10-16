@@ -61,5 +61,5 @@ settings:
     type: STRING
   learnFromMatches:
     displayName: Learn from Ascension, HotOrNot and Xenith matches
-    description: Each match those plugins recorded counts as half a bracket pick. Skips, draws and anything not in your library are left out.
+    description: Each match those plugins recorded counts as half a bracket pick, leaving out skips, draws and anything not in your library. Off, only your own ratings, plays and brackets teach Cherry Pick.
     type: BOOLEAN

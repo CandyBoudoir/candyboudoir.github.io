@@ -1,7 +1,8 @@
 // Learning from other plugins' matches: what Ascension, HotOrNot_V3 and
 // Xenith write to custom fields becomes bracket picks, each match once, at
 // half a pick's weight, ahead of Cherry Pick's own picks and only with the
-// switch on. Every record here is synthetic, in the shape each plugin writes.
+// switch on (it starts on). Every record here is synthetic, in the shape
+// each plugin writes.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { buildDb } from '../../src/js/model/db.js'
@@ -327,8 +328,8 @@ function rankedLibrary() {
   return { lib, ps, ss }
 }
 
-test('the switch is off by default, and off teaches nothing', () => {
-  assert.equal(SETTING_DEFAULTS.learnFromMatches, false)
+test('the switch starts on, and off teaches nothing', () => {
+  assert.equal(SETTING_DEFAULTS.learnFromMatches, true)
   const { lib } = rankedLibrary()
   const engine = createEngine(buildDb(lib))
   const M = engine.compute({})
