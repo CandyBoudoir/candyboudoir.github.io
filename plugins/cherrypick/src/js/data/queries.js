@@ -100,3 +100,17 @@ export const PERFORMERS_WITH_FIELD = `
     }
   }
 `
+
+export const SCENES_WITH_FIELD = `
+  query CherryPickScenesWithField($scene_filter: SceneFilterType) {
+    findScenes(scene_filter: $scene_filter, filter: { per_page: -1 }) {
+      scenes { id custom_fields }
+    }
+  }
+`
+
+export const SCENE_SET_FIELDS = `
+  mutation CherryPickSceneSetFields($input: SceneUpdateInput!) {
+    sceneUpdate(input: $input) { id custom_fields }
+  }
+`

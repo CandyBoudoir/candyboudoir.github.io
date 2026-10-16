@@ -314,14 +314,6 @@ body:has(.cherrypick-dialog) #hon-floating-btn {
   line-height: 1.2;
 }
 
-/* the stars are a display here: a click anywhere on the card picks it */
-.cherrypick-cont-rating {
-  font-size: 0.8rem;
-  margin: 0.2rem 0;
-  min-height: 1.4rem;
-  pointer-events: none;
-}
-
 .cherrypick-cont-reason {
   margin-top: 0.25rem;
 }
@@ -431,11 +423,6 @@ body:has(.cherrypick-dialog) #hon-floating-btn {
   object-fit: cover;
   object-position: top;
   width: 1.4rem;
-}
-
-.cherrypick-tree-seed {
-  flex: 0 0 1.1rem;
-  text-align: right;
 }
 
 .cherrypick-tree-label {

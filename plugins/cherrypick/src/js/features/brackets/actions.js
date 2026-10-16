@@ -75,12 +75,12 @@ const PLUGINS = `
 `
 const PERFORMER_RATE = `
   mutation CherryPickRatePerformer($input: PerformerUpdateInput!) {
-    performerUpdate(input: $input) { id rating100 }
+    performerUpdate(input: $input) { id rating100 custom_fields }
   }
 `
 const SCENE_RATE = `
   mutation CherryPickRateScene($input: SceneUpdateInput!) {
-    sceneUpdate(input: $input) { id rating100 }
+    sceneUpdate(input: $input) { id rating100 custom_fields }
   }
 `
 
@@ -328,7 +328,7 @@ export function undoPick() {
   // straight after the final: reopen it, and put the fields back
   const last = s.brackets.history[s.brackets.history.length - 1]
   if (!last || last.id !== s.lastFinished) return
-  const reopened = { ...last }
+  const reopened = { ...last, championRating: null }
   delete reopened.fieldWrites
   delete reopened.result
   store.set((st) => ({
@@ -382,20 +382,43 @@ async function currentRecords(kind, ids) {
   return new Map(rows.map((x) => [x.id, x]))
 }
 
-async function setRating(kind, id, rating100) {
+// One write: the rating, and the provisional mark when it changes (fields:
+// a custom_fields input, or null)
+async function setRating(kind, id, rating100, fields) {
+  const input = { id, rating100, ...(fields ? { custom_fields: fields } : {}) }
   if (kind === 'performer') {
-    await runMutation(PERFORMER_RATE, { input: { id, rating100 } })
-    patchLibraryPerformer(id, { rating100 })
+    const data = await runMutation(PERFORMER_RATE, { input })
+    patchLibraryPerformer(id, {
+      rating100,
+      custom_fields: data.performerUpdate.custom_fields,
+    })
   } else {
-    await runMutation(SCENE_RATE, { input: { id, rating100 } })
-    patchLibraryScene(id, { rating100 })
+    const data = await runMutation(SCENE_RATE, { input })
+    patchLibraryScene(id, {
+      rating100,
+      custom_fields: data.sceneUpdate.custom_fields,
+    })
   }
 }
 
-// changes: [{ id, to }] from the preview. Each record is read from Stash
-// right before the write, so Undo puts back exactly what was there (unrated
-// included), and one another plugin started ranking or mirroring since the
-// preview is left alone (the batch counts it in `kept`). The batch lands in tier 1.
+// The champion's rating the user gave on the champion screen, when no
+// anchor played: the scale the rest step down from. Apply writes it with
+// them.
+export const setChampionRating = (bracketId, rating100) =>
+  store.set((s) => ({
+    brackets: {
+      ...s.brackets,
+      history: s.brackets.history.map((x) =>
+        x.id === bracketId ? { ...x, championRating: rating100 ?? null } : x,
+      ),
+    },
+  }))
+
+// changes: [{ id, to, provisional }] from the preview. Each record is read
+// from Stash right before the write, so Undo puts back exactly what was
+// there (unrated, and the provisional mark, included), and one another
+// plugin started ranking or mirroring since the preview is left alone (the
+// batch counts it in `kept`). The batch lands in tier 1.
 export async function applyRatingChanges(bracket, changes) {
   if (!changes.length) return
   const kind = bracket.kind
@@ -407,8 +430,20 @@ export async function applyRatingChanges(bracket, changes) {
   const done = []
   try {
     for (const c of write) {
-      await setRating(kind, c.id, c.to)
-      done.push({ id: c.id, from: c.from, to: c.to })
+      const provisional = !!c.provisional
+      await setRating(
+        kind,
+        c.id,
+        c.to,
+        BR.provisionalFieldsInput(c.to, provisional, c.fromProvisional),
+      )
+      done.push({
+        id: c.id,
+        from: c.from,
+        to: c.to,
+        provisional,
+        fromProvisional: c.fromProvisional,
+      })
     }
   } catch (e) {
     reportError(e)
@@ -426,9 +461,10 @@ export async function applyRatingChanges(bracket, changes) {
   store.set((s) => ({ applied: [...s.applied, batch] }))
 }
 
-// Puts each rating back. A record another plugin has ranked or mirrored since
-// keeps its rating, which is that plugin's score now: the batch then stays,
-// with nothing left to undo, to say so until it is dismissed.
+// Puts each rating, and its provisional mark, back. A record another plugin
+// has ranked or mirrored since keeps its rating, which is that plugin's
+// score now: the batch then stays, with nothing left to undo, to say so
+// until it is dismissed.
 export async function undoApplied(batchId) {
   const batch = store.get().applied.find((b) => b.id === batchId)
   if (!batch) return
@@ -452,7 +488,12 @@ export async function undoApplied(batchId) {
   const left = []
   for (const c of undo) {
     try {
-      await setRating(batch.kind, c.id, c.from ?? null)
+      await setRating(
+        batch.kind,
+        c.id,
+        c.from ?? null,
+        BR.restoreProvisionalInput(c),
+      )
     } catch (e) {
       left.push(c)
       reportError(e)

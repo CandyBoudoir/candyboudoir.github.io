@@ -374,7 +374,7 @@ export function GenderGrid({ listFilter, choice: given, picked }) {
 const an = (n) => ([8, 11, 18].includes(n) ? 'an' : 'a')
 
 // Size and pool, laid out like the performer sheet. A pool of 4 to 15 keeps
-// 16 on and plays every scene, the top seeds taking byes; under 4 every size
+// 16 on and plays every scene, some taking byes; under 4 every size
 // is off and a card says why.
 export function ClipSetup({ ids, poolLabel, poolNote, short, origin }) {
   const [pref, setPref] = React.useState(BR.DEFAULT_SIZE)

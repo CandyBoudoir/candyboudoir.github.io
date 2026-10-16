@@ -239,8 +239,10 @@ function RemoveDialog() {
               interested and Don&apos;t learn, from Stash&apos;s configuration
             </li>
             <li>
-              Bracket results from {counts.performers ?? 0} performer
-              {counts.performers === 1 ? '' : 's'} (custom fields)
+              Bracket results and provisional marks from{' '}
+              {counts.performers ?? 0} performer
+              {counts.performers === 1 ? '' : 's'} and {counts.scenes ?? 0}{' '}
+              scene{counts.scenes === 1 ? '' : 's'} (custom fields)
             </li>
             <li>
               The library copy, the StashDB cache and row history in this

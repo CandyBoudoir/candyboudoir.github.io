@@ -267,99 +267,126 @@ function placedBracket() {
   return { ...b, result: st.result, finishedAt: '2026-10-01T20:00:00Z' }
 }
 
-test('Apply skips a performer Ascension ranks, with the reason, and fills a primed one', () => {
-  const done = placedBracket()
-  const r = done.result
+// A 16-performer bracket over lib, played out (always side a)
+function playedOn(lib) {
+  const M = engineFor(lib)
+  const ids = BR.performerPool(M, { gender: 'FEMALE', pool: 'library' })
+  let b = BR.createBracket(M, {
+    kind: 'performer',
+    gender: 'FEMALE',
+    poolLabel: 'Female',
+    size: 16,
+    ids,
+    now: 7,
+  })
+  let st = BR.bracketState(b)
+  while (st.current) {
+    b = BR.pick(b, st.current.a)
+    st = BR.bracketState(b)
+  }
+  return {
+    M,
+    b: { ...b, result: st.result, finishedAt: '2026-10-01T20:00:00Z' },
+  }
+}
+
+// The Female pool of a library with every performer rating cleared
+function clearedPool() {
   const lib = copy()
   for (const p of lib.performers) p.rating100 = null
-  const champ = lib.performers.find((p) => p.id === r.champion)
-  champ.rating100 = 55
-  champ.custom_fields = rankedPerformer()
-  // Prime ran over every unrated performer except the finalist (added later)
-  const primed = lib.performers.filter(
-    (p) => p.id !== r.champion && p.id !== r.finalist,
-  )
-  primed.forEach((p, i) => (p.rating100 = primeValue(i, primed.length)))
-  const M = engineFor(lib)
+  const pool = BR.performerPool(engineFor(lib), {
+    gender: 'FEMALE',
+    pool: 'library',
+  })
+  const by = (id) => lib.performers.find((p) => p.id === id)
+  return { lib, pool: pool.map(by) }
+}
 
-  for (const includeRated of [false, true]) {
-    const rows = BR.ratingProposals(M, done, includeRated)
-    const by = new Map(rows.map((x) => [x.id, x]))
-    assert.deepEqual(
-      by.get(r.champion),
-      { id: r.champion, from: 55, to: 100, why: 'Champion', skip: 'ranked' },
-      'listed, never written',
+test('Apply never writes a performer Ascension ranks, and says why', () => {
+  // four rated by hand, six unrated, the rest ranked
+  const { lib, pool } = clearedPool()
+  pool.slice(0, 4).forEach((p, i) => (p.rating100 = [100, 80, 60, 30][i]))
+  const ranked = new Set(pool.slice(10).map((p) => p.id))
+  pool.slice(10).forEach((p, i) => {
+    p.rating100 = 31 + i
+    p.custom_fields = rankedPerformer()
+  })
+  const { M, b } = playedOn(lib)
+  const role = (id) => BR.entrantRole(M, 'performer', id)
+  const roles = b.seeds.map(role)
+  assert.deepEqual(
+    ['anchor', 'candidate', 'ranked'].map(
+      (r) => roles.filter((x) => x === r).length,
+    ),
+    [4, 6, 6],
+    'ranked records fill only what the others leave',
+  )
+  const { rows } = BR.ratingProposals(M, b)
+  const by = new Map(rows.map((x) => [x.id, x]))
+  const placedRanked = placedIds(b.result).filter((id) => ranked.has(id))
+  assert.ok(placedRanked.length, 'a ranked one placed')
+  for (const id of placedRanked) {
+    const x = by.get(id)
+    assert.equal(x.skip, 'ranked', 'listed, never written')
+    assert.equal(x.from, M.stashPerformerRating(id))
+  }
+  for (const x of rows) if (!x.skip) assert.equal(role(x.id), 'candidate')
+  for (const p of pool.slice(0, 4)) assert.equal(by.has(p.id), false)
+})
+
+test('Apply fills a primed performer as unrated', () => {
+  const { lib, pool } = clearedPool()
+  const hand = new Set(pool.slice(0, 6).map((p) => p.id))
+  pool
+    .slice(0, 6)
+    .forEach((p, i) => (p.rating100 = [100, 90, 80, 70, 60, 50][i]))
+  const rest = lib.performers.filter((p) => !hand.has(p.id))
+  rest.forEach((p, i) => (p.rating100 = primeValue(i, rest.length)))
+  const { M, b } = playedOn(lib)
+  const { rows } = BR.ratingProposals(M, b)
+  assert.ok(rows.length > 0)
+  for (const x of rows) {
+    assert.equal(x.primed, true, 'a primed rating counts as unrated')
+    assert.equal(x.skip, undefined)
+    assert.equal(
+      x.from,
+      lib.performers.find((p) => p.id === x.id).rating100,
+      "Now shows Stash's",
     )
-    assert.deepEqual(by.get(r.finalist), {
-      id: r.finalist,
-      from: null,
-      to: 90,
-      why: 'Finalist',
-    })
-    for (const id of [...r.semifinalists, ...r.quarterfinalists]) {
-      const x = by.get(id)
-      assert.equal(x.primed, true, 'a primed rating counts as unrated')
-      assert.equal(x.skip, undefined)
-      assert.equal(
-        x.from,
-        lib.performers.find((p) => p.id === id).rating100,
-        "Now shows Stash's",
-      )
-    }
-    assert.equal(rows.length, 8)
+    assert.ok(!hand.has(x.id), 'a hand rating is an anchor')
   }
 })
 
 test('Apply skips a performer Xenith ranks or Restash mirrored, with the reason', () => {
-  const done = placedBracket()
-  const r = done.result
-  const lib = copy()
-  for (const p of lib.performers) p.rating100 = null
-  const find = (id) => lib.performers.find((p) => p.id === id)
-  find(r.champion).rating100 = 58
-  find(r.champion).custom_fields = xenithRanked()
-  find(r.finalist).rating100 = 64
-  find(r.finalist).custom_fields = restash(64)
+  const { lib, pool } = clearedPool()
+  pool.slice(0, 4).forEach((p, i) => (p.rating100 = [100, 80, 60, 30][i]))
   // Restash scored these, mirror off: one unrated, one rated by hand
-  const [semi1, semi2] = r.semifinalists
-  find(semi1).custom_fields = restash(71)
-  find(semi2).rating100 = 60
-  find(semi2).custom_fields = restash(52)
-  const M = engineFor(lib)
-
-  for (const includeRated of [false, true]) {
-    const by = new Map(
-      BR.ratingProposals(M, done, includeRated).map((x) => [x.id, x]),
-    )
-    assert.deepEqual(by.get(r.champion), {
-      id: r.champion,
-      from: 58,
-      to: 100,
-      why: 'Champion',
-      skip: 'ranked',
-    })
-    assert.deepEqual(by.get(r.finalist), {
-      id: r.finalist,
-      from: 64,
-      to: 90,
-      why: 'Finalist',
-      skip: 'mirrored',
-    })
-    assert.deepEqual(by.get(semi1), {
-      id: semi1,
-      from: null,
-      to: 80,
-      why: 'Semifinalist',
-    })
-    if (includeRated)
-      assert.deepEqual(by.get(semi2), {
-        id: semi2,
-        from: 60,
-        to: 80,
-        why: 'Semifinalist',
-      })
-    else assert.equal(by.has(semi2), false, "the user's rating stays")
+  pool[4].custom_fields = restash(71)
+  pool[8].rating100 = 60
+  pool[8].custom_fields = restash(52)
+  const xenith = new Set(pool.slice(9, 20).map((p) => p.id))
+  pool.slice(9, 20).forEach((p) => {
+    p.rating100 = 58
+    p.custom_fields = xenithRanked()
+  })
+  const mirrored = new Set(pool.slice(20).map((p) => p.id))
+  pool.slice(20).forEach((p) => {
+    p.rating100 = 64
+    p.custom_fields = restash(64)
+  })
+  const { M, b } = playedOn(lib)
+  const role = (id) => BR.entrantRole(M, 'performer', id)
+  assert.equal(role(pool[4].id), 'candidate', "Restash's score alone")
+  assert.equal(role(pool[8].id), 'anchor', 'a hand rating Restash scored')
+  const by = new Map(BR.ratingProposals(M, b).rows.map((x) => [x.id, x]))
+  for (const id of placedIds(b.result)) {
+    if (xenith.has(id)) assert.equal(by.get(id).skip, 'ranked')
+    if (mirrored.has(id)) assert.equal(by.get(id).skip, 'mirrored')
   }
+  assert.equal(by.has(pool[8].id), false, "the user's rating stays")
+  assert.ok(b.seeds.includes(pool[4].id))
+  for (const x of by.values())
+    if (!x.skip) assert.equal(role(x.id), 'candidate')
 })
 
 test('Apply re-checks each record right before writing', () => {
@@ -377,7 +404,7 @@ test('Apply re-checks each record right before writing', () => {
     // '4' is gone from Stash
   ])
   assert.deepEqual(BR.writableChanges(changes, current), {
-    write: [{ id: '1', to: 100, from: null }],
+    write: [{ id: '1', to: 100, from: null, fromProvisional: null }],
     ranked: ['2', '3'],
   })
 })
@@ -396,8 +423,8 @@ test('Apply and Undo re-check for Xenith and Restash too', () => {
   ])
   assert.deepEqual(BR.writableChanges(changes, current), {
     write: [
-      { id: '4', to: 90, from: 80 },
-      { id: '5', to: 90, from: null },
+      { id: '4', to: 90, from: 80, fromProvisional: null },
+      { id: '5', to: 90, from: null, fromProvisional: null },
     ],
     ranked: ['1', '2', '3'],
   })
