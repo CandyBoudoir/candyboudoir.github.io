@@ -1,15 +1,17 @@
 // Cherry Pick beside the plugins the compatibility tests can install
-// (companions.mjs): the Elo ranking plugins Ascension 1.4.1 and HotOrNot
-// 1.0.0, and Stash Curator 0.36.0. Each block runs when prepare.mjs installed
-// its plugin alone (COMPANIONS=ascension, hotornot or curator) and is skipped
-// otherwise: Ascension is a fork of HotOrNot and the two claim the same
-// element ids, so they fight over a performer's page whatever Cherry Pick
-// does. Beside a ranking plugin, both plugins' pieces render on the pages
-// they share, nothing throws, they don't overlap, a dialog's buttons are
-// never covered, and Apply never writes over a performer the other plugin
-// ranks and says that plugin will pick up what it sets. Beside Curator, whose
-// patches change the list components' arguments and whose criteria Stash's
-// schema lacks, the lists render and Bracket works on a list it filters.
+// (companions.mjs): the Elo ranking plugins Ascension 1.4.1, HotOrNot 1.0.0
+// and Xenith 3.2.0, and Stash Curator 0.36.0. Each block runs when
+// prepare.mjs installed its plugin alone (COMPANIONS=ascension, hotornot,
+// xenith or curator) and is skipped otherwise: Ascension is a fork of
+// HotOrNot and the two claim the same element ids, so they fight over a
+// performer's page whatever Cherry Pick does. Beside a ranking plugin, both
+// plugins' pieces render on the pages they share, nothing throws, they don't
+// overlap, Your score stays on cards whose rating the other plugin hides, a
+// dialog's buttons are never covered, and Apply never writes over a
+// performer the other plugin ranks and says that plugin will pick up what it
+// sets. Beside Curator, whose patches change the list components' arguments
+// and whose criteria Stash's schema lacks, the lists render and Bracket works
+// on a list it filters.
 import { expect, test } from '@playwright/test'
 import { companionPluginIds } from '../../../tests/stash/companions.mjs'
 import {
@@ -100,6 +102,46 @@ const SIDE = {
       await page.locator('#hon-modal .hon-modal-close').click()
     },
   },
+  xenith: {
+    name: 'Xenith',
+    // As one match leaves a performer: xenith_stats and xenith_record
+    ranked: {
+      xenith_stats: JSON.stringify({
+        total_matches: 4,
+        wins: 3,
+        losses: 1,
+        draws: 0,
+        current_streak: 2,
+        best_streak: 2,
+        worst_streak: 0,
+        last_match: '2026-10-15T20:00:00.000Z',
+      }),
+      xenith_record: JSON.stringify([
+        {
+          date: '2026-10-15T20:00:00.000Z',
+          opponent: '1:Gumdrop Gigi',
+          won: true,
+          ratingAfter: 62,
+        },
+      ]),
+    },
+    theirs: '.hon-compact-badge, #hon-battle-rank-badge',
+    seen: {
+      // Its rank badge on every scene and performer card, whose rating it
+      // hides, and beside the rating on a performer's page
+      front: (page) => forYouCards(page).first().locator('.hon-compact-badge'),
+      scenes: (page) =>
+        page
+          .locator('.scene-card', {
+            has: page.locator('.cherrypick-score-banner'),
+          })
+          .first()
+          .locator('.hon-compact-badge'),
+      performers: (page) =>
+        page.locator('.performer-card .hon-compact-badge').first(),
+      performer: (page) => page.locator('#hon-battle-rank-badge'),
+    },
+  },
 }
 
 // Performers by id, with the rating and the fields a ranking plugin writes
@@ -170,6 +212,22 @@ const overlaps = (page, theirs) =>
     }
     return out
   }, theirs)
+
+// Your scores on the page that are not drawn: hidden by another plugin's
+// rule or inline style, or squashed to nothing
+const hiddenScores = (page) =>
+  page.evaluate(() =>
+    [...document.querySelectorAll('.cherrypick-score-banner')]
+      .filter((el) => {
+        const b = el.getBoundingClientRect()
+        return (
+          !b.width ||
+          !b.height ||
+          !el.checkVisibility({ visibilityProperty: true })
+        )
+      })
+      .map((el) => el.title),
+  )
 
 // The buttons, links and fields of Cherry Pick's open dialogs that a piece of
 // the other plugin sits on top of, at any of nine points across each one
@@ -251,6 +309,7 @@ for (const [key, side] of Object.entries(SIDE)) {
       await page.goto('/')
       await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
       await seen('front')
+      expect(await hiddenScores(page)).toEqual([])
       expect(await overlaps(page, side.theirs)).toEqual([])
 
       await page.goto('/scenes?sortby=title&perPage=120')
@@ -258,6 +317,7 @@ for (const [key, side] of Object.entries(SIDE)) {
         page.locator('.cherrypick-score-banner').first(),
       ).toBeVisible({ timeout: 20_000 })
       await seen('scenes')
+      expect(await hiddenScores(page)).toEqual([])
       await expect(
         page.locator('.cherrypick-bracket-button').filter({ visible: true }),
       ).toHaveCount(1)
