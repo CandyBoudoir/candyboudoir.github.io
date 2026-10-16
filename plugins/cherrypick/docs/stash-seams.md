@@ -4,9 +4,11 @@ Checked against the Stash source for v0.31.1 and the develop branch of 2026-10-1
 
 ## How patches run
 
-- `patch.before(name, fn)`: `fn(...args)` must return an array, the new argument list (`patch.tsx:57-105`).
-- `patch.instead(name, fn)`: called as `fn(props, secondArg, next)`. `next` is the original function, or the next plugin's `instead`; call it as a function, never render it as `<Next />`, which remounts the subtree on every render once two plugins patch the same component.
-- `patch.after(name, fn)`: called as `fn(props, secondArg, result)`; it returns what renders.
+- React calls a component as `(props, secondArg)`. Every patch on it gets the arguments as the before patches left them, so their number is not fixed (`patch.tsx:86-105`).
+- `patch.before(name, fn)`: `fn(...args)` must return an array, the new argument list, which replaces the arguments for every later patch. Return `[newProps, ...rest]` to keep the second argument; Stash Curator returns `[newProps]` alone.
+- `patch.instead(name, fn)`: called as `fn(...args, next)`. `next` is the original function, or the next plugin's `instead`; call it as a function, never render it as `<Next />`, which remounts the subtree on every render once two plugins patch the same component.
+- `patch.after(name, fn)`: called as `fn(...args, result)`; it returns what renders. The result is the last argument, which is the third only when no before patch dropped one: beside Curator it is the second. Cherry Pick registers every after patch through `patchAfter` (`runtime/api.js`), which passes `(props, result)` with the result taken from the end.
+- All before patches run before any after patch, whatever order the plugins load in.
 - Patches run inside the patched component's render, so hooks called in a patch body become that component's hooks. Cherry Pick's patches only return elements of its own components, which hold their own hooks and state.
 - Patching a name that does not exist does nothing, and patches registered before a lazy-loaded module loads still apply.
 - `PluginApi.Event` dispatches one event, `stash:location`, on every route change. The first one fires before plugin scripts load, so the plugin reads `window.location` at start.

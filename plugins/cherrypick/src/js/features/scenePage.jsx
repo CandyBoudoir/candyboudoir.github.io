@@ -4,7 +4,7 @@
 // Stash has no slot beside the rating (RatingSystem does not know its scene,
 // and the toolbar takes no extensions), so the line renders through a portal
 // into the toolbar's first group, from a component added after ScenePage.
-import { Bootstrap, patch, React, ReactDOM } from '../runtime/api.js'
+import { Bootstrap, patchAfter, React, ReactDOM } from '../runtime/api.js'
 import { toggleDontLearn, isDontLearn } from '../runtime/actions.js'
 import { badgeLabel, fmtStars, rateMore } from '../model/index.js'
 import { popularity, performerRankPhrase } from '../model/signals.js'
@@ -195,7 +195,7 @@ export function registerScenePage() {
   // Both go after ScenePage's own output, inside the page's .row; CSS orders
   // More like this last and full width, so it sits under the player on wide
   // screens and after the scene's details on a phone.
-  patch.after('ScenePage', (props, _, result) => (
+  patchAfter('ScenePage', (props, result) => (
     <>
       {result}
       <Safe name="scene toolbar">

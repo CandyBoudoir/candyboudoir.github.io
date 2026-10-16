@@ -10,7 +10,13 @@
 // Where: the Performers page gets the performer pair; the Scenes page and
 // the scenes of a tag, studio or group get the scene pair; a performer's
 // Scenes tab gets "Bracket her scenes". No toolbar, no buttons.
-import { patch, React, ReactDOM, ReactRouterDOM } from '../../runtime/api.js'
+import {
+  patch,
+  patchAfter,
+  React,
+  ReactDOM,
+  ReactRouterDOM,
+} from '../../runtime/api.js'
 import { createStore, useStoreValue } from '../../runtime/store.js'
 import { run, store } from '../../runtime/app.js'
 import * as BR from '../../model/brackets.js'
@@ -338,7 +344,7 @@ export function registerListOps() {
     report('scene', args[0]?.filter)
     return args
   })
-  patch.after('FilteredPerformerList', (props, _, result) => (
+  patchAfter('FilteredPerformerList', (props, result) => (
     <>
       {result}
       <Safe name="performer bracket buttons">
@@ -346,7 +352,7 @@ export function registerListOps() {
       </Safe>
     </>
   ))
-  patch.after('FilteredSceneList', (props, _, result) => (
+  patchAfter('FilteredSceneList', (props, result) => (
     <>
       {result}
       <Safe name="scene bracket buttons">

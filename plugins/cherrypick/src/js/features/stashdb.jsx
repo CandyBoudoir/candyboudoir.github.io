@@ -5,7 +5,7 @@ import {
   Bootstrap,
   FontAwesomeSolid,
   components,
-  patch,
+  patchAfter,
   React,
   ReactRouterDOM,
 } from '../runtime/api.js'
@@ -425,7 +425,7 @@ function NotInYourLibrary({ performer }) {
 export function registerStashdb() {
   registerDialog('connect', ConnectDialog)
   registerPageSection('stashdb', 30, 'StashDB', StashdbSection)
-  patch.after('PerformerScenesPanel', (props, _, result) => (
+  patchAfter('PerformerScenesPanel', (props, result) => (
     <>
       {result}
       <Safe name="Not in your library">
