@@ -62,13 +62,24 @@ test.beforeAll(async ({ browser }) => {
     // client leaves that rejection unhandled. The walk loads pages in full
     // while Cherry Pick's queries are in flight; Stash's own navigation
     // never unloads the page, so users don't hit it.
-    if (/cannot load .*\/graphql due to access control checks/.test(e.message))
-      return
+    if (/graphql due to access control checks/.test(e.message)) return
     errors.push(e.message.slice(0, 300))
   })
-  page.on('console', (m) => {
-    if (m.type() === 'error' && /cherry/i.test(m.text()))
-      errors.push(`console: ${m.text().slice(0, 300)}`)
+  page.on('console', async (m) => {
+    if (m.type() !== 'error' || !/cherry/i.test(m.text())) return
+    // Firefox prints an Error argument as "Error": ask for its message.
+    const detail = await Promise.all(
+      m
+        .args()
+        .map((a) =>
+          a
+            .evaluate((v) =>
+              v instanceof Error ? `${v.message} ${v.stack}` : String(v),
+            )
+            .catch(() => ''),
+        ),
+    )
+    errors.push(`console: ${(detail.join(' ') || m.text()).slice(0, 400)}`)
   })
 })
 

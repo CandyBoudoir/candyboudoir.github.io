@@ -136,9 +136,10 @@ export function cancelWrites() {
   unsavedSettings.clear()
 }
 
-// While the page is being left, the last save's request is cut off. The
-// browser mirror keeps what it carried and the next load puts it back
-// (storage/tier1.js), so that is no error to report.
+// While the page is being left, requests still in flight are cut off: a
+// query, or the last save, whose content the browser mirror keeps for the
+// next load to put back (storage/tier1.js). Neither is an error to report.
+// Firefox cuts them off when the navigation starts, before pagehide.
 let leaving = false
 
 function reportError(e) {
@@ -195,6 +196,7 @@ export function boot() {
   if (booted) return
   booted = true
   store.subscribe(persist)
+  window.addEventListener('beforeunload', () => (leaving = true))
   window.addEventListener('pagehide', () => {
     leaving = true
     saveNow()
