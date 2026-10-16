@@ -27,6 +27,13 @@ const M = engine({ rated: 1 })
 const { db } = M
 const hasFavorite = (s) =>
   s.performers.some((p) => db.favoritePerformerIds.has(p.id))
+// four favorites from the middle of the cast list, who would not otherwise
+// lead the row
+const picks = [...db.localPerformers]
+  .sort((a, b) => b.ownedSceneIds.length - a.ownedSceneIds.length)
+  .slice(20, 24)
+  .map((p) => p.id)
+const withPick = (it) => it.scene.performers.some((p) => picks.includes(p.id))
 
 test('Your score counts the ratings it still needs and stays hidden', () => {
   assert.equal(M.fits.rated.length, 1)
@@ -73,14 +80,7 @@ test('with too few ratings, no reason claims you rate anything well', () => {
 })
 
 test('For you leans on your favorites until Your score can check itself', () => {
-  // four favorites from the middle of the cast list, who would not
-  // otherwise lead the row
-  const picks = [...db.localPerformers]
-    .sort((a, b) => b.ownedSceneIds.length - a.ownedSceneIds.length)
-    .slice(20, 24)
-    .map((p) => p.id)
-  const theirs = (row) =>
-    row.filter((it) => it.scene.performers.some((p) => picks.includes(p.id)))
+  const theirs = (row) => row.filter(withPick)
   const row = forYou(engine({ rated: 1, favorites: picks }))
   const plain = forYou(engine({ rated: 1, favorites: [] }))
   assert.ok(
@@ -98,6 +98,34 @@ test('For you leans on your favorites until Your score can check itself', () => 
   for (const it of row)
     for (const p of it.scene.performers) per.set(p.id, (per.get(p.id) || 0) + 1)
   assert.ok(Math.max(...per.values()) <= FY.FY.perPerformer)
+})
+
+test('with no ratings and no plays, Your score guesses 3 and favorites lead For you', () => {
+  // a brand-new library: nothing to fit, so every scene predicts 3 stars
+  // (not 0/0, which made every total NaN and the row's order arbitrary)
+  const empty = (favorites) =>
+    engine({ rated: 0, played: 0, favorites, performerRatings: false })
+  const Mx = empty(picks)
+  assert.equal(Mx.fits.rated.length + Mx.fits.watchedUnrated.length, 0)
+  for (const [id, p] of Mx.predictions) assert.equal(p.value, 3, id)
+  const row = forYou(Mx)
+  assert.equal(row.length, FY.FY.size)
+  for (const it of row) assert.ok(Number.isFinite(it.total), it.scene.id)
+  // the favorites carry the row
+  const theirs = row.filter(withPick)
+  const plain = forYou(empty([])).filter(withPick)
+  assert.ok(
+    theirs.length >= Math.max(6, plain.length + 3),
+    `${theirs.length} cards with a favorite, ${plain.length} without`,
+  )
+  const mains = row.filter((it) => it.kind === 'main')
+  const lowest = Math.min(...mains.filter(withPick).map((it) => it.total))
+  const rest = mains.filter((it) => !withPick(it)).map((it) => it.total)
+  assert.ok(
+    rest.every((t) => t < lowest),
+    `favorites' cards from ${lowest}, others ${rest}`,
+  )
+  assert.ok(theirs.some((it) => it.reason.endsWith('one of your favorites')))
 })
 
 test('a performer rating lifts or sinks their scenes, by the stars', () => {
