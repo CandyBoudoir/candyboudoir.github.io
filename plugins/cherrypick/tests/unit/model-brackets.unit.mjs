@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { buildDb } from '../../src/js/model/db.js'
 import { createEngine } from '../../src/js/model/index.js'
 import * as BR from '../../src/js/model/brackets.js'
+import { fmtStars } from '../../src/js/model/util.js'
 import { FIELD_PREFIX } from '../../src/js/name.js'
 import { syntheticLibrary } from './fixtures/synthetic.mjs'
 
@@ -192,26 +193,32 @@ test('a performer bracket: half anchors, half candidates, each candidate meets a
   const ids = BR.performerPool(M, { gender: 'FEMALE', pool: 'library' })
   const role = (id) => BR.entrantRole(M, 'performer', id)
   const anchorsIn = ids.filter((id) => role(id) === 'anchor')
-  const candidatesIn = ids.filter((id) => role(id) === 'candidate')
-  assert.ok(anchorsIn.length >= 8 && candidatesIn.length >= 8, 'the fixture')
+  // unrated performers with two rated scenes or more anchor by them
+  const byScenes = (id) => BR.sceneAverage(M, id) != null
+  const candidatesIn = ids.filter(
+    (id) => role(id) === 'candidate' && !byScenes(id),
+  )
+  assert.ok(anchorsIn.length >= 8 && candidatesIn.length >= 6, 'the fixture')
+  assert.ok(ids.some((id) => role(id) === 'candidate' && byScenes(id)))
   const b = BR.createBracket(M, {
     kind: 'performer',
     gender: 'FEMALE',
     poolLabel: 'Female',
-    size: 16,
+    size: 8,
     ids,
     now: 7,
   })
   assert.equal(b.id, 'b' + (7).toString(36))
-  assert.equal(b.seeds.length, 16)
+  assert.equal(b.seeds.length, 8)
   const anchors = Object.keys(b.anchors)
-  assert.equal(anchors.length, 8)
+  assert.equal(anchors.length, 4)
   for (const id of anchors) {
-    assert.equal(role(id), 'anchor')
+    assert.equal(role(id), 'anchor', 'rated by the user: scene averages wait')
     assert.equal(b.anchors[id], M.stashPerformerRating(id))
   }
+  assert.deepEqual(b.sceneAnchors, [])
   const candidates = b.seeds.filter((id) => !(id in b.anchors))
-  assert.ok(candidates.every((id) => role(id) === 'candidate'))
+  assert.ok(candidates.every((id) => candidatesIn.includes(id)))
   // anchors span the user's scale; candidates the model's whole range
   const rating = (id) => M.stashPerformerRating(id)
   const ratings = anchorsIn.map(rating)
@@ -231,14 +238,19 @@ test('a performer bracket: half anchors, half candidates, each candidate meets a
   assert.ok([topMatch.a, topMatch.b].includes(strongest))
   // the sides are drawn from `now`: the same each time, not always the anchor's
   assert.deepEqual(
-    BR.createBracket(M, { kind: 'performer', size: 16, ids, now: 7 }).slots,
+    BR.createBracket(M, { kind: 'performer', size: 8, ids, now: 7 }).slots,
     b.slots,
   )
   assert.ok(first.some((m) => m.a in b.anchors))
   assert.ok(first.some((m) => m.b in b.anchors))
   const done = playOut(b)
-  assert.equal(done.decisions.length, 15)
+  assert.equal(done.decisions.length, 7)
   assert.ok(done.result.champion)
+  // At 16 the candidates run short: rated anchors fill the places they leave
+  const big = BR.createBracket(M, { kind: 'performer', size: 16, ids, now: 7 })
+  assert.equal(Object.keys(big.anchors).length, 16 - candidatesIn.length)
+  assert.ok(Object.keys(big.anchors).every((id) => role(id) === 'anchor'))
+  assert.ok(candidatesIn.every((id) => big.seeds.includes(id)))
 })
 
 test('who plays: candidates and anchors share the slots, ranked records only fill', () => {
@@ -693,4 +705,300 @@ test('a bracket from before anchors seeds 1 v N and takes the anchors it has now
   const { rows } = BR.ratingProposals(M, done)
   for (const x of rows)
     assert.equal(BR.entrantRole(M, 'performer', x.id), 'candidate')
+})
+
+// ---------------------------------------------------------------- scene-average anchors
+
+// A small library through buildDb: Female performers with a photo, by id
+// (rating100, or [rating100, custom_fields]), and owned scenes s0, s1, ...
+// as [cast, rating100, custom_fields]
+function sceneLibrary(performers, scenes) {
+  return buildDb({
+    asOf: Date.parse('2026-10-15T12:00:00Z'),
+    performers: Object.entries(performers).map(([id, v]) => {
+      const [rating100, custom_fields = {}] = Array.isArray(v) ? v : [v]
+      return {
+        id,
+        name: `Performer ${id}`,
+        gender: 'FEMALE',
+        image_path: `/performer/${id}/image`,
+        rating100,
+        custom_fields,
+      }
+    }),
+    scenes: scenes.map(([cast, rating100, custom_fields = {}], i) => ({
+      id: 's' + i,
+      title: `Scene ${i}`,
+      created_at: '2026-01-01T00:00:00Z',
+      rating100,
+      performers: cast.map((id) => ({ id, name: `Performer ${id}` })),
+      custom_fields,
+    })),
+  })
+}
+// Scenes with one performer alone, one per rating
+const scenesOf = (id, ...ratings) => ratings.map((r) => [[id], r])
+// What Ascension writes on a record it ranks
+const RANKED = {
+  hotornot_stats: JSON.stringify({ total_matches: 5, wins: 3, losses: 2 }),
+  performer_record: JSON.stringify([{ opponentId: '9', won: true }]),
+}
+
+test('a scene-average anchor: the plain average of two or more of your scene ratings', () => {
+  const M = createEngine(
+    sceneLibrary({ P: null, Q: null, R: null }, [
+      [['P'], 80],
+      [['P', 'Q'], 70],
+      [['Q'], 65],
+      [['Q'], 80],
+      [['R'], 90],
+      [['R'], null],
+    ]),
+  ).compute({})
+  assert.equal(BR.SCENE_ANCHOR_MIN, 2)
+  assert.equal(BR.sceneAverage(M, 'P'), 75, "4★ and 3.5★, not Q's others")
+  assert.equal(BR.sceneAverage(M, 'Q'), 72, '(70 + 65 + 80) / 3, whole')
+  assert.equal(BR.sceneAverage(M, 'R'), null, 'one rated scene is not enough')
+})
+
+test('a scene-average anchor counts only the ratings that are yours', () => {
+  // Ascension's Prime: one shared low value and one mid value across the
+  // library's scenes
+  const prime = Array.from({ length: 10 }, (_, i) => [[], i < 7 ? 6 : 31])
+  const scenes = [
+    [['P'], 80],
+    [['P'], 60],
+    [['P'], 100, { scene_record: JSON.stringify([{ opponentId: '9' }]) }],
+    [['P'], 100, { restash_score: 100 }],
+    [['P'], 100, { [BR.PROVISIONAL_FIELD]: 100 }],
+    [['P'], 6],
+    [['P'], 20],
+    [['P'], null],
+    ...prime,
+  ]
+  const db = sceneLibrary({ P: null }, scenes)
+  const M = createEngine(db).compute({ dontLearn: ['s6'] })
+  assert.equal(M.ratingSource('clip', 's2'), 'elo', 'Ascension ranks it')
+  assert.equal(M.ratingSource('clip', 's3'), 'mirror', "Restash's score")
+  assert.ok(BR.isProvisional(db.scenes.get('s4').local), 'stepped down')
+  assert.equal(M.ratingSource('clip', 's5'), 'primed', "Prime's value")
+  assert.equal(BR.sceneAverage(M, 'P'), 70, 'the 4★ and the 3★ alone')
+  // a scene marked Don't learn from this counts once it is unmarked
+  assert.equal(
+    BR.sceneAverage(createEngine(db).compute({}), 'P'),
+    Math.round((80 + 60 + 20) / 3),
+  )
+  // a provisional rating the user changed is theirs
+  scenes[4] = [['P'], 50, { [BR.PROVISIONAL_FIELD]: 100 }]
+  assert.equal(
+    BR.sceneAverage(
+      createEngine(sceneLibrary({ P: null }, scenes)).compute({
+        dontLearn: ['s6'],
+      }),
+      'P',
+    ),
+    Math.round((80 + 60 + 50) / 3),
+  )
+})
+
+test('who anchors by scene ratings: performers with no rating of their own', () => {
+  // Prime's shape across the Female performers, so PRIMED's 6 is Prime's
+  const primed = Object.fromEntries(
+    Array.from({ length: 10 }, (_, i) => ['Z' + i, i < 7 ? 6 : 31]),
+  )
+  const M = createEngine(
+    sceneLibrary(
+      {
+        OWN: 90,
+        NONE: null,
+        PRIMED: 6,
+        PROV: [70, { [BR.PROVISIONAL_FIELD]: 70 }],
+        RANKED: [55, RANKED],
+        ONE: null,
+        ...primed,
+      },
+      [
+        ...scenesOf('OWN', 40, 40),
+        ...scenesOf('NONE', 80, 60),
+        ...scenesOf('PRIMED', 40, 60),
+        ...scenesOf('PROV', 100, 100),
+        ...scenesOf('RANKED', 100, 100),
+        ...scenesOf('ONE', 100, null),
+      ],
+    ),
+  ).compute({})
+  assert.equal(M.ratingSource('performer', 'PRIMED'), 'primed')
+  const c = BR.composeEntrants(
+    M,
+    'performer',
+    ['OWN', 'NONE', 'PRIMED', 'PROV', 'RANKED', 'ONE'],
+    8,
+  )
+  assert.deepEqual(c.anchors, ['OWN', 'NONE', 'PRIMED'], 'highest first')
+  assert.deepEqual(c.ratings, { OWN: 90, NONE: 70, PRIMED: 50 })
+  assert.deepEqual(c.sceneAnchors, ['NONE', 'PRIMED'])
+  // a provisional rating stays a candidate, so a bracket can correct it;
+  // another plugin's ranking stays that plugin's
+  assert.deepEqual(c.candidates.slice().sort(), ['ONE', 'PROV'])
+  assert.deepEqual(c.ranked, ['RANKED'])
+  // a clip bracket has no scene-average anchors
+  assert.deepEqual(
+    BR.composeEntrants(M, 'clip', ['s0', 's2'], 4).sceneAnchors,
+    [],
+  )
+})
+
+// Two performers rated by hand, four anchored by their scenes, four
+// candidates (one rated scene at most) and one Ascension ranks
+const ORDER_PERFORMERS = {
+  A1: 90,
+  A2: 50,
+  S1: null,
+  S2: null,
+  S3: null,
+  S4: null,
+  C1: null,
+  C2: null,
+  C3: null,
+  C4: null,
+  R1: [55, RANKED],
+}
+const ORDER_SCENES = [
+  ...scenesOf('S1', 100, 70),
+  ...scenesOf('S2', 60, 60),
+  ...scenesOf('S3', 40, 30),
+  ...scenesOf('S4', 80, 70),
+  ...scenesOf('C1', 90),
+  ...scenesOf('C2', null),
+  ...scenesOf('C3', 20),
+  ...scenesOf('C4', null),
+  ...scenesOf('R1', 100, 90),
+]
+
+test('pools: rated anchors first, scene-average anchors next, ranked records last', () => {
+  const M = createEngine(sceneLibrary(ORDER_PERFORMERS, ORDER_SCENES)).compute(
+    {},
+  )
+  const ids = Object.keys(ORDER_PERFORMERS)
+  // Four anchor places: both rated ones, then the scene averages spread
+  // from the top (S1, 4.25★) to the bottom (S3, 1.75★)
+  const c = BR.composeEntrants(M, 'performer', ids, 8)
+  assert.deepEqual(c.anchors, ['A1', 'S1', 'A2', 'S3'])
+  assert.deepEqual(c.ratings, { A1: 90, S1: 85, A2: 50, S3: 35 })
+  assert.deepEqual(c.sceneAnchors, ['S1', 'S3'])
+  assert.deepEqual(c.candidates.slice().sort(), ['C1', 'C2', 'C3', 'C4'])
+  assert.deepEqual(c.ranked, [])
+  // Short of candidates: every scene-average anchor plays before the
+  // ranked record fills the last place
+  const few = BR.composeEntrants(
+    M,
+    'performer',
+    ids.filter((id) => !['C2', 'C3', 'C4'].includes(id)),
+    8,
+  )
+  assert.deepEqual(few.anchors, ['A1', 'S1', 'S4', 'S2', 'A2', 'S3'])
+  assert.deepEqual(few.candidates, ['C1'])
+  assert.deepEqual(few.ranked, ['R1'])
+  // Enough rated anchors: no scene-average anchor plays
+  const rated = createEngine(
+    sceneLibrary({ ...ORDER_PERFORMERS, S2: 70, S3: 60, S4: 40 }, ORDER_SCENES),
+  ).compute({})
+  const full = BR.composeEntrants(rated, 'performer', ids, 8)
+  assert.deepEqual(full.anchors, ['A1', 'S2', 'S3', 'S4'])
+  assert.deepEqual(full.sceneAnchors, [])
+  // The bracket keeps them, and each candidate meets the anchor of its rank
+  const b = BR.createBracket(M, { kind: 'performer', size: 8, ids, now: 3 })
+  assert.deepEqual(b.anchors, c.ratings)
+  assert.deepEqual(b.sceneAnchors, ['S1', 'S3'])
+  const strength = (id) => M.performerAffinity(id)
+  const byRank = c.candidates.slice().sort((x, y) => strength(y) - strength(x))
+  for (const m of BR.bracketState(b).rounds[0]) {
+    const anchor = m.a in b.anchors ? m.a : m.b
+    const other = anchor === m.a ? m.b : m.a
+    assert.ok(!(other in b.anchors), 'an anchor against a candidate')
+    assert.equal(byRank.indexOf(other), c.anchors.indexOf(anchor))
+  }
+})
+
+// A bracket of 8 where no performer has a rating of their own: four
+// anchored by their scenes (4.5★, 3.75★, 3★, 1.75★) and four candidates
+// with no rated scene, played out by `winner(a, b, anchors)`
+function sceneAnchored(winner) {
+  const M = createEngine(
+    sceneLibrary(
+      Object.fromEntries(
+        ['S1', 'S2', 'S3', 'S4', 'C1', 'C2', 'C3', 'C4'].map((id) => [
+          id,
+          null,
+        ]),
+      ),
+      [
+        ...scenesOf('S1', 100, 80),
+        ...scenesOf('S2', 80, 70),
+        ...scenesOf('S3', 60, 60),
+        ...scenesOf('S4', 40, 30),
+        ...['C1', 'C2', 'C3', 'C4'].flatMap((id) => scenesOf(id, null)),
+      ],
+    ),
+  ).compute({})
+  const ids = ['S1', 'S2', 'S3', 'S4', 'C1', 'C2', 'C3', 'C4']
+  let b = BR.createBracket(M, { kind: 'performer', size: 8, ids, now: 11 })
+  let st = BR.bracketState(b)
+  while (st.current) {
+    b = BR.pick(b, winner(st.current.a, st.current.b, b.anchors))
+    st = BR.bracketState(b)
+  }
+  return { M, b: { ...b, result: st.result, status: 'done' }, st }
+}
+
+test('Apply measures against scene-average anchors and never rates one', () => {
+  // Anchors beat candidates, and the higher anchor beats the lower
+  const { M, b, st } = sceneAnchored((x, y, anchors) => {
+    if (x in anchors && y in anchors) return anchors[x] > anchors[y] ? x : y
+    return x in anchors ? x : y
+  })
+  assert.deepEqual(b.anchors, { S1: 90, S2: 75, S3: 60, S4: 35 })
+  assert.deepEqual(b.sceneAnchors, ['S1', 'S2', 'S3', 'S4'])
+  assert.equal(b.result.champion, 'S1')
+  const { rows, askChampion } = BR.ratingProposals(M, b)
+  assert.equal(askChampion, false, 'an anchored bracket: no stars asked')
+  assert.deepEqual(rows.map((x) => x.id).sort(), ['C1', 'C2', 'C3', 'C4'])
+  // each candidate half a star under the anchor that beat it in round one
+  for (const m of st.rounds[0]) {
+    const anchor = m.winner
+    const x = rows.find((r) => r.id === (m.a === anchor ? m.b : m.a))
+    assert.equal(x.to, b.anchors[anchor] - 10)
+    assert.equal(
+      x.why,
+      `Below Performer ${anchor} (${fmtStars(b.anchors[anchor] / 20)}★ from your scene ratings)`,
+    )
+    assert.equal(x.from, null)
+    assert.equal(x.provisional, false)
+  }
+  const s2 = rows.find((r) => r.why.includes('Performer S2'))
+  assert.equal(s2.why, 'Below Performer S2 (3.8★ from your scene ratings)')
+  assert.equal(s2.to, 65)
+  // the anchors stay unrated in Stash, ready to anchor again
+  for (const id of b.sceneAnchors)
+    assert.equal(M.stashPerformerRating(id), null)
+  const again = BR.composeEntrants(M, 'performer', b.seeds, 8)
+  assert.deepEqual(again.sceneAnchors, b.sceneAnchors)
+})
+
+test('Apply: a candidate that beats scene-average anchors goes above them', () => {
+  // Candidates beat anchors; between two candidates, side a
+  const { M, b } = sceneAnchored((x, y, anchors) => (x in anchors ? y : x))
+  const champion = b.result.champion
+  assert.ok(!(champion in b.anchors))
+  const { rows, askChampion } = BR.ratingProposals(M, b)
+  assert.equal(askChampion, false)
+  for (const x of rows) {
+    assert.ok(!(x.id in b.anchors), 'never an anchor')
+    assert.match(
+      x.why,
+      /^Above Performer S\d \(\d\.\d★ from your scene ratings\)/,
+    )
+  }
+  const top = rows.find((x) => x.id === champion)
+  assert.equal(top.to, 100, 'half a star above the 4.5★ it beat')
 })
