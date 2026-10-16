@@ -162,6 +162,10 @@ function errorText(e) {
 
 const failedTitle = (text) => `Can't bracket this list: ${text}`
 
+// The buttons wait for the model, several seconds on a large library's
+// first visit; the title says why they are greyed out.
+const NOT_READY = 'Cherry Pick is still reading your library'
+
 // A button's title, and the criteria the bracket leaves out
 const withNotes = (title, desc) =>
   title && desc?.notApplied?.length
@@ -201,21 +205,28 @@ function PerformerOps({ desc, pending }) {
       })
   const off = !ready || pending || !!error
   return (
-    <div className="btn-group cherrypick-bracket-ops">
+    // A disabled button shows no tooltip in some browsers, so the group
+    // carries the not-ready title too.
+    <div
+      className="btn-group cherrypick-bracket-ops"
+      title={ready ? undefined : NOT_READY}
+    >
       {active ? null : (
         <button
           type="button"
           className="btn btn-secondary cherrypick-bracket-button"
           disabled={off}
           title={
-            error
-              ? failedTitle(error)
-              : withNotes(
-                  desc?.active
-                    ? 'Bracket the performers in this list'
-                    : 'Bracket your performers',
-                  desc,
-                )
+            !ready
+              ? NOT_READY
+              : error
+                ? failedTitle(error)
+                : withNotes(
+                    desc?.active
+                      ? 'Bracket the performers in this list'
+                      : 'Bracket your performers',
+                    desc,
+                  )
           }
           onClick={go(quickStartPerformers)}
         >
@@ -227,7 +238,7 @@ function PerformerOps({ desc, pending }) {
         type="button"
         className="btn btn-link cherrypick-options-link"
         disabled={off}
-        title={error ? failedTitle(error) : undefined}
+        title={!ready ? NOT_READY : error ? failedTitle(error) : undefined}
         onClick={go(openPerformerSetup)}
       >
         Options
@@ -324,15 +335,20 @@ function SceneOps({ where, desc, pathname }) {
     label = 'Bracket'
     title = error
       ? failedTitle(error)
-      : n == null
-        ? undefined
-        : ok
-          ? `Bracket ${BR.clipPoolPhrase(n)} watched scenes in this list`
-          : `Needs ${BR.MIN_CLIP_POOL} watched scenes in this list`
+      : !M
+        ? NOT_READY
+        : n == null
+          ? undefined
+          : ok
+            ? `Bracket ${BR.clipPoolPhrase(n)} watched scenes in this list`
+            : `Needs ${BR.MIN_CLIP_POOL} watched scenes in this list`
   }
   const herTab = where.place === 'performer-scenes'
   return (
-    <div className="btn-group cherrypick-bracket-ops">
+    <div
+      className="btn-group cherrypick-bracket-ops"
+      title={M ? undefined : NOT_READY}
+    >
       {active && !herTab ? null : (
         <button
           type="button"
@@ -349,7 +365,7 @@ function SceneOps({ where, desc, pathname }) {
         type="button"
         className="btn btn-link cherrypick-options-link"
         disabled={n == null}
-        title={error ? failedTitle(error) : undefined}
+        title={!M ? NOT_READY : error ? failedTitle(error) : undefined}
         onClick={() => openClipSetup(pool)}
       >
         Options

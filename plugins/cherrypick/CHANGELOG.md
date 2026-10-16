@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+
+- On a browser's first visit, and after a day away, For you's header says what is happening while its row of placeholder cards waits: "Reading your library: 4,500 of 25,000 scenes", then "Learning your taste from 25,000 scenes". On a library of 25,000 scenes that takes about 6 seconds. Other visits start from the browser's copy of your library, take about 2 to 3 seconds and show no line.
+- While Cherry Pick is still reading your library, Bracket and Options beside the Performers and Scenes lists say so when you point at them, instead of sitting greyed out with no reason.
+
 ## 0.1.1
 
 - Your score now shows on scenes whose only rating another plugin set: Ascension's or Xenith's Elo score, the random starting rating of Ascension's Prime tasks, or Restash's mirrored score. Cherry Pick already counted those scenes as unrated, but hid Your score on them, so the scenes Prime Unrated Scenes primed lost it. It takes the card's rating corner, where Ascension and Xenith already hide Stash's rating, and shows beside the stars on the scene page. A rating you set yourself still hides it.

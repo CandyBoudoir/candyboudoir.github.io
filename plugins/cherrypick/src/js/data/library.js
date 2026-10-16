@@ -81,7 +81,11 @@ export async function loadLibrary({
     const { findScenes } = await run(SCENES, { filter: { per_page: 0 } })
     if (findScenes.count !== scenes.length) scenes = null
   }
-  if (!scenes)
+  // onProgress reports a full read only: a first visit, or a copy too old or
+  // out of step to update. The performers, fetched whole every time, take
+  // well under a second on top of an update.
+  const full = !scenes
+  if (full)
     scenes = await fetchPages(
       run,
       SCENES,
@@ -96,7 +100,7 @@ export async function loadLibrary({
     'findPerformers',
     'performers',
     {},
-    (n, of) => onProgress?.({ kind: 'performers', n, of }),
+    full ? (n, of) => onProgress?.({ kind: 'performers', n, of }) : undefined,
   )
   const library = { version: CACHE_VERSION, syncedAt, scenes, performers }
   if (cache) await cache.set('library', library).catch(() => {})

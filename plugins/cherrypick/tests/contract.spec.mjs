@@ -52,6 +52,65 @@ test('For you comes first on the front page, before Stash rows', async ({
   expect(errors).toEqual([])
 })
 
+// Each page of the library takes a second and a half to arrive, as on a
+// library of tens of thousands of scenes, so the first build lasts long
+// enough to watch.
+const slowLibrary = (page) =>
+  page.route('**/graphql', async (route) => {
+    if (/CherryPick(Scenes|Performers)/.test(route.request().postData() || ''))
+      await new Promise((r) => setTimeout(r, 1500))
+    await route.continue()
+  })
+
+test("a browser's first visit says For you is reading the library; a reload doesn't", async ({
+  page,
+}) => {
+  // Whether the line showed at any moment of a page load
+  await page.addInitScript(() => {
+    new MutationObserver(() => {
+      if (document.querySelector('.cherrypick-building'))
+        window.__sawBuilding = true
+    }).observe(document, { childList: true, subtree: true })
+  })
+  await slowLibrary(page)
+  await page.goto('/')
+  const line = page.locator('.cherrypick-for-you-building .cherrypick-building')
+  await expect(line).toContainText(
+    /^Reading your library: [\d,]+ of [\d,]+ (scenes|performers)…$/,
+    { timeout: 20_000 },
+  )
+  await expect(forYouCards(page).first()).toBeVisible({ timeout: 30_000 })
+  await expect(line).toHaveCount(0)
+  // The next load starts from the browser's copy and says nothing.
+  await page.reload()
+  await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
+  expect(await page.evaluate(() => !!window.__sawBuilding)).toBe(false)
+})
+
+test('the bracket buttons say why they are greyed out until the model is in', async ({
+  page,
+}) => {
+  await slowLibrary(page)
+  await page.goto('/performers')
+  const button = page
+    .locator('.cherrypick-bracket-button')
+    .filter({ visible: true })
+    .first()
+  await expect(button).toBeDisabled({ timeout: 20_000 })
+  await expect(button).toHaveAttribute(
+    'title',
+    'Cherry Pick is still reading your library',
+  )
+  await expect(
+    page.locator('.cherrypick-bracket-ops').filter({ visible: true }).first(),
+  ).toHaveAttribute('title', 'Cherry Pick is still reading your library')
+  await expect(button).toBeEnabled({ timeout: 30_000 })
+  await expect(button).not.toHaveAttribute(
+    'title',
+    'Cherry Pick is still reading your library',
+  )
+})
+
 test('Not interested hides a card in place and is saved to Stash', async ({
   page,
 }) => {

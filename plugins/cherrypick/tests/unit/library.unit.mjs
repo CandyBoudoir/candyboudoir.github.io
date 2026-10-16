@@ -79,6 +79,29 @@ test('an older copy fetches only what changed', async () => {
   assert.equal(lib.scenes.length, 10)
 })
 
+test('progress is reported for a full read and not for an update', async () => {
+  const stash = fakeStash(1234)
+  const cache = memCache()
+  const now = Date.parse('2026-02-01T00:00:00Z')
+  const first = []
+  await loadLibrary({
+    run: stash.run,
+    cache,
+    now,
+    onProgress: (p) => first.push(p),
+  })
+  assert.deepEqual(first.at(0), { kind: 'scenes', n: 500, of: 1234 })
+  assert.deepEqual(first.at(-1), { kind: 'performers', n: 2, of: 2 })
+  const update = []
+  await loadLibrary({
+    run: stash.run,
+    cache,
+    now: now + REFRESH_MS + 1000,
+    onProgress: (p) => update.push(p),
+  })
+  assert.deepEqual(update, [])
+})
+
 test('a deleted scene triggers a full reload', async () => {
   const stash = fakeStash(10)
   const cache = memCache()
