@@ -155,6 +155,41 @@ test('the navbar cherries open the plugin page, which survives a reload', async 
   )
 })
 
+test("the navbar keeps Stash's items and another plugin's list beside the cherries", async ({
+  page,
+}) => {
+  // Xenith's after patch on MainNavBar.UtilityItems returns [result, the
+  // host of its dialog], and Stash hands the next after patch each item as
+  // an argument of its own. A stand-in registers the same kind of patch as
+  // soon as Stash sets PluginApi, before any plugin loads, so Cherry Pick's
+  // patch runs after it.
+  await page.addInitScript(() => {
+    let api
+    Object.defineProperty(window, 'PluginApi', {
+      configurable: true,
+      get: () => api,
+      set(value) {
+        api = value
+        api.patch.after('MainNavBar.UtilityItems', (props, ...rest) => [
+          rest[rest.length - 1],
+          api.React.createElement('span', {
+            key: 'list-patch',
+            className: 'list-patch-probe',
+          }),
+        ])
+      },
+    })
+  })
+  await page.goto('/')
+  await expect(page.locator('.cherrypick-nav-icon').first()).toBeAttached({
+    timeout: 20_000,
+  })
+  await expect(page.locator('.list-patch-probe').first()).toBeAttached()
+  await expect(
+    page.locator('.navbar a.nav-utility[href="/settings"]').first(),
+  ).toBeAttached()
+})
+
 test('Settings › Plugins lists the switches, already on', async ({ page }) => {
   await page.goto('/')
   await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })

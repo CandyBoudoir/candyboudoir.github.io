@@ -14,8 +14,9 @@
 //     won, ratingAfter, AscRatingAfter }.
 //   - xenith_record: Xenith's last 50, for performers and scenes, { date,
 //     opponent: "<id>:<name or title>", won, ratingAfter }.
-// A skip is won: null in Ascension and HotOrNot and { draw: true } with no
-// won in Xenith; an unknown opponent is "0". None of them teaches anything.
+// Ascension's Skip writes nothing and its draw is won: null; a skip is won:
+// null in HotOrNot and { draw: true } with no won in Xenith; an unknown
+// opponent is "0". None of them teaches anything.
 // HotOrNot 1.0 and V2 keep only totals (hotornot_stats), so they add none.
 //
 // Every match lands in both players' records, written at most a few seconds
