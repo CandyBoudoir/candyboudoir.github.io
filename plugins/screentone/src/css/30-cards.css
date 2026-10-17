@@ -448,8 +448,3 @@
 .grid-card .card-check {
   accent-color: var(--st-spot);
 }
-
-/* The grid: the same panels, closer set, as a page of manga lays them out */
-.card-grid {
-  gap: 1.1rem;
-}
