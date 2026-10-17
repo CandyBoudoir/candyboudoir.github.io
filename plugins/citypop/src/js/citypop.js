@@ -219,10 +219,20 @@
     if (unknown.length) ask([...new Set(unknown)])
   }
 
-  // Only nodes React adds or rewrites are checked for copy, so a long scene
-  // grid costs nothing after its first render.
+  // Only nodes React adds or rewrites are checked for copy, and the scene
+  // cards only when React adds or redraws one, so a long scene grid costs
+  // nothing after its first render.
   const queue = new Set()
   let pending = false
+  let cardsChanged = false
+
+  function touchesCards(node) {
+    return (
+      node.nodeType === Node.ELEMENT_NODE &&
+      (node.closest('.scene-card') !== null ||
+        node.querySelector('.scene-card') !== null)
+    )
+  }
 
   function flush() {
     pending = false
@@ -237,14 +247,17 @@
       }
     }
     markEmptyLists()
-    if (window.PluginApi) markAudio()
+    if (cardsChanged && window.PluginApi) markAudio()
+    cardsChanged = false
   }
 
   const observer = new MutationObserver((records) => {
     for (const record of records) {
       if (record.type === 'characterData') queue.add(record.target)
       for (const node of record.addedNodes) {
-        if (!node.classList?.contains('citypop-audio-cover')) queue.add(node)
+        if (node.classList?.contains('citypop-audio-cover')) continue
+        queue.add(node)
+        if (!cardsChanged && touchesCards(node)) cardsChanged = true
       }
     }
     if (pending || queue.size === 0) return
