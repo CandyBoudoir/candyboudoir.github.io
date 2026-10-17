@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.1.5
 
 - In a bracket's first round, the unrated ones meet across the bracket's halves: of 16, the one Cherry Pick rates highest meets the ninth, the second the tenth, and so on. They met their neighbour (first against second), so since 0.1.4 rates every entrant from where it finished, a strong scene or performer that lost to the next strongest in the first round was rated at about the middle of your scale.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.39.2, Xenith 3.2.0 and Restash 0.3.0-55c1cb2.
 
 ## 0.1.4
 
