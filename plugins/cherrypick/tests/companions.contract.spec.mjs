@@ -1,6 +1,6 @@
 // Cherry Pick beside the plugins the compatibility tests can install
 // (companions.mjs): the Elo ranking plugins Ascension 1.4.1, HotOrNot 1.0.0
-// and Xenith 3.2.0, Stash Curator 0.36.0 and Restash 0.3.0. Each block runs
+// and Xenith 3.2.0, Stash Curator 0.39.1 and Restash 0.3.0. Each block runs
 // when prepare.mjs installed its plugin alone (COMPANIONS=ascension,
 // hotornot, xenith, curator or restash) and is skipped otherwise: Ascension
 // is a fork of HotOrNot and the two claim the same element ids, so they

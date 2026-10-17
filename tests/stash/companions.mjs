@@ -4,17 +4,19 @@
 // them from a package source of its own, the way users install plugins,
 // and usePlugins leaves them enabled. Each is pinned to one release: its zip,
 // which Stash checks against sha256 as it installs it, at a fixed commit when
-// the author keeps the zip in git.
+// the author keeps the zip in git. The pin is always the author's latest
+// release: `latest` says where to look, and tested-with.mjs holds back a
+// Cherry Pick release while a newer one is out.
 const CURATOR_RELEASE =
-  'https://github.com/mrx-31415/stash-curator/releases/download/v0.36.0'
+  'https://github.com/mrx-31415/stash-curator/releases/download/v0.39.1'
 const CURATOR_ZIPS = {
   'linux-x64': [
     'stash-curator-linux-amd64.zip',
-    '4e997b78d325d909ba1b01c040147ff0dc52b94e5361ebcdd864abf6d787c1c5',
+    '8c40feb24d0178e909728a7a10d912795381bf40ae4d618ede989d000a185d51',
   ],
   'darwin-arm64': [
     'stash-curator-darwin-arm64.zip',
-    '1d54e6cd42c3e8bbb38abe6d50ad5efb4980c270b29d3ada9f23fdcbd019334c',
+    'c194f3de779e90094eca592e83a9151c9e4eef716721d7382950bc1a55bb6db4',
   ],
 }
 // Stash Curator's zip for the machine Stash runs on, linux-amd64 by default
@@ -42,6 +44,11 @@ export const COMPANIONS = {
     // build and a beta that must not run beside it.
     enable: ['ascension'],
     disable: ['ascension-beta'],
+    // The source index users add, whose sha256 changes with each release
+    latest: {
+      index:
+        'https://raw.githubusercontent.com/Servbot91/Sakotos-Stash-Repo/main/plugins/manifest.yml',
+    },
   },
   // HotOrNot 1.0.0, the Elo ranking plugin Ascension was forked from and
   // whose hotornot_stats field HotOrNotV2 and HotOrNot_V3 also write, from
@@ -64,12 +71,13 @@ export const COMPANIONS = {
     },
     enable: ['hotornot'],
     disable: [],
+    latest: { index: 'https://lowgrade12.github.io/hot-or-not/main/index.yml' },
   },
-  // Stash Curator 0.36.0, local recommendations that score scenes and
+  // Stash Curator 0.39.1, local recommendations that score scenes and
   // performers on Stash's own cards, from
   // https://github.com/mrx-31415/stash-curator (AGPL-3.0). Its zip carries a
   // compiled backend, one zip per platform: linux-amd64 in CI, darwin-arm64
-  // for a local run on a Mac. Both are the builds attached to the v0.36.0
+  // for a local run on a Mac. Both are the builds attached to the v0.39.1
   // release, which later releases leave in place; its GitHub Pages index
   // serves only the newest. Its manifest runs `python` (a launcher for the
   // backend), so Stash needs one on its PATH: where there is only python3,
@@ -78,12 +86,13 @@ export const COMPANIONS = {
     package: {
       id: 'stash-curator',
       name: 'Stash Curator',
-      version: '0.36.0',
-      date: '2026-10-14 18:50:51',
+      version: '0.39.1',
+      date: '2026-10-16 20:19:15',
       ...curatorZip(),
     },
     enable: ['stash-curator'],
     disable: [],
+    latest: { release: 'mrx-31415/stash-curator' },
   },
   // Xenith 3.2.0, the Elo ranking plugin forked from Ascension 1.2.6, from
   // https://github.com/gq1869/stashapp-xenith (GPL-3.0). The zip is the one
@@ -101,6 +110,7 @@ export const COMPANIONS = {
     },
     enable: ['xenith'],
     disable: [],
+    latest: { release: 'gq1869/stashapp-xenith' },
   },
   // Restash 0.3.0, which scores scenes and performers for freshness into
   // custom fields and can mirror that score to rating100, from
@@ -122,6 +132,7 @@ export const COMPANIONS = {
     },
     enable: ['restash'],
     disable: [],
+    latest: { index: 'https://espionage9248.github.io/Restash/index.yml' },
   },
 }
 
@@ -153,3 +164,15 @@ export const companionIndex = () =>
       ].join('\n'),
     )
     .join('\n') + '\n'
+
+// The plugin whose contract specs the companion legs run
+export const TESTED_PLUGIN = 'cherrypick'
+
+// The sentence each Cherry Pick release's CHANGELOG section carries, naming
+// the companion versions its specs ran beside
+export function testedBeside() {
+  const names = Object.values(COMPANIONS).map(
+    (c) => `${c.package.name} ${c.package.version}`,
+  )
+  return `Tested beside ${names.slice(0, -1).join(', ')} and ${names.at(-1)}.`
+}
