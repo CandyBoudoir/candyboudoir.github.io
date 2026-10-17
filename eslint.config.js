@@ -28,9 +28,24 @@ export default defineConfig(
     },
   },
   {
+    // Tag Candy's script runs inside Stash's own JavaScript engine, which
+    // gives it these globals and nothing from a browser or Node.
+    files: ['plugins/tagcandy/src/**/*.js'],
+    languageOptions: {
+      sourceType: 'module',
+      globals: {
+        input: 'readonly',
+        log: 'readonly',
+        gql: 'readonly',
+        util: 'readonly',
+      },
+    },
+  },
+  {
     files: [
       'scripts/**/*.mjs',
       'plugins/*/plugin.mjs',
+      'plugins/*/lookup.mjs',
       '*.config.js',
       '*.config.mjs',
     ],

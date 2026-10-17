@@ -5,3 +5,4 @@ stash-work/
 test-results/
 playwright-report/
 plugins/*/tests/snapshots/
+plugins/tagcandy/data/
