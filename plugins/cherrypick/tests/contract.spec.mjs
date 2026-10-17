@@ -245,6 +245,53 @@ test("the scene page shows the score line, Don't learn and More like this", asyn
     .toEqual([])
 })
 
+// Stash draws a row's arrows outside its slider. More like this is as wide as
+// the page, so arrows that land past its edge make the page scroll sideways.
+// Below Stash's xl breakpoint it follows the scene's tabs, whose performer
+// cards spill out of a box Stash caps at the window's height.
+test("More like this fits the page and clears the scene's details", async ({
+  page,
+}) => {
+  const scene = demoScene(demo, { rated: false, played: true })
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 844 })
+    await page.goto(`/scenes/${scene}`)
+    const row = page.locator('.cherrypick-more-like-this')
+    await expect(row.locator('.slick-arrow').first()).toBeVisible({
+      timeout: 20_000,
+    })
+    const past = await row.evaluate((el) =>
+      [...el.querySelectorAll('.slick-list, .slick-arrow')]
+        .map((e) => [e.className, e.getBoundingClientRect()])
+        .filter(([, b]) => b.left < 0 || b.right > window.innerWidth)
+        .map(([c, b]) => `${c}: ${b.left} to ${b.right}`),
+    )
+    expect(past, `at ${width} wide`).toEqual([])
+    // Another plugin's pieces may widen the page in a companion leg
+    if (!companionPluginIds().length)
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth - window.innerWidth,
+        ),
+        `at ${width} wide`,
+      ).toBe(0)
+  }
+  // Still 390 wide: the demo scene's performer cards run past one screen
+  const overlap = await page.evaluate(() => {
+    const tabs = document.querySelector('.scene-tabs')
+    const bottom = Math.max(
+      ...[...tabs.querySelectorAll('*')].map(
+        (e) => e.getBoundingClientRect().bottom,
+      ),
+    )
+    const top = document
+      .querySelector('.cherrypick-more-like-this')
+      .getBoundingClientRect().top
+    return bottom - top
+  })
+  expect(overlap).toBeLessThanOrEqual(0)
+})
+
 test('nothing of Cherry Pick shows once the scene plays', async ({ page }) => {
   // A shared clip, so there is a player. A play event is enough: the clip
   // need not run, and its play count stays as the themes' screenshots expect.
