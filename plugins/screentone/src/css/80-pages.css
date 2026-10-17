@@ -704,6 +704,12 @@ body {
     width: calc(100% - 2.2rem);
   }
 
+  /* A long value (a StashID, many tags) drops under its title */
+  #performer-page .detail-header:not(.edit) .detail-item {
+    flex-wrap: wrap;
+    row-gap: 0.25rem;
+  }
+
   #performer-page .detail-header:not(.edit) .detail-item-title {
     min-width: 5.8rem;
   }

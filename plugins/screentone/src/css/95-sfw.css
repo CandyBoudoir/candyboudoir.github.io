@@ -51,9 +51,10 @@
 
 /*
  * Stash's SFW content mode keeps the ink and the tone and drops the voice and
- * the figure: no SFX on cards, toasts or the favourite, the empty state is
- * the silent bubble alone. Stash swaps the O counter for a thumbs-up of its
- * own, which the drop mask skips and Screentone leaves alone.
+ * the figure: no SFX on cards, toasts or the favourite, and the empty state
+ * is the silent bubble without her panel. Stash swaps the O counter for a
+ * thumbs-up of its own, which the drop mask skips and Screentone leaves
+ * alone.
  */
 .sfw-content-mode .grid-card .thumbnail-section::after,
 .sfw-content-mode .favorite-button::after,
