@@ -2,7 +2,8 @@
 # Downloads a Stash build, checks it against Stash's published SHA-1 sums and
 # starts it on localhost with an empty config.
 # Usage: tests/stash/stash.sh <vX.Y.Z|develop> <work-dir>
-# STASH_PORT picks the port (default 9999).
+# STASH_PORT picks the port (default 9999). STASH_TZ starts Stash's server in
+# that time zone (such as America/Phoenix) instead of the machine's.
 set -euo pipefail
 
 tag=$1
@@ -28,6 +29,7 @@ actual=$(shasum -a 1 "$work/bin/$asset" | awk '{ print $1 }')
 chmod +x "$work/bin/$asset"
 "$work/bin/$asset" --version | tee "$work/version.txt"
 
+if [ -n "${STASH_TZ:-}" ]; then export TZ=$STASH_TZ; fi
 nohup "$work/bin/$asset" --config "$work/config/config.yml" \
   --host 127.0.0.1 --port "$port" --nobrowser > "$work/stash.log" 2>&1 &
 echo $! > "$work/stash.pid"

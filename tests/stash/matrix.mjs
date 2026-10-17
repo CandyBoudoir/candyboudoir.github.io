@@ -3,9 +3,11 @@
 // tests/stash-versions.json does not list yet. Each companion plugin
 // (companions.mjs) adds an optional leg on the baseline version with it
 // installed, and Firefox and WebKit each add one that runs Cherry Pick's
-// contract specs in that browser (the screenshots stay Chromium's). A
-// companion leg's `zips` keys the cache of its pinned zip (companion-zips.mjs)
-// on the pin's sha256.
+// contract specs in that browser (the screenshots stay Chromium's). The tz
+// leg runs Cherry Pick's contract specs on a Stash whose server is at UTC-7
+// all year: Stash compares its timestamp filters with the server's local
+// time, which a server in UTC never shows. A companion leg's `zips` keys the
+// cache of its pinned zip (companion-zips.mjs) on the pin's sha256.
 import { readFile } from 'node:fs/promises'
 import { COMPANIONS } from './companions.mjs'
 
@@ -61,6 +63,14 @@ if (baseline)
       baseline: false,
       browser,
     })
+if (baseline)
+  legs.push({
+    name: `${baseline.tag} tz`,
+    tag: baseline.tag,
+    channel: 'timezone',
+    baseline: false,
+    tz: 'America/Phoenix',
+  })
 if (versions.develop) {
   legs.push({
     name: 'develop',
