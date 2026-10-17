@@ -66,7 +66,7 @@ Cherry Pick also has a walk through every feature on a library the size of a rea
 
 `main` is the trunk and feeds the develop channel. `prod` is the release branch. Every push to either publishes the site to GitHub Pages and checks the live files against the build.
 
-Each plugin releases on its own. When `prod` carries a plugin version with no `<name>-vX.Y.Z` tag yet, the Publish workflow tags it and publishes a GitHub Release from that version's section in the plugin's `CHANGELOG.md`. The stable channel builds each plugin from its latest tag, so a plugin's changes reach it only with a version bump. A manual run of the Publish workflow can pin a plugin to an older tag to roll it back. Plugin zips are reproducible, so the release asset and the served zip share one sha256.
+Each plugin releases on its own. When `prod` carries a plugin version with no `<name>-vX.Y.Z` tag yet, the Publish workflow tags it and publishes a GitHub Release from that version's section in the plugin's `CHANGELOG.md`. The stable channel builds each plugin from its latest tag, so a plugin's changes reach it only with a version bump. A manual run of the Publish workflow can pin a plugin to an older tag to roll it back. Plugin zips are reproducible, so the release asset and the zip the build makes share one sha256. The stable channel and Juicy's own source point Stash at each plugin's release asset, and the build stops if the asset hashes differently, so each release's download count reads as installs and updates of that version. The develop channel serves its zips from Pages.
 
 ## License
 

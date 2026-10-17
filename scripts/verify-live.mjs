@@ -1,11 +1,14 @@
 // Checks that the live site serves what the Publish workflow built: for every
 // index.yml in the build (the shared channels and each legacy source), the
-// live index lists each built entry's sha256 and the live zip hashes to it.
+// live index lists each built entry's path and sha256, and the zip at that
+// path hashes to it. A path on a GitHub Release is checked against the digest
+// GitHub recorded, not downloaded, so checks leave its download count alone.
 // Pages takes a moment to update, so it retries for 5 minutes.
 // Usage: node scripts/verify-live.mjs <built-site-dir> <live-base-url>
 import { createHash } from 'node:crypto'
 import { readdir, readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
+import { assetDigest, isAssetURL } from './release-assets.mjs'
 
 const [siteDir, base] = process.argv.slice(2)
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -31,14 +34,20 @@ async function check(index) {
         await (await fetch(`${base}/${index}${bust}`)).text(),
       )
       for (const e of expected) {
-        const listed = live.find((l) => l.id === e.id)?.sha256
-        const zip = Buffer.from(
-          await (await fetch(`${base}/${dir}${e.path}${bust}`)).arrayBuffer(),
-        )
-        const actual = createHash('sha256').update(zip).digest('hex')
-        if (listed !== e.sha256 || actual !== e.sha256)
+        const listed = live.find((l) => l.id === e.id)
+        let actual
+        if (isAssetURL(e.path)) actual = await assetDigest(e.path)
+        else {
+          const zip = Buffer.from(
+            await (await fetch(`${base}/${dir}${e.path}${bust}`)).arrayBuffer(),
+          )
+          actual = createHash('sha256').update(zip).digest('hex')
+        }
+        if (listed?.path !== e.path)
+          problems.push(`${e.id}: index lists ${listed?.path}, build ${e.path}`)
+        if (listed?.sha256 !== e.sha256 || actual !== e.sha256)
           problems.push(
-            `${e.id}: index lists ${listed}, zip hashes to ${actual}, build was ${e.sha256}`,
+            `${e.id}: index lists ${listed?.sha256}, zip hashes to ${actual}, build was ${e.sha256}`,
           )
       }
       if (live.length !== expected.length)

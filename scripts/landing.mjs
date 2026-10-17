@@ -1,7 +1,7 @@
 // The page at the root of the site: how to add the CandyBoudoir source and a
 // card per plugin. It lives apart from site.mjs so a change to the page dates
 // no plugin forward.
-const REPO = 'https://github.com/CandyBoudoir/candyboudoir.github.io'
+export const REPO = 'https://github.com/CandyBoudoir/candyboudoir.github.io'
 const SOURCE = 'https://candyboudoir.github.io/index.yml'
 const DEVELOP = 'https://candyboudoir.github.io/develop/index.yml'
 
