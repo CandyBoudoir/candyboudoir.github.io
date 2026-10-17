@@ -4,10 +4,10 @@
 
 // Owned scenes, with everything the taste model and For you read
 // (custom_fields: whether another plugin ranks the scene or mirrors its
-// rating).
+// rating). ids: the scenes a library update found changed.
 export const SCENES = `
-  query CherryPickScenes($filter: FindFilterType, $scene_filter: SceneFilterType) {
-    findScenes(filter: $filter, scene_filter: $scene_filter) {
+  query CherryPickScenes($filter: FindFilterType, $scene_filter: SceneFilterType, $ids: [ID!]) {
+    findScenes(filter: $filter, scene_filter: $scene_filter, ids: $ids) {
       count
       scenes {
         id
@@ -30,6 +30,23 @@ export const SCENES = `
         performers { id name disambiguation gender favorite image_path }
         tags { id name }
         custom_fields
+      }
+    }
+  }
+`
+
+// Each scene's id and the times Stash keeps of its changes, for finding
+// the scenes changed since the library was last read (data/library.js)
+export const SCENE_TIMES = `
+  query CherryPickSceneTimes($filter: FindFilterType) {
+    findScenes(filter: $filter) {
+      count
+      scenes {
+        id
+        updated_at
+        last_played_at
+        o_counter
+        o_history
       }
     }
   }
