@@ -409,9 +409,12 @@ const evenly = (k, n) =>
  * The first round's slots, two per match (null: a bye). Each candidate
  * meets the anchor of matching rank, so its first pick already places it on
  * the user's scale; byes go to anchors first, which need no measuring; what
- * is left plays among itself. Seeds never show, so the order serves the
- * measuring: matches spread like seeds (the top anchors' apart) and each
- * match's sides are drawn at random.
+ * is left plays across its halves, the strongest against the strongest of
+ * the weaker half (1 v 9, 2 v 10 of 16). Since every entrant is rated from
+ * where it finished, the strongest shouldn't knock each other out in round
+ * one, and a match across halves is still close enough to teach the model.
+ * Seeds never show, so the order serves the measuring: matches spread like
+ * seeds (the top pairs' apart) and each match's sides are drawn at random.
  * @param {string[]} anchors  highest rated first
  * @param {string[]} unknowns  candidates and ranked records, strongest first
  * @param {number} size
@@ -435,7 +438,8 @@ export function firstRoundSlots(anchors, unknowns, size, now = 0) {
       byes--
     }
   const left = [...restU, ...restA]
-  for (let i = 0; i < left.length; i += 2) units.push([left[i], left[i + 1]])
+  const half = left.length / 2
+  for (let i = 0; i < half; i++) units.push([left[i], left[i + half]])
   const rand = randomFrom(now)
   const slots = []
   for (const rank of seedOrder(size / 2)) {
