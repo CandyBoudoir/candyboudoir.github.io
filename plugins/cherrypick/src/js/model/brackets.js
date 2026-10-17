@@ -1134,27 +1134,45 @@ export function ratingProposals(M, b) {
   }
 }
 
+// The change Apply writes for a proposal row: its new rating, and the one
+// the preview showed, which writableChanges checks is still there
+export function proposedChange(row) {
+  const { id, from, to, provisional } = row
+  return { id, from, to, provisional, fromProvisional: !!row.fromProvisional }
+}
+
 // The changes Apply may still write, against the records as Stash has them
-// right before the write (current: Map id -> { rating100, custom_fields }):
-// a record gone from Stash, or one another plugin started ranking or
-// mirroring since the preview, is left out (`ranked` lists the latter).
-// Each change keeps what it replaces: the rating, and the provisional mark
-// (fromProvisional), for Undo.
+// right before the write (current: Map id -> { rating100, custom_fields }).
+// Each change carries the rating the preview showed (from, read from the
+// library copy) and whether it was provisional (fromProvisional). A record
+// gone from Stash is left out, and one another plugin started ranking or
+// mirroring since the preview is listed in `ranked`. A record whose rating
+// is no longer the one the preview showed is listed in `changed`: the user
+// rated it since, on Stash's own pages or in another tab, or another
+// bracket's Apply did. So is a provisional one that lost its mark, which
+// makes its rating the user's (isProvisional). Apply leaves both alone.
+// Each change written keeps what it replaces, for Undo: the rating, and
+// the provisional mark itself (fromProvisional).
 export function writableChanges(changes, current) {
   const write = []
   const ranked = []
+  const changed = []
   for (const c of changes) {
     const rec = current.get(c.id)
     if (!rec) continue
     if (pluginRating(rec)) ranked.push(c.id)
+    else if (
+      (rec.rating100 ?? null) !== c.from ||
+      (c.fromProvisional && !isProvisional(rec))
+    )
+      changed.push(c.id)
     else
       write.push({
         ...c,
-        from: rec.rating100 ?? null,
         fromProvisional: rec.custom_fields?.[PROVISIONAL_FIELD] ?? null,
       })
   }
-  return { write, ranked }
+  return { write, ranked, changed }
 }
 
 // The changes of an applied batch that Undo may still put back, against the

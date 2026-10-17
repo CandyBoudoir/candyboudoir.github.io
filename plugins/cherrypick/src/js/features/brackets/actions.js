@@ -466,7 +466,7 @@ export async function autoApplyBracket(id) {
   updateFinished(id, (x) => ({ ...x, autoApplied: true }))
   const changes = BR.ratingProposals(s.M, b)
     .rows.filter((x) => !x.skip && x.to != null)
-    .map(({ id: x, to, provisional }) => ({ id: x, to, provisional }))
+    .map(BR.proposedChange)
   if (changes.length) await applyRatingChanges(b, changes)
 }
 
@@ -479,16 +479,19 @@ export const setChampionRating = (bracketId, rating100) =>
     championRating: rating100 ?? null,
   }))
 
-// changes: [{ id, to, provisional }] from the preview. Each record is read
-// from Stash right before the write, so Undo puts back exactly what was
-// there (unrated, and the provisional mark, included), and one another
-// plugin started ranking or mirroring since the preview is left alone (the
-// batch counts it in `kept`). The batch lands in tier 1.
+// changes: [{ id, from, to, provisional, fromProvisional }] from the
+// preview (BR.proposedChange). Each record is read from Stash right before
+// the write, so Undo puts back exactly what was there (unrated, and the
+// provisional mark, included). One another plugin started ranking or
+// mirroring since the preview is left alone (the batch counts it in
+// `kept`), and so is one whose rating changed since the preview (counted
+// in `stale`): Apply never writes over a rating the preview didn't show.
+// The batch lands in tier 1.
 export async function applyRatingChanges(bracket, changes) {
   if (!changes.length) return
   const kind = bracket.kind
   const ids = changes.map((c) => c.id)
-  const { write, ranked } = BR.writableChanges(
+  const { write, ranked, changed } = BR.writableChanges(
     changes,
     await currentRecords(kind, ids),
   )
@@ -518,7 +521,7 @@ export async function applyRatingChanges(bracket, changes) {
     reportError(e)
   }
   patchRated(kind, patches)
-  if (!done.length && !ranked.length) return
+  if (!done.length && !ranked.length && !changed.length) return
   const batch = {
     id: 'a' + Date.now().toString(36),
     at: new Date().toISOString(),
@@ -527,6 +530,7 @@ export async function applyRatingChanges(bracket, changes) {
     poolLabel: bracket.poolLabel,
     changes: done,
     kept: ranked.length,
+    stale: changed.length,
   }
   store.set((s) => ({ applied: [...s.applied, batch] }))
 }
