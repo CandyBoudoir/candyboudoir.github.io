@@ -1,0 +1,321 @@
+/*
+ * Buttons: glossy airbrushed enamel on a crisp offset shadow, like late sun.
+ * Pressing pushes the button down onto its shadow. Stash renders its icon
+ * buttons as `.btn.btn-primary.minimal`, so every enamel rule skips
+ * `.minimal` and those stay flat.
+ */
+.btn {
+  --citypop-btn-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 40%), inset 0 -2px 0 rgb(0 0 0 / 14%),
+    3px 3px 0 rgb(4 3 22 / 70%);
+
+  border-radius: 5px;
+  font-family: var(--citypop-font-label);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition:
+    transform var(--citypop-fast) var(--citypop-ease),
+    box-shadow var(--citypop-fast) var(--citypop-ease),
+    filter var(--citypop-fast) var(--citypop-ease),
+    color var(--citypop-fast) var(--citypop-ease);
+}
+
+/*
+ * The glint hangs off the button, so it needs a position. A zero-specificity
+ * rule keeps every Stash rule that places a button absolutely (card
+ * favourites, the Tagger's sprite button) in charge.
+ */
+:where(.btn:not(.minimal, .btn-link)) {
+  position: relative;
+}
+
+.btn:not(.minimal, .btn-link) {
+  border: 0 !important;
+  box-shadow: var(--citypop-btn-shadow);
+  font-size: 0.82rem;
+}
+
+.btn:focus,
+.btn.focus {
+  box-shadow: var(--citypop-btn-shadow) !important;
+  outline: none;
+}
+
+.btn:focus-visible {
+  box-shadow:
+    var(--citypop-btn-shadow),
+    0 0 0 2px var(--citypop-night),
+    0 0 0 4px var(--citypop-pool) !important;
+}
+
+/* Pressed: the button drops onto its own shadow */
+.btn:not(.minimal, .btn-link, :disabled, .disabled):active,
+.btn:not(.minimal, .btn-link).active {
+  --citypop-btn-shadow:
+    inset 0 2px 3px rgb(0 0 0 / 25%), 1px 1px 0 rgb(4 3 22 / 70%);
+
+  transform: translate(2px, 2px);
+}
+
+/* Primary is the sunset with navy type */
+.btn-primary:not(.minimal),
+.btn-primary:not(.minimal):hover,
+.btn-primary:not(.minimal):focus,
+.btn-primary:not(.minimal, :disabled, .disabled):active,
+.btn-primary:not(.minimal, :disabled, .disabled).active,
+.show > .btn-primary.dropdown-toggle:not(.minimal) {
+  background: var(--citypop-gloss), var(--citypop-sunset-btn);
+  color: var(--citypop-ink);
+  font-weight: 600;
+}
+
+.btn-primary:not(.minimal) {
+  padding-inline: 1.5rem;
+}
+
+/* The glint: a four-point sparkle on the top-right corner of the gloss */
+.btn-primary:not(.minimal)::after {
+  background: var(--citypop-glint) center / contain no-repeat;
+  content: '';
+  height: 16px;
+  pointer-events: none;
+  position: absolute;
+  right: 5px;
+  top: -6px;
+  transform: scale(0.75) rotate(0deg);
+  transition: transform var(--citypop-medium) var(--citypop-ease);
+  width: 16px;
+}
+
+/* Rows of the Tagger repeat their buttons hundreds of times; they keep the
+   sunset and drop the glint */
+.search-item .btn-primary:not(.minimal)::after {
+  content: none;
+}
+
+.btn-primary:not(.minimal, :disabled, .disabled):hover::after {
+  transform: scale(1.1) rotate(90deg);
+}
+
+.btn-primary:not(.minimal, :disabled, .disabled):hover {
+  filter: brightness(1.06) saturate(1.08);
+}
+
+/* Secondary is night violet */
+.btn-secondary:not(.minimal),
+.btn-secondary:not(.minimal):hover,
+.btn-secondary:not(.minimal):focus,
+.btn-secondary:not(.minimal, :disabled, .disabled):active,
+.show > .btn-secondary.dropdown-toggle:not(.minimal) {
+  --citypop-btn-shadow:
+    inset 0 0 0 1px var(--citypop-key), inset 0 1px 0 rgb(255 255 255 / 18%),
+    3px 3px 0 rgb(4 3 22 / 70%);
+
+  background: var(--citypop-gloss-soft), var(--citypop-night-btn);
+  color: var(--citypop-text);
+}
+
+.btn-secondary:not(.minimal, :disabled, .disabled):hover {
+  color: #fff;
+  filter: brightness(1.15);
+}
+
+/* The chosen item of a group is the sunset */
+.btn.btn-secondary:not(.minimal, :disabled, .disabled).active {
+  background: var(--citypop-gloss), var(--citypop-sunset-btn);
+  color: var(--citypop-ink);
+  font-weight: 600;
+}
+
+/* Success is pool turquoise, warning apricot, info sky and danger hot coral */
+.btn-success:not(.minimal),
+.btn-success:not(.minimal):hover,
+.btn-success:not(.minimal):focus,
+.btn-success:not(.minimal, :disabled, .disabled):active {
+  background: var(--citypop-gloss), var(--citypop-pool-grad);
+  color: var(--citypop-ink);
+  font-weight: 600;
+}
+
+.btn-warning:not(.minimal),
+.btn-warning:not(.minimal):hover,
+.btn-warning:not(.minimal):focus,
+.btn-warning:not(.minimal, :disabled, .disabled):active {
+  background:
+    var(--citypop-gloss), linear-gradient(180deg, #ffe7a0, #ffc27a 55%, #ffa060);
+  color: var(--citypop-ink);
+  font-weight: 600;
+}
+
+.btn-info:not(.minimal),
+.btn-info:not(.minimal):hover,
+.btn-info:not(.minimal):focus,
+.btn-info:not(.minimal, :disabled, .disabled):active {
+  background:
+    var(--citypop-gloss), linear-gradient(180deg, #c6d6ff, #a3bbff 55%, #8aa4f6);
+  color: var(--citypop-ink);
+  font-weight: 600;
+}
+
+.btn-danger:not(.minimal),
+.btn-danger:not(.minimal):hover,
+.btn-danger:not(.minimal):focus,
+.btn-danger:not(.minimal, :disabled, .disabled):active {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 22%) 0 44%, transparent 44%),
+    linear-gradient(180deg, #f0365a, #d62452 55%, #b81846);
+  color: #fff;
+  font-weight: 600;
+}
+
+:is(.btn-success, .btn-warning, .btn-info, .btn-danger):not(
+    .minimal,
+    :disabled,
+    .disabled
+  ):hover {
+  filter: brightness(1.07) saturate(1.08);
+}
+
+.btn:disabled,
+.btn.disabled {
+  box-shadow: none !important;
+  cursor: not-allowed;
+  filter: saturate(0.3) brightness(0.8);
+  opacity: 0.45;
+  transform: none;
+}
+
+.btn:disabled::after,
+.btn.disabled::after {
+  display: none;
+}
+
+.btn-sm:not(.minimal, .btn-link) {
+  font-size: 0.72rem;
+}
+
+.btn-sm.btn-primary:not(.minimal) {
+  padding-inline: 1.15rem;
+}
+
+.btn.minimal {
+  --citypop-btn-shadow: none;
+
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--citypop-muted);
+}
+
+.btn.minimal:not(:disabled):hover,
+.btn.minimal:not(:disabled, .disabled):active {
+  background: rgb(255 255 255 / 6%);
+  border-color: transparent;
+  color: #fff;
+}
+
+.btn-link {
+  --citypop-btn-shadow: none;
+
+  color: var(--citypop-coral);
+  text-decoration: underline 1px rgb(255 138 122 / 55%);
+  text-underline-offset: 5px;
+}
+
+.btn-link:hover {
+  color: var(--citypop-apricot);
+  text-decoration-color: var(--citypop-apricot);
+}
+
+/*
+ * Joined buttons share one hard shadow, so seams stay flush and a pressed or
+ * chosen button never steps out of line. The pager is one strip with the
+ * current page in sunset.
+ */
+.btn-group:has(> .btn:not(.minimal, .btn-link)) {
+  border-radius: 5px;
+  box-shadow: 3px 3px 0 rgb(4 3 22 / 70%);
+}
+
+.btn-group > .btn:not(.minimal, .btn-link) {
+  --citypop-btn-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 40%), inset 0 -2px 0 rgb(0 0 0 / 14%);
+}
+
+.btn-group > .btn-secondary:not(.minimal) {
+  --citypop-btn-shadow:
+    inset 0 0 0 1px var(--citypop-key), inset 0 1px 0 rgb(255 255 255 / 18%);
+}
+
+.btn-group > .btn:not(.minimal, .btn-link, :disabled, .disabled):active,
+.btn-group > .btn:not(.minimal, .btn-link).active {
+  --citypop-btn-shadow: inset 0 2px 3px rgb(0 0 0 / 22%);
+
+  transform: none;
+}
+
+/* A disabled end of the pager stays part of the strip, just unlit */
+.btn-group > .btn-secondary:not(.minimal):disabled {
+  background: linear-gradient(180deg, #1f1c56, #1a1749);
+  box-shadow: inset 0 0 0 1px var(--citypop-line) !important;
+  color: rgb(203 195 236 / 38%);
+  filter: none;
+  opacity: 1;
+}
+
+/* Buttons joined to a field stay put */
+.input-group .btn:not(.minimal, .btn-link, :disabled, .disabled):active {
+  transform: none;
+}
+
+/* Selects styled as buttons (the page-size picker in list toolbars) */
+select.btn-secondary {
+  background:
+    url('assets/icons/chevron.svg') right 0.6rem center / 12px 12px no-repeat,
+    var(--citypop-night-btn);
+  border: 0;
+  border-radius: 5px;
+  box-shadow:
+    inset 0 0 0 1px var(--citypop-key),
+    3px 3px 0 rgb(4 3 22 / 70%);
+  color: var(--citypop-text);
+  font-family: var(--citypop-font-label);
+  letter-spacing: 0.08em;
+}
+
+select option {
+  background-color: var(--citypop-panel);
+  color: var(--citypop-text);
+}
+
+/*
+ * Chrome that Stash renders as plain buttons: the bars that fold the details
+ * panel away on scene and gallery pages, and the player's scrubber arrows.
+ * Keep them quiet.
+ */
+#root :is(.scene-divider, .gallery-divider, .details-divider) .btn,
+#root .scrubber-button {
+  background: none;
+  box-shadow: none;
+  color: var(--citypop-dim);
+  transform: none;
+}
+
+#root :is(.scene-divider, .gallery-divider, .details-divider) .btn::after,
+#root .scrubber-button::after {
+  content: none;
+}
+
+#root .scrubber-button {
+  background: var(--citypop-raised);
+}
+
+#root :is(.scene-divider, .gallery-divider, .details-divider) .btn:hover,
+#root .scrubber-button:hover {
+  color: var(--citypop-coral);
+}
+
+#root .scrubber-tags-background {
+  background-color: var(--citypop-raised);
+}

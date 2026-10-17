@@ -172,11 +172,17 @@ importers:
       '@fontsource-variable/fredoka':
         specifier: ^5.3.0
         version: 5.3.0
+      '@fontsource-variable/jost':
+        specifier: 5.3.0
+        version: 5.3.0
       '@fontsource-variable/oswald':
         specifier: ^5.3.0
         version: 5.3.0
       '@fontsource/grenze-gotisch':
         specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/mr-dafoe':
+        specifier: 5.3.0
         version: 5.3.0
       '@playwright/test':
         specifier: ^1.64.0
@@ -526,11 +532,17 @@ packages:
   '@fontsource-variable/fredoka@5.3.0':
     resolution: {integrity: sha512-13w98iw2RcmYfZQRZPLSu+0YJK3HHm5A2XrpU26moFIAePmfiKfvkmEJUgkc8r5GNR+pbDijOueS1KdGAMAWmQ==}
 
+  '@fontsource-variable/jost@5.3.0':
+    resolution: {integrity: sha512-9FS8iBMJnfyPqQOi9dfMjSwYBIWd0kBD3/jl8VvtbIMY2pK+CSp3oAaTLS1V60rDoM7AfyPvuT+IUfJfGeCTKg==}
+
   '@fontsource-variable/oswald@5.3.0':
     resolution: {integrity: sha512-sSZzcTeaQGNyZbTVlS4tNNHElK38UktFLqKd6NQDLFCBV27320rQC3kXSZVytYm1PPjKmPxqVaGwqj7LEKUWQw==}
 
   '@fontsource/grenze-gotisch@5.3.0':
     resolution: {integrity: sha512-hIgb3TJWnwjiaf8FWMYfPe5PvHHnSv+VYUJI40Fj0KhjWhBhBl4LTsGrkr4MSjo6mG+znR2tBz5L++4wkEgI1A==}
+
+  '@fontsource/mr-dafoe@5.3.0':
+    resolution: {integrity: sha512-zYTNXnERIkYWqFDTOaw5Z5xL9H1twFhAhFwxFIEWA/Y+dt0E3XpySsFFxhiOElIZUAOMuVvxrd/s976G/3cEzg==}
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -1543,9 +1555,13 @@ snapshots:
 
   '@fontsource-variable/fredoka@5.3.0': {}
 
+  '@fontsource-variable/jost@5.3.0': {}
+
   '@fontsource-variable/oswald@5.3.0': {}
 
   '@fontsource/grenze-gotisch@5.3.0': {}
+
+  '@fontsource/mr-dafoe@5.3.0': {}
 
   '@humanfs/core@0.19.2':
     dependencies:

@@ -1,0 +1,380 @@
+/*
+ * Menus, popovers, tooltips, toasts and modals: navy panels on the hard
+ * shadow. Stash paints its menus slate through div.dropdown-menu rules, so the
+ * menu rules name the div too, and some menus and their items carry
+ * Bootstrap's !important bg-secondary.
+ */
+.dropdown-menu,
+div.dropdown-menu {
+  background: var(--citypop-panel-grad);
+  border: 1px solid var(--citypop-line);
+  border-radius: 5px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 8%),
+    var(--citypop-hard);
+  color: var(--citypop-text);
+  padding: 0.5rem;
+}
+
+.dropdown-menu.bg-secondary {
+  background-color: var(--citypop-panel) !important;
+}
+
+.dropdown-menu .dropdown-item.bg-secondary {
+  background-color: transparent !important;
+}
+
+.dropdown-item,
+div.dropdown-menu .dropdown-item {
+  border-radius: 3px;
+  color: var(--citypop-text);
+  font-family: var(--citypop-font-label);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  padding: 0.38rem 0.75rem;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus,
+div.dropdown-menu .dropdown-item:hover,
+div.dropdown-menu .dropdown-item:focus {
+  background: linear-gradient(
+    90deg,
+    rgb(255 122 107 / 26%),
+    rgb(245 80 138 / 6%)
+  );
+  box-shadow: inset 3px 0 0 var(--citypop-sun);
+  color: #fff;
+}
+
+.dropdown-item.active,
+.dropdown-item:active,
+div.dropdown-menu .dropdown-item.active,
+div.dropdown-menu .dropdown-item:active {
+  background: var(--citypop-gloss), var(--citypop-sunset-btn);
+  box-shadow: none;
+  color: var(--citypop-ink);
+  font-weight: 500;
+}
+
+.dropdown-divider {
+  border-top: 1px solid var(--citypop-line);
+}
+
+.dropdown-header {
+  color: var(--citypop-dim);
+  font-family: var(--citypop-font-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.popover {
+  background: var(--citypop-panel-grad);
+  border: 1px solid var(--citypop-line);
+  border-radius: 5px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 8%),
+    var(--citypop-hard);
+}
+
+.popover-header {
+  background: var(--citypop-raised);
+  border-bottom: 1px solid var(--citypop-line);
+  color: var(--citypop-text);
+  font-family: var(--citypop-font-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.popover-body {
+  color: var(--citypop-text);
+}
+
+.bs-popover-top > .arrow::after,
+.bs-popover-auto[x-placement^='top'] > .arrow::after {
+  border-top-color: #181546;
+}
+
+.bs-popover-bottom > .arrow::after,
+.bs-popover-auto[x-placement^='bottom'] > .arrow::after {
+  border-bottom-color: #1f1c55;
+}
+
+.bs-popover-left > .arrow::after,
+.bs-popover-auto[x-placement^='left'] > .arrow::after {
+  border-left-color: var(--citypop-panel);
+}
+
+.bs-popover-right > .arrow::after,
+.bs-popover-auto[x-placement^='right'] > .arrow::after {
+  border-right-color: var(--citypop-panel);
+}
+
+/* Tooltips are cream cassette labels with a sunset edge */
+.tooltip {
+  font-family: var(--citypop-font-label);
+}
+
+.tooltip.show {
+  opacity: 1;
+}
+
+.tooltip-inner {
+  background:
+    linear-gradient(
+      180deg,
+      #ff7a6b 0 3px,
+      #f5508a 3px 4.5px,
+      transparent 4.5px
+    ),
+    var(--citypop-cream);
+  border-radius: 3px;
+  box-shadow: 3px 3px 0 rgb(4 3 22 / 65%);
+  color: var(--citypop-ink);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  padding: 0.55rem 0.8rem 0.42rem;
+  text-transform: uppercase;
+}
+
+/* A title Stash cut short reads in full in its tooltip, in sentence case */
+.TruncatedText-tooltip .tooltip-inner {
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.bs-tooltip-top .arrow::before,
+.bs-tooltip-auto[x-placement^='top'] .arrow::before {
+  border-top-color: var(--citypop-cream);
+}
+
+.bs-tooltip-bottom .arrow::before,
+.bs-tooltip-auto[x-placement^='bottom'] .arrow::before {
+  border-bottom-color: var(--citypop-sun);
+}
+
+.bs-tooltip-left .arrow::before,
+.bs-tooltip-auto[x-placement^='left'] .arrow::before {
+  border-left-color: var(--citypop-cream);
+}
+
+.bs-tooltip-right .arrow::before,
+.bs-tooltip-auto[x-placement^='right'] .arrow::before {
+  border-right-color: var(--citypop-cream);
+}
+
+/*
+ * Toasts: Stash puts the whole message in the toast's header and colours the
+ * toast by kind. Here every toast is a navy panel under the stripe band, the
+ * message speaks in her light italic beside a striped sun, and a coloured
+ * edge on the left says which kind it is.
+ */
+.toast,
+.toast-container .toast {
+  backdrop-filter: none;
+  background: var(--citypop-panel-grad);
+  border: 1px solid var(--citypop-line);
+  border-radius: 5px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 8%),
+    var(--citypop-hard);
+  color: var(--citypop-text);
+  overflow: hidden;
+  position: relative;
+}
+
+.toast::before {
+  background: var(--citypop-stripes) 0 0 / 100% var(--citypop-band) no-repeat;
+  content: '';
+  height: var(--citypop-band);
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+/* Stash hangs toasts 4rem from the top, under its own shorter bar, and on
+   a phone 4rem from the bottom, over it */
+.toast-container {
+  opacity: 1;
+}
+
+@media (width >= 576px) {
+  .toast-container {
+    top: calc(var(--citypop-nav-height) + 1rem);
+  }
+}
+
+@media (width <= 575.98px) {
+  .toast-container {
+    bottom: calc(var(--citypop-nav-height) + 1rem);
+  }
+}
+
+.toast-container .toast.danger {
+  box-shadow:
+    inset 5px 0 0 var(--citypop-danger),
+    var(--citypop-hard);
+}
+
+.toast-container .toast.warning {
+  box-shadow:
+    inset 5px 0 0 var(--citypop-warning),
+    var(--citypop-hard);
+}
+
+.toast-header,
+.toast-container .toast-header {
+  align-items: center;
+  background: none;
+  border-bottom: 0;
+  color: var(--citypop-text);
+  font-size: 1.2rem;
+  gap: 0.6rem;
+  line-height: 1.35;
+  padding: 1.15rem 1rem 0.9rem;
+}
+
+.toast-header::before {
+  align-self: flex-start;
+  background: var(--citypop-sunset);
+  content: '';
+  flex: none;
+  height: 14px;
+  margin-top: 0.35em;
+  mask: url('assets/icons/glyph-sun.svg') center / contain no-repeat;
+  width: 14px;
+}
+
+.toast-container .toast-header .close {
+  color: var(--citypop-muted);
+  font-family: var(--citypop-font-label);
+  font-style: normal;
+  text-shadow: none;
+}
+
+.toast-body:empty {
+  display: none;
+}
+
+/* Modals: navy panels with the stripe band under the title */
+.modal-content {
+  background: var(--citypop-panel-grad);
+  border: 1px solid var(--citypop-line);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 8%),
+    10px 10px 0 var(--citypop-drop);
+  color: var(--citypop-text);
+}
+
+/* Stash paints each modal section slate; let the panel show through */
+.modal-header,
+.modal-body,
+.modal-footer {
+  background-color: transparent;
+  color: var(--citypop-text);
+}
+
+.modal-content > .modal-header {
+  align-items: center;
+  border-bottom: 0;
+  font-family: var(--citypop-font-label);
+  font-size: 1.3rem;
+  font-weight: 500;
+  gap: 0.6rem;
+  justify-content: flex-start;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  padding: 1rem 1.25rem 1.6rem;
+  position: relative;
+}
+
+.modal-content > .modal-header::after {
+  background: var(--citypop-stripes) 0 0 / 100% var(--citypop-band) no-repeat;
+  bottom: 0.45rem;
+  content: '';
+  height: var(--citypop-band);
+  left: 1.25rem;
+  pointer-events: none;
+  position: absolute;
+  right: 1.25rem;
+}
+
+.modal-title {
+  color: var(--citypop-text);
+  font-family: var(--citypop-font-label);
+  font-size: 1.3rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+.modal-header .fa-icon {
+  color: var(--citypop-coral);
+  height: 0.8em;
+}
+
+.modal-body {
+  color: var(--citypop-muted);
+}
+
+.modal-footer {
+  border-top: 1px solid var(--citypop-line);
+}
+
+.modal-header .close,
+.modal .close {
+  color: var(--citypop-muted);
+  text-shadow: none;
+}
+
+/* The edit filter dialog's criteria are a list, not sleeves */
+.edit-filter-dialog .criterion-list .card {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--citypop-line);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.edit-filter-dialog .criterion-list .card .filter-item-header {
+  background: none;
+  border-bottom: 0;
+}
+
+.modal-backdrop.show {
+  background-color: #04031a;
+  opacity: 0.72;
+}
+
+.alert {
+  background: var(--citypop-panel-grad);
+  border: 1px solid var(--citypop-line);
+  border-radius: 5px;
+  box-shadow:
+    inset 4px 0 0 var(--citypop-sun),
+    var(--citypop-hard-sm);
+  color: var(--citypop-text);
+}
+
+.alert-danger {
+  box-shadow:
+    inset 4px 0 0 var(--citypop-danger),
+    var(--citypop-hard-sm);
+}
+
+.alert-warning {
+  box-shadow:
+    inset 4px 0 0 var(--citypop-warning),
+    var(--citypop-hard-sm);
+}
+
+.alert-success {
+  box-shadow:
+    inset 4px 0 0 var(--citypop-success),
+    var(--citypop-hard-sm);
+}

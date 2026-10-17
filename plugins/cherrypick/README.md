@@ -19,7 +19,7 @@ Cherry Pick comes from the CandyBoudoir plugin source, which carries every Candy
 
 If you run a Stash develop build, use `https://candyboudoir.github.io/develop/index.yml` as the source URL instead. Add one of the two sources, never both: they carry the same plugins.
 
-Cherry Pick works with any theme, including CandyBoudoir's Juicy and Leather: it uses Stash's own cards, rows, buttons and dialogs, and its CSS sets only layout.
+Cherry Pick works with any theme, including CandyBoudoir's Juicy, Leather and City Pop: it uses Stash's own cards, rows, buttons and dialogs, and its CSS sets only layout.
 
 ## What it adds
 

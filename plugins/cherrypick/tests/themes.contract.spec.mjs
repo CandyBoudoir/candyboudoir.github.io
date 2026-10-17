@@ -22,7 +22,7 @@ test.afterAll(async () => {
 const unratedPlayed = (ids) =>
   ids.scenes['Bright Street'] ?? Object.values(ids.scenes)[0]
 
-for (const theme of ['Theme-Juicy', 'Theme-Leather']) {
+for (const theme of ['Theme-Juicy', 'Theme-Leather', 'Theme-CityPop']) {
   test(`with ${theme}: the rows, badges and scene line render in the theme`, async ({
     page,
   }) => {

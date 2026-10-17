@@ -1,0 +1,327 @@
+/* Forms: night-blue wells, and a pool-turquoise ring on focus */
+.form-control,
+.custom-select,
+.input-control,
+div.react-select__control {
+  background: var(--citypop-well);
+  border: 1px solid var(--citypop-line);
+  border-radius: 5px;
+  box-shadow:
+    inset 0 2px 0 rgb(0 0 0 / 30%),
+    0 1px 0 rgb(255 255 255 / 6%);
+  color: var(--citypop-text);
+}
+
+.custom-select {
+  background:
+    url('assets/icons/chevron.svg') right 0.8rem center / 12px 12px no-repeat,
+    var(--citypop-well);
+  padding-right: 2.2rem;
+}
+
+.custom-select option {
+  background: var(--citypop-panel);
+  color: var(--citypop-text);
+}
+
+.form-control::placeholder {
+  color: var(--citypop-dim);
+}
+
+.form-control:focus,
+.custom-select:focus,
+.input-control:focus,
+div.react-select__control--is-focused {
+  background-color: var(--citypop-well);
+  border-color: var(--citypop-pool);
+  box-shadow:
+    inset 0 2px 0 rgb(0 0 0 / 30%),
+    0 0 0 3px rgb(79 227 218 / 25%);
+  color: var(--citypop-text);
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+  background-color: rgb(14 15 51 / 60%);
+  color: var(--citypop-muted);
+}
+
+/* Bootstrap paints these fields (the scrape dialogs) with !important */
+.form-control.bg-secondary {
+  background: var(--citypop-raised) !important;
+}
+
+.form-control.border-secondary {
+  border-color: var(--citypop-key) !important;
+}
+
+.input-group-text {
+  background: var(--citypop-raised);
+  border: 1px solid var(--citypop-line);
+  color: var(--citypop-muted);
+  font-family: var(--citypop-font-label);
+  letter-spacing: 0.06em;
+}
+
+/* The clear button inside Stash's search fields */
+.clearable-text-field-clear,
+.clearable-text-field-clear:is(:hover, :focus, :active) {
+  background-color: transparent !important;
+  color: var(--citypop-dim);
+}
+
+.clearable-text-field-clear:hover {
+  color: var(--citypop-coral);
+}
+
+/* Validation, as in the stash-box endpoint form */
+.form-control.is-valid,
+.was-validated .form-control:valid {
+  border-color: var(--citypop-success);
+}
+
+.form-control.is-valid:focus,
+.was-validated .form-control:valid:focus {
+  border-color: var(--citypop-success);
+  box-shadow:
+    inset 0 2px 0 rgb(0 0 0 / 30%),
+    0 0 0 3px rgb(111 240 230 / 25%);
+}
+
+.form-control.is-invalid,
+.was-validated .form-control:invalid {
+  border-color: var(--citypop-danger);
+}
+
+.form-control.is-invalid:focus,
+.was-validated .form-control:invalid:focus {
+  border-color: var(--citypop-danger);
+  box-shadow:
+    inset 0 2px 0 rgb(0 0 0 / 30%),
+    0 0 0 3px rgb(255 125 146 / 28%);
+}
+
+.invalid-feedback {
+  color: var(--citypop-danger);
+}
+
+/* Checkboxes: night wells that fill with pool water */
+.custom-control-label::before {
+  background: var(--citypop-well);
+  border: 1px solid var(--citypop-key);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 50%);
+}
+
+.custom-checkbox .custom-control-label::before {
+  border-radius: 4px;
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+  background: var(--citypop-gloss), var(--citypop-pool-grad);
+  border-color: #7ff3ea;
+  box-shadow: 2px 2px 0 rgb(4 3 22 / 60%);
+}
+
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::after {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%231b1145' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26l2.974 2.99L8 2.193z'/%3e%3c/svg%3e");
+}
+
+.custom-control-input:focus ~ .custom-control-label::before {
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 50%),
+    0 0 0 3px rgb(79 227 218 / 30%);
+}
+
+.custom-control-input:focus:not(:checked) ~ .custom-control-label::before {
+  border-color: var(--citypop-pool);
+}
+
+.custom-control-input:disabled ~ .custom-control-label {
+  color: var(--citypop-dim);
+}
+
+/* Switches: a pool lane with a pearl float */
+.custom-switch {
+  padding-left: 2.9rem;
+}
+
+.custom-switch .custom-control-label::before {
+  border-radius: 999px;
+  height: 1.25rem;
+  left: -2.9rem;
+  top: 0.12rem;
+  width: 2.4rem;
+}
+
+.custom-switch .custom-control-input:checked ~ .custom-control-label::before {
+  background: var(--citypop-caustic), var(--citypop-pool-grad);
+}
+
+.custom-switch .custom-control-label::after,
+.custom-switch .custom-control-input:checked ~ .custom-control-label::after {
+  background: radial-gradient(
+    circle at 34% 30%,
+    #fff 0 22%,
+    #f1eaff 48%,
+    #b9a6f0 100%
+  );
+  border-radius: 50%;
+  box-shadow: 1px 1px 0 rgb(4 3 22 / 70%);
+  height: calc(1.25rem - 6px);
+  left: calc(-2.9rem + 3px);
+  top: calc(0.12rem + 3px);
+  transition: transform var(--citypop-medium) var(--citypop-ease);
+  width: calc(1.25rem - 6px);
+}
+
+.custom-switch .custom-control-input:checked ~ .custom-control-label::after {
+  background: radial-gradient(
+    circle at 34% 30%,
+    #fff 0 22%,
+    #fff4ec 48%,
+    #ffb36b 100%
+  );
+  transform: translateX(1.15rem);
+}
+
+/* Stash's searchable selects (react-select) */
+div.react-select__control .react-select__single-value,
+div.react-select__control .react-select__input-container {
+  color: var(--citypop-text);
+}
+
+.react-select__placeholder {
+  color: var(--citypop-dim) !important;
+}
+
+.react-select__indicator {
+  color: var(--citypop-lilac) !important;
+}
+
+.react-select__indicator-separator {
+  background-color: var(--citypop-line) !important;
+}
+
+/*
+ * The Tagger marks a match linked to something already in Stash by
+ * colouring its select. Here it takes the turquoise ring of a focused field.
+ */
+.search-result
+  :is(.performer-select-active, .studio-select-active)
+  div.react-select__control,
+:is(.performer-select-active, .studio-select-active) div.react-select__control {
+  border-color: var(--citypop-pool);
+  box-shadow:
+    inset 0 2px 0 rgb(0 0 0 / 30%),
+    0 0 0 3px rgb(79 227 218 / 25%);
+}
+
+/* Select menus match the dropdowns: navy panels on a hard shadow */
+div.react-select__menu {
+  background: var(--citypop-panel-grad);
+  border: 1px solid var(--citypop-line);
+  border-radius: 5px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 8%),
+    var(--citypop-hard);
+  color: var(--citypop-text);
+  overflow: hidden;
+}
+
+div.react-select__menu .react-select__menu-list {
+  padding: 0.35rem;
+}
+
+div.react-select__menu .react-select__option {
+  border-radius: 3px;
+  color: var(--citypop-text);
+}
+
+div.react-select__menu .react-select__option--is-focused {
+  background: linear-gradient(
+    90deg,
+    rgb(255 122 107 / 26%),
+    rgb(245 80 138 / 6%)
+  );
+  box-shadow: inset 3px 0 0 var(--citypop-sun);
+  color: #fff;
+}
+
+div.react-select__menu .react-select__option--is-selected {
+  background: var(--citypop-gloss), var(--citypop-sunset-btn);
+  box-shadow: none;
+  color: var(--citypop-ink);
+}
+
+div.react-select__control .react-select__multi-value {
+  background: linear-gradient(180deg, #2a2566, #211d56);
+  border: 1px solid var(--citypop-key);
+  border-radius: 999px;
+  color: var(--citypop-text);
+}
+
+.react-select__multi-value__label {
+  color: var(--citypop-text) !important;
+  font-family: var(--citypop-font-label);
+  letter-spacing: 0.06em;
+}
+
+/*
+ * Sliders: Stash draws its own (styles/_range.scss), so repaint the track and
+ * the thumb as a pool lane and a pearl. The scene filter sliders keep their
+ * colour tracks.
+ */
+#root
+  input[type='range']:not(
+    .blue-slider,
+    .brightness-slider,
+    .contrast-slider,
+    .double-range-slider-max,
+    .green-slider,
+    .hue-rotate-slider,
+    .red-slider,
+    .saturation-slider,
+    .white-balance-slider
+  )::-webkit-slider-runnable-track {
+  background: linear-gradient(90deg, var(--citypop-pool-deep), #2a2566);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 60%);
+}
+
+#root input[type='range']::-webkit-slider-thumb {
+  background: radial-gradient(
+    circle at 34% 30%,
+    #fff 0 22%,
+    #fff4ec 48%,
+    #ffb36b 100%
+  );
+  border: 0;
+  box-shadow: 1px 1px 0 rgb(4 3 22 / 70%);
+  height: 16px;
+  margin-top: -5px;
+  width: 16px;
+}
+
+#root
+  input[type='range']:not(
+    .blue-slider,
+    .brightness-slider,
+    .contrast-slider,
+    .double-range-slider-max,
+    .green-slider,
+    .hue-rotate-slider,
+    .red-slider,
+    .saturation-slider,
+    .white-balance-slider
+  )::-moz-range-track {
+  background: linear-gradient(90deg, var(--citypop-pool-deep), #2a2566);
+}
+
+#root input[type='range']::-moz-range-thumb {
+  background: radial-gradient(
+    circle at 34% 30%,
+    #fff 0 22%,
+    #fff4ec 48%,
+    #ffb36b 100%
+  );
+  border: 0;
+}
