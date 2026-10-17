@@ -188,8 +188,8 @@ sintel 168 12 | Bread and a Climb | Ember Row | Linnea Frost | City, Rooftops | 
 sintel 250 18 | Market Morning | Ember Row | Pippa Coleby, Hester Reed | Market, City, Dragons | played
 sintel 268 18 | A Small Friend on the Beam | Ember Row | Marlowe Finch, Pippa Coleby | Market, Dragons, Friendship | rated
 sintel 286 18 | Running the Rooftops | Ember Row | Hester Reed, Tilda Ember | Rooftops, Sunset, Dragons | rated
-sintel 304 18 | Wings at Dusk | Ember Row | June Quill, Tilda Ember | Rooftops, Sunset, Flying | never
-sintel 322 18 | The Big Wings | Ember Row | June Quill, Marlowe Finch | Rooftops, Sunset, Dragons | played
+sintel 304 18 1 | Wings at Dusk | Ember Row | June Quill, Tilda Ember | Rooftops, Sunset, Flying | never
+sintel 322 18 3.5 | The Big Wings | Ember Row | June Quill, Marlowe Finch | Rooftops, Sunset, Dragons | played
 sintel 340 18 | Over the Old City | Ember Row | June Quill | Rooftops, Sunset, Moody | rated
 sintel 360 18 | Across the Dunes | Snowdrop Hill | Hazel Moorcroft | Desert, Moody | rated
 sintel 378 18 | Bamboo and Stone | Snowdrop Hill | Hazel Moorcroft, Corin Ashgrove | Forest, Desert, Adventure | rated
@@ -230,21 +230,24 @@ dream 425 18 1 | The Green Room | Copper Spool Works | Toby Wick, Prosper Gale |
     ]
   })
 
-// Covers for the scenes a StashDB performer has that the library lacks
-// (the not-in-library screenshot): film and second.
+// Covers for the StashDB scenes in the not-in-library screenshot, one per
+// scene in take-screenshots.mjs's MISSING, in its order: film and second.
 export const STASHDB_COVERS = [
   ['sintel', 262],
-  ['bunny', 96],
+  ['sintel', 310],
+  ['bunny', 484],
   ['sintel', 296],
+  ['sintel', 325],
+  ['sintel', 255],
   ['bunny', 64],
-  ['sintel', 140],
-  ['bunny', 400],
   ['sintel', 330],
-  ['bunny', 474],
-  ['sintel', 380],
-  ['bunny', 150],
+  ['bunny', 96],
+  ['sintel', 345],
   ['sintel', 720],
-  ['bunny', 586],
+  ['bunny', 10],
+  ['sintel', 300],
+  ['sintel', 420],
+  ['sintel', 30],
 ]
 
 const slug = (title) =>
