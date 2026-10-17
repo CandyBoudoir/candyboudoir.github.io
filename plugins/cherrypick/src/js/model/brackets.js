@@ -10,12 +10,13 @@
 // a bracket plays candidates (no rating of the user's own) and keeps anchors
 // (the user's own rating, or for a performer, the average of the user's
 // ratings on their scenes) for the places candidates can't fill: rated
-// entrants would win their way to every final. The champion then meets up
-// to three anchors in a Challenge round, which places it on the user's
-// scale; the rest step down from it. A candidate's proposed rating comes
-// from the anchors it beat and lost to: a bracket only orders its own pool,
-// so a finish alone says nothing about stars. No rating or seed shows
-// during play.
+// entrants would win their way to every final. A candidate's proposed
+// rating comes from the anchors it beat and lost to when any played, and
+// otherwise from where it finished: a bracket's entrants are spread over the
+// model's range of the library, so its finishing order is laid over the
+// user's own ratings (ratingScale). The champion may then meet up to three
+// anchors in an optional Challenge round, which measures it on the user's
+// scale and moves the rest with it. No rating or seed shows during play.
 
 import { pluginRating } from './rankings.js'
 import { fmtStars } from './util.js'
@@ -46,8 +47,11 @@ export const CHAMPIONS_MIN = 4
  *   average of the user's ratings on their scenes (performer brackets)
  * @property {string[]} [waiting]  rated records of the pool that did not
  *   play, which the Challenge round puts up first (waitingIn)
+ * @property {number[]} [spread]  where the entrants sat in the library when
+ *   it started, highest first (entrantSpread); brackets from before it work
+ *   it out when they finish
  * @property {number|null} [championRating]  the user's rating of the
- *   champion, asked when no anchor played
+ *   champion, given on the champion screen
  * @property {{ winner: string, loser: string }[]} decisions  picks, in order
  * @property {string} createdAt  ISO
  * @property {string|null} finishedAt  ISO
@@ -66,7 +70,7 @@ export const CHAMPIONS_MIN = 4
  *   round was offered
  * @property {string[]} sceneRungs  those rated by their scenes' ratings
  * @property {{ winner: string, loser: string }[]} decisions  picks, in order
- * @property {boolean} [skipped]  the user chose to rate the champion instead
+ * @property {boolean} [skipped]  the user chose to rate the champion by hand
  */
 
 /**
@@ -470,6 +474,7 @@ export function createBracket(
     (a, b) => strength(b) - strength(a),
   )
   const slots = firstRoundSlots(anchors, unknowns, size, now)
+  const seeds = slots.filter(Boolean)
   return {
     id: 'b' + now.toString(36),
     kind,
@@ -478,8 +483,9 @@ export function createBracket(
     size,
     champions,
     origin,
-    seeds: slots.filter(Boolean),
+    seeds,
     slots,
+    spread: entrantSpread(M, kind, gender, seeds),
     anchors: ratings,
     sceneAnchors,
     waiting: champions ? [] : waitingIn(M, kind, pool, slots),
@@ -939,12 +945,14 @@ export function fieldsFromHistory(history) {
 //
 // The champion is measured by its Challenge round as well: between the
 // last anchor it beat and the one that beat it, or half a star above the
-// highest it beat. With no anchor below it (no anchor played and it lost
-// its first challenge, or it skipped the round) the user rates it: Apply
-// asks. A candidate no anchor places steps down from the champion's
-// rating, half a star per round it fell short of the title (a finalist ½★
-// under, a semifinalist 1★ under), never above half a star under an anchor
-// that beat it, and is marked provisional; first-round losers get nothing.
+// highest it beat. Every candidate no anchor places, first-round losers
+// included, is rated from where it finished: the finishing order is laid
+// over the user's own ratings (ratingScale), each place taking the rating
+// at the share of the library the entrant in it was drawn from
+// (entrantSpread). These are marked provisional. When the champion is
+// measured, or the user rates it on the champion screen, they all move by
+// the difference between that and the champion's rating from its finish.
+// None is ever above half a star under an anchor that beat it.
 //
 // Anchors are never written, those from scene ratings included, and the
 // preview names those apart: "Cleo Finch (3.8★ from your scene ratings)". A
@@ -958,10 +966,6 @@ const clampRating = (r) => Math.min(100, Math.max(HALF, r))
 // a midpoint, to the nearest quarter star: between a 4★ and a 4.5★ anchor
 // is 4.25★, not either anchor's rating
 const quarterStars = (r) => Math.round(r / 5) * 5
-
-// "½", "1", "1½": a rating100 difference in stars
-const starsText = (r) =>
-  (Math.floor(r / 20) ? String(Math.floor(r / 20)) : '') + (r % 20 ? '½' : '')
 
 // How far short of the title: 0 the champion, 1 the finalist, 2 a
 // semifinalist, 3 a quarterfinalist, then earlier rounds
@@ -997,7 +1001,162 @@ function treeOrder(st) {
     for (let c = conqueror.get(id); c; c = conqueror.get(c)) out.push(c)
     return out
   }
-  return { beaten: (id) => beaten.get(id) || new Set(), above, outIn }
+  return {
+    beaten: (id) => beaten.get(id) || new Set(),
+    above,
+    outIn,
+    conqueror: (id) => conqueror.get(id),
+  }
+}
+
+// ---------------------------------------------------------------- ratings from the finish
+
+// The fewest ratings of the user's own that make the scale on their own
+export const SCALE_MIN = 10
+// The scale with too few of them, and no Your score to stand in: one star
+// to five, evenly
+const EVEN_SCALE = [20, 100]
+
+// Who a bracket's entrants are drawn from, for where they sit: every scene
+// a scene bracket can draw from, or every performer of the bracket's gender
+// in the library
+function universeOf(M, kind, gender) {
+  return kind === 'performer'
+    ? performerPool(M, { gender, pool: 'library' })
+    : bracketScenes(M).map((s) => s.id)
+}
+
+// The model's strength, or nothing for a record gone from the library
+function safeStrength(M, kind) {
+  const strength = strengthOf(M, kind)
+  return (id) => {
+    const there =
+      kind === 'performer'
+        ? !!M.db.performers.get(id)?.local
+        : !!M.db.scenes.get(id)?.owned
+    return there ? strength(id) : -Infinity
+  }
+}
+
+/**
+ * Where a bracket's entrants sit among everyone they are drawn from, as the
+ * share of the library the model ranks below each (1: above everyone),
+ * highest first. Entrants the model can't tell apart (a new library guesses
+ * 3★ for every scene) share the places their tie fills evenly, so a bracket
+ * from a library the model knows nothing about still spans it.
+ * @param {object} M
+ * @param {'performer'|'clip'} kind
+ * @param {string|null} gender
+ * @param {string[]} ids  the entrants
+ * @returns {number[]}
+ */
+export function entrantSpread(M, kind, gender, ids) {
+  const strength = safeStrength(M, kind)
+  const all = universeOf(M, kind, gender)
+    .map(strength)
+    .sort((a, b) => b - a)
+  const n = Math.max(all.length, 1)
+  const EPS = 1e-9
+  // how many of the library sit above v, and at or above it
+  const countWhile = (ok) => {
+    let lo = 0
+    let hi = all.length
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1
+      if (ok(all[mid])) lo = mid + 1
+      else hi = mid
+    }
+    return lo
+  }
+  const ties = new Map()
+  for (const id of ids) {
+    const v = strength(id)
+    const start = countWhile((x) => x > v + EPS)
+    const end = Math.max(
+      countWhile((x) => x >= v - EPS),
+      start + 1,
+    )
+    const key = start + ':' + end
+    ties.set(key, [...(ties.get(key) || []), id])
+  }
+  const out = []
+  for (const [key, list] of ties) {
+    const [start, end] = key.split(':').map(Number)
+    list.forEach((_, j) => {
+      const place = start + ((j + 0.5) * (end - start)) / list.length
+      out.push(
+        Math.round(Math.min(1, Math.max(0, 1 - place / n)) * 1000) / 1000,
+      )
+    })
+  }
+  return out.sort((a, b) => b - a)
+}
+
+// The value at share q of values (lowest first), between neighbours
+export function quantileOf(values, q) {
+  if (!values.length) return null
+  const p = Math.min(1, Math.max(0, q)) * (values.length - 1)
+  const i = Math.floor(p)
+  const next = values[Math.min(i + 1, values.length - 1)]
+  return values[i] + (next - values[i]) * (p - i)
+}
+
+/**
+ * The ratings a bracket's finishing order is laid over, lowest first, and
+ * where they come from: the user's own ratings of the bracket's kind (for
+ * performers, of its gender), once there are SCALE_MIN of them ('own');
+ * else, for scenes, Your score across the library when it spreads over a
+ * star or more ('score'); else one star to five, evenly ('even').
+ * @returns {{ values: number[], source: 'own'|'score'|'even' }}
+ */
+export function ratingScale(M, kind, gender) {
+  const ids = universeOf(M, kind, gender)
+  const own = ids
+    .filter((id) => entrantRole(M, kind, id) === 'anchor')
+    .map((id) => stashRatingOf(M, kind, id))
+    .sort((a, b) => a - b)
+  if (own.length >= SCALE_MIN) return { values: own, source: 'own' }
+  if (kind === 'clip' && ids.length >= SCALE_MIN) {
+    const score = ids.map((id) => M.estimate(id) * 20).sort((a, b) => a - b)
+    if (quantileOf(score, 0.9) - quantileOf(score, 0.1) >= 20)
+      return { values: score, source: 'score' }
+  }
+  return { values: EVEN_SCALE, source: 'even' }
+}
+
+const SCALE_NAMES = {
+  own: 'your ratings',
+  score: 'Your score',
+  even: 'a one to five star scale',
+}
+
+// "in the top 9% of your ratings", "in the bottom 3% of Your score"
+const placeText = (q, source) => {
+  const where =
+    q >= 0.5
+      ? `the top ${Math.max(1, Math.round((1 - q) * 100))}%`
+      : `the bottom ${Math.max(1, Math.round(q * 100))}%`
+  return `in ${where} of ${SCALE_NAMES[source]}`
+}
+
+// A finished bracket's entrants, best first: the champion, then the losers
+// of each round from the final back; within a round, whoever lost to the
+// one that went furthest first, then the model's stronger first
+function finishOrder(M, b, st, tree) {
+  const champ = st.result.champion
+  const rounds = st.rounds.length
+  const reach = (id) =>
+    id == null ? -1 : id === champ ? rounds : (tree.outIn.get(id) ?? -1)
+  const strength = safeStrength(M, b.kind)
+  return b.seeds
+    .slice()
+    .sort(
+      (x, y) =>
+        reach(y) - reach(x) ||
+        reach(tree.conqueror(y)) - reach(tree.conqueror(x)) ||
+        strength(y) - strength(x) ||
+        (x < y ? -1 : 1),
+    )
 }
 
 /**
@@ -1007,23 +1166,25 @@ function treeOrder(st) {
  * @property {number|null} from  Stash's rating now
  * @property {number|null} to  the proposed rating100 (null on a skipped row)
  * @property {string} why  the anchors behind it, or its finish
- * @property {boolean} provisional  stepped down from the champion's rating
+ * @property {boolean} provisional  rated from its finish, not measured
  * @property {true} [fromProvisional]  its rating now is a provisional one
  * @property {number} short  rounds short of the title (0: the champion)
+ * @property {number} place  its place in the finishing order (0: the champion)
  * @property {true} [primed]  its rating is Ascension's Prime
  * @property {'ranked'|'mirrored'} [skip]  another plugin owns its rating
  */
 
 /**
- * @returns {{ rows: RatingProposal[], askChampion: boolean }} askChampion:
- *   nothing places the champion from below and it is a candidate, so the
- *   user's rating of the champion sets the scale (b.championRating)
+ * @returns {{ rows: RatingProposal[], askChampion: boolean }} askChampion is
+ *   always false now that the finish rates the champion; kept for the
+ *   callers that offer the champion's stars by hand (b.championRating)
  */
 export function ratingProposals(M, b) {
   const kind = b.kind
   const st = bracketState(b)
   if (!st.done) return { rows: [], askChampion: false }
-  const { beaten, above, outIn } = treeOrder(st)
+  const tree = treeOrder(st)
+  const { beaten, above, outIn } = tree
   const rounds = st.rounds.length
   const champ = st.result.champion
   const present = (id) =>
@@ -1075,21 +1236,37 @@ export function ratingProposals(M, b) {
   ])
   const label = (id) =>
     `${name(id)} (${fmtStars(ref[id] / 20)}★${fromScenes.has(id) ? ' from your scene ratings' : ''})`
-  const champRole = present(champ) ? entrantRole(M, kind, champ) : null
   const champLo = isAnchor(champ) ? null : lowOf(champ)
-  // The top of the scale, for the steps
-  let top = null
+  // Each entrant's rating from where it finished: the finishing order laid
+  // over the scale, place k taking the k-th highest share of the library
+  // the entrants were drawn from
+  const order = finishOrder(M, b, st, tree)
+  const spread = b.spread?.length
+    ? b.spread
+    : entrantSpread(M, kind, b.gender, b.seeds)
+  const scale = ratingScale(M, kind, b.gender)
+  const place = new Map(order.map((id, k) => [id, k]))
+  const shareOf = (id) => spread[Math.min(place.get(id), spread.length - 1)]
+  const fromFinish = (id) => quantileOf(scale.values, shareOf(id))
+  // The champion's rating: an anchor's own, measured by its Challenge
+  // round, the user's stars, or from its finish, never above half a star
+  // under a favorite that beat it. Everyone rated from the finish moves by
+  // the difference, so the order holds.
+  const champHi = highOf(champ)
+  let top = fromFinish(champ)
   if (isAnchor(champ)) top = anchors[champ]
-  else if (champLo != null) top = measured(champLo, highOf(champ))
+  else if (champLo != null) top = measured(champLo, champHi)
   else if (b.championRating != null) top = b.championRating
+  else if (champHi != null) top = Math.min(top, ref[champHi] - HALF)
+  const shift = top - fromFinish(champ)
   const rows = []
   for (const id of b.seeds) {
     if (isAnchor(id) || !present(id)) continue
     const role = entrantRole(M, kind, id)
     if (role === 'anchor') continue // rated by the user since
     const short = id === champ ? 0 : rounds - outIn.get(id)
-    let to = null
-    let why = finishLabel(short)
+    let to
+    let why
     let provisional = false
     const lo = lowOf(id)
     const hi = highOf(id)
@@ -1099,14 +1276,15 @@ export function ratingProposals(M, b) {
         hi != null
           ? `Above ${label(lo)}, below ${label(hi)}`
           : `Above ${label(lo)}`
-    } else if (id === champ) {
-      if (b.championRating != null) {
-        to = b.championRating
-        why = 'Your rating for the champion'
-      }
-    } else if (top != null && outIn.get(id) > 0) {
-      to = clampRating(top - short * HALF)
-      why = `${finishLabel(short)}, ${starsText(short * HALF)}★ under the champion`
+    } else if (id === champ && b.championRating != null) {
+      to = b.championRating
+      why = 'Your rating for the champion'
+    } else {
+      to = clampRating(quarterStars(fromFinish(id) + shift))
+      why =
+        id === champ && shift < 0
+          ? `${finishLabel(0)}, below ${label(champHi)}`
+          : `${finishLabel(short)}, ${placeText(shareOf(id), scale.source)}${shift ? ', moved with the champion' : ''}`
       if (hi != null && ref[hi] - HALF < to) {
         to = clampRating(ref[hi] - HALF)
         why = `${finishLabel(short)}, below ${label(hi)}`
@@ -1114,7 +1292,7 @@ export function ratingProposals(M, b) {
       provisional = true
     }
     const from = stashRatingOf(M, kind, id)
-    const row = { id, from, to, why, provisional, short }
+    const row = { id, from, to, why, provisional, short, place: place.get(id) }
     if (isProvisional(recordOf(M, kind, id)?.local, from))
       row.fromProvisional = true
     if (role === 'ranked') {
@@ -1123,18 +1301,11 @@ export function ratingProposals(M, b) {
       row.why = finishLabel(short)
     } else if (to == null) continue
     else if (M.ratingSource(kind, id) === 'primed') row.primed = true
-    else if (from === to) continue // its provisional rating already
+    else if (from === to) continue // its rating already
     rows.push(row)
   }
-  rows.sort((x, y) => x.short - y.short)
-  return {
-    rows,
-    askChampion:
-      !isAnchor(champ) &&
-      champLo == null &&
-      b.championRating == null &&
-      champRole === 'candidate',
-  }
+  rows.sort((x, y) => x.place - y.place)
+  return { rows, askChampion: false }
 }
 
 // The change Apply writes for a proposal row: its new rating, and the one

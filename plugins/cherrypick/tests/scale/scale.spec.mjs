@@ -148,8 +148,9 @@ async function playOut(key = 'ArrowLeft', wait = 120) {
   return picks
 }
 
-// With no anchors in the bracket, the result asks for the champion's stars:
-// Stash's own star buttons, or a list where Stash has none. Four stars.
+// When the result shows the champion's stars (only after Rate them myself
+// since the finish rates every entrant): Stash's own star buttons, or a list
+// where Stash has none. Four stars.
 async function rateChampionIfAsked() {
   const prompt = page.locator('.cherrypick-result-modal .cherrypick-champ-rate')
   if (!(await prompt.count())) return false

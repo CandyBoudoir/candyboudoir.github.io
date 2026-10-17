@@ -1,7 +1,7 @@
 // When a bracket ends: the champion screen (podium, where the results went,
-// the Challenge round, the champion's rating when nothing else places it,
-// Undo of the final pick, a Champions round when one is due) and the
-// optional, previewed "Apply to my ratings".
+// the optional Challenge round, the champion's stars given by hand, Undo of
+// the final pick, a Champions round when one is due) and the optional,
+// previewed "Apply to my ratings".
 import {
   components,
   FontAwesomeSolid,
@@ -151,13 +151,10 @@ function ChampionStars({ b }) {
   )
 }
 
-// When nothing places the champion from below (no rated performer or
-// scene played, and the Challenge round was skipped, lost at once or not
-// there), the user's rating of the champion sets the scale: the rest step
-// down from it, half a star a round. lost: the champion lost its first
-// challenge, which the card above says. auto: ratings apply when the
-// champion screen closes (the autoApply setting).
-export function ChampionPrompt({ b, name, them, lost = false, auto = false }) {
+// The champion's stars, given by hand after Rate them myself: they replace
+// the champion's rating from its finish, and the rest move with it. auto:
+// ratings apply when the champion screen closes (the autoApply setting).
+export function ChampionPrompt({ b, name, them, auto = false }) {
   const value = b.championRating ?? null
   const st = BR.challengeState(b)
   return (
@@ -165,11 +162,9 @@ export function ChampionPrompt({ b, name, them, lost = false, auto = false }) {
       <p className="mb-2">
         {value != null
           ? auto
-            ? `${name}: ${fmtStars(value / 20)}★, and the rest below ${them}.`
-            : `${name}: ${fmtStars(value / 20)}★. Apply to my ratings sets it, and the rest below it.`
-          : lost
-            ? `How many stars for ${name}? The rest are rated below ${them}.`
-            : `None of this bracket's ${b.kind === 'performer' ? 'performers' : 'scenes'} had a rating of yours to measure against. How many stars for ${name}? The rest are rated below ${them}.`}
+            ? `${name}: ${fmtStars(value / 20)}★, and the rest move with ${them}.`
+            : `${name}: ${fmtStars(value / 20)}★. Apply to my ratings sets it, and moves the rest with it.`
+          : `How many stars for ${name}? The rest move with ${them}.`}
       </p>
       <ChampionStars b={b} />
       {st?.skipped ? (
@@ -188,8 +183,11 @@ export function ChampionPrompt({ b, name, them, lost = false, auto = false }) {
 }
 
 // The Challenge round on the champion screen: offered, under way, or how
-// it went. proposal: the champion's row in Apply, once the round placed it;
-// auto: ratings apply when the champion screen closes.
+// it went. It is optional: every entrant is rated from where it finished
+// without it, and the round measures the champion against the user's own
+// ratings and moves the rest with it. proposal: the champion's row in
+// Apply, once the round placed it; auto: ratings apply when the champion
+// screen closes.
 function ChallengeCard({ b, st, name, them, proposal, auto }) {
   const entrant = useEntrant(b.kind)
   const n = st.rungs.length
@@ -198,20 +196,22 @@ function ChallengeCard({ b, st, name, them, proposal, auto }) {
     return (
       <div className="card cherrypick-fixes cherrypick-challenge">
         <p className="mb-2">
-          <b>{name} has earned a shot at your favorites.</b>{' '}
+          <b>Test {name} against your favorites?</b> Optional: the ratings from
+          this bracket are ready without it.{' '}
           {n === 1
             ? `One of the ${what} you've rated waits`
             : `${n} of the ${what} you've rated wait, lowest rated first`}
-          . Win to place {them} among your ratings; a loss ends the round.
+          . Each win measures {them} on your own stars and moves the rest with{' '}
+          {them}; a loss ends the round.
         </p>
         <div className="cherrypick-fix-actions">
           <button
             type="button"
-            className="btn btn-primary cherrypick-challenge-start"
+            className="btn btn-secondary cherrypick-challenge-start"
             onClick={() => startChallenge(b.id)}
           >
             <Icon icon={faTrophy || faCrown} />
-            <span>Challenge round</span>
+            <span>Test the champion</span>
           </button>
           <button
             type="button"
@@ -265,8 +265,8 @@ function ChallengeCard({ b, st, name, them, proposal, auto }) {
         {text}
         {proposal
           ? auto
-            ? ` That puts ${them} at ${fmtStars(proposal.to / 20)}★, and the rest below.`
-            : ` Apply to my ratings sets ${them} at ${fmtStars(proposal.to / 20)}★, and the rest below.`
+            ? ` That puts ${them} at ${fmtStars(proposal.to / 20)}★, and moves the rest with ${them}.`
+            : ` Apply to my ratings sets ${them} at ${fmtStars(proposal.to / 20)}★, and moves the rest with ${them}.`
           : ''}
       </p>
       <div>
@@ -291,6 +291,8 @@ export function ResultDialog({ id }) {
   const rankers = useRankingPlugins(auto)
   const b = history.find((x) => x.id === id)
   const [tree, setTree] = React.useState(false)
+  // Rate them myself, with no Challenge round to skip
+  const [rateOwn, setRateOwn] = React.useState(false)
   const moved = useMoved(b?.id)
   const entrant = useEntrant(b?.kind || 'performer')
   const proposals = React.useMemo(
@@ -306,10 +308,15 @@ export function ResultDialog({ id }) {
     ? { her: 'her', his: 'him' }[pronoun(champ.p)] || 'them'
     : 'it'
   const challenge = BR.challengeState(b)
-  // offered or under way: the card asks for the round before any stars
+  // offered or under way, the round's card shows; after Rate them myself,
+  // the champion's stars
   const challengeOpen = !!challenge && !challenge.skipped && !challenge.done
   const ask =
-    !challengeOpen && (proposals?.askChampion || b.championRating != null)
+    !challengeOpen &&
+    (!!challenge?.skipped ||
+      rateOwn ||
+      proposals?.askChampion ||
+      b.championRating != null)
   const placed =
     challenge?.started && challenge.done
       ? proposals?.rows.find(
@@ -434,14 +441,18 @@ export function ResultDialog({ id }) {
             />
           ) : null}
           {ask ? (
-            <ChampionPrompt
-              b={b}
-              name={champ.name}
-              them={them}
-              lost={!!challenge?.lostTo}
-              auto={auto}
-            />
-          ) : null}
+            <ChampionPrompt b={b} name={champ.name} them={them} auto={auto} />
+          ) : challenge || b.champions ? null : (
+            <p className="small mb-2">
+              <button
+                type="button"
+                className="btn btn-link btn-sm cherrypick-inline-link cherrypick-rate-own"
+                onClick={() => setRateOwn(true)}
+              >
+                Rate {them} myself
+              </button>
+            </p>
+          )}
           <Applied bracketId={b.id} />
           {toSet ? (
             <>
@@ -456,15 +467,6 @@ export function ResultDialog({ id }) {
               </p>
               <RankingWarning names={rankers} />
             </>
-          ) : null}
-          {auto && !toSet && (challengeOpen || ask) ? (
-            // nothing places the champion yet, so nothing would apply
-            <p className="small text-warning cherrypick-auto-apply-none">
-              Closing now sets no ratings.{' '}
-              {challengeOpen
-                ? `Play the Challenge round, or rate ${them} yourself, first.`
-                : `Rate ${champ.name} first, and the rest step down from ${them}.`}
-            </p>
           ) : null}
         </div>
       </div>

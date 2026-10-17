@@ -165,7 +165,7 @@ async function provisional(value) {
   return findPerformers.count
 }
 
-test("a bracket of performers you never rated asks for the champion's stars and steps the rest down", async ({
+test('a bracket of performers you never rated rates all sixteen from their finish, and your stars for the champion move the rest', async ({
   page,
 }) => {
   // The bracket the front page's test left paused reaches Stash only if
@@ -189,30 +189,39 @@ test("a bracket of performers you never rated asks for the champion's stars and 
     await page.waitForTimeout(150)
   }
   const result = page.locator('.cherrypick-result-modal')
+  // nothing to challenge and nothing asked: the finish rates all sixteen
+  await expect(result.locator('.cherrypick-challenge')).toHaveCount(0)
+  await expect(result.locator('.cherrypick-champ-rate')).toHaveCount(0)
+  await result.locator('.cherrypick-apply-open').click()
+  const apply = page.locator('.cherrypick-apply-modal')
+  const rows = apply.locator('.cherrypick-apply-table tbody tr')
+  await expect(rows).toHaveCount(16)
+  await expect(rows.first()).toContainText(
+    /Champion, in the top \d+% of a one to five star scale/,
+  )
+  await expect(apply.locator('.cherrypick-provisional')).toHaveCount(16)
+  await apply.getByRole('button', { name: 'Back' }).click()
+
+  // Rate her myself: the stars set the champion, and the rest move with her
+  await result.locator('.cherrypick-rate-own').click()
   const ask = result.locator('.cherrypick-champ-rate')
   await expect(ask).toContainText('How many stars for')
   await expect(ask.locator('.rating-stars .star-fill-100')).toHaveCount(0)
   await ask.locator('.rating-stars button').nth(3).click()
   await expect(ask).toContainText('4.0★')
-
   await result.locator('.cherrypick-apply-open').click()
-  const apply = page.locator('.cherrypick-apply-modal')
-  const rows = apply.locator('.cherrypick-apply-table tbody tr')
-  // the champion, the finalist, two semifinalists and four quarterfinalists;
-  // the first round's losers get nothing
-  await expect(rows).toHaveCount(8)
+  await expect(rows).toHaveCount(16)
   await expect(rows.first()).toContainText('Your rating for the champion')
   await expect(rows.first()).toContainText('4.0★')
-  await expect(rows.nth(1)).toContainText('Finalist, ½★ under the champion')
-  await expect(apply.locator('.cherrypick-provisional')).toHaveCount(7)
+  await expect(rows.nth(1)).toContainText(
+    /Finalist, in the top \d+% of a one to five star scale, moved with the champion/,
+  )
+  await expect(apply.locator('.cherrypick-provisional')).toHaveCount(15)
   await apply.locator('.cherrypick-apply-go').click()
 
-  // the stepped ratings carry the mark, with the value written; the
+  // the ratings from the finish carry the mark, with the value written; the
   // champion's, the user's own, does not
-  await expect.poll(() => provisional()).toBe(7)
-  expect(await provisional(70)).toBe(1)
-  expect(await provisional(60)).toBe(2)
-  expect(await provisional(50)).toBe(4)
+  await expect.poll(() => provisional()).toBe(15)
 
   // Undo takes the ratings and the marks back
   await result.locator('.cherrypick-applied button').click()

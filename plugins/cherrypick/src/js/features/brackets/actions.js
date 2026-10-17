@@ -412,7 +412,7 @@ export function undoChallengePick(id) {
   openDialog({ view: VIEWS.challenge, id })
 }
 
-// Rate the champion by hand instead
+// Rate the champion by hand instead of the optional Challenge round
 export const skipChallenge = (id) =>
   updateFinished(id, (b) => BR.skipChallenge(b))
 
@@ -470,9 +470,9 @@ export async function autoApplyBracket(id) {
   if (changes.length) await applyRatingChanges(b, changes)
 }
 
-// The champion's rating the user gave on the champion screen, when no
-// anchor played: the scale the rest step down from. Apply writes it with
-// them.
+// The champion's stars the user gave on the champion screen, after Rate
+// them myself: they replace its rating from its finish, and the rest move
+// with it. Apply writes it with them.
 export const setChampionRating = (bracketId, rating100) =>
   updateFinished(bracketId, (x) => ({
     ...x,

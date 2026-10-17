@@ -92,7 +92,7 @@ test('an anchored bracket hides ratings while you pick and rates only the unrate
     // only the unrated, each placed by the rated ones around it
     await expect(row.locator('td.num').first()).toHaveText('unrated')
     await expect(row.locator('td').last()).toHaveText(
-      /^(Above .+★( from your scene ratings)?\)|(Finalist|Semifinalist|Quarterfinalist), (below .+★( from your scene ratings)?\)|.+ under the champion))$/,
+      /^(Above .+★( from your scene ratings)?\)|(Finalist|Semifinalist|Quarterfinalist|Round of \d+), (below .+★( from your scene ratings)?\)|in the (top|bottom) \d+% of .+))$/,
     )
   }
 })
@@ -182,7 +182,7 @@ test('performers rated only through their scenes anchor a bracket, and Apply rat
     await expect(rows.first()).toBeVisible()
     expect(await rows.count()).toBeLessThanOrEqual(8)
     // "Above A (4.3★ from your scene ratings), below B (...)", or one of the
-    // two; a row with neither steps down from the champion
+    // two; a row with neither is rated from where it finished
     const above = /^Above ([^,]+) \((\d\.\d)★ from your scene ratings\)/
     const below =
       /(?:^|, )[Bb]elow ([^,]+) \((\d\.\d)★ from your scene ratings\)$/
@@ -196,7 +196,7 @@ test('performers rated only through their scenes anchor a bracket, and Apply rat
       const [, loName, loStars] = why.match(above) || []
       const [, hiName, hiStars] = why.match(below) || []
       if (!loName && !hiName) {
-        expect(why).toMatch(/ under the champion$/)
+        expect(why).toMatch(/, in the (top|bottom) \d+% of .+$/)
         await expect(row.locator('.cherrypick-provisional')).toHaveCount(1)
         stepped.push(name)
         continue
@@ -311,12 +311,12 @@ test('a bracket of unrated performers, then its champion takes on your favorites
     const champ = await result.locator('.cherrypick-champ-name').innerText()
     const card = result.locator('.cherrypick-challenge')
     await expect(card).toContainText(
-      `${champ} has earned a shot at your favorites.`,
+      `Test ${champ} against your favorites? Optional: the ratings from this bracket are ready without it.`,
     )
     await expect(card).toContainText(
       "3 of the performers you've rated wait, lowest rated first",
     )
-    // the round comes before any stars
+    // optional: no stars asked for, before or instead of it
     await expect(result.locator('.cherrypick-champ-rate')).toHaveCount(0)
     await card.locator('.cherrypick-challenge-start').click()
 
@@ -332,7 +332,7 @@ test('a bracket of unrated performers, then its champion takes on your favorites
     await page.keyboard.press('ArrowLeft')
     const outcome = result.locator('.cherrypick-challenge-outcome')
     await expect(outcome).toHaveText(
-      `${champ} beat Edie Flint, then lost to Hana Ridge. Apply to my ratings sets her at 2.3★, and the rest below.`,
+      `${champ} beat Edie Flint, then lost to Hana Ridge. Apply to my ratings sets her at 2.3★, and moves the rest with her.`,
     )
     // Undo that pick, beat Hana Ridge and Bea Lark: every favorite beaten
     await result.getByRole('button', { name: 'Undo the last pick' }).click()
@@ -345,18 +345,21 @@ test('a bracket of unrated performers, then its champion takes on your favorites
       'Beat your favorites',
     )
     await expect(outcome).toHaveText(
-      `${champ} beat all 3 of your favorites: Edie Flint, Hana Ridge and Bea Lark. Apply to my ratings sets her at 5.0★, and the rest below.`,
+      `${champ} beat all 3 of your favorites: Edie Flint, Hana Ridge and Bea Lark. Apply to my ratings sets her at 5.0★, and moves the rest with her.`,
     )
 
-    // Apply: the champion above Bea Lark, the rest stepping down from her
+    // Apply: the champion above Bea Lark; all fifteen others rated from
+    // where they finished, moved with her
     await result.locator('.cherrypick-apply-open').click()
     const apply = page.locator('.cherrypick-apply-modal')
     const rows = apply.locator('.cherrypick-apply-table tbody tr')
-    await expect(rows).toHaveCount(8)
+    await expect(rows).toHaveCount(16)
     await expect(rows.first()).toContainText(champ)
     await expect(rows.first()).toContainText('Above Bea Lark (5.0★)')
-    await expect(rows.nth(1)).toContainText('Finalist, ½★ under the champion')
-    await expect(apply.locator('.cherrypick-provisional')).toHaveCount(7)
+    await expect(rows.nth(1)).toContainText(
+      /Finalist, in the top \d+% of a one to five star scale, moved with the champion/,
+    )
+    await expect(apply.locator('.cherrypick-provisional')).toHaveCount(15)
     await apply.locator('.cherrypick-apply-go').click()
     const champId = demo.performers[champ]
     await expect
@@ -480,11 +483,11 @@ async function clearProvisional(ids) {
       )
 }
 
-test('with auto-apply on, the champion screen says when closing would set nothing', async ({
+test('with auto-apply on, a bracket of unrated performers sets all sixteen on close, and stars given by hand move them', async ({
   page,
 }) => {
-  // A bracket of unrated performers: nothing places its champion until the
-  // Challenge round or the user's stars do
+  // A bracket of unrated performers: each is rated from where it finished,
+  // with no Challenge round played
   const favorites = { 'Edie Flint': 20, 'Hana Ridge': 70, 'Bea Lark': 100 }
   await setAutoApply(true)
   const ids = Object.values(demo.performers)
@@ -509,28 +512,38 @@ test('with auto-apply on, the champion screen says when closing would set nothin
     }
     const result = page.locator('.cherrypick-result-modal')
     const champ = await result.locator('.cherrypick-champ-name').innerText()
-    const none = result.locator('.cherrypick-auto-apply-none')
-    await expect(none).toHaveText(
-      'Closing now sets no ratings. Play the Challenge round, or rate her yourself, first.',
-    )
-    await expect(result.locator('.cherrypick-auto-apply')).toHaveCount(0)
-    // Rate her myself: the stars come next
-    await result.locator('.cherrypick-challenge-skip').click()
-    await expect(none).toHaveText(
-      `Closing now sets no ratings. Rate ${champ} first, and the rest step down from her.`,
-    )
-    const ask = result.locator('.cherrypick-champ-rate')
-    await ask.locator('.rating-stars button').nth(3).click()
-    await expect(ask).toContainText('4.0★, and the rest below her.')
-    await expect(none).toHaveCount(0)
+    await expect(result.locator('.cherrypick-auto-apply-none')).toHaveCount(0)
     await expect(result.locator('.cherrypick-auto-apply')).toContainText(
-      'Closing this sets 8 performer ratings in Stash.',
+      'Closing this sets 16 performer ratings in Stash.',
+    )
+    // Rate her myself: her stars move the rest with her
+    await result.locator('.cherrypick-challenge-skip').click()
+    const ask = result.locator('.cherrypick-champ-rate')
+    await expect(ask).toContainText(
+      `How many stars for ${champ}? The rest move with her.`,
+    )
+    await ask.locator('.rating-stars button').nth(3).click()
+    await expect(ask).toContainText('4.0★, and the rest move with her.')
+    await expect(result.locator('.cherrypick-auto-apply')).toContainText(
+      'Closing this sets 16 performer ratings in Stash.',
     )
     await result.getByRole('button', { name: 'Done' }).click()
     const champId = demo.performers[champ]
     await expect
       .poll(async () => (await performerRatings([champId]))[champId])
       .toBe(80)
+    // the three favorites, the champion and the fifteen it beat or outlasted
+    await expect
+      .poll(
+        async () =>
+          Object.values(await performerRatings(ids)).filter((r) => r != null)
+            .length,
+      )
+      .toBe(19)
+    const after = await performerRatings(ids)
+    for (const [id, r] of Object.entries(after))
+      if (r != null && id !== champId && !Object.values(favorites).includes(r))
+        expect(r).toBeLessThanOrEqual(80)
   } finally {
     for (const [id, r] of Object.entries(before))
       await setPerformerRating(id, r)
@@ -550,7 +563,7 @@ test('a scene bracket plays the unrated scenes and keeps the rated ones for the 
   await options.click()
   const sheet = page.locator('.cherrypick-clip-dialog')
   await expect(sheet.locator('.cherrypick-new-faces')).toContainText(
-    /^\d+ scenes you've rated sit out, and the champion meets up to 3 of them in a Challenge round\.$/,
+    /^\d+ scenes you've rated sit out, and the champion can meet up to 3 of them in an optional Challenge round\.$/,
   )
   await sheet.locator('.cherrypick-start').click()
   const play = page.locator('.cherrypick-play-modal')
