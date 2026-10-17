@@ -823,7 +823,7 @@ test.describe('beside Stash Curator', () => {
     await expect(bracket).toBeEnabled({ timeout: 20_000 })
     await expect(bracket).toHaveAttribute(
       'title',
-      /watched scenes in this list · Curator Appeal not applied$/,
+      /watched scenes in this list(, from likely best to likely worst)? · Curator Appeal not applied$/,
     )
     await bracket.click()
     await expect(page.locator('.cherrypick-play-modal')).toContainText(

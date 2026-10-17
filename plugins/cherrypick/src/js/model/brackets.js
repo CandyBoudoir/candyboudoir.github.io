@@ -131,10 +131,14 @@ export function clipSize(n, pref = DEFAULT_SIZE) {
   return s
 }
 
-// "the 7" / "your top 16 of the 60": the Bracket buttons' tooltips, naming
-// what one click starts (16, or every scene under 16); Options has 32 and 64
+// "the 7" / "16 of the 60": the Bracket buttons' tooltips, naming what one
+// click starts (16, or every scene under 16); Options has 32 and 64. The 16
+// of a bigger pool spread over the model's whole range (composeEntrants),
+// which clipPoolSpread adds after the pool's name.
 export const clipPoolPhrase = (n) =>
-  n <= DEFAULT_SIZE ? `the ${n}` : `your top ${DEFAULT_SIZE} of the ${n}`
+  n <= DEFAULT_SIZE ? `the ${n}` : `${DEFAULT_SIZE} of the ${n}`
+export const clipPoolSpread = (n) =>
+  n > DEFAULT_SIZE ? ', from likely best to likely worst' : ''
 
 // How many of a clip pool of 4 to 15 get a bye in the first round
 export const clipByes = (n) =>

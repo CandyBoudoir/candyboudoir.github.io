@@ -66,7 +66,13 @@ test('clip brackets: every scene under 16, with byes for the top seeds', () => {
   )
   assert.equal(BR.clipPoolPhrase(7), 'the 7')
   assert.equal(BR.clipPoolPhrase(16), 'the 16')
-  assert.equal(BR.clipPoolPhrase(60), 'your top 16 of the 60')
+  assert.equal(BR.clipPoolPhrase(60), '16 of the 60')
+  assert.equal(BR.clipPoolSpread(16), '')
+  assert.equal(
+    BR.clipPoolSpread(60),
+    ', from likely best to likely worst',
+    'the 16 spread over the whole range',
+  )
 })
 
 test('a clip bracket of 7: one bye, then six picks to a champion', () => {

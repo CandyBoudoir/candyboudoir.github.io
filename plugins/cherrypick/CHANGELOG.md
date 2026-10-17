@@ -6,6 +6,7 @@
 - In a window or on a phone narrower than 1200px, More like this no longer covers the scene's performers. Stash keeps the scene's details to the window's height and lets the rest run past, and More like this started where that box ended.
 - Your score's ribbon on scene cards runs off the picture's top and left edges like Stash's rating ribbon. Its label is shorter than Stash's "Rating: 5", so the ribbon stopped inside the picture with its end showing.
 - Undo leaves alone a rating you changed by hand after Apply and says so: "Left 1 as it is: its rating changed since Apply." It used to put the rating from before Apply back over yours. The same goes for a provisional rating a later bracket stepped down again.
+- Bracket's tooltip on more than 16 watched scenes reads "Bracket 16 of the 60 watched scenes in this list, from likely best to likely worst", and the same on a performer's scenes. It called them your top 16, and a bracket spreads its 16 places over the whole range of what Cherry Pick expects you to think of them.
 
 Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.39.1, Xenith 3.2.0 and Restash 0.3.0-55c1cb2.
 
