@@ -1,0 +1,901 @@
+/*
+ * The page under the taller navbar. Stash spaces the page, the filter sidebar
+ * and its sticky bars by its own 48.75px bar, so each of those moves down by
+ * --st-nav-clear: the band and the double rule under it. On a phone held
+ * upright the bar is at the bottom.
+ */
+:root {
+  --st-nav-clear: calc(var(--st-nav-height) + 6px);
+}
+
+body {
+  padding-top: var(--st-nav-clear);
+}
+
+.sidebar-pane .sidebar {
+  margin-top: var(--st-nav-clear);
+}
+
+.sidebar-toggle-button-container .sidebar-toggle-button {
+  background: #000;
+  border: 2px solid var(--st-white);
+  border-radius: 0;
+  opacity: 1;
+  top: calc(var(--st-nav-clear) + 0.5rem);
+}
+
+.sticky.detail-header {
+  top: var(--st-nav-clear);
+}
+
+/* The task queue at the top of Settings > Tasks sticks under the bar */
+#tasks-panel .tasks-panel-queue {
+  background-color: #000;
+  top: var(--st-nav-clear);
+}
+
+#queue-viewer .queue-controls {
+  background-color: #000;
+}
+
+#queue-viewer .current {
+  background-color: var(--st-tone);
+}
+
+/* Toasts come in under the bar */
+.toast-container {
+  top: calc(var(--st-nav-clear) + 1rem);
+}
+
+@media (width <= 575.98px) and (orientation: portrait) {
+  body {
+    padding-bottom: var(--st-nav-clear);
+    padding-top: 0.5rem;
+  }
+
+  .pagination-footer-container {
+    bottom: var(--st-nav-clear);
+  }
+
+  .sidebar-pane .sidebar {
+    margin-top: 0;
+  }
+
+  .detail-body .sidebar {
+    height: calc(100vh - var(--st-nav-clear));
+    max-height: calc(100vh - var(--st-nav-clear));
+  }
+
+  .toast-container {
+    bottom: calc(var(--st-nav-clear) + 1.5rem);
+    top: unset;
+  }
+}
+
+/*
+ * List toolbars: the toolbar sits over every list, so it is a quiet strip of
+ * inked boxes, with no tone shadows and no lift, and every control stands the
+ * same height. The search field and its filter button are one ruled box.
+ */
+.filtered-list-toolbar {
+  background-color: transparent;
+}
+
+.filtered-list-toolbar .btn-group:has(> .btn)::after,
+.filtered-list-toolbar .btn:not(.minimal, .btn-minimal, .btn-link)::after,
+.pagination-footer-container .btn-group:has(> .btn)::after,
+.pagination-footer-container
+  .btn:not(.minimal, .btn-minimal, .btn-link)::after {
+  content: none;
+}
+
+.filtered-list-toolbar
+  .btn:not(.minimal, .btn-minimal, .btn-link, :disabled, .disabled):is(
+    :hover,
+    :active
+  ),
+.pagination-footer-container
+  .btn:not(.minimal, .btn-minimal, .btn-link, :disabled, .disabled):is(
+    :hover,
+    :active
+  ) {
+  transform: none;
+}
+
+.item-list-container .filtered-list-toolbar.has-selection {
+  background: #000;
+  border: 2px solid var(--st-white);
+  box-shadow: 6px 6px 0 rgb(253 252 249 / 18%);
+}
+
+.filtered-list-toolbar .paginationIndex,
+.paginationIndex {
+  color: var(--st-muted);
+  font-family: var(--st-font-label);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+/* The filter sidebar */
+.sidebar-pane .sidebar,
+.sidebar {
+  background: #000;
+  border-right: 2px solid var(--st-white);
+  box-shadow: none;
+}
+
+.sidebar .collapse-button.btn.minimal,
+.sidebar-section .collapse-button {
+  color: var(--st-text);
+  font-family: var(--st-font-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sidebar-section + .sidebar-section {
+  border-top: 1px solid var(--st-line);
+}
+
+/* The pager: one ruled strip, the current page in the spot colour */
+.btn-group.pagination .btn {
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+  min-width: 2.6rem;
+}
+
+.btn-group.pagination
+  .btn.btn-secondary:not(.minimal, :disabled, .disabled).active {
+  background: var(--st-spot);
+  color: #fff;
+}
+
+/* An end of the list: the box stays drawn, only its arrow fades */
+.btn-group.pagination .btn:disabled {
+  background: #000;
+  border-style: solid !important;
+  color: #5c5a56;
+  filter: none;
+  opacity: 1;
+}
+
+/*
+ * Stash builds the page count and its dropdown as one split button, with only
+ * 5px on the sides where they join (three classes deep).
+ */
+.pagination .page-count-container .btn.page-count {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.pagination .page-count-container .btn.page-count-dropdown {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+/* The floating pager on a phone stands on beta, not over the cards */
+.pagination-footer-container .pagination {
+  background: #000;
+}
+
+/* Bootstrap's pagination, where Stash uses it */
+.page-link {
+  background: #000;
+  border: 2px solid var(--st-white);
+  border-radius: 0 !important;
+  color: var(--st-text);
+  font-family: var(--st-font-label);
+  font-weight: 900;
+  margin-left: -2px;
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+.page-item:first-child .page-link {
+  margin-left: 0;
+}
+
+.page-link:hover {
+  background: var(--st-paper);
+  border-color: var(--st-white);
+  color: #000;
+}
+
+.page-link:focus {
+  box-shadow: 0 0 0 3px rgb(255 77 109 / 45%);
+}
+
+.page-item.active .page-link {
+  background: var(--st-spot);
+  border-color: var(--st-white);
+  color: #fff;
+}
+
+/* Tabs: the open tab is a white panel joined to the rule */
+.nav-tabs {
+  border-bottom: 2.5px solid var(--st-white);
+  gap: 0.25rem;
+}
+
+.nav-tabs .nav-link {
+  align-items: center;
+  background: none;
+  border: 2px solid transparent;
+  border-bottom: 0;
+  border-radius: 0;
+  color: var(--st-muted);
+  display: inline-flex;
+  font-family: var(--st-font-label);
+  font-size: 0.82rem;
+  font-weight: 700;
+  gap: 0.4rem;
+  letter-spacing: 0.12em;
+  margin-bottom: -2.5px;
+  text-transform: uppercase;
+}
+
+.nav-tabs .nav-link:hover,
+.nav-tabs .nav-link:focus {
+  background: var(--st-hatch-soft);
+  border-color: transparent;
+  color: #fff;
+}
+
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+  background: var(--st-paper);
+  border-color: var(--st-white);
+  color: #000;
+}
+
+/* The counts on tabs are small caption boxes, red on the open one */
+.nav-tabs .nav-link .badge {
+  background: none;
+  border: 1.5px solid currentcolor;
+  color: inherit;
+  font-family: var(--st-font-label);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  margin: 0;
+  padding: 0.22em 0.45em;
+}
+
+.nav-tabs .nav-link.active .badge {
+  background: var(--st-spot);
+  border-color: var(--st-spot);
+  color: #fff;
+}
+
+/* Settings and other pill navs */
+.nav-pills .nav-link {
+  border-radius: 0;
+  color: var(--st-muted);
+  font-family: var(--st-font-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.nav-pills .nav-link:hover {
+  background: var(--st-hatch-soft);
+  color: #fff;
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+  background: var(--st-spot);
+  clip-path: polygon(7px 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
+  color: #fff;
+}
+
+/* Settings: Dela section titles, the rest on Zen Kaku */
+.setting-section > h1 {
+  color: var(--st-white);
+  letter-spacing: -0.01em;
+}
+
+.setting-section .setting h3,
+.setting-section .sub-heading {
+  font-family: var(--st-font-body);
+}
+
+.setting-section .setting h3 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.setting-section .card {
+  background: var(--st-panel);
+}
+
+/* Detail pages: a beta header ruled off in white */
+.detail-header {
+  background: var(--st-beta);
+  border-bottom: 2.5px solid var(--st-white);
+}
+
+/*
+ * Stash's blurred backdrop is an Interface setting (Enable background image),
+ * so it stays when it is on, printed in grey under a tone so the page keeps
+ * its one colour.
+ */
+.detail-header .background-image-container .background-image {
+  filter: blur(16px) grayscale(1) contrast(1.15);
+}
+
+.detail-header .background-image-container::after {
+  background: var(--st-dots-ink);
+  content: '';
+  inset: 0;
+  opacity: 0.8;
+  position: absolute;
+}
+
+.detail-header .performer-name,
+.detail-header :is(.studio-name, .tag-name, .group-name),
+.scene-header {
+  color: var(--st-white);
+  font-family: var(--st-font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.detail-item-title {
+  color: var(--st-dim);
+  font-family: var(--st-font-label);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/*
+ * The performer page: her header is a manga spread. Two panels share one
+ * row: her picture, cut on the slant, and the panel her name sits in, split
+ * by a gutter that leans. Both span the same rows, so the two slanted edges
+ * stay parallel at any height. The details are a paper narration box in the
+ * corner of her panel, ドン (her entrance) breaks the frame between them, and
+ * the buttons sit under the spread. Stash's own markup nests the head in a
+ * row and the buttons in a column, which `display: contents` opens up so
+ * every part can take a cell.
+ */
+#performer-page .detail-header:not(.edit) {
+  border-bottom: 0;
+  padding: 0.6rem 1rem 1rem;
+}
+
+#performer-page .detail-header:not(.edit) .detail-container {
+  --st-gut: 14px;
+  --st-lean: 44px;
+  --st-rule: 3px;
+
+  display: grid;
+  gap: 0;
+  grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+  grid-template-rows: auto auto auto 1fr auto;
+}
+
+#performer-page .detail-header:not(.edit) .detail-container > .row,
+#performer-page .detail-header:not(.edit) .performer-head {
+  display: contents;
+}
+
+/* Panel one: her picture, cropped to fill from the top, in a white frame */
+#performer-page .detail-header:not(.edit) .detail-header-image {
+  background: var(--st-white);
+  clip-path: polygon(0 0, 100% 0, calc(100% - var(--st-lean)) 100%, 0 100%);
+  grid-column: 1;
+  grid-row: 1 / 5;
+  min-height: 25rem;
+  padding: 0;
+  position: relative;
+}
+
+#performer-page .detail-header:not(.edit) .detail-header-image > .btn {
+  background: var(--st-panel);
+  border: 0;
+  clip-path: polygon(0 0, 100% 0, calc(100% - var(--st-lean)) 100%, 0 100%);
+  inset: var(--st-rule);
+  padding: 0;
+  position: absolute;
+}
+
+#performer-page .detail-header:not(.edit) .detail-header-image img.performer {
+  border-radius: 0;
+  height: 100%;
+  margin: 0;
+  max-height: none;
+  max-width: none;
+  object-fit: cover;
+  object-position: 50% 18%;
+  width: 100%;
+}
+
+/* Panel two: hers. A frame, then tone laid in from the foot of the panel */
+#performer-page .detail-header:not(.edit) .performer-head::before,
+#performer-page .detail-header:not(.edit) .performer-head::after {
+  content: '';
+  grid-column: 2;
+  grid-row: 1 / 5;
+  margin-left: calc(var(--st-gut) - var(--st-lean));
+}
+
+#performer-page .detail-header:not(.edit) .performer-head::before {
+  background: var(--st-white);
+  clip-path: polygon(var(--st-lean) 0, 100% 0, 100% 100%, 0 100%);
+}
+
+#performer-page .detail-header:not(.edit) .performer-head::after {
+  background:
+    linear-gradient(
+      170deg,
+      var(--st-panel) 38%,
+      rgb(10 10 10 / 60%) 70%,
+      rgb(10 10 10 / 15%)
+    ),
+    var(--st-dots-soft), var(--st-panel);
+  clip-path: polygon(
+    calc(var(--st-lean) + var(--st-rule)) var(--st-rule),
+    calc(100% - var(--st-rule)) var(--st-rule),
+    calc(100% - var(--st-rule)) calc(100% - var(--st-rule)),
+    var(--st-rule) calc(100% - var(--st-rule))
+  );
+}
+
+#performer-page .detail-header:not(.edit) .performer-head > * {
+  grid-column: 2;
+  margin-left: calc(var(--st-gut) + 1.6rem);
+  margin-right: 1.6rem;
+  min-width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  position: relative;
+  z-index: 1;
+}
+
+#performer-page .detail-header:not(.edit) .performer-head h2 {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.6rem;
+  grid-row: 1;
+  margin-bottom: 0.2rem;
+  padding-right: 4.5rem;
+  padding-top: 1.5rem;
+}
+
+/* The heart sits by her name; Stash's fold button goes to the far end */
+#performer-page .detail-header:not(.edit) .performer-head h2 .name-icons {
+  order: 1;
+}
+
+#performer-page .detail-header:not(.edit) .detail-expand-collapse {
+  margin-left: auto;
+  order: 2;
+}
+
+/* Her name, lettered like the title of a chapter */
+#performer-page .detail-header:not(.edit) .performer-name {
+  color: var(--st-white);
+  display: inline-block;
+  font-family: var(--st-font-display);
+  font-size: clamp(2rem, 4.2vw, 3.3rem);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  text-shadow: 0.05em 0.05em 0 var(--st-spot);
+  transform: skewX(-8deg);
+}
+
+/* Her aliases, which Stash prints in a bare div under her name */
+#performer-page
+  .detail-header:not(.edit)
+  .performer-head
+  > div:has(> .alias-head) {
+  grid-row: 2;
+}
+
+#performer-page .detail-header:not(.edit) .alias-head {
+  color: var(--st-muted);
+  font-family: var(--st-font-label);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+#performer-page .detail-header:not(.edit) .quality-group {
+  grid-row: 3;
+}
+
+/* Her details: a paper narration box set into the corner of her panel */
+#performer-page .detail-header:not(.edit) .detail-group {
+  place-self: end end;
+  background: var(--st-paper);
+  border: 2px solid #000;
+  box-shadow: 0 0 0 2px var(--st-paper);
+  color: #000;
+  column-gap: 1.6rem;
+  display: grid;
+  grid-row: 4;
+  grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
+  margin-bottom: 1.6rem;
+  margin-top: 1.2rem;
+  max-width: 41rem;
+  padding: 0.7rem 1rem 0.8rem;
+  width: calc(100% - var(--st-gut) - 3.2rem);
+}
+
+#performer-page .detail-header:not(.edit) .detail-group:empty {
+  display: none;
+}
+
+#performer-page .detail-header:not(.edit) .detail-item {
+  align-items: baseline;
+  border-bottom: 1px solid rgb(0 0 0 / 14%);
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 0.7rem;
+  padding: 0.28rem 0;
+}
+
+#performer-page .detail-header:not(.edit) .detail-item-title {
+  color: #4d4b47;
+  flex: none;
+  font-size: 0.68rem;
+  min-width: 6.6rem;
+}
+
+#performer-page .detail-header:not(.edit) .detail-item-value {
+  color: #000;
+  font-weight: 700;
+  min-width: 0;
+}
+
+#performer-page .detail-header:not(.edit) .detail-item-value.age {
+  border-bottom-color: #000;
+}
+
+#performer-page .detail-header:not(.edit) .detail-item:is(.tags, .stash_ids) {
+  border-bottom: 0;
+  grid-column: 1 / -1;
+}
+
+/* Black ink on paper: tags and the StashID turn over */
+#performer-page .detail-header:not(.edit) .detail-group .tag-item.badge {
+  background:
+    linear-gradient(135deg, transparent 0 7px, #000 7px), var(--st-dots-ink);
+  border-color: #000;
+  color: var(--st-white);
+}
+
+#performer-page .detail-header:not(.edit) .detail-group .stash-id-pill {
+  border-color: #000;
+}
+
+#performer-page .detail-header:not(.edit) .detail-group .stash-id-pill span {
+  background: #000;
+  color: var(--st-white);
+}
+
+#performer-page .detail-header:not(.edit) .detail-group .stash-id-pill a {
+  background: var(--st-paper);
+  color: #000;
+}
+
+/* ドン: her entrance, breaking the frame across the gutter */
+#performer-page .detail-header:not(.edit) .detail-container::after {
+  -webkit-text-stroke: 7px #000;
+  place-self: end start;
+  color: var(--st-spot-hi);
+  content: 'ドン';
+  filter: drop-shadow(2.5px 0 0 var(--st-white))
+    drop-shadow(-2.5px 0 0 var(--st-white))
+    drop-shadow(0 2.5px 0 var(--st-white))
+    drop-shadow(0 -2.5px 0 var(--st-white));
+  font-size: 3.6rem;
+  grid-column: 1 / 3;
+  grid-row: 4;
+  letter-spacing: -0.06em;
+  margin: 0 0 1.4rem calc(min(300px, 100%) - var(--st-lean) - 3.2rem);
+  transform: rotate(-9deg) skewX(-10deg);
+  z-index: 2;
+}
+
+/* The buttons under the spread */
+#performer-page .detail-header:not(.edit) .performer-head > .col {
+  grid-column: 1 / -1;
+  grid-row: 5;
+  margin: 1.1rem 0 0;
+}
+
+#performer-page .detail-header:not(.edit) .performer-head > .col > .row {
+  margin: 0;
+}
+
+#performer-page .detail-header:not(.edit) .details-edit {
+  margin: 0;
+}
+
+/* Collapsed, the spread keeps its panels, shorter */
+#performer-page .detail-header.collapsed:not(.edit) .detail-header-image {
+  min-height: 15rem;
+}
+
+/*
+ * On a phone the spread stacks: her picture over her panel, and the gutter
+ * between them leans across the width instead. Both are full width, so the
+ * two slanted edges stay parallel.
+ */
+@media (width <= 720px) {
+  #performer-page .detail-header:not(.edit) .detail-container {
+    --st-lean: 26px;
+
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto 1fr auto;
+  }
+
+  #performer-page .detail-header:not(.edit) .detail-header-image {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--st-lean)), 0 100%);
+    grid-row: 1;
+    height: 19rem;
+    min-height: 0;
+  }
+
+  #performer-page .detail-header:not(.edit) .detail-header-image > .btn {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--st-lean)), 0 100%);
+  }
+
+  #performer-page .detail-header:not(.edit) .performer-head::before,
+  #performer-page .detail-header:not(.edit) .performer-head::after {
+    grid-column: 1;
+    grid-row: 2 / 6;
+    margin-left: 0;
+    margin-top: calc(var(--st-gut) - var(--st-lean));
+  }
+
+  #performer-page .detail-header:not(.edit) .performer-head::before {
+    clip-path: polygon(0 var(--st-lean), 100% 0, 100% 100%, 0 100%);
+  }
+
+  #performer-page .detail-header:not(.edit) .performer-head::after {
+    clip-path: polygon(
+      var(--st-rule) calc(var(--st-lean) + var(--st-rule)),
+      calc(100% - var(--st-rule)) var(--st-rule),
+      calc(100% - var(--st-rule)) calc(100% - var(--st-rule)),
+      var(--st-rule) calc(100% - var(--st-rule))
+    );
+  }
+
+  #performer-page .detail-header:not(.edit) .performer-head > * {
+    grid-column: 1;
+    margin-left: 1.1rem;
+    margin-right: 1.1rem;
+  }
+
+  #performer-page .detail-header:not(.edit) .performer-head h2 {
+    flex-wrap: nowrap;
+    grid-row: 2;
+    padding-right: 0;
+    padding-top: 1.4rem;
+  }
+
+  #performer-page .detail-header:not(.edit) .performer-name {
+    font-size: 1.85rem;
+  }
+
+  #performer-page
+    .detail-header:not(.edit)
+    .performer-head
+    > div:has(> .alias-head) {
+    grid-row: 3;
+  }
+
+  #performer-page .detail-header:not(.edit) .quality-group {
+    grid-row: 4;
+  }
+
+  #performer-page .detail-header:not(.edit) .detail-group {
+    grid-row: 5;
+    grid-template-columns: minmax(0, 1fr);
+    margin-bottom: 1.1rem;
+    width: calc(100% - 2.2rem);
+  }
+
+  #performer-page .detail-header:not(.edit) .detail-item-title {
+    min-width: 5.8rem;
+  }
+
+  #performer-page .detail-header:not(.edit) .detail-container::after {
+    font-size: 2.6rem;
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
+    margin: 0 0.8rem -0.6rem 0;
+  }
+
+  #performer-page .detail-header:not(.edit) .performer-head > .col {
+    grid-column: 1;
+    grid-row: 6;
+  }
+}
+
+/* video.js player */
+.video-js .vjs-control-bar {
+  background-color: transparent;
+  background-image: linear-gradient(0deg, rgb(0 0 0 / 92%), rgb(0 0 0 / 0%));
+}
+
+.video-js .vjs-play-progress,
+.video-js .vjs-volume-level {
+  background-color: var(--st-spot);
+}
+
+.video-js .vjs-play-progress::before {
+  color: var(--st-white);
+}
+
+.video-js .vjs-load-progress,
+.video-js .vjs-load-progress div {
+  background: rgb(253 252 249 / 25%);
+}
+
+/*
+ * Tables: a paper header and hairline rows. Modals render outside #root, so
+ * :is(#root, .modal) keeps #root's weight and reaches tables in dialogs too.
+ */
+:is(#root, .modal) table thead {
+  background-color: var(--st-paper);
+}
+
+:is(#root, .modal) .table td,
+:is(#root, .modal) .table th {
+  background-color: transparent;
+  color: var(--st-text);
+}
+
+:is(#root, .modal) .table thead th {
+  border-bottom: 2px solid var(--st-white);
+  color: #000;
+  font-family: var(--st-font-label);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+:is(#root, .modal) .table td {
+  border-top: 1px solid var(--st-line);
+}
+
+/* The scene edit form's sticky button bar, which Stash paints slate */
+#scene-edit-details .edit-buttons-container {
+  background-color: #000;
+}
+
+/*
+ * Other surfaces Stash paints slate two classes deep: the task queue, the
+ * sidebar's text filters and their clear buttons, the filter dialog's
+ * modifier pills, the front page's row editor, the date picker and the
+ * manual.
+ */
+.job-table.card {
+  background: var(--st-panel);
+  border: 2px solid var(--st-white);
+}
+
+.job-table.card::after {
+  content: none;
+}
+
+.job-table.card :is(.cancelled, .finished) {
+  color: var(--st-dim);
+}
+
+.job-table.card :is(.failed, .stopping, .cancelled) .fa-icon,
+.job-table.card .job-error {
+  color: var(--st-spot-hi);
+}
+
+.job-table.card :is(.running, .finished, .ready) .fa-icon {
+  color: var(--st-white);
+}
+
+.clearable-text-field,
+.clearable-text-field:active,
+.clearable-text-field:focus {
+  background-color: #000;
+  border: 2px solid var(--st-white);
+  border-radius: 0;
+  color: var(--st-text);
+}
+
+:is(.clearable-text-field-clear, .query-text-field-clear),
+:is(.clearable-text-field-clear, .query-text-field-clear):is(
+  :hover,
+  :focus,
+  :active
+) {
+  background-color: transparent;
+  border: 0 !important;
+  color: var(--st-muted);
+}
+
+:is(.clearable-text-field-clear, .query-text-field-clear)::after {
+  content: none;
+}
+
+.modifier-options .modifier-option {
+  background: #000;
+  border: 1.5px solid var(--st-white);
+  border-radius: 0;
+  color: var(--st-text);
+  font-family: var(--st-font-label);
+}
+
+.modifier-options .modifier-option.selected {
+  background: var(--st-spot);
+  color: #fff;
+}
+
+.recommendations-container-edit .recommendation-row {
+  background: var(--st-panel);
+  border: 2px solid var(--st-white);
+}
+
+.selected-items-info {
+  border-color: var(--st-white);
+}
+
+.sidebar-section,
+.sidebar-section:first-child .collapse-header {
+  border-color: var(--st-line);
+}
+
+div.react-datepicker {
+  background-color: #000;
+  border: 2px solid var(--st-white);
+  border-radius: 0;
+  color: var(--st-text);
+  font-family: var(--st-font-label);
+}
+
+div.react-datepicker .react-datepicker__header,
+div.react-datepicker .react-datepicker-time__header {
+  background-color: var(--st-paper);
+  border-bottom: 2px solid var(--st-white);
+  border-radius: 0;
+  color: #000;
+}
+
+div.react-datepicker .react-datepicker__current-month,
+div.react-datepicker .react-datepicker__day-name {
+  color: #000;
+}
+
+div.react-datepicker .react-datepicker__day {
+  color: var(--st-text);
+}
+
+div.react-datepicker .react-datepicker__day:hover {
+  background: var(--st-paper);
+  border-radius: 0;
+  color: #000;
+}
+
+div.react-datepicker
+  :is(
+    .react-datepicker__day--selected,
+    .react-datepicker__day--keyboard-selected
+  ) {
+  background: var(--st-spot);
+  border-radius: 0;
+  color: #fff;
+}
+
+.manual-header,
+.manual-body {
+  background-color: #000;
+  color: var(--st-text);
+}

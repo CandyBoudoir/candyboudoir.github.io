@@ -1,0 +1,152 @@
+/* Page, type, links, focus, selection, verdicts and the SFX lettering */
+::selection {
+  background: var(--st-spot);
+  color: #fff;
+}
+
+body {
+  background: var(--st-beta);
+  color: var(--st-text);
+  font-family: var(--st-font-body);
+}
+
+/* Gradient tone across the top of the page, like a night sky laid in tone */
+body::before {
+  background: var(--st-dots-soft);
+  content: '';
+  height: 70vh;
+  inset: 0 0 auto;
+  mask: linear-gradient(180deg, #000, transparent);
+  pointer-events: none;
+  position: fixed;
+  z-index: -1;
+}
+
+a {
+  color: var(--st-text);
+}
+
+a:hover {
+  color: var(--st-spot-hi);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--st-font-display);
+  font-weight: 400;
+}
+
+h4,
+h5,
+h6 {
+  font-family: var(--st-font-label);
+  font-weight: 700;
+}
+
+.text-muted {
+  color: var(--st-muted) !important;
+}
+
+hr {
+  border-top-color: var(--st-line);
+}
+
+code {
+  color: var(--st-spot-hi);
+}
+
+/*
+ * Verdicts in black, white and the one red, told apart by a chip, so a
+ * column of Tagger rows reads at a glance without green or yellow: a match
+ * is a white box with a black tick, a near miss an outlined box with a bang,
+ * a failure a red box with a white cross. Text stays bold and still.
+ */
+.text-success,
+.text-warning,
+.text-danger {
+  --st-chip-size: 1.05em;
+}
+
+:is(.text-success, .text-warning, .text-danger):not(svg) {
+  font-weight: 700;
+}
+
+.text-success {
+  color: var(--st-white) !important;
+
+  --st-chip: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Crect width='18' height='18' fill='%23fdfcf9'/%3E%3Cpath d='m3.4 9.4 1.7-1.7 2.7 2.7 5.2-5.2 1.7 1.7-6.9 6.9Z'/%3E%3C/svg%3E");
+}
+
+.text-warning {
+  color: var(--st-muted) !important;
+
+  --st-chip: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Crect x='.9' y='.9' width='16.2' height='16.2' fill='%23000' stroke='%23fdfcf9' stroke-width='1.8'/%3E%3Cpath d='M7.7 3.6h2.6l-.5 6.9H8.2Z' fill='%23fdfcf9'/%3E%3Ccircle cx='9' cy='13.3' r='1.45' fill='%23fdfcf9'/%3E%3C/svg%3E");
+}
+
+.text-danger {
+  color: var(--st-spot-hi) !important;
+
+  --st-chip: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Crect width='18' height='18' fill='%23e8173f'/%3E%3Cpath d='m5.2 3.9 3.8 3.8 3.8-3.8 1.3 1.3L10.3 9l3.8 3.8-1.3 1.3L9 10.3l-3.8 3.8-1.3-1.3L7.7 9 3.9 5.2Z' fill='%23fff'/%3E%3C/svg%3E");
+}
+
+/* A verdict that brings its own icon wears the chip on that icon */
+:is(.text-success, .text-warning, .text-danger):not(svg) > svg {
+  box-sizing: content-box;
+  height: calc(var(--st-chip-size) - 4px);
+  padding: 2px;
+  vertical-align: -0.17em;
+  width: calc(var(--st-chip-size) - 4px);
+}
+
+.text-success:not(svg) > svg {
+  background: var(--st-paper);
+  color: #000;
+  fill: #000;
+}
+
+.text-warning:not(svg) > svg {
+  background: #000;
+  color: var(--st-white);
+  fill: var(--st-white);
+  outline: 1.5px solid var(--st-white);
+  outline-offset: -1.5px;
+}
+
+.text-danger:not(svg) > svg {
+  background: var(--st-spot);
+  color: #fff;
+  fill: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--st-spot-hi);
+  outline-offset: 3px;
+}
+
+* {
+  scrollbar-color: #3a3a3a var(--st-beta);
+}
+
+/*
+ * SFX lettering, shared by every katakana sound effect drawn as text: white
+ * Dela Gothic One on a thick black stroke, as letterers ink them over art.
+ */
+.grid-card .thumbnail-section::after,
+.favorite-button::after,
+.modal-header::after,
+.LoadingIndicator::after,
+.toast::before,
+.detail-header .detail-container::after {
+  -webkit-text-stroke: 5px #000;
+  color: var(--st-white);
+  font-family: var(--st-font-display);
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  paint-order: stroke fill;
+  pointer-events: none;
+  text-transform: none;
+  white-space: nowrap;
+}

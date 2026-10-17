@@ -1,0 +1,1106 @@
+/*
+ * Design-system page only. Stash's own stylesheet positions card overlays,
+ * stacks the rating stars and fixes the navbar to the window; this file stands
+ * in for those few rules so the specimens below match Stash's layout, and
+ * dresses the page itself. Everything Stash shows comes from screentone.css.
+ */
+
+/* Stash fixes its navbar and pads the page for it; here the bar is sticky */
+body {
+  font-family: var(--st-font-body);
+  padding: 0 0 6rem;
+}
+
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+.top-nav .nav-utility {
+  margin-left: auto;
+}
+
+.top-nav .navbar-collapse {
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+@media (width < 1200px) {
+  .top-nav.navbar {
+    flex-wrap: wrap;
+  }
+
+  .top-nav .navbar-toggler {
+    margin-right: 0.5rem;
+  }
+
+  .top-nav .navbar-collapse {
+    flex-basis: 100%;
+    order: 3;
+    padding: 0.4rem 0 0.2rem;
+  }
+
+  .top-nav .navbar-collapse.show {
+    display: flex;
+  }
+}
+
+/* On this page the bar stays at the top of a phone, with its rules below */
+@media (width <= 575.98px) and (orientation: portrait) {
+  body {
+    padding: 0 0 6rem;
+  }
+
+  .top-nav.navbar {
+    border-bottom: 3px solid var(--st-white);
+    border-top: 0;
+    box-shadow:
+      0 4px 0 #000,
+      0 5.5px 0 var(--st-white);
+  }
+}
+
+/* The "Try it" switches */
+.ds-controls {
+  align-items: center;
+  background: rgb(0 0 0 / 92%);
+  border-bottom: 2px solid var(--st-white);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-top: 6px;
+  padding: 0.6rem 1rem;
+  position: sticky;
+  top: var(--st-nav-clear);
+  z-index: 1020;
+}
+
+.ds-controls .label {
+  color: var(--st-dim);
+  font-family: var(--st-font-label);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Below 1200px the demo navbar wraps, so the switches stop sticking under it */
+@media (width < 1200px) {
+  .ds-controls {
+    position: static;
+  }
+}
+
+/* Sections: each opens on a band of speed lines, fading out at both ends */
+.ds-section {
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 3.5rem 1rem 0;
+}
+
+.ds-section::before {
+  background: var(--st-speed);
+  content: '';
+  display: block;
+  height: 12px;
+  margin-bottom: 2.6rem;
+  mask: linear-gradient(90deg, transparent, #000 15% 70%, transparent);
+}
+
+.ds-section > h2 {
+  align-items: center;
+  color: var(--st-white);
+  display: flex;
+  font-family: var(--st-font-display);
+  font-size: 2.5rem;
+  gap: 0.75rem;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  margin-bottom: 0.5rem;
+}
+
+.ds-section > h2 img {
+  height: 2.8rem;
+  max-width: 5.5rem;
+  width: auto;
+}
+
+/* Katakana words in running text stay whole */
+.ds-lede {
+  color: var(--st-muted);
+  margin-bottom: 1.5rem;
+  max-width: 68ch;
+  word-break: keep-all;
+}
+
+.ds-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+/*
+ * Panels on the page are drawn a hair off square, as an inker's ruler
+ * leaves them: a white polygon under a black one inset by the line width.
+ */
+.ds-panel,
+.ds-swatch {
+  isolation: isolate;
+  padding: 1.25rem;
+  position: relative;
+}
+
+.ds-panel::before,
+.ds-panel::after,
+.ds-swatch::before,
+.ds-swatch::after {
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+}
+
+.ds-panel::before,
+.ds-swatch::before {
+  background: var(--st-white);
+  clip-path: polygon(
+    0 2px,
+    100% 0,
+    calc(100% - 2px) 100%,
+    3px calc(100% - 1px)
+  );
+}
+
+.ds-panel::after,
+.ds-swatch::after {
+  background: var(--st-panel);
+  clip-path: polygon(
+    2.5px 4.5px,
+    calc(100% - 2.5px) 2.5px,
+    calc(100% - 4.5px) calc(100% - 2.5px),
+    5.5px calc(100% - 3.5px)
+  );
+}
+
+.ds-panel:nth-of-type(even)::before {
+  clip-path: polygon(
+    2px 0,
+    calc(100% - 1px) 3px,
+    100% calc(100% - 1px),
+    0 100%
+  );
+}
+
+.ds-panel:nth-of-type(even)::after {
+  clip-path: polygon(
+    4.5px 2.5px,
+    calc(100% - 3.5px) 5.5px,
+    calc(100% - 2.5px) calc(100% - 3.5px),
+    2.5px calc(100% - 2.5px)
+  );
+}
+
+.ds-caption {
+  color: var(--st-dim);
+  font-size: 0.85rem;
+}
+
+/* Hero: the wordmark is a manga logo, the art a page of panels */
+.ds-hero {
+  align-items: center;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  margin: 0 auto;
+  max-width: 1180px;
+  min-height: 420px;
+  overflow: clip;
+  padding: 3rem 1rem 1rem;
+  position: relative;
+}
+
+.ds-hero .kicker {
+  color: var(--st-dim);
+  font-family: var(--st-font-label);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}
+
+.ds-hero .wordmark {
+  color: var(--st-white);
+  display: inline-block;
+  font-family: var(--st-font-display);
+  font-size: clamp(3rem, 6.6vw, 5.8rem);
+  font-weight: 400;
+  isolation: isolate;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  margin: 0;
+  position: relative;
+  transform: skewX(-8deg);
+  transform-origin: 0 100%;
+}
+
+/* A red offset copy behind, and a gradient tone laid over the lower half */
+.ds-hero .wordmark::before,
+.ds-hero .wordmark::after {
+  content: attr(data-text);
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.ds-hero .wordmark::before {
+  -webkit-text-stroke: 0.05em var(--st-spot);
+  color: var(--st-spot);
+  transform: translate(0.06em, 0.06em);
+  z-index: -1;
+}
+
+.ds-hero .wordmark::after {
+  background: var(--st-dots-ink);
+  background-clip: text;
+  color: transparent;
+  mask: linear-gradient(180deg, transparent 38%, #000 92%);
+}
+
+.ds-hero .st-sub {
+  align-items: center;
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 0.9rem;
+}
+
+.ds-hero .st-sub img {
+  height: 2.4rem;
+}
+
+.ds-hero .st-sub span {
+  background: var(--st-spot);
+  color: #fff;
+  font-family: var(--st-font-label);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  padding: 0.3rem 0.7rem;
+  text-transform: uppercase;
+}
+
+.ds-hero .tagline {
+  color: var(--st-muted);
+  font-size: 1.15rem;
+  margin-top: 1.25rem;
+  max-width: 46ch;
+}
+
+/*
+ * The art is a manga page of three panels, stacked as layers that each fill
+ * the box: tone fills, the two figures, the white frames, then her line and
+ * the SFX. SFW mode drops the figures and the voice and keeps the page.
+ */
+.ds-hero-art {
+  aspect-ratio: 500 / 620;
+  position: relative;
+}
+
+.ds-hero-art img {
+  height: 100%;
+  inset: 0;
+  position: absolute;
+  width: 100%;
+}
+
+.ds-hero-art .voice {
+  animation: ds-pop 520ms var(--st-snap) 300ms both;
+  transform-origin: 20% 70%;
+}
+
+@keyframes ds-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+.sfw-content-mode .ds-hero-art :is(.figure, .voice) {
+  display: none;
+}
+
+/* Palette */
+.ds-swatches {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+}
+
+.ds-swatch {
+  padding: 0;
+}
+
+.ds-swatch .chip {
+  border-bottom: 2.5px solid var(--st-white);
+  height: 84px;
+  margin: 2.5px 3px 0 2.5px;
+}
+
+.ds-swatch .meta {
+  padding: 0.6rem 0.85rem 0.85rem;
+}
+
+.ds-swatch code {
+  color: var(--st-text);
+  display: block;
+  font-family: var(--st-font-label);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.ds-swatch .hex {
+  color: var(--st-text);
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+}
+
+.ds-swatch .role {
+  color: var(--st-muted);
+  font-size: 0.8rem;
+}
+
+/* Swatches that show the tone, not only the colour */
+.ds-chip-dots {
+  background:
+    linear-gradient(90deg, #fdfcf9 10%, transparent 90%), var(--st-dots-ink),
+    #fdfcf9;
+}
+
+.ds-chip-tone {
+  background: var(--st-dots-soft), #1d1d1d;
+}
+
+.ds-chip-hatch {
+  background: var(--st-hatch-soft), #2e2e2e;
+}
+
+/* Type */
+.ds-type .specimen {
+  border-bottom: 1px solid var(--st-line);
+  padding: 1rem 0;
+}
+
+.ds-type .specimen:first-child {
+  padding-top: 0;
+}
+
+.ds-type .specimen:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.ds-type .spec {
+  color: var(--st-dim);
+  font-family: var(--st-font-label);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.6rem;
+  text-transform: uppercase;
+}
+
+.ds-type .t-display {
+  color: var(--st-white);
+  font: 400 3.2rem/1.05 var(--st-font-display);
+  letter-spacing: -0.03em;
+}
+
+.ds-type .t-sfx {
+  -webkit-text-stroke: 5px #000;
+  color: var(--st-white);
+  display: flex;
+  flex-wrap: wrap;
+  font-family: var(--st-font-display);
+  font-size: 2.6rem;
+  gap: 1.4rem;
+  margin-top: 0.5rem;
+  paint-order: stroke fill;
+}
+
+.ds-type .t-sfx span {
+  display: inline-block;
+  transform: rotate(var(--tilt)) skewX(-8deg);
+}
+
+.ds-type .t-sfx .is-red {
+  color: var(--st-spot-hi);
+}
+
+.ds-type .t-bubbles {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.ds-type .t-bubble {
+  background: var(--st-paper);
+  border-radius: 50%;
+  color: #000;
+  display: inline-block;
+  font: italic 400 1.5rem/1.12 var(--st-font-letter);
+  letter-spacing: 0.05em;
+  padding: 1rem 2rem;
+  text-transform: uppercase;
+}
+
+.ds-type .t-bubble.is-small {
+  font-size: 1.22rem;
+  padding: 0.8rem 1.6rem;
+}
+
+.ds-type .t-card {
+  color: var(--st-text);
+  font: 900 1.35rem/1.2 var(--st-font-label);
+}
+
+.ds-type .t-label {
+  color: var(--st-muted);
+  font: 700 0.9rem var(--st-font-label);
+  letter-spacing: 0.12em;
+  margin-top: 0.3rem;
+  text-transform: uppercase;
+}
+
+.ds-type .t-body {
+  color: var(--st-muted);
+}
+
+/* The glossary of every Japanese word in the theme */
+.st-gloss {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.st-gloss td {
+  border-top: 1px solid var(--st-line);
+  padding: 0.45rem 0.6rem;
+  vertical-align: middle;
+}
+
+.st-gloss td:first-child {
+  color: var(--st-white);
+  font-family: var(--st-font-display);
+  font-size: 1.5rem;
+  white-space: nowrap;
+}
+
+.st-gloss td:nth-child(2) {
+  color: var(--st-spot-hi);
+  font-family: var(--st-font-label);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.st-gloss td:last-child {
+  color: var(--st-muted);
+}
+
+/*
+ * The silence (……): Japanese sets the dots at mid-height, where Latin fonts
+ * put them on the baseline, so the six dots are drawn and the text stays
+ * there for screen readers and copying.
+ */
+.st-silence {
+  background: radial-gradient(
+      circle,
+      currentcolor 0 0.075em,
+      transparent 0.09em
+    )
+    0 50% / 0.333em 0.333em repeat-x;
+  color: inherit;
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+  vertical-align: -0.12em;
+  white-space: nowrap;
+  width: 2em;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Motifs and glyphs */
+.ds-motifs {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  margin-bottom: 1.5rem;
+}
+
+.ds-motif {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ds-motif img {
+  height: 112px;
+  object-fit: contain;
+  width: 112px;
+}
+
+.ds-motif span {
+  color: var(--st-muted);
+  font-family: var(--st-font-label);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+.ds-glyph {
+  background: var(--st-white);
+  display: inline-block;
+  height: 36px;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  width: 36px;
+}
+
+.ds-glyph.is-red {
+  background: var(--st-spot);
+}
+
+/* Cards, as Stash lays them out */
+.ds-cards {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.ds-cards .scene-card {
+  width: 300px;
+}
+
+.ds-cards .performer-card {
+  width: 220px;
+}
+
+.ds-cards .image-card {
+  width: 240px;
+}
+
+.grid-card.card {
+  display: flex;
+  flex-direction: column;
+}
+
+.scene-card .video-section,
+.performer-card .thumbnail-section,
+.image-card .thumbnail-section {
+  position: relative;
+}
+
+.scene-card-preview {
+  align-items: center;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  justify-content: center;
+}
+
+.performer-card-image {
+  align-items: center;
+  aspect-ratio: 2 / 3;
+  display: flex;
+  justify-content: center;
+}
+
+.image-card-preview {
+  align-items: center;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.image-card-preview.portrait {
+  aspect-ratio: 3 / 4;
+}
+
+.grid-card .card-controls {
+  align-items: center;
+  display: flex;
+  left: 0.5rem;
+  position: absolute;
+  top: 0.7rem;
+}
+
+.grid-card .card-check {
+  height: 1.2rem;
+  opacity: 0.25;
+  width: 1.2rem;
+}
+
+.grid-card .card-check:checked,
+.grid-card:hover .card-check {
+  opacity: 0.75;
+}
+
+.preview-button {
+  display: flex;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.rating-banner {
+  position: absolute;
+}
+
+.grid-card:hover :is(.rating-banner, .studio-overlay) {
+  opacity: 0;
+}
+
+.studio-overlay {
+  position: absolute;
+  right: 0.7rem;
+  top: 0.7rem;
+  z-index: 8;
+}
+
+.overlay-resolution {
+  text-transform: uppercase;
+}
+
+.scene-specs-overlay {
+  position: absolute;
+}
+
+.grid-card .progress-bar {
+  left: 0;
+  position: absolute;
+  right: 0;
+}
+
+.card-popovers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0 0.4rem 0.3rem;
+}
+
+.card-popovers .btn {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+.ds-ico {
+  fill: currentcolor;
+  height: 14px;
+  width: 14px;
+}
+
+.performer-card .favorite-button {
+  padding: 0;
+  position: absolute;
+  right: 5px;
+  top: 10px;
+}
+
+/* Audio-only covers: a whisper bubble over focus lines, no picture needed */
+.ds-audio-cover {
+  background:
+    radial-gradient(closest-side, #000 34%, transparent 100%),
+    linear-gradient(rgb(0 0 0 / 30%), rgb(0 0 0 / 30%)),
+    repeating-conic-gradient(from 3deg, #fff 0 0.7deg, transparent 0.7deg 5deg),
+    repeating-conic-gradient(
+      from 1deg,
+      transparent 0 2.6deg,
+      #fff 2.6deg 3.1deg,
+      transparent 3.1deg 7.3deg
+    ),
+    #000;
+  overflow: hidden;
+  position: relative;
+}
+
+.st-audio {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  width: 100%;
+}
+
+.st-whisper {
+  align-items: center;
+  background: var(--st-paper);
+  border-radius: 50%;
+  color: #000;
+  display: flex;
+  font-family: var(--st-font-display);
+  font-size: 1.45rem;
+  height: 4.4rem;
+  justify-content: center;
+  letter-spacing: -0.04em;
+  outline: 2px dashed var(--st-paper);
+  outline-offset: 4px;
+  position: relative;
+  transform: rotate(-4deg);
+  width: 9rem;
+}
+
+.st-whisper::after {
+  background: var(--st-paper);
+  bottom: -0.85rem;
+  clip-path: polygon(0 0, 100% 0, 10% 100%);
+  content: '';
+  height: 1.1rem;
+  left: 30%;
+  position: absolute;
+  width: 1.4rem;
+}
+
+/* Rating stars, as Stash's Rating/styles.scss stacks them */
+.rating-stars {
+  display: inline-flex;
+  font-size: 1.6rem;
+  vertical-align: middle;
+}
+
+.rating-stars button {
+  font-size: inherit;
+  line-height: 1;
+  padding: 0 0.1rem;
+  position: relative;
+}
+
+.rating-stars .filled-star {
+  height: 100%;
+  left: 0.1rem;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+}
+
+.rating-stars .star-fill-0 .filled-star {
+  width: 0;
+}
+
+.rating-stars .star-fill-100 .filled-star {
+  width: 1em;
+}
+
+.rating-stars svg {
+  display: block;
+  height: 1em;
+  width: 1em;
+}
+
+.star-rating-number {
+  margin-left: 0.5rem;
+}
+
+/* Her header, as Stash's detail page lays it out */
+.ds-performer .detail-header .favorite-button svg {
+  height: 1.6rem;
+  width: 1.6rem;
+}
+
+.ds-performer .details-edit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.ds-performer .stash-id-pill,
+.ds-performer .tag-item {
+  margin-right: 0.3rem;
+}
+
+/* Overlays shown in place rather than floating */
+.ds-static .dropdown-menu,
+.ds-static .toast,
+.ds-static .modal-content,
+.ds-static .tooltip {
+  display: block;
+  float: none;
+  left: auto;
+  opacity: 1;
+  position: relative;
+  top: auto;
+}
+
+.ds-static .tooltip-inner {
+  display: inline-block;
+  position: relative;
+}
+
+/* The specimen tooltip has no arrow element, so it draws its own tail */
+.ds-static .tooltip-inner::after {
+  background: var(--st-paper);
+  bottom: -0.45rem;
+  clip-path: polygon(0 0, 100% 0, 20% 100%);
+  content: '';
+  height: 0.55rem;
+  left: 1.1rem;
+  position: absolute;
+  width: 0.8rem;
+}
+
+.ds-overlays {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.ds-static .toast-container {
+  position: static;
+}
+
+/* Bootstrap's spinner box */
+.LoadingIndicator {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+/* Stash-box: the layout the Tagger and react-select give these */
+.search-item {
+  padding: 1rem;
+}
+
+.search-result {
+  padding: 1rem 0;
+}
+
+.scene-metadata {
+  margin-left: 1rem;
+}
+
+.ds-cover {
+  aspect-ratio: 16 / 9;
+  height: 7rem;
+}
+
+.ds-match {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.ds-match .entity-name {
+  flex: 1 1 10rem;
+}
+
+.ds-match .react-select {
+  width: 14rem;
+}
+
+.react-select__control {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 0 0.75rem;
+}
+
+.stash-id-pill {
+  display: inline-flex;
+  font-size: 90%;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.stash-id-pill span,
+.stash-id-pill a {
+  padding: 0.25em 0.6em;
+}
+
+.scrape-dialog {
+  max-width: 760px;
+}
+
+/* The pagination line Stash prints above a list */
+.paginationIndex {
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+}
+
+/* Copy table: her lines in the bubble lettering */
+.ds-copy {
+  width: 100%;
+}
+
+.ds-copy td,
+.ds-copy th {
+  border-top: 1px solid var(--st-line);
+  padding: 0.6rem 0.75rem;
+}
+
+.ds-copy th {
+  color: var(--st-dim);
+  font-family: var(--st-font-label);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ds-copy td:first-child {
+  color: var(--st-muted);
+}
+
+.ds-copy td:last-child {
+  color: var(--st-white);
+  font-family: var(--st-font-letter);
+  font-size: 1.3rem;
+  font-style: italic;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ds-footer {
+  color: var(--st-dim);
+  font-size: 0.85rem;
+  margin: 4rem auto 0;
+  max-width: 1180px;
+  padding: 0 1rem;
+}
+
+/*
+ * Picture stand-ins: soft gradients in place of covers, so each specimen
+ * frames something with a picture's light and shade. They are colour only.
+ */
+.ph {
+  background-color: #15090d;
+}
+
+.ph-1 {
+  background:
+    radial-gradient(
+      34% 62% at 42% 58%,
+      #e8bbad 0,
+      #c68a6d 38%,
+      transparent 72%
+    ),
+    radial-gradient(40% 50% at 72% 30%, #93384b 0, transparent 70%),
+    linear-gradient(160deg, #3a2a2c, #15090d 70%);
+}
+
+.ph-2 {
+  background:
+    radial-gradient(
+      30% 58% at 60% 55%,
+      #ebb9b2 0,
+      #c6866c 40%,
+      transparent 72%
+    ),
+    radial-gradient(45% 70% at 20% 40%, #524540 0, transparent 70%),
+    linear-gradient(200deg, #241018, #0f070b 75%);
+}
+
+.ph-3 {
+  background:
+    radial-gradient(
+      28% 50% at 50% 46%,
+      #e0b0b5 0,
+      #b98887 36%,
+      transparent 70%
+    ),
+    radial-gradient(60% 60% at 80% 80%, #afafae66 0, transparent 70%),
+    linear-gradient(140deg, #2f282e, #0f070b 70%);
+}
+
+.ph-4 {
+  background:
+    radial-gradient(
+      36% 64% at 36% 52%,
+      #efe8e5 0,
+      #cc939c 34%,
+      transparent 70%
+    ),
+    radial-gradient(50% 50% at 78% 40%, #8b243d 0, transparent 72%),
+    linear-gradient(180deg, #383035, #17090d 70%);
+}
+
+.ph-5 {
+  background:
+    radial-gradient(
+      40% 54% at 50% 38%,
+      #e7c7bf 0,
+      #c5878d 40%,
+      transparent 72%
+    ),
+    radial-gradient(70% 40% at 50% 100%, #782f49 0, transparent 70%),
+    linear-gradient(170deg, #44393c, #180d17 75%);
+}
+
+.ph-6 {
+  background:
+    radial-gradient(
+      34% 56% at 58% 50%,
+      #e8bbad 0,
+      #ae5758 46%,
+      transparent 74%
+    ),
+    radial-gradient(40% 40% at 18% 24%, #bcbab855 0, transparent 70%),
+    linear-gradient(150deg, #241018, #15090d 70%);
+}
+
+@media (width <= 720px) {
+  .ds-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .ds-hero-art {
+    max-width: 340px;
+  }
+
+  .ds-section > h2 {
+    font-size: 2rem;
+  }
+
+  .ds-type .t-display {
+    font-size: 2.3rem;
+  }
+
+  .st-gloss td {
+    padding: 0.4rem 0.35rem;
+  }
+
+  .st-gloss td:first-child {
+    font-size: 1.2rem;
+  }
+
+  .ds-cards .scene-card,
+  .ds-cards .performer-card,
+  .ds-cards .image-card {
+    width: 100%;
+  }
+
+  .search-result .col-lg-5.d-flex {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .scene-metadata {
+    margin-left: 0;
+    min-width: 0;
+  }
+}

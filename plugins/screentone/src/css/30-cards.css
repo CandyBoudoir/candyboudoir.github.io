@@ -1,0 +1,455 @@
+/*
+ * Cards: manga panels. The picture and the caption are two frames in white
+ * ink, split by a black gutter that cuts the outer frame.
+ */
+.card {
+  background: var(--st-panel);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--st-text);
+  transition: --st-frame var(--st-fast) var(--st-ease);
+}
+
+/* The panel frame: white ink, drawn over the picture's edge */
+.card::after {
+  border: var(--st-frame) solid var(--st-white);
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 4;
+}
+
+/* Stash zeroes each card type's padding two classes deep */
+.grid-card.card {
+  padding: 0;
+}
+
+.grid-card:hover {
+  --st-frame: 4.5px;
+}
+
+.grid-card .thumbnail-section {
+  background: #000;
+  border-bottom: var(--st-frame) solid var(--st-white);
+  margin-bottom: 7px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Stash leaves a 5px gap under the picture; the frame closes round it */
+.grid-card :is(.scene-card-preview, .image-card-preview, .gallery-card-cover) {
+  margin-bottom: 0;
+}
+
+.grid-card .card-section {
+  border-top: var(--st-frame) solid var(--st-white);
+  padding: 0.6rem 0.85rem 0.55rem;
+  position: relative;
+}
+
+/* The gutter between the two panels cuts the outer frame */
+.grid-card .card-section::before {
+  background: var(--st-beta);
+  content: '';
+  height: 7px;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: calc(-7px - var(--st-frame));
+  z-index: 5;
+}
+
+.grid-card .card-controls {
+  z-index: 6;
+}
+
+/*
+ * Hover: lines rush in over the picture for a beat. Scene cards get speed
+ * lines (they move), performers and images get focus lines (look at her).
+ */
+.grid-card .thumbnail-section::before {
+  background: url('assets/icons/focus-overlay.svg') center / cover no-repeat;
+  content: '';
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.scene-card .thumbnail-section::before {
+  background: url('assets/icons/speed-overlay.svg') 0 0 / 100% 100% no-repeat;
+}
+
+.grid-card:hover .thumbnail-section::before {
+  animation: st-rush 560ms cubic-bezier(0.1, 0.7, 0.3, 1) both;
+}
+
+.scene-card:hover .thumbnail-section::before {
+  animation-name: st-speed;
+}
+
+/*
+ * An SFX for the beat: ジー (staring) on scenes, ニヤ (a smirk) on performers,
+ * チュッ (a kiss) on images.
+ */
+.grid-card .thumbnail-section::after {
+  bottom: 1rem;
+  content: 'ジー';
+  font-size: 1.6rem;
+  left: 0.55rem;
+  opacity: 0;
+  position: absolute;
+  transform: rotate(-8deg) skewX(-8deg) scale(0.5);
+  transform-origin: 0 100%;
+  transition:
+    opacity var(--st-fast),
+    transform var(--st-medium) var(--st-snap);
+  z-index: 3;
+}
+
+.performer-card .thumbnail-section::after {
+  bottom: 1.2rem;
+  content: 'ニヤ';
+  left: auto;
+  right: 0.6rem;
+  transform-origin: 100% 100%;
+}
+
+.image-card .thumbnail-section::after {
+  inset: 0.6rem 0.55rem auto auto;
+  color: var(--st-spot-hi);
+  content: 'チュッ';
+  transform-origin: 100% 0;
+}
+
+/* Galleries, studios, tags and groups take the lines without a word */
+:is(.gallery-card, .studio-card, .tag-card, .group-card)
+  .thumbnail-section::after {
+  content: none;
+}
+
+.grid-card:hover .thumbnail-section::after {
+  opacity: 1;
+  transform: rotate(-8deg) skewX(-8deg) scale(1);
+}
+
+.card a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.card-section-title,
+.grid-card a .card-section-title {
+  color: var(--st-text);
+  font-family: var(--st-font-label);
+  font-size: 1.08rem;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+/* Real titles are long: two lines, then an ellipsis */
+.grid-card .card-section-title .TruncatedText {
+  -webkit-line-clamp: 2;
+  white-space: normal;
+}
+
+.grid-card a:hover .card-section-title {
+  color: var(--st-spot-hi);
+}
+
+:is(
+  .scene-card__details,
+  .gallery-card__details,
+  .image-card__details,
+  .studio-card__details
+) {
+  color: var(--st-dim);
+}
+
+:is(
+  .scene-card__date,
+  .gallery-card__date,
+  .image-card__date,
+  .performer-card__age
+) {
+  color: var(--st-dim);
+  font-family: var(--st-font-label);
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+/*
+ * The card rule is a thin strip of hatching, pushed to the foot of the
+ * caption panel, so the counts sit level along a row whether a title runs to
+ * one line or two
+ */
+.grid-card > hr {
+  background: var(--st-hatch);
+  border: 0;
+  height: 3px;
+  margin: auto 0.85rem 0.35rem;
+  opacity: 0.5;
+}
+
+/* The studio is a narration box: paper, black lettering */
+.grid-card .studio-overlay {
+  background: var(--st-paper);
+  border: 1.5px solid #000;
+  box-shadow: 2px 2px 0 #000;
+  color: #000;
+  font-family: var(--st-font-label);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  opacity: 1;
+  padding: 0.28rem 0.45rem;
+  right: 0.7rem;
+  text-transform: uppercase;
+  top: 0.7rem;
+  z-index: 3;
+}
+
+.grid-card .studio-overlay a {
+  color: #000;
+  text-shadow: none;
+}
+
+.grid-card .studio-overlay a:hover {
+  color: var(--st-spot);
+}
+
+/* A studio logo sits in the box at caption height */
+.grid-card .studio-overlay .image-thumbnail {
+  display: block;
+  height: auto;
+  max-height: 1.6rem;
+  max-width: 6rem;
+  width: auto;
+}
+
+.scene-specs-overlay {
+  bottom: 0.85rem;
+  display: flex;
+  gap: 0;
+  right: 0.7rem;
+  text-shadow: none;
+  z-index: 3;
+}
+
+.scene-specs-overlay > span:not(:last-child) {
+  margin-right: 0;
+}
+
+.scene-specs-overlay > span,
+.scene-interactive-speed-overlay:not(:empty) {
+  background: #000;
+  border: 1.5px solid var(--st-white);
+  color: var(--st-text);
+  font-family: var(--st-font-label);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  padding: 0.25rem 0.4rem;
+}
+
+.scene-specs-overlay > span + span {
+  border-left: 0;
+}
+
+.scene-specs-overlay > .extra-scene-info {
+  display: none;
+}
+
+.scene-specs-overlay .overlay-resolution {
+  font-weight: 900;
+}
+
+/*
+ * The rating banner is a red caption box cut on the slant, in place of
+ * Stash's diagonal ribbon. Stash shows the card's checkbox in the picture's
+ * top-left corner whenever a card is hovered or selected, and always on
+ * touch screens, so the box sits to its right (and past a group's drag
+ * handle where there is one).
+ */
+.rating-banner {
+  background: var(--st-spot);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 9px) 100%, 0 100%);
+  color: #fff;
+  font-family: var(--st-font-letter);
+  font-size: 0.9rem;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  padding: 0.3rem 1.05rem 0.3rem 0.7rem;
+  text-transform: uppercase;
+  top: 0.7rem;
+  transform: none;
+  width: auto;
+  z-index: 3;
+}
+
+.grid-card .rating-banner {
+  left: 2.1rem;
+}
+
+.grid-card:has(.card-drag-handle) .rating-banner {
+  left: 4.1rem;
+}
+
+.grid-card .progress-bar {
+  background: var(--st-dots-soft), rgb(0 0 0 / 85%);
+  border-top: 1.5px solid var(--st-white);
+  bottom: 0;
+  height: 7px;
+  z-index: 3;
+}
+
+.grid-card .progress-indicator {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 5px,
+      rgb(255 255 255 / 45%) 5px 6px
+    ),
+    var(--st-spot);
+  height: 100%;
+}
+
+/* Counts under the card, aligned on a common baseline */
+.card-popovers {
+  padding-inline: 0.5rem;
+}
+
+.card-popovers .btn.minimal {
+  color: var(--st-muted);
+  font-family: var(--st-font-label);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.card-popovers .btn.minimal:not(:disabled):hover {
+  background: none;
+  color: var(--st-spot-hi);
+}
+
+.card-popovers .organized .btn,
+.card-popovers .organized svg {
+  color: var(--st-white);
+}
+
+.performer-card .card-section-title {
+  font-size: 1.2rem;
+}
+
+/* On a card the heart sits on the picture, so it takes a dark edge */
+#root .grid-card button.btn.favorite-button {
+  filter: drop-shadow(0 0 2px #000) drop-shadow(0 0 1px #000);
+  z-index: 3;
+}
+
+#root .grid-card button.btn.favorite-button svg {
+  height: 28px;
+  width: 28px;
+}
+
+#root .grid-card button.btn.favorite-button.not-favorite {
+  color: rgb(253 252 249 / 80%);
+}
+
+#root .grid-card button.btn.favorite-button.favorite {
+  filter: var(--st-outline) drop-shadow(0 0 3px #000);
+}
+
+/*
+ * The zoom button on image cards, which opens the lightbox. Stash draws it as
+ * a bare 5em magnifier in the middle of the picture. Here it is a small round
+ * bubble in the bottom-right corner, clear of the rating box and checkbox.
+ * #root outranks Stash's hover, focus and active reset.
+ */
+#root .image-card .preview-button {
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 0.6rem;
+
+  /* Only the bubble takes the pointer; the rest is the picture and its link */
+  pointer-events: none;
+  z-index: 3;
+}
+
+#root .image-card .preview-button .btn {
+  align-items: center;
+  background: var(--st-paper);
+  border: 2px solid #000 !important;
+  border-radius: 50%;
+  color: #000;
+  display: inline-flex;
+  filter: none;
+  height: 34px;
+  justify-content: center;
+  padding: 0;
+  pointer-events: auto;
+  transition:
+    opacity var(--st-fast),
+    transform var(--st-medium) var(--st-snap);
+  width: 34px;
+}
+
+#root .image-card .preview-button .btn::after {
+  content: none;
+}
+
+#root .image-card .preview-button .fa-icon {
+  color: inherit;
+  filter: none;
+  height: 15px;
+  margin: 0;
+  opacity: 1;
+  transition: none;
+  width: 15px;
+}
+
+/*
+ * With a mouse the bubble waits for the card: it shows on hover, or when the
+ * keyboard reaches anything on the card. Touch screens have no hover, so
+ * there it always shows.
+ */
+@media (hover: hover) and (pointer: fine) {
+  #root .image-card .preview-button .btn {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+
+  #root .image-card:hover .preview-button .btn,
+  #root .image-card:has(:focus-visible) .preview-button .btn {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+#root .image-card .preview-button .btn:active {
+  transform: scale(0.9);
+}
+
+#root .image-card .preview-button .btn:focus-visible {
+  outline: 2px solid var(--st-spot-hi);
+  outline-offset: 2px;
+}
+
+.grid-card .card-check {
+  accent-color: var(--st-spot);
+}
+
+/* The grid: the same panels, closer set, as a page of manga lays them out */
+.card-grid {
+  gap: 1.1rem;
+}

@@ -1,0 +1,421 @@
+/*
+ * Menus, popovers, tooltips, toasts and modals: panels and bubbles. Stash
+ * paints its menus slate through div.dropdown-menu rules, so the menu rules
+ * name the div too, and some menus and their items carry Bootstrap's
+ * !important bg-secondary. Stash caps every menu at 300px and scrolls it, so
+ * a menu's white frame and its tone shadow are one border image drawn out
+ * past the box (tone-frame.svg), which neither scrolls nor clips.
+ */
+.dropdown-menu,
+div.dropdown-menu,
+div.react-select__menu,
+.popover {
+  border: 2px solid var(--st-white);
+  border-image: url('assets/icons/tone-frame.svg') 8 12 12 8 / 8px 12px 12px
+    8px / 0 10px 10px 0 round;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.dropdown-menu,
+div.dropdown-menu {
+  background: #000;
+  color: var(--st-text);
+  padding: 0.35rem;
+}
+
+.dropdown-menu.bg-secondary {
+  background-color: #000 !important;
+}
+
+.dropdown-menu .dropdown-item.bg-secondary {
+  background-color: transparent !important;
+}
+
+.dropdown-item,
+div.dropdown-menu .dropdown-item {
+  border-radius: 0;
+  color: var(--st-text);
+  font-family: var(--st-font-label);
+  font-size: 0.92rem;
+  font-weight: 500;
+  padding: 0.38rem 0.75rem;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus,
+div.dropdown-menu .dropdown-item:hover,
+div.dropdown-menu .dropdown-item:focus,
+.dropdown-menu .dropdown-item.bg-secondary:hover,
+.dropdown-menu .dropdown-item.bg-secondary:focus {
+  background: var(--st-paper) !important;
+  color: #000;
+}
+
+.dropdown-item.active,
+.dropdown-item:active,
+div.dropdown-menu .dropdown-item.active,
+div.dropdown-menu .dropdown-item:active {
+  background: var(--st-spot) !important;
+  color: #fff;
+}
+
+.dropdown-divider {
+  background: var(--st-hatch);
+  border: 0;
+  height: 4px;
+  margin: 0.35rem 0.5rem;
+}
+
+.dropdown-header {
+  color: var(--st-dim);
+  font-family: var(--st-font-label);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.popover {
+  background: #000;
+  color: var(--st-text);
+}
+
+.popover-header {
+  background: var(--st-paper);
+  border-bottom: 2px solid var(--st-white);
+  border-radius: 0;
+  color: #000;
+  font-family: var(--st-font-label);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.popover-body {
+  color: var(--st-text);
+}
+
+.bs-popover-top > .arrow::after,
+.bs-popover-auto[x-placement^='top'] > .arrow::after {
+  border-top-color: #000;
+}
+
+.bs-popover-top > .arrow::before,
+.bs-popover-auto[x-placement^='top'] > .arrow::before {
+  border-top-color: var(--st-white);
+}
+
+.bs-popover-bottom > .arrow::after,
+.bs-popover-auto[x-placement^='bottom'] > .arrow::after {
+  border-bottom-color: #000;
+}
+
+.bs-popover-bottom > .arrow::before,
+.bs-popover-auto[x-placement^='bottom'] > .arrow::before {
+  border-bottom-color: var(--st-white);
+}
+
+.bs-popover-left > .arrow::after,
+.bs-popover-auto[x-placement^='left'] > .arrow::after {
+  border-left-color: #000;
+}
+
+.bs-popover-right > .arrow::after,
+.bs-popover-auto[x-placement^='right'] > .arrow::after {
+  border-right-color: #000;
+}
+
+/* The tooltip is a small bubble; Bootstrap's arrow is its tail */
+.tooltip {
+  font-family: var(--st-font-letter);
+}
+
+.tooltip.show {
+  opacity: 1;
+}
+
+.tooltip-inner {
+  background: var(--st-paper);
+  border-radius: 999px;
+  color: #000;
+  font-size: 0.94rem;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+  padding: 0.34rem 0.95rem;
+  text-transform: uppercase;
+}
+
+/* A title Stash cut short reads in full in its tooltip, in a plain face */
+.TruncatedText-tooltip .tooltip-inner {
+  border-radius: 1.1rem;
+  font-family: var(--st-font-label);
+  font-size: 0.85rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 0.45rem 0.95rem;
+  text-transform: none;
+}
+
+.bs-tooltip-top .arrow::before,
+.bs-tooltip-auto[x-placement^='top'] .arrow::before {
+  border-top-color: var(--st-paper);
+}
+
+.bs-tooltip-bottom .arrow::before,
+.bs-tooltip-auto[x-placement^='bottom'] .arrow::before {
+  border-bottom-color: var(--st-paper);
+}
+
+.bs-tooltip-left .arrow::before,
+.bs-tooltip-auto[x-placement^='left'] .arrow::before {
+  border-left-color: var(--st-paper);
+}
+
+.bs-tooltip-right .arrow::before,
+.bs-tooltip-auto[x-placement^='right'] .arrow::before {
+  border-right-color: var(--st-paper);
+}
+
+/*
+ * Toasts are speech bubbles: paper, black lettering, a tail, and a huff over
+ * each. Stash puts the whole message in the toast's header and colours the
+ * toast by kind; here a warning or an error rings its bubble in red.
+ */
+.toast,
+.toast-container .toast {
+  backdrop-filter: none;
+  background: var(--st-paper);
+  border: 2px solid #000;
+  border-radius: 50%;
+  box-shadow: none;
+  color: #000;
+  margin-top: 0.4rem;
+  overflow: visible;
+  padding: 0.8rem 1.8rem 0.9rem;
+  position: relative;
+  text-align: center;
+}
+
+.toast-container {
+  opacity: 1;
+}
+
+.toast:not(:last-child) {
+  margin-bottom: 1.7rem;
+}
+
+.toast-container .toast:is(.danger, .warning) {
+  box-shadow:
+    0 0 0 3px var(--st-spot),
+    0 0 0 5px #000;
+}
+
+/* The tail */
+.toast::after {
+  background: var(--st-paper);
+  bottom: -0.95rem;
+  clip-path: polygon(0 0, 100% 0, 8% 100%);
+  content: '';
+  height: 1.2rem;
+  left: 24%;
+  position: absolute;
+  width: 1.6rem;
+}
+
+/* A huff above the bubble: フン (hmph) */
+.toast::before {
+  -webkit-text-stroke-width: 4px;
+  content: 'フン';
+  font-size: 1.05rem;
+  position: absolute;
+  right: 0.6rem;
+  top: -0.75rem;
+  transform: rotate(10deg);
+  z-index: 1;
+}
+
+/* In Stash the message sits in the header alone, so the header letters it */
+.toast-header,
+.toast-container .toast-header {
+  background: none;
+  border: 0;
+  color: #000;
+  font-family: var(--st-font-letter);
+  font-size: 1.22rem;
+  font-style: italic;
+  font-weight: 400;
+  justify-content: center;
+  letter-spacing: 0.05em;
+  line-height: 1.12;
+  padding: 0;
+  text-transform: uppercase;
+}
+
+.toast-body {
+  color: #000;
+  padding: 0.3rem 0 0;
+}
+
+.toast-header .close,
+.toast-container .toast-header .close,
+.toast-container .toast-header .expand-error-button {
+  color: #000;
+  font-family: var(--st-font-label);
+  font-style: normal;
+  margin-left: 0.6rem;
+  opacity: 0.6;
+  text-shadow: none;
+}
+
+/* Modals: a panel; trouble brews in the corner (ゴゴゴ, menacing) */
+.modal-content {
+  background: #000;
+  border: 3px solid var(--st-white);
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--st-text);
+}
+
+.modal-content::before {
+  background: var(--st-dots);
+  content: '';
+  height: calc(100% + 6px);
+  left: -3px;
+  mask:
+    linear-gradient(#000, #000) right / 7px 100% no-repeat,
+    linear-gradient(#000, #000) bottom / 100% 7px no-repeat;
+  pointer-events: none;
+  position: absolute;
+  top: -3px;
+  transform: translate(10px, 10px);
+  width: calc(100% + 6px);
+}
+
+/* Stash paints each modal section slate; the panel shows through */
+.modal-header,
+.modal-body,
+.modal-footer {
+  background-color: transparent;
+  color: var(--st-text);
+}
+
+.modal-content > .modal-header {
+  align-items: center;
+  border-bottom: 0;
+  font-family: var(--st-font-display);
+  font-size: 1.55rem;
+  font-weight: 400;
+  gap: 0.6rem;
+  justify-content: flex-start;
+  line-height: 1.15;
+  padding: 1.1rem 6.5rem 1.4rem 1.4rem;
+  position: relative;
+}
+
+/* Speed lines rule off the title */
+.modal-content > .modal-header::before {
+  background: var(--st-speed);
+  bottom: 0.3rem;
+  content: '';
+  height: 9px;
+  left: 1.4rem;
+  mask: linear-gradient(90deg, #000 40%, transparent);
+  position: absolute;
+  right: 1.4rem;
+}
+
+.modal-content > .modal-header::after {
+  -webkit-text-stroke: 1.6px var(--st-white);
+  background: var(--st-dots-soft), #000;
+  background-clip: text;
+  color: transparent;
+  content: 'ゴゴゴ';
+  font-size: 1.9rem;
+  letter-spacing: -0.02em;
+  paint-order: normal;
+  position: absolute;
+  right: 1.2rem;
+  top: 0.75rem;
+  transform: rotate(-6deg) skewX(-10deg);
+}
+
+/* A header with a close button keeps the button clear of the SFX */
+.modal-content > .modal-header .close {
+  margin: -0.5rem -5.5rem -0.5rem auto;
+  position: relative;
+  z-index: 1;
+}
+
+.modal-title {
+  color: var(--st-white);
+  font-family: var(--st-font-display);
+  font-size: 1.55rem;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.modal-header .fa-icon {
+  color: var(--st-spot-hi);
+  height: 0.8em;
+}
+
+.modal-body {
+  color: var(--st-muted);
+  padding: 0.8rem 1.4rem 1.2rem;
+}
+
+.modal-footer {
+  border-top: 2px solid var(--st-white);
+  padding: 0.9rem 1.2rem 1.1rem;
+}
+
+.modal-footer > * {
+  margin: 0.25rem 0.4rem;
+}
+
+.modal-header .close,
+.modal .close {
+  color: var(--st-white);
+  opacity: 0.8;
+  text-shadow: none;
+}
+
+/* The edit filter dialog's criteria are a list, not panels */
+.edit-filter-dialog .criterion-list .card {
+  background: transparent;
+  border-bottom: 1px solid var(--st-line);
+}
+
+.edit-filter-dialog .criterion-list .card::after {
+  content: none;
+}
+
+.edit-filter-dialog .criterion-list .card .filter-item-header {
+  background: none;
+  border-bottom: 0;
+}
+
+.modal-backdrop.show {
+  background-color: #000;
+  opacity: 0.8;
+}
+
+.alert {
+  background: #000;
+  border: 2px solid var(--st-white);
+  border-radius: 0;
+  box-shadow: inset 6px 0 0 var(--st-white);
+  color: var(--st-text);
+}
+
+.alert-danger,
+.alert-warning {
+  border-color: var(--st-spot-hi);
+  box-shadow: inset 6px 0 0 var(--st-spot);
+}
+
+.alert-success {
+  box-shadow: inset 6px 0 0 var(--st-white);
+}

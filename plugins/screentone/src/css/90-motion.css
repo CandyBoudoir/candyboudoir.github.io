@@ -1,0 +1,246 @@
+/* Keyframes, burst particles and the calm switch */
+@keyframes st-rush {
+  0% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+
+  30% {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+@keyframes st-speed {
+  0% {
+    opacity: 0;
+    transform: translateX(60%) scaleX(1.6);
+  }
+
+  30% {
+    opacity: 0.9;
+    transform: translateX(0) scaleX(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-12%);
+  }
+}
+
+@keyframes st-twinkle {
+  0%,
+  78%,
+  100% {
+    opacity: 0;
+    transform: scale(0.2) rotate(0deg);
+  }
+
+  86% {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+}
+
+@keyframes st-twinkle-now {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+
+  40% {
+    opacity: 1;
+    transform: scale(1.2) rotate(45deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.6) rotate(90deg);
+  }
+}
+
+@keyframes st-doki-doki {
+  0%,
+  60%,
+  100% {
+    transform: scale(1);
+  }
+
+  15% {
+    transform: scale(1.22);
+  }
+
+  30% {
+    transform: scale(0.96);
+  }
+
+  45% {
+    transform: scale(1.14);
+  }
+}
+
+@keyframes st-doki-flash {
+  0% {
+    opacity: 0;
+    transform: rotate(-12deg) scale(0.4);
+  }
+
+  14%,
+  70% {
+    opacity: 1;
+    transform: rotate(-12deg) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: rotate(-12deg) scale(1);
+  }
+}
+
+@keyframes st-wobble {
+  25% {
+    transform: rotate(-14deg) translateY(-1px);
+  }
+
+  60% {
+    transform: rotate(10deg);
+  }
+}
+
+@keyframes st-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes st-shake {
+  0% {
+    transform: rotate(-8deg) translate(0, 0);
+  }
+
+  50% {
+    transform: rotate(-8deg) translate(1.5px, -1px);
+  }
+
+  100% {
+    transform: rotate(-8deg) translate(-1px, 1px);
+  }
+}
+
+@keyframes st-fly {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+
+  60% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy)))
+      rotate(var(--spin)) scale(1.1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(
+        calc(-50% + var(--dx) * 1.1),
+        calc(-50% + var(--dy) * 1.1 + 10px)
+      )
+      rotate(calc(var(--spin) * 1.6)) scale(0.6);
+  }
+}
+
+@keyframes st-streak {
+  0% {
+    opacity: 1;
+    translate: -50% -50%;
+  }
+
+  100% {
+    opacity: 0;
+    translate: calc(-50% + var(--dx) * 1.25) calc(-50% + var(--dy) * 1.25);
+  }
+}
+
+/* Bursts: white sparkles, red stars, sweat drops and focus-line streaks */
+.screentone-burst {
+  animation: st-fly 640ms cubic-bezier(0.15, 0.8, 0.3, 1) forwards;
+  background: var(--st-white);
+  height: 17px;
+  mask: url('assets/icons/glyph-sparkle.svg') center / contain no-repeat;
+  pointer-events: none;
+  position: fixed;
+  width: 17px;
+  z-index: 2000;
+}
+
+.screentone-burst.is-drop {
+  height: 19px;
+  mask-image: url('assets/icons/glyph-drop.svg');
+  width: 19px;
+}
+
+.screentone-burst.is-red {
+  background: var(--st-spot-hi);
+  height: 15px;
+  mask-image: url('assets/icons/glyph-star.svg');
+  width: 15px;
+}
+
+/* A streak points the way it flies */
+.screentone-burst.is-line {
+  animation-name: st-streak;
+  height: 2.5px;
+  mask: linear-gradient(90deg, transparent, #000 40%);
+  rotate: atan2(var(--dy), var(--dx));
+  width: 24px;
+}
+
+/* Calm mode and reduced motion: everything holds still */
+.screentone-calm *,
+.screentone-calm *::before,
+.screentone-calm *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/*
+ * Stash fades its loader in from nothing with an animation, so with motion
+ * stopped the loader is shown outright instead
+ */
+.screentone-calm .LoadingIndicator {
+  opacity: 1;
+}
+
+.screentone-calm .grid-card:hover .thumbnail-section::before {
+  opacity: 0;
+}
+
+.screentone-calm .grid-card:hover {
+  --st-frame: 2.5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .LoadingIndicator {
+    opacity: 1;
+  }
+
+  .grid-card:hover .thumbnail-section::before {
+    opacity: 0;
+  }
+
+  .screentone-burst {
+    display: none;
+  }
+}

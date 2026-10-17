@@ -1,0 +1,1572 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Screentone design system</title>
+    <meta
+      name="description"
+      content="Screentone, a black-and-white manga theme for Stash: palette, type, motifs and Stash components in Screentone style."
+    />
+    <link rel="icon" href="ds/motifs/favicon.svg" />
+    <!-- Bootstrap 4.6 stands in for Stash's own base styles. -->
+    <link rel="stylesheet" href="ds/vendor/bootstrap.min.css" />
+    <link rel="stylesheet" href="Theme-Screentone/screentone.css" />
+    <link rel="stylesheet" href="ds/ds.css" />
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="i-tag" viewBox="0 0 16 16">
+        <path
+          fill-rule="evenodd"
+          d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l7.5 7.5-6 6L1 7ZM4.6 3.2a1.4 1.4 0 1 0 0 2.8a1.4 1.4 0 1 0 0-2.8Z"
+        />
+      </symbol>
+      <symbol id="i-user" viewBox="0 0 16 16">
+        <circle cx="8" cy="4.8" r="3.2" />
+        <path d="M1.8 15c0-3.5 2.8-6 6.2-6s6.2 2.5 6.2 6Z" />
+      </symbol>
+      <symbol id="i-box" viewBox="0 0 16 16">
+        <path d="M1 4.5 8 1l7 3.5v7L8 15l-7-3.5Zm7 1.8 4.6-2.2L8 2 3.4 4.1Z" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 16 16">
+        <path d="m1.5 8.6 1.6-1.6 3 3 6.8-6.8 1.6 1.6-8.4 8.4Z" />
+      </symbol>
+      <symbol id="i-cross" viewBox="0 0 16 16">
+        <path
+          d="m3.1 1.5 4.9 4.9 4.9-4.9 1.6 1.6L9.6 8l4.9 4.9-1.6 1.6L8 9.6l-4.9 4.9-1.6-1.6L6.4 8 1.5 3.1Z"
+        />
+      </symbol>
+      <symbol id="i-star" viewBox="0 0 576 512">
+        <path
+          fill="currentColor"
+          d="M288 0 359 186 576 186 400 300 466 512 288 384 110 512 176 300 0 186 217 186Z"
+        />
+      </symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M12 21.2C6.4 17.4 2.6 13.9 2.6 9.5C2.6 6.4 5 4 8 4C9.8 4 11.2 4.9 12 6.3C12.8 4.9 14.2 4 16 4C19 4 21.4 6.4 21.4 9.5C21.4 13.9 17.6 17.4 12 21.2Z"
+        />
+      </symbol>
+      <symbol id="i-drops" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M12 2s-7 8.5-7 13a7 7 0 0 0 14 0c0-4.5-7-13-7-13Z"
+        />
+      </symbol>
+      <symbol id="i-zoom" viewBox="0 0 512 512">
+        <path
+          fill="currentColor"
+          d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376C296.3 401.1 253.9 416 208 416 93.1 416 0 322.9 0 208S93.1 0 208 0 416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
+        />
+      </symbol>
+    </svg>
+
+    <!-- Like Stash's MainNavbar: below 1200px the page links fold behind the toggler -->
+    <nav class="navbar navbar-expand-xl navbar-dark bg-dark top-nav">
+      <button
+        class="navbar-toggler"
+        type="button"
+        aria-controls="ds-nav"
+        aria-expanded="false"
+        aria-label="Menu"
+        id="ds-toggler"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="navbar-brand">
+        <button class="btn btn-primary minimal brand-link">Stash</button>
+      </div>
+      <div class="navbar-collapse collapse" id="ds-nav">
+        <div class="navbar-nav">
+          <div class="nav-link">
+            <a class="minimal btn btn-primary active" href="#top">Scenes</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Images</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Groups</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Markers</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Galleries</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Performers</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Studios</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Tags</a>
+          </div>
+        </div>
+      </div>
+      <div class="nav-utility">
+        <button class="btn btn-primary minimal">Settings</button>
+      </div>
+    </nav>
+
+    <div class="ds-controls">
+      <span class="label">Try it</span>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-calm" />
+        <label class="custom-control-label" for="ds-calm">Calm mode</label>
+      </div>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-plain" />
+        <label class="custom-control-label" for="ds-plain">Plain labels</label>
+      </div>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-sfw" />
+        <label class="custom-control-label" for="ds-sfw">Stash SFW mode</label>
+      </div>
+    </div>
+
+    <div id="root">
+      <div class="main container-fluid p-0" id="ds-main">
+        <header class="ds-hero">
+          <div>
+            <div class="kicker">A theme for Stash</div>
+            <h1 class="wordmark" data-text="Screentone">Screentone</h1>
+            <div class="st-sub">
+              <span>漫画 · one spot colour</span
+              ><img src="ds/motifs/sfx-doki.svg" alt="" />
+            </div>
+            <p class="tagline">
+              A black-and-white manga page with one spot colour. White ink on
+              beta black, panels with gutters, screentone, speed lines, and a
+              crimson-pink for what is chosen. Toasts are speech bubbles; she
+              has a mouth on her.
+            </p>
+          </div>
+          <div class="ds-hero-art" aria-hidden="true">
+            <img class="tone" src="ds/hero/hero-tone.svg" alt="" />
+            <img class="figure eyes" src="ds/hero/hero-eyes.webp" alt="" />
+            <img class="figure glance" src="ds/hero/hero-glance.webp" alt="" />
+            <img class="ink" src="ds/hero/hero-ink.svg" alt="" />
+            <img class="voice" src="ds/hero/hero-voice.svg" alt="" />
+          </div>
+        </header>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/tone-gradient.svg" alt="" />Palette</h2>
+          <p class="ds-lede">
+            Beta black and white ink carry almost everything, with screentone in
+            between. The one spot colour is a hot crimson-pink, kept for primary
+            actions, the current page and tab, ratings, the favourite and how
+            far into a scene you got. Bubbles and narration boxes are paper
+            white. Contrast on the panel (#0A0A0A): text 17.7:1, muted 9.8:1,
+            dim 6.3:1; the red on black 6.5:1 as text, white on the red 4.5:1.
+          </p>
+          <div class="ds-swatches">
+            <div class="ds-swatch">
+              <div class="chip" style="background: #e8173f"></div>
+              <div class="meta">
+                <code>--st-spot</code>
+                <div class="hex">#E8173F</div>
+                <div class="role">
+                  The one colour: primary, active, ratings, favourite
+                </div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #ff4d6d"></div>
+              <div class="meta">
+                <code>--st-spot-hi</code>
+                <div class="hex">#FF4D6D</div>
+                <div class="role">
+                  Red on black: numbers, focus, links (6.5:1)
+                </div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #b30e30"></div>
+              <div class="meta">
+                <code>--st-spot-deep</code>
+                <div class="hex">#B30E30</div>
+                <div class="role">A pressed primary button</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #fdfcf9"></div>
+              <div class="meta">
+                <code>--st-white</code>
+                <div class="hex">#FDFCF9</div>
+                <div class="role">
+                  White ink and paper: frames, rules, bubbles, narration boxes
+                </div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-dots"></div>
+              <div class="meta">
+                <code>--st-dots</code>
+                <div class="hex">#000 on #FDFCF9</div>
+                <div class="role">
+                  Tone: shadows, fills, the wordmark's shading
+                </div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #000"></div>
+              <div class="meta">
+                <code>--st-beta</code>
+                <div class="hex">#000000</div>
+                <div class="role">Beta: the page, gutters</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #0a0a0a"></div>
+              <div class="meta">
+                <code>--st-panel</code>
+                <div class="hex">#0A0A0A</div>
+                <div class="role">Inside a panel</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-tone"></div>
+              <div class="meta">
+                <code>--st-tone</code>
+                <div class="hex">#1D1D1D</div>
+                <div class="role">Tone: read-only fields, Identify</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-hatch"></div>
+              <div class="meta">
+                <code>--st-tone-hi</code>
+                <div class="hex">#2E2E2E</div>
+                <div class="role">Hatched tone: Generate</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #f3f2ef"></div>
+              <div class="meta">
+                <code>--st-text</code>
+                <div class="hex">#F3F2EF</div>
+                <div class="role">Text (17.7:1 on the panel)</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #b8b6b1"></div>
+              <div class="meta">
+                <code>--st-muted</code>
+                <div class="hex">#B8B6B1</div>
+                <div class="role">Secondary text (9.8:1)</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #94918c"></div>
+              <div class="meta">
+                <code>--st-dim</code>
+                <div class="hex">#94918C</div>
+                <div class="role">Dates, captions (6.3:1)</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #3a3a3a"></div>
+              <div class="meta">
+                <code>--st-line</code>
+                <div class="hex">#3A3A3A</div>
+                <div class="role">Hairlines between rows</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section ds-type">
+          <h2><img src="ds/motifs/sfx-manga.svg" alt="" />Type</h2>
+          <p class="ds-lede">
+            Three SIL OFL faces. Dela Gothic One, a heavy gothic with Latin and
+            Japanese, letters the brand, section titles and every SFX; its
+            Japanese ships as a 2 KB subset holding only the kana and kanji the
+            SFX use. Caveat Brush, a condensed brush hand slanted and set in
+            caps, letters the bubbles the way translated manga is hand-lettered.
+            Zen Kaku Gothic New carries labels, card titles and body text. The
+            silence (<span class="st-silence">……</span>) is drawn as dots,
+            centred the way Japanese sets it, so no font ships for two
+            characters.
+          </p>
+          <div class="ds-panel">
+            <div class="specimen">
+              <div class="spec">
+                Dela Gothic One · brand, section titles, SFX
+              </div>
+              <div class="t-display">Look, Don't Touch</div>
+              <div class="t-sfx">
+                <span class="is-red" style="--tilt: -8deg">ドキッ</span
+                ><span style="--tilt: 4deg">ゴゴゴ</span
+                ><span style="--tilt: -4deg">キラキラ</span
+                ><span class="is-red" style="--tilt: 6deg">ドン</span>
+              </div>
+            </div>
+            <div class="specimen">
+              <div class="spec">
+                Caveat Brush, slanted, caps · bubbles, toasts, her lines
+              </div>
+              <div class="t-bubbles">
+                <span class="t-bubble"
+                  >It's not like I loaded this for you.</span
+                ><span class="t-bubble is-small">Already tagged, baka.</span>
+              </div>
+            </div>
+            <div class="specimen">
+              <div class="spec">
+                Zen Kaku Gothic New 900 and 700 caps · card titles, buttons,
+                tabs, labels
+              </div>
+              <div class="t-card">Tied in Silk · Rei Kisaragi</div>
+              <div class="t-label">
+                Scenes · Performers · Rating: 5 · 24:16 · 4K
+              </div>
+            </div>
+            <div class="specimen">
+              <div class="spec">
+                Zen Kaku Gothic New 400 · descriptions and settings
+              </div>
+              <div class="t-body">
+                Descriptions, settings and file details stay on a plain gothic,
+                so long text stays easy to read between the panels.
+              </div>
+            </div>
+            <div class="specimen">
+              <div class="spec">
+                Every Japanese word in the theme, with its reading and meaning
+              </div>
+              <table class="st-gloss">
+                <tr>
+                  <td>ドキッ</td>
+                  <td>doki'</td>
+                  <td>
+                    a jolt of the heart; the favourite, on hover, click and
+                    keyboard focus
+                  </td>
+                </tr>
+                <tr>
+                  <td>ドキドキ</td>
+                  <td>doki-doki</td>
+                  <td>a pounding heart; audio-only covers on this page</td>
+                </tr>
+                <tr>
+                  <td>キラキラ</td>
+                  <td>kira-kira</td>
+                  <td>sparkle; the motifs on this page</td>
+                </tr>
+                <tr>
+                  <td>ゴゴゴ</td>
+                  <td>go-go-go</td>
+                  <td>menacing aura; modal titles, the loader</td>
+                </tr>
+                <tr>
+                  <td>ドン</td>
+                  <td>don</td>
+                  <td>dramatic impact; her entrance on the performer page</td>
+                </tr>
+                <tr>
+                  <td>ジー</td>
+                  <td>jii</td>
+                  <td>staring; scene cards on hover; her stare in the hero</td>
+                </tr>
+                <tr>
+                  <td>ニヤ</td>
+                  <td>niya</td>
+                  <td>a smirk; performer cards on hover; the hero</td>
+                </tr>
+                <tr>
+                  <td>チュッ</td>
+                  <td>chu'</td>
+                  <td>a kiss; image cards, on hover</td>
+                </tr>
+                <tr>
+                  <td>フン</td>
+                  <td>fun</td>
+                  <td>hmph; over every toast</td>
+                </tr>
+                <tr>
+                  <td>ぷい</td>
+                  <td>pui</td>
+                  <td>turning away in a huff; the empty-state panel</td>
+                </tr>
+                <tr>
+                  <td><span class="st-silence">……</span></td>
+                  <td>(silence)</td>
+                  <td>nothing to say; every empty state</td>
+                </tr>
+                <tr>
+                  <td>漫画</td>
+                  <td>manga</td>
+                  <td>manga; the imprint label on the brand</td>
+                </tr>
+                <tr>
+                  <td>baka</td>
+                  <td>baka</td>
+                  <td>
+                    dummy, idiot (a tsundere's word, in romaji as translated
+                    manga print it); her one line for Scene already tagged
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2>
+            <img src="ds/motifs/focus-lines.svg" alt="" />Motifs and glyphs
+          </h2>
+          <p class="ds-lede">
+            Everything is drawn, not rendered: CSS gradients for screentone,
+            hatching, speed and focus lines, and SVG for the bubbles, stars,
+            sweat drop and lettering, set from the Dela Gothic One and Caveat
+            Brush outlines so they need no web font. The two figures are the
+            only renders, made locally with Qwen-Image 2512 (Apache 2.0): the
+            stare and the glance in the hero, and the glance again in the
+            empty-state panel, the one figure the plugin ships. SFW mode hides
+            both. The flat glyphs below are CSS masks, so they take any fill.
+          </p>
+          <div class="ds-panel">
+            <div class="ds-motifs">
+              <div class="ds-motif">
+                <img src="ds/motifs/focus-lines.svg" alt="" /><span
+                  >focus lines</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/speed-lines.svg" alt="" /><span
+                  >speed lines</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/tone-gradient.svg" alt="" /><span
+                  >gradient tone</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/hatching.svg" alt="" /><span>hatching</span>
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/bubble.svg" alt="" /><span
+                  >speech bubble</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img
+                  src="Theme-Screentone/assets/icons/silence.svg"
+                  alt=""
+                /><span><span class="st-silence">……</span> silence</span>
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/sfx-doki.svg" alt="" /><span
+                  >ドキッ doki'</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/sfx-gogogo.svg" alt="" /><span
+                  >ゴゴゴ go-go-go</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/sfx-kirakira.svg" alt="" /><span
+                  >キラキラ kira-kira</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/sfx-don.svg" alt="" /><span>ドン don</span>
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/drop.svg" alt="" /><span>sweat drop</span>
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/star.svg" alt="" /><span>inked star</span>
+              </div>
+            </div>
+            <div class="ds-row m-0">
+              <span
+                class="ds-glyph is-red"
+                title="rating"
+                style="
+                  mask-image: url('Theme-Screentone/assets/icons/glyph-star.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                title="rating, empty"
+                style="
+                  mask-image: url('Theme-Screentone/assets/icons/glyph-star-empty.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph is-red"
+                title="favourite"
+                style="
+                  mask-image: url('Theme-Screentone/assets/icons/glyph-heart.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                title="favourite, off"
+                style="
+                  mask-image: url('Theme-Screentone/assets/icons/glyph-heart-empty.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                title="O counter"
+                style="
+                  mask-image: url('Theme-Screentone/assets/icons/glyph-drop.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                title="a burst and the glint"
+                style="
+                  mask-image: url('Theme-Screentone/assets/icons/glyph-sparkle.svg');
+                "
+              ></span>
+              <span class="ds-caption"
+                >The rating, an empty rating, the favourite, the favourite off,
+                the sweat-drop O counter, and the sparkle a burst throws and a
+                star catches.</span
+              >
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/sfx-don.svg" alt="" />Buttons</h2>
+          <p class="ds-lede">
+            Buttons are inked boxes with a screentone shadow. Primary is the
+            spot red, secondary is beta, Scan is paper, Generate is hatched and
+            Identify is toned; Delete is outlined in red until you mean it.
+            Hover lifts the box off its shadow, a press lands it, and the chosen
+            item of a group turns paper white.
+          </p>
+          <div class="ds-row">
+            <button class="btn btn-primary">Save</button>
+            <button class="btn btn-secondary">Edit</button>
+            <button class="btn btn-success">Scan</button>
+            <button class="btn btn-warning">Generate</button>
+            <button class="btn btn-info">Identify</button>
+            <button class="btn btn-danger">Delete</button>
+            <button class="btn btn-primary" disabled>Disabled</button>
+          </div>
+          <div class="ds-row">
+            <button class="btn btn-primary btn-sm">Small</button>
+            <button class="btn btn-primary btn-lg">Large</button>
+            <div class="btn-group">
+              <button class="btn btn-secondary">Grid</button>
+              <button class="btn btn-secondary active">List</button>
+              <button class="btn btn-secondary">Wall</button>
+            </div>
+            <button class="btn btn-primary minimal">Minimal</button>
+            <a class="btn btn-link" href="#top">Link button</a>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2>
+            <img src="ds/motifs/star.svg" alt="" />Tags, ratings and favourites
+          </h2>
+          <p class="ds-lede">
+            Tags are caption boxes with a scrap of tone in the corner. Ratings
+            are inked stars in the spot colour, outlined in white, and each one
+            catches a glint now and then. The favourite is a heart that pounds
+            when you hover or tab to it, and ドキッ (a jolt of the heart) pops
+            beside it on hover, on click and on keyboard focus. The O counter is
+            the anime sweat drop. Click them for sparkles, streaks and drops.
+          </p>
+          <div class="ds-row">
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Manga</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Monochrome</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Tease</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Close-up</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Behind the scenes</div></a></span
+            >
+            <span class="badge badge-primary">New</span>
+            <span class="badge badge-info">4K</span>
+          </div>
+          <div class="ds-row ds-panel">
+            <div class="rating-stars" id="ds-rating">
+              <button
+                class="btn btn-secondary minimal star-fill-100"
+                data-star="1"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-secondary minimal star-fill-100"
+                data-star="2"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-secondary minimal star-fill-100"
+                data-star="3"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-secondary minimal star-fill-0"
+                data-star="4"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-secondary minimal star-fill-0"
+                data-star="5"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <span class="star-rating-number">3</span>
+            </div>
+            <span class="name-icons">
+              <button
+                class="btn btn-primary minimal favorite-button not-favorite"
+                id="ds-fav"
+                title="Favourite"
+              >
+                <svg class="svg-inline--fa fa-heart" width="28" height="28">
+                  <use href="#i-heart" />
+                </svg>
+              </button>
+            </span>
+            <div class="btn-group count-button" id="ds-o">
+              <button
+                class="btn btn-secondary minimal count-icon"
+                title="O Count"
+              >
+                <span
+                  ><svg width="22" height="22"><use href="#i-drops" /></svg
+                ></span>
+              </button>
+              <button class="btn btn-secondary minimal count-value">
+                <span>2</span>
+              </button>
+            </div>
+            <span class="ds-caption"
+              >Click the rating, the favourite and the O counter.</span
+            >
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/panels.svg" alt="" />Cards</h2>
+          <p class="ds-lede">
+            Cards are manga panels: the picture and the caption are two frames
+            split by a black gutter. On hover the frame thickens and lines rush
+            in over the picture for a beat, speed lines on scenes and focus
+            lines on performers and images, with an SFX: ジー (staring), ニヤ (a
+            smirk), チュッ (a kiss). The studio is a narration box, resolution
+            and length a black caption, and the rating a red caption cut on the
+            slant, to the right of the card's checkbox. Titles stop at two lines
+            and the counts sit at the foot of each caption panel, so a row stays
+            level whatever its titles.
+          </p>
+          <div class="ds-cards">
+            <div class="scene-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  aria-label="Select Look, Don't Touch"
+                />
+              </div>
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards">
+                  <div class="scene-card-preview ph ph-1"></div>
+                  <div class="rating-banner rating-5">Rating: 5</div>
+                  <div class="scene-specs-overlay">
+                    <span class="overlay-resolution">4K</span
+                    ><span class="overlay-duration">24:16</span>
+                  </div>
+                </a>
+                <div class="studio-overlay">
+                  <a href="#cards">Gutter Press</a>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-indicator" style="width: 42%"></div>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    Look, Don't Touch
+                  </h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-09-14</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>6</span>
+                </button>
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>1</span>
+                </button>
+                <div class="btn-group count-button">
+                  <button
+                    class="btn btn-secondary minimal count-icon"
+                    title="O Count"
+                  >
+                    <span
+                      ><svg class="ds-ico" viewBox="0 0 24 24">
+                        <use href="#i-drops" /></svg
+                    ></span></button
+                  ><button class="btn btn-secondary minimal count-value">
+                    <span>3</span>
+                  </button>
+                </div>
+                <div class="organized">
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-box" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="scene-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  aria-label="Select Tied in Silk"
+                />
+              </div>
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards">
+                  <div class="scene-card-preview ph ph-3"></div>
+                  <div class="rating-banner rating-4">Rating: 4</div>
+                  <div class="scene-specs-overlay">
+                    <span class="overlay-resolution">1080p</span
+                    ><span class="overlay-duration">31:02</span>
+                  </div>
+                </a>
+                <div class="studio-overlay">
+                  <a href="#cards">Inkwell</a>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    Tied in Silk
+                  </h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-08-30</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>9</span>
+                </button>
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>1</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="scene-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  aria-label="Select Chapter Twelve"
+                />
+              </div>
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards">
+                  <div class="scene-card-preview ds-audio-cover">
+                    <div class="st-audio">
+                      <span class="st-whisper">ドキドキ</span>
+                    </div>
+                  </div>
+                  <div class="scene-specs-overlay">
+                    <span class="overlay-resolution">Audio</span
+                    ><span class="overlay-duration">18:40</span>
+                  </div>
+                </a>
+                <div class="studio-overlay">
+                  <a href="#cards">Gutter Press</a>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-indicator" style="width: 78%"></div>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    Chapter Twelve
+                  </h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-07-02</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>5</span>
+                </button>
+                <div class="organized">
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-box" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ds-cards mt-4">
+            <div class="performer-card grid-card card">
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div class="performer-card-image ph ph-5"></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button favorite"
+                  title="Favourite"
+                >
+                  <svg class="svg-inline--fa fa-heart">
+                    <use href="#i-heart" />
+                  </svg>
+                </button>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <span class="performer-name">Rei Kisaragi</span>
+                  </h5></a
+                >
+                <div class="performer-card__age">29 years old</div>
+              </div>
+            </div>
+            <div class="performer-card grid-card card">
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div class="performer-card-image ph ph-2"></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button not-favorite"
+                  title="Favourite"
+                >
+                  <svg class="svg-inline--fa fa-heart">
+                    <use href="#i-heart" />
+                  </svg>
+                </button>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <span class="performer-name">Mika Aozora</span>
+                  </h5></a
+                >
+                <div class="performer-card__age">26 years old</div>
+              </div>
+            </div>
+            <div class="performer-card grid-card card">
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div class="performer-card-image ph ph-6"></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button not-favorite"
+                  title="Favourite"
+                >
+                  <svg class="svg-inline--fa fa-heart">
+                    <use href="#i-heart" />
+                  </svg>
+                </button>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <span class="performer-name">Sana Kurosaki</span>
+                  </h5></a
+                >
+                <div class="performer-card__age">34 years old</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ds-cards mt-4">
+            <div class="image-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  checked
+                  aria-label="Select tone-04.jpg"
+                />
+              </div>
+              <div class="thumbnail-section">
+                <a class="image-card-link" href="#cards"
+                  ><div class="image-card-preview portrait ph ph-4">
+                    <div class="preview-button">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        title="Zoom"
+                      >
+                        <svg class="svg-inline--fa fa-magnifying-glass fa-icon">
+                          <use href="#i-zoom" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="rating-banner rating-5">Rating: 5</div></a
+                >
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    tone-04.jpg
+                  </h5></a
+                >
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>1</span>
+                </button>
+              </div>
+            </div>
+            <div class="image-card grid-card card">
+              <div class="thumbnail-section">
+                <a class="image-card-link" href="#cards"
+                  ><div class="image-card-preview ph ph-2">
+                    <div class="preview-button">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        title="Zoom"
+                      >
+                        <svg class="svg-inline--fa fa-magnifying-glass fa-icon">
+                          <use href="#i-zoom" />
+                        </svg>
+                      </button>
+                    </div></div
+                ></a>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    gutter-press.jpg
+                  </h5></a
+                >
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>2</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/sfx-niya.svg" alt="" />Performer page</h2>
+          <p class="ds-lede">
+            Her header is a manga spread. Her picture fills a panel cut on the
+            slant, her name is lettered in the next panel across a leaning
+            gutter, ドン (dramatic impact: her entrance) breaks the frame
+            between them, and her details sit in a paper narration box in the
+            corner of her panel. The picture panel crops any picture from the
+            top, so faces stay in. When Stash's Enable background image setting
+            is on, her blurred picture shows through the gutters, printed in
+            grey under a tone. The cards below stay square.
+          </p>
+          <div id="performer-page" class="ds-performer">
+            <div class="detail-header full-width">
+              <div class="detail-container">
+                <div class="detail-header-image">
+                  <button type="button" class="btn btn-link">
+                    <img
+                      class="performer ph ph-5"
+                      src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                      alt=""
+                    />
+                  </button>
+                </div>
+                <div class="row">
+                  <div class="performer-head col">
+                    <h2>
+                      <span class="performer-name">Rei Kisaragi</span
+                      ><span class="name-icons"
+                        ><button
+                          type="button"
+                          class="minimal favorite-button favorite btn btn-primary"
+                          title="Favourite"
+                        >
+                          <svg class="svg-inline--fa fa-heart fa-icon">
+                            <use href="#i-heart" />
+                          </svg></button
+                      ></span>
+                    </h2>
+                    <div><span class="alias-head">Rei K., Kisaragi</span></div>
+                    <div class="quality-group">
+                      <div class="rating-stars">
+                        <button class="btn btn-secondary minimal star-fill-100">
+                          <div class="filled-star">
+                            <svg class="svg-inline--fa fa-star">
+                              <use href="#i-star" />
+                            </svg>
+                          </div>
+                          <div class="unfilled-star">
+                            <svg class="svg-inline--fa fa-star">
+                              <use href="#i-star" />
+                            </svg>
+                          </div></button
+                        ><button
+                          class="btn btn-secondary minimal star-fill-100"
+                        >
+                          <div class="filled-star">
+                            <svg class="svg-inline--fa fa-star">
+                              <use href="#i-star" />
+                            </svg>
+                          </div>
+                          <div class="unfilled-star">
+                            <svg class="svg-inline--fa fa-star">
+                              <use href="#i-star" />
+                            </svg>
+                          </div></button
+                        ><button
+                          class="btn btn-secondary minimal star-fill-100"
+                        >
+                          <div class="filled-star">
+                            <svg class="svg-inline--fa fa-star">
+                              <use href="#i-star" />
+                            </svg>
+                          </div>
+                          <div class="unfilled-star">
+                            <svg class="svg-inline--fa fa-star">
+                              <use href="#i-star" />
+                            </svg>
+                          </div></button
+                        ><button
+                          class="btn btn-secondary minimal star-fill-100"
+                        >
+                          <div class="filled-star">
+                            <svg class="svg-inline--fa fa-star">
+                              <use href="#i-star" />
+                            </svg>
+                          </div>
+                          <div class="unfilled-star">
+                            <svg class="svg-inline--fa fa-star">
+                              <use href="#i-star" />
+                            </svg>
+                          </div></button
+                        ><button class="btn btn-secondary minimal star-fill-0">
+                          <div class="filled-star">
+                            <svg class="svg-inline--fa fa-star">
+                              <use href="#i-star" />
+                            </svg>
+                          </div>
+                          <div class="unfilled-star">
+                            <svg class="svg-inline--fa fa-star">
+                              <use href="#i-star" />
+                            </svg>
+                          </div></button
+                        ><span class="star-rating-number">4</span>
+                      </div>
+                    </div>
+                    <div class="detail-group">
+                      <div class="detail-item gender">
+                        <span class="detail-item-title">Gender:</span
+                        ><span class="detail-item-value">Female</span>
+                      </div>
+                      <div class="detail-item age">
+                        <span class="detail-item-title">Age:</span
+                        ><span class="detail-item-value">29</span>
+                      </div>
+                      <div class="detail-item country">
+                        <span class="detail-item-title">Country:</span
+                        ><span class="detail-item-value">Japan</span>
+                      </div>
+                      <div class="detail-item hair_color">
+                        <span class="detail-item-title">Hair Color:</span
+                        ><span class="detail-item-value">Black</span>
+                      </div>
+                      <div class="detail-item height">
+                        <span class="detail-item-title">Height:</span
+                        ><span class="detail-item-value">162 cm</span>
+                      </div>
+                      <div class="detail-item career_length">
+                        <span class="detail-item-title">Career Length:</span
+                        ><span class="detail-item-value">2019 -</span>
+                      </div>
+                      <div class="detail-item tags">
+                        <span class="detail-item-title">Tags:</span
+                        ><span class="detail-item-value"
+                          ><span class="tag-item tag-link badge badge-secondary"
+                            ><a href="#performer"><div>Manga</div></a></span
+                          >
+                          <span class="tag-item tag-link badge badge-secondary"
+                            ><a href="#performer"><div>Tease</div></a></span
+                          ></span
+                        >
+                      </div>
+                      <div class="detail-item stash_ids">
+                        <span class="detail-item-title">Stash IDs:</span
+                        ><span class="detail-item-value"
+                          ><span class="stash-id-pill"
+                            ><span>StashDB</span
+                            ><a href="#performer">3f8b21d0</a></span
+                          ></span
+                        >
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="row">
+                        <div class="details-edit">
+                          <button type="button" class="btn btn-primary">
+                            Edit
+                          </button>
+                          <button type="button" class="btn btn-secondary">
+                            Auto tag…
+                          </button>
+                          <button type="button" class="btn btn-danger">
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/bubble.svg" alt="" />Forms and menus</h2>
+          <p class="ds-lede">
+            Inputs are ruled in white ink and focus throws a red offset. Menus
+            are panels with the tone shadow; the tooltip is a small bubble and
+            toasts are speech bubbles, with a huff (フン) over each. A modal is
+            a panel ruled off by speed lines, with ゴゴゴ (menacing) brewing in
+            the corner.
+          </p>
+          <div class="ds-row ds-panel">
+            <input
+              class="form-control"
+              style="max-width: 280px"
+              placeholder="Search scenes…"
+            />
+            <select class="custom-select" style="max-width: 200px">
+              <option>Sort by rating</option>
+              <option>Sort by date</option>
+            </select>
+            <div class="custom-control custom-checkbox">
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="ds-check"
+                checked
+              />
+              <label class="custom-control-label" for="ds-check"
+                >Organised only</label
+              >
+            </div>
+            <div class="custom-control custom-switch">
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="ds-switch"
+                checked
+              />
+              <label class="custom-control-label" for="ds-switch"
+                >Show previews</label
+              >
+            </div>
+          </div>
+          <div class="ds-overlays ds-static">
+            <div>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="#menu">Play random</a>
+                <a class="dropdown-item active" href="#menu"
+                  >Generate previews</a
+                >
+                <a class="dropdown-item" href="#menu">Export</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#menu">Delete…</a>
+              </div>
+              <div class="tooltip bs-tooltip-top show mt-3" role="tooltip">
+                <div class="tooltip-inner">Organised</div>
+              </div>
+            </div>
+            <div class="toast-container">
+              <div class="toast success show" role="status">
+                <div class="toast-header">Started generating</div>
+              </div>
+              <div class="toast success show mt-3" role="status">
+                <div class="toast-header">Performer Favourited</div>
+              </div>
+            </div>
+            <div>
+              <div class="modal-content">
+                <div class="modal-header"><span>Delete scene?</span></div>
+                <div class="modal-body">
+                  The file stays on disk unless you tick the box.
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary">Cancel</button>
+                  <button class="btn btn-danger">Delete</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/speed-lines.svg" alt="" />Stash-box</h2>
+          <p class="ds-lede">
+            Tagger rows stay flat, since you clear hundreds of them: no tone, no
+            lines, no motion. The chosen row gets a red edge and the chosen
+            select a red offset. Verdicts use no green or yellow: a match is a
+            white box with a black tick, a near miss an outlined box with a
+            bang, a failure a red box with a cross, and in the scrape dialog the
+            winning side's button turns paper.
+          </p>
+          <div class="ds-row tagger-container">
+            <span class="stash-id-pill" data-endpoint="StashDB"
+              ><span>StashDB</span><a href="#stash-box">5e1a9c30-look</a></span
+            >
+            <span class="text-success"
+              ><svg class="ds-ico"><use href="#i-check" /></svg> Duration is a
+              match</span
+            >
+            <span class="text-warning">Duration off by at least 2s</span>
+            <span class="text-danger">No results found</span>
+          </div>
+          <div class="search-item mb-4">
+            <ul class="list-unstyled m-0">
+              <li class="row mx-0 search-result selected-result active">
+                <div class="col-lg-5 d-flex">
+                  <div class="scene-image-container">
+                    <div class="scene-image ds-cover ph ph-1"></div>
+                  </div>
+                  <div class="scene-metadata">
+                    <h4 class="m-0">Look, Don't Touch</h4>
+                    <h5>Gutter Press · 2026-09-14</h5>
+                    <span class="stash-id-pill" data-endpoint="StashDB"
+                      ><span>StashDB</span
+                      ><a href="#stash-box">5e1a9c30</a></span
+                    >
+                  </div>
+                </div>
+                <div class="col-lg-7">
+                  <div class="ds-match">
+                    <span class="entity-name">Studio: Gutter Press</span>
+                    <div class="btn-group">
+                      <button class="btn btn-secondary">Create</button
+                      ><button class="btn btn-secondary">Skip</button>
+                    </div>
+                    <div
+                      class="studio-select studio-select-active react-select"
+                    >
+                      <div class="react-select__control">
+                        <span class="react-select__single-value"
+                          >Gutter Press</span
+                        ><span class="react-select__indicator">▾</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ds-match">
+                    <span class="entity-name">Performer: Mika Aozora</span>
+                    <div class="btn-group">
+                      <button class="btn btn-secondary">Create</button
+                      ><button class="btn btn-primary">Skip</button>
+                    </div>
+                    <div class="performer-select react-select">
+                      <div class="react-select__control">
+                        <span class="react-select__placeholder"
+                          >Select Performer</span
+                        ><span class="react-select__indicator">▾</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ds-match">
+                    <span class="entity-name">Performer: Rei Kisaragi</span>
+                    <span class="text-success"
+                      ><svg class="ds-ico"><use href="#i-check" /></svg>
+                      Matched: Rei Kisaragi</span
+                    >
+                  </div>
+                </div>
+              </li>
+              <li class="row mx-0 mt-2 search-result">
+                <div class="col">
+                  <h4 class="m-0">Spot Red</h4>
+                  <h5 class="m-0">Inkwell · 2026-02-14</h5>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="ds-static">
+            <div class="modal-dialog scrape-dialog modal-lg m-0">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <span>Scene Scrape Results</span>
+                </div>
+                <div class="modal-body">
+                  <div class="row">
+                    <div class="col-3"></div>
+                    <div class="col column-label">Existing</div>
+                    <div class="col column-label">Scraped</div>
+                  </div>
+                  <div class="row align-items-center mt-3">
+                    <div class="col-3 col-form-label">Title</div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-muted">
+                              <use href="#i-cross" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="Spot Red"
+                          readonly
+                        />
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-success">
+                              <use href="#i-check" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="Look, Don't Touch"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row align-items-center mt-3">
+                    <div class="col-3 col-form-label">Date</div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-success">
+                              <use href="#i-check" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="2026-09-11"
+                          readonly
+                        />
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-muted">
+                              <use href="#i-cross" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="2026-09-14"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary">Cancel</button>
+                  <button class="btn btn-primary">Apply</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/sfx-pui.svg" alt="" />Navigation</h2>
+          <p class="ds-lede">
+            The navbar is a beta title band ruled off like the top of a page,
+            with 漫画 (manga) on a red imprint label by the brand. The current
+            page is a red slug cut on the slant. On a phone held upright Stash
+            docks the bar at the bottom, and the rules move to its top edge. The
+            open tab is a white panel joined to the rule, and the pager is one
+            ruled strip.
+          </p>
+          <div class="ds-panel">
+            <ul class="nav nav-tabs mb-3">
+              <li class="nav-item">
+                <a class="nav-link active" href="#nav">Details</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#nav">Scenes</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#nav">Galleries</a>
+              </li>
+              <li class="nav-item"><a class="nav-link" href="#nav">Edit</a></li>
+            </ul>
+            <div role="group" class="pagination btn-group">
+              <button disabled type="button" class="btn btn-secondary">
+                «
+              </button>
+              <button disabled type="button" class="btn btn-secondary">
+                &lt;
+              </button>
+              <button type="button" class="page-count btn btn-secondary">
+                1 of 4
+              </button>
+              <button type="button" class="btn btn-secondary">&gt;</button>
+              <button type="button" class="btn btn-secondary">»</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2>
+            <img src="ds/motifs/sfx-gogogo.svg" alt="" />Loading and empty
+          </h2>
+          <p class="ds-lede">
+            The loader is focus lines spinning in held frames, like limited
+            animation, with ゴゴゴ shaking beside them and her line in a bubble.
+            Empty states fall silent: a panel of her looking back over her
+            shoulder, a <span class="st-silence">……</span> bubble and ぷい
+            (turning away in a huff), then a line. In SFW mode the panel goes
+            and the bubble stays.
+          </p>
+          <div class="ds-row" style="align-items: stretch">
+            <div class="ds-panel" style="min-width: 260px">
+              <div class="LoadingIndicator">
+                <div class="spinner-border" role="status">
+                  <span class="sr-only">Loading…</span>
+                </div>
+                <h4 class="LoadingIndicator-message">Loading…</h4>
+              </div>
+            </div>
+            <div class="ds-panel" style="min-width: 260px">
+              <div>No results found.</div>
+            </div>
+            <div class="ds-panel" style="min-width: 260px">
+              <span
+                class="filter-container text-muted paginationIndex center-text"
+                >0-0 of 0<br
+              /></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/sfx-fun.svg" alt="" />Copy</h2>
+          <p class="ds-lede">
+            Her lines are a tsundere's, manga's own brat: huffy, teasing and
+            secretly pleased, with one "baka" in the whole theme, as translated
+            manga keep it. Matches are exact and whole-text, so titles, tags and
+            descriptions are never touched. Plain labels and Stash's SFW mode
+            turn them off.
+          </p>
+          <div class="ds-panel">
+            <table class="ds-copy">
+              <thead>
+                <tr>
+                  <th>Stash says</th>
+                  <th>Screentone says</th>
+                </tr>
+              </thead>
+              <tbody id="ds-copy-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <footer class="ds-footer">
+          <p>
+            Dela Gothic One by artakana, Caveat Brush by Pablo Impallari and Zen
+            Kaku Gothic New by Yoshimichi Ohira, all SIL OFL 1.1 and bundled
+            with the plugin, since Stash blocks font hosts. The two figures were
+            rendered locally with Qwen-Image 2512 (Apache 2.0). Bootstrap 4.6
+            stands in for Stash's own styles. Built with Claude, Anthropic's AI
+            coding assistant.
+            <a
+              href="https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/screentone"
+              >Source and install</a
+            >.
+          </p>
+        </footer>
+      </div>
+    </div>
+
+    <script src="Theme-Screentone/screentone.js"></script>
+    <script src="ds/ds.js"></script>
+  </body>
+</html>

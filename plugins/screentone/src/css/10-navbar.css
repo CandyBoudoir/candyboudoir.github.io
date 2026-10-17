@@ -1,0 +1,151 @@
+/*
+ * Navigation: a beta title band ruled off like the top of a page, a white
+ * rule and a hairline under it, with tone fading in from the right. Stash
+ * paints the bar and its folded menu with Bootstrap's !important bg-dark, so
+ * these need !important too.
+ */
+.top-nav.navbar {
+  background:
+    linear-gradient(90deg, #000 30%, transparent 85%), var(--st-dots-soft), #000 !important;
+  border-bottom: 3px solid var(--st-white);
+  box-shadow:
+    0 4px 0 #000,
+    0 5.5px 0 var(--st-white);
+  min-height: var(--st-nav-height);
+  padding: 0.5rem 1rem;
+}
+
+.top-nav .navbar-collapse.bg-dark {
+  background-color: transparent !important;
+}
+
+/* Stash fixes the bar to 48.75px on wide screens */
+@media (width >= 1200px) {
+  .top-nav.navbar {
+    height: var(--st-nav-height);
+  }
+
+  /* Stash pads its page links for the folded menu's tiles; in the band they
+     sit tight, so the bar keeps its height */
+  .top-nav .navbar-nav .nav-link > .btn.minimal {
+    padding: 0.4rem 0.85rem !important;
+  }
+}
+
+.top-nav .btn.minimal {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  color: var(--st-muted);
+  font-family: var(--st-font-label);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.top-nav .btn.minimal:not(:disabled):hover {
+  background: var(--st-hatch-soft);
+  color: #fff;
+}
+
+/* The active page is a red title slug, cut on the slant */
+.top-nav .btn.minimal.active,
+.top-nav .btn.minimal.active:not(:disabled):hover {
+  background: var(--st-spot);
+  clip-path: polygon(7px 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
+  color: #fff;
+}
+
+.top-nav .brand-link.btn.minimal {
+  align-items: center;
+  color: var(--st-white);
+  display: inline-flex !important;
+  font-family: var(--st-font-display);
+  font-size: 1.65rem;
+  font-weight: 400;
+  gap: 0.45rem;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  padding: 0 0.6rem 0 0.2rem;
+  text-transform: none;
+}
+
+/* 漫画 (manga) on a red label, like the imprint box on a volume spine */
+.top-nav .brand-link.btn.minimal::before {
+  background: var(--st-spot);
+  color: #fff;
+  content: '漫画';
+  font-family: var(--st-font-display);
+  font-size: 0.62rem;
+  letter-spacing: 0;
+  line-height: 1;
+  padding: 0.28rem 0.2rem;
+  writing-mode: vertical-rl;
+}
+
+.top-nav .brand-link.btn.minimal:hover {
+  background: none;
+  color: #fff;
+}
+
+.top-nav .navbar-brand {
+  padding-block: 0;
+}
+
+/* The menu toggle Stash shows below 1200px: a small inked box */
+.top-nav .navbar-toggler {
+  background: #000;
+  border: 2px solid var(--st-white);
+  border-radius: 0;
+  color: var(--st-text);
+  padding: 0.3rem 0.55rem;
+}
+
+.top-nav .navbar-toggler:focus-visible {
+  box-shadow: 0 0 0 2px var(--st-spot-hi);
+  outline: none;
+}
+
+/* The folded menu: Stash's grid of icon tiles, in caps on the band */
+@media (width < 1200px) {
+  .top-nav.navbar {
+    padding-block: 0.35rem;
+  }
+
+  .top-nav .navbar-collapse .btn.minimal {
+    letter-spacing: 0.08em;
+  }
+
+  .top-nav .navbar-collapse .nav-menu-icon {
+    color: var(--st-dim);
+  }
+
+  .top-nav .navbar-collapse .btn.minimal.active .nav-menu-icon {
+    color: #fff;
+  }
+}
+
+/*
+ * On a phone held upright Stash docks the bar at the bottom of the screen, so
+ * the rules move to its top edge.
+ */
+@media (width <= 575.98px) and (orientation: portrait) {
+  .top-nav.navbar {
+    border-bottom: 0;
+    border-top: 3px solid var(--st-white);
+    box-shadow:
+      0 -4px 0 #000,
+      0 -5.5px 0 var(--st-white);
+    padding: 0.35rem 1.25rem;
+  }
+
+  .top-nav .btn.minimal {
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+  }
+
+  .top-nav .brand-link.btn.minimal {
+    font-size: 1.4rem;
+  }
+}

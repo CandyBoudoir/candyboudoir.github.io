@@ -1,0 +1,69 @@
+/*
+ * Empty states fall silent: her panel with a …… bubble and ぷい (turning away
+ * in a huff), then a line. Stash marks an empty list with nothing but "0-0 of
+ * 0" in .paginationIndex, and screentone.js adds the line.
+ */
+.screentone-empty,
+.paginationIndex[data-screentone-empty] {
+  align-items: center;
+  color: var(--st-text);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--st-font-letter);
+  font-size: 1.32rem;
+  font-style: italic;
+  font-weight: 400;
+  gap: 0.7rem;
+  letter-spacing: 0.05em;
+  line-height: 1.12;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.screentone-empty::before,
+.paginationIndex[data-screentone-empty]::before {
+  background: url('assets/icons/empty-panel.webp') center / contain no-repeat;
+  content: '';
+  height: 150px;
+  width: 170px;
+}
+
+/* Stash marks the line .text-muted, which Bootstrap sets with !important */
+.paginationIndex[data-screentone-empty] {
+  color: var(--st-text) !important;
+  font-size: 0;
+  padding-block: 1.5rem;
+}
+
+.paginationIndex[data-screentone-empty]::after {
+  content: attr(data-screentone-empty);
+  font-size: 1.32rem;
+}
+
+/* With the voice off (Plain labels, SFW) the empty list says Stash's own words */
+.paginationIndex[data-screentone-empty=''] {
+  font-family: var(--st-font-label);
+  font-size: 0.9rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+/*
+ * Stash's SFW content mode keeps the ink and the tone and drops the voice and
+ * the figure: no SFX on cards, toasts or the favourite, the empty state is
+ * the silent bubble alone. Stash swaps the O counter for a thumbs-up of its
+ * own, which the drop mask skips and Screentone leaves alone.
+ */
+.sfw-content-mode .grid-card .thumbnail-section::after,
+.sfw-content-mode .favorite-button::after,
+body:has(.sfw-content-mode) .toast::before {
+  content: none;
+}
+
+body:has(.sfw-content-mode) .screentone-empty::before,
+body:has(.sfw-content-mode) .paginationIndex[data-screentone-empty]::before {
+  background-image: url('assets/icons/silence.svg');
+  height: 110px;
+  width: 140px;
+}
