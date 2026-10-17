@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- More like this no longer makes the scene page scroll sideways in a desktop browser. Its arrows sat past the page's edges, the right one 10px beyond the page and the left one half off it.
+- In a window or on a phone narrower than 1200px, More like this no longer covers the scene's performers. Stash keeps the scene's details to the window's height and lets the rest run past, and More like this started where that box ended.
+
 ## 0.1.3
 
 - Brackets play the performers and scenes you haven't rated. People rate their favorites, so the rated ones won their way to nearly every final; they now play only when there aren't enough unrated ones to fill a bracket. Performers and scenes from your last three brackets of the same kind and gender sit out while others can take their places.
