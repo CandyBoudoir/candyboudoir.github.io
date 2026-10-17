@@ -122,8 +122,9 @@ async function forYouScenes() {
 }
 
 // Plays a bracket that is open in the play dialog to its end, picking with
-// the given key ('random' for either), and returns how many picks it took.
-async function playOut(key = 'ArrowLeft') {
+// the given key ('random' for either) every `wait` ms, and returns how many
+// picks it took. A scene bracket ignores a pick within 400 ms of the last.
+async function playOut(key = 'ArrowLeft', wait = 120) {
   const play = page.locator('.cherrypick-play-modal')
   const result = page.locator('.cherrypick-result-modal')
   let picks = 0
@@ -140,7 +141,7 @@ async function playOut(key = 'ArrowLeft') {
         : key,
     )
     picks++
-    await page.waitForTimeout(120)
+    await page.waitForTimeout(wait)
     if (picks > 200) throw new Error('A bracket did not end')
   }
   await expect(result.locator('.cherrypick-champ-name')).not.toBeEmpty()
@@ -389,8 +390,8 @@ test('four brackets crown four champions, then a Champions round', async () => {
 })
 
 test('a clip bracket from a filtered Scenes list pauses, resumes and applies', async () => {
-  // A filtered list with watched scenes: Stash's search for the longest word
-  // in the most-played scene's title.
+  // A filtered list: Stash's search for the longest word in the most-played
+  // scene's title.
   const { findScenes } = await gql(`{
     findScenes(filter: { per_page: 1, sort: "play_count", direction: DESC }) {
       scenes { title } } }`)
@@ -418,7 +419,7 @@ test('a clip bracket from a filtered Scenes list pauses, resumes and applies', a
   await page.reload()
   await visible('.cherrypick-resume-pill').click({ timeout: 30_000 })
   await expect(play.locator('.cherrypick-round')).toHaveText(at)
-  await playOut()
+  await playOut('ArrowLeft', 450)
   metrics.championAskedClip = await rateChampionIfAsked()
   metrics.sceneApply = await applyAndUndo('Scenes')
   await closeDialogs()

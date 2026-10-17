@@ -20,7 +20,7 @@ import {
 import { createStore, useStoreValue } from '../../runtime/store.js'
 import { run, store } from '../../runtime/app.js'
 import * as BR from '../../model/brackets.js'
-import { watchedPool } from '../../model/bracketSetup.js'
+import { scenePool } from '../../model/bracketSetup.js'
 import { pronoun } from '../../model/util.js'
 import { describeFilter, listPlace } from '../../data/listFilter.js'
 import { useAppState } from '../../ui/hooks.js'
@@ -277,18 +277,18 @@ function useListScenes(where, desc, M) {
   }, [key, remote])
   const none = { ids: null, error: null }
   if (!desc || !M) return none
-  if (!desc.active) return { ids: watchedPool(M.db, null), error: null }
+  if (!desc.active) return { ids: scenePool(M, null), error: null }
   if (local) {
     const p = M.db.performers.get(where.performerId)
     return {
-      ids: watchedPool(M.db, new Set(p?.ownedSceneIds || [])),
+      ids: scenePool(M, new Set(p?.ownedSceneIds || [])),
       error: null,
     }
   }
   if (!fetched || fetched.key !== key) return none
   return fetched.error
     ? { ids: null, error: fetched.error }
-    : { ids: watchedPool(M.db, fetched.ids), error: null }
+    : { ids: scenePool(M, fetched.ids), error: null }
 }
 
 const cap = (s) => s[0].toUpperCase() + s.slice(1)
@@ -307,7 +307,7 @@ function SceneOps({ where, desc, pathname }) {
   let title
   if (where.place === 'performer-scenes') {
     const p = M?.db.performers.get(where.performerId)
-    // A performer with no watched scenes shows no button
+    // A performer with no scene a bracket can draw from shows no button
     if (!p || (!n && !error)) return null
     const her = pronoun(p)
     pool = {
@@ -315,23 +315,21 @@ function SceneOps({ where, desc, pathname }) {
       poolLabel: [`${p.name}'s scenes`, ...(desc?.notApplied || [])].join(
         ' · ',
       ),
-      poolNote: `${cap(her)} scenes you've watched`,
-      short: `Watch ${BR.MIN_CLIP_POOL - n} more of ${her} scenes to bracket them.`,
+      poolNote: `${cap(her)} scenes in your library`,
+      short: '',
       origin: pathname,
     }
     label = `Bracket ${her} scenes`
     title = error
       ? failedTitle(error)
       : ok
-        ? `A bracket of ${BR.clipPoolPhrase(plays)}${unrated} scenes of ${her} you've watched${BR.clipPoolSpread(plays)}`
-        : `Needs ${BR.MIN_CLIP_POOL} watched scenes; you've watched ${n}`
+        ? `A bracket of ${BR.clipPoolPhrase(plays)}${unrated} scenes of ${her}${BR.clipPoolSpread(plays)}`
+        : `Needs ${BR.MIN_CLIP_POOL} scenes; your library has ${n} of ${her}`
   } else {
     pool = {
       ids: ids || [],
-      poolLabel: desc?.active
-        ? desc.fullLabel || 'This list'
-        : 'All watched scenes',
-      poolNote: 'The watched scenes in this list',
+      poolLabel: desc?.active ? desc.fullLabel || 'This list' : 'All scenes',
+      poolNote: 'The scenes in this list',
       short: "Widen this list's filter to take in more of them.",
       origin: pathname,
     }
@@ -343,8 +341,8 @@ function SceneOps({ where, desc, pathname }) {
         : n == null
           ? undefined
           : ok
-            ? `Bracket ${BR.clipPoolPhrase(plays)}${unrated} watched scenes in this list${BR.clipPoolSpread(plays)}`
-            : `Needs ${BR.MIN_CLIP_POOL} watched scenes in this list`
+            ? `Bracket ${BR.clipPoolPhrase(plays)}${unrated} scenes in this list${BR.clipPoolSpread(plays)}`
+            : `Needs ${BR.MIN_CLIP_POOL} scenes in this list`
   }
   const herTab = where.place === 'performer-scenes'
   return (

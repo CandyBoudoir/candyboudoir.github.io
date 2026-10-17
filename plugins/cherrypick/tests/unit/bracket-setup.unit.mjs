@@ -247,18 +247,35 @@ test('Set genders fills a short pool', () => {
   assert.equal(filled.ids.length, short.ids.length + none.length)
 })
 
-test('clip pools: the watched scenes, or those a filter matches', () => {
-  const all = S.watchedPool(db, null)
+test('clip pools: every owned scene, or those a filter matches', () => {
+  const all = S.scenePool(M, null)
   assert.deepEqual(
     all,
-    BR.watchedScenes(db).map((s) => s.id),
+    db.owned.map((s) => s.id),
   )
   const unwatched = db.owned.find((s) => !s.local.play_count)
-  const some = new Set([all[0], all[1], unwatched.id])
+  const some = new Set([all[0], all[1], unwatched.id, 'not-a-scene'])
+  assert.deepEqual(S.scenePool(M, some), [all[0], all[1], unwatched.id])
+})
+
+test("clip pools leave out audio-only scenes and Don't learn ones", () => {
+  const rows = input.scenes.slice(0, 6).map((r, i) => ({
+    ...r,
+    files: [{ ...r.files[0], video_codec: i === 1 ? '' : 'h264' }],
+  }))
+  const small = buildDb({ ...input, scenes: rows })
+  const ids = rows.map((r) => r.id)
+  const M2 = createEngine(small).compute({ dontLearn: [ids[2]] })
+  assert.equal(small.scenes.get(ids[1]).audioOnly, true)
+  assert.equal(small.scenes.get(ids[0]).audioOnly, false)
+  const kept = [ids[0], ids[3], ids[4], ids[5]].sort()
+  assert.deepEqual(S.scenePool(M2, null).sort(), kept)
+  // the Challenge round's library draws from the same scenes
   assert.deepEqual(
-    S.watchedPool(db, some),
-    [all[0], all[1]],
-    'unwatched scenes stay out',
+    BR.bracketScenes(M2)
+      .map((s) => s.id)
+      .sort(),
+    kept,
   )
 })
 

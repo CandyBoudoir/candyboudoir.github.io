@@ -23,8 +23,8 @@ export const REFRESH_MS = 2 * 60 * 1000
 const OVERLAP_MS = 60 * 1000
 // 2: scenes carry custom_fields. 3: updates find changed scenes by sorting
 // (`cursors`), and the age of the last full read (`fullAt`) decides when to
-// read in full.
-const CACHE_VERSION = 3
+// read in full. 4: files carry video_codec, width and height, for scene brackets.
+const CACHE_VERSION = 4
 
 // Every page of one find query, sorted by id so pages never shift.
 async function fetchPages(run, query, field, list, variables, onPage) {

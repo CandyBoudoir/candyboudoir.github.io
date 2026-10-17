@@ -449,8 +449,8 @@ export function ClipSetup({ ids, poolLabel, poolNote, short, origin }) {
               <b>
                 {n} of {BR.MIN_CLIP_POOL} needed.
               </b>{' '}
-              A clip bracket needs {BR.MIN_CLIP_POOL} scenes you&apos;ve
-              watched.{short ? ' ' + short : ''}
+              A scene bracket needs {BR.MIN_CLIP_POOL} scenes.
+              {short ? ' ' + short : ''}
             </p>
           </div>
         ) : (
