@@ -2,10 +2,10 @@
 // Each side of a match is a contact sheet: the cover and eight frames over
 // the runtime, title, studio, year, length, resolution, up to four
 // performers' faces and a row of tags, with no rating, seed or reason. The
-// picture (the cover and its frames) picks, as on a performer card. Look
-// closer opens the inspector, one scene large: a frame viewer with a scrub
-// bar, sixteen tiles, Stash's preview clip, every performer, the
-// description and every tag.
+// cover picks, as a performer card's photo does. A frame under it opens the
+// inspector at that frame, and Look closer on the cover: one scene large, a
+// frame viewer with a scrub bar, sixteen tiles, Stash's preview clip, every
+// performer, the description and every tag.
 //
 // Nothing here plays the scene's own file or uses Stash's scene player,
 // which records a play and saves activity as it plays. The frames come
@@ -204,7 +204,9 @@ function Faces({ db, performers, max, big = false }) {
 }
 
 /**
- * One side of a scene match. The picture picks; onLook opens the inspector.
+ * One side of a scene match. The cover picks, as a performer card's photo
+ * does; onLook(frame) opens the inspector, at a frame under the cover or
+ * (-1) on the cover from Look closer.
  */
 export function SceneContender({ id, side, onPick, onLook }) {
   const M = useAppState((s) => s.M)
@@ -221,41 +223,48 @@ export function SceneContender({ id, side, onPick, onLook }) {
     >
       <button
         type="button"
-        className="cherrypick-cont-media"
+        className="cherrypick-cont-img cherrypick-cover-pick"
         onClick={onPick}
         aria-label={`Pick ${title}`}
       >
-        <span className="cherrypick-cont-img">
-          {s.image ? <img src={s.image} alt="" /> : null}
-          <span className="cherrypick-key badge badge-dark">
-            {side === 'left' ? '←' : '→'}
-          </span>
-          {s.duration ? (
-            <span className="cherrypick-runtime badge badge-dark">
-              {fmtDuration(s.duration)}
-            </span>
-          ) : null}
+        {s.image ? <img src={s.image} alt="" /> : null}
+        <span className="cherrypick-key badge badge-dark">
+          {side === 'left' ? '←' : '→'}
         </span>
-        {sheet === NONE ? null : (
-          <span className="cherrypick-sheet" style={ratioOf(sheet)}>
-            {(n ? evenly(8, n) : [0, 1, 2, 3, 4, 5, 6, 7]).map((i) => (
-              <span className="cherrypick-frame" key={i}>
-                {n ? (
-                  <>
+        {s.duration ? (
+          <span className="cherrypick-runtime badge badge-dark">
+            {fmtDuration(s.duration)}
+          </span>
+        ) : null}
+      </button>
+      {sheet === NONE ? null : (
+        <div className="cherrypick-sheet" style={ratioOf(sheet)}>
+          {n
+            ? evenly(8, n).map((i) => {
+                const t = fmtDuration(sheet.frames[i].t) || '0:00'
+                return (
+                  <button
+                    type="button"
+                    className="cherrypick-frame"
+                    key={i}
+                    aria-label={`Look closer from ${t}`}
+                    onClick={() => onLook(i)}
+                  >
                     <span
                       className="cherrypick-frame-img"
                       style={cellStyle(sheet, sheet.frames[i])}
                     />
                     <span className="cherrypick-frame-t badge badge-dark">
-                      {fmtDuration(sheet.frames[i].t) || '0:00'}
+                      {t}
                     </span>
-                  </>
-                ) : null}
-              </span>
-            ))}
-          </span>
-        )}
-      </button>
+                  </button>
+                )
+              })
+            : [0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                <span className="cherrypick-frame" key={i} />
+              ))}
+        </div>
+      )}
       {sheet === NONE ? (
         <p className="cherrypick-sheet-none small text-muted">
           No frames: Stash hasn&apos;t generated previews for this scene.
@@ -284,7 +293,7 @@ export function SceneContender({ id, side, onPick, onLook }) {
           <button
             type="button"
             className="btn btn-secondary cherrypick-look-btn"
-            onClick={onLook}
+            onClick={() => onLook(-1)}
           >
             <Icon icon={faMagnifyingGlass || faSearch} />
             <span>Look closer</span>
@@ -656,8 +665,8 @@ export function MatchHints({ esc }) {
         <kbd>U</kbd> undo · <kbd>Esc</kbd> {esc}
       </span>
       <span className="cherrypick-hints-touch">
-        Tap a scene to pick it, or Look closer for its frames and details. Close
-        to {esc === 'pause' ? 'pause' : 'go back'}.
+        Tap a cover to pick it, or a frame to look closer. Close to{' '}
+        {esc === 'pause' ? 'pause' : 'go back'}.
       </span>
     </p>
   )

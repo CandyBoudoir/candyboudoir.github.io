@@ -1,9 +1,10 @@
 // Checks how a scene bracket lets you judge a scene you have never watched:
 // every owned scene can play; each side of a match is a contact sheet of
 // the cover and eight frames from Stash's sprite sheet, with no rating; the
-// picture picks, and a second pick within 400 ms is ignored; Look closer
-// and 1 or 2 open the inspector without picking, its keys move through the
-// frames, O switches, Enter picks and Esc goes back instead of pausing;
+// cover picks, and a second pick within 400 ms is ignored; a frame, Look
+// closer and 1 or 2 open the inspector without picking, its keys move
+// through the frames, O switches, Enter picks and Esc goes back instead of
+// pausing;
 // Play the preview plays Stash's preview clip, muted, and nothing records a
 // play; a scene without generated previews says so; at 390 px the scenes
 // stack with both Pick buttons above the footer.
@@ -81,7 +82,7 @@ test('a scene bracket draws on scenes you have never played', async ({
   expect(title).not.toContain('watched')
 })
 
-test('a scene match shows contact sheets, and the picture picks', async ({
+test('a scene match shows contact sheets, and the cover picks', async ({
   page,
 }) => {
   const errors = []
@@ -90,8 +91,8 @@ test('a scene match shows contact sheets, and the picture picks', async ({
   await expect(play).toContainText('8 scenes')
   await expect(round(play)).toContainText('match 1 of 4')
   const card = play.locator('.cherrypick-judge').first()
-  // the cover and eight frames from Stash's sprite sheet, as one button
-  const frames = card.locator('.cherrypick-cont-media .cherrypick-frame-img')
+  // the cover, and eight frames from Stash's sprite sheet under it
+  const frames = card.locator('.cherrypick-sheet .cherrypick-frame-img')
   await expect(frames).toHaveCount(8)
   expect(
     await frames.evaluateAll((els) =>
@@ -100,7 +101,10 @@ test('a scene match shows contact sheets, and the picture picks', async ({
       ),
     ),
   ).toBe(true)
-  await expect(card.locator('.cherrypick-cont-media img')).toHaveCount(1)
+  await expect(card.locator('.cherrypick-cover-pick img')).toHaveCount(1)
+  await expect(
+    card.locator('.cherrypick-sheet button').first(),
+  ).toHaveAttribute('aria-label', /^Look closer from \d+:\d\d$/)
   await expect(card.locator('.cherrypick-cont-meta')).toContainText(
     /0:08 · 360p$/,
   )
@@ -113,12 +117,12 @@ test('a scene match shows contact sheets, and the picture picks', async ({
   await expect(play.locator('.cherrypick-match')).not.toContainText('★')
   await expect(play.locator('.cherrypick-match')).not.toContainText('seed')
 
-  await card.locator('.cherrypick-cont-media').click()
+  await card.locator('.cherrypick-cover-pick').click()
   await expect(round(play)).toContainText('match 2 of 4')
   // a double click picks once: the second lands on the next match
   await page.waitForTimeout(SETTLE)
   await play
-    .locator('.cherrypick-judge .cherrypick-cont-media')
+    .locator('.cherrypick-judge .cherrypick-cover-pick')
     .nth(1)
     .dblclick()
   await expect(round(play)).toContainText('match 3 of 4')
@@ -130,7 +134,7 @@ test('a scene match shows contact sheets, and the picture picks', async ({
   expect(errors).toEqual([])
 })
 
-test('Look closer opens the inspector without picking, and Esc goes back', async ({
+test('a frame or Look closer opens the inspector without picking, and Esc goes back', async ({
   page,
 }) => {
   const before = await plays()
@@ -140,8 +144,24 @@ test('Look closer opens the inspector without picking, and Esc goes back', async
   })
   const play = await startBracket(page, CLIPS)
   const [left, right] = await sceneIds(play)
-  await play.locator('.cherrypick-look-btn').first().click()
+  // a frame under the cover opens the inspector at that frame (the third of
+  // eight spread over 81: frame 25)
+  await play
+    .locator('.cherrypick-judge')
+    .nth(1)
+    .locator('.cherrypick-sheet button')
+    .nth(2)
+    .click()
   const insp = play.locator('.cherrypick-inspector')
+  await expect(insp).toHaveAttribute('data-scene', right)
+  await expect(insp.locator('.cherrypick-scrub')).toHaveAttribute(
+    'aria-valuenow',
+    '25',
+  )
+  await expect(round(play)).toContainText('match 1 of 4')
+  await play.locator('.cherrypick-insp-back').click()
+  // Look closer opens it on the cover
+  await play.locator('.cherrypick-look-btn').first().click()
   await expect(insp).toHaveAttribute('data-scene', left)
   await expect(round(play)).toContainText('match 1 of 4')
   // the cover and fifteen frames
@@ -272,7 +292,7 @@ test.describe('at 390 px', () => {
     await play.locator('.cherrypick-insp-back').click()
     // a tap on the picture picks: the next match is on screen
     const first = await sceneIds(play)
-    await cards.nth(1).locator('.cherrypick-cont-media').tap()
+    await cards.nth(1).locator('.cherrypick-cover-pick').tap()
     await expect.poll(() => sceneIds(play)).not.toEqual(first)
     await play.getByRole('button', { name: 'Show bracket' }).click()
     await expect(

@@ -2,8 +2,8 @@
 // Backspace undoes, Esc or × pauses. Every pick needs an answer: there is no
 // "Can't decide". A card shows no rating, seed or rating-based reason, so a
 // pick is not pulled toward past ratings, and an anchor looks like any
-// other entrant. A scene match shows contact sheets and opens an inspector
-// on Look closer or 1 and 2 (judge.jsx); no scene's own file plays.
+// other entrant. A scene match shows contact sheets; a frame, Look closer
+// or 1 and 2 open an inspector (judge.jsx), and no scene's own file plays.
 import { FontAwesomeSolid, React } from '../../runtime/api.js'
 import { store } from '../../runtime/app.js'
 import * as BR from '../../model/brackets.js'
@@ -286,7 +286,7 @@ export function PlayDialog() {
               id={cur.a}
               side="left"
               onPick={() => match.pick(cur.a)}
-              onLook={() => match.setLook({ id: cur.a, frame: -1 })}
+              onLook={(frame) => match.setLook({ id: cur.a, frame })}
             />
             <Contender
               key={'b' + cur.b}
@@ -294,7 +294,7 @@ export function PlayDialog() {
               id={cur.b}
               side="right"
               onPick={() => match.pick(cur.b)}
-              onLook={() => match.setLook({ id: cur.b, frame: -1 })}
+              onLook={(frame) => match.setLook({ id: cur.b, frame })}
             />
           </div>
           {b.kind === 'clip' ? (

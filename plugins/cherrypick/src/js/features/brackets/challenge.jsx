@@ -129,7 +129,7 @@ export function ChallengeDialog({ id }) {
               id={left}
               side="left"
               onPick={() => match.pick(left)}
-              onLook={() => match.setLook({ id: left, frame: -1 })}
+              onLook={(frame) => match.setLook({ id: left, frame })}
             />
             <Contender
               key={'r' + right}
@@ -137,7 +137,7 @@ export function ChallengeDialog({ id }) {
               id={right}
               side="right"
               onPick={() => match.pick(right)}
-              onLook={() => match.setLook({ id: right, frame: -1 })}
+              onLook={(frame) => match.setLook({ id: right, frame })}
             />
           </div>
           {b.kind === 'clip' ? (

@@ -13,27 +13,21 @@
   transform: none;
 }
 
-/* the picture (cover and frames) is one pick target, like a performer
-   card's photo */
-.cherrypick-cont-media {
+/* the cover picks, like a performer card's photo; the frames under it are
+   their own buttons, which open the inspector */
+.cherrypick-cover-pick {
   background: none;
   border: 0;
   color: inherit;
   cursor: pointer;
   display: block;
   padding: 0;
-  text-align: left;
-  width: 100%;
 }
 
-.cherrypick-cont-media:hover,
-.cherrypick-cont-media:focus-visible {
+.cherrypick-cover-pick:hover,
+.cherrypick-cover-pick:focus-visible {
   outline: 2px solid currentcolor;
   outline-offset: 2px;
-}
-
-.cherrypick-cont-media .cherrypick-cont-img {
-  display: block;
 }
 
 .cherrypick-judge .cherrypick-cont-img img {
@@ -66,6 +60,10 @@
 }
 
 button.cherrypick-frame {
+  cursor: zoom-in;
+}
+
+.cherrypick-insp-grid button.cherrypick-frame {
   cursor: pointer;
 }
 
