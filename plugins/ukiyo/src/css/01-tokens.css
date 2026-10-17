@@ -1,0 +1,94 @@
+/*
+ * Ukiyo design tokens: the pigments a woodblock printer kept. Stash compiles
+ * its colours from SCSS and exposes no custom properties, so every rule in
+ * this theme reads from these instead. Every url() here resolves against
+ * ukiyo.css.
+ */
+:root {
+  color-scheme: dark;
+  accent-color: var(--ukiyo-shu);
+
+  /* Pigments */
+  --ukiyo-night: #080d18;
+  --ukiyo-ai: #121c31;
+  --ukiyo-ai-hi: #1b2944;
+  --ukiyo-ai-deep: #0b1324;
+  --ukiyo-line: #2d3d5f;
+  --ukiyo-line-hi: #34466b;
+  --ukiyo-rule: #273755;
+  --ukiyo-bero: #1f4f8f;
+  --ukiyo-bero-dk: #12305e;
+  --ukiyo-shu: #b9381f;
+  --ukiyo-shu-hi: #f2694c;
+  --ukiyo-shu-ink: #d0462a;
+  --ukiyo-shu-text: #9e2f19;
+  --ukiyo-sakura: #f2a7b5;
+  --ukiyo-kinari: #efe4cc;
+  --ukiyo-paper: #ece1c7;
+  --ukiyo-ki: #c99a3e;
+  --ukiyo-sumi: #15110f;
+  --ukiyo-muted: #b5ae9f;
+  --ukiyo-dim: #8f97ad;
+  --ukiyo-on-shu: #f6eedc;
+  --ukiyo-success: #9ccf8a;
+  --ukiyo-warning: #e6b45a;
+  --ukiyo-danger: #f0788a;
+
+  /*
+   * Materials. The washi is a seamless fibre overlay on transparent, laid
+   * over any flat colour: one lossless file per screen density, each drawn at
+   * its own pixels, since resampling the edges brings the seam back.
+   */
+  --ukiyo-washi: image-set(
+      url('assets/icons/washi-1x.webp') 1x,
+      url('assets/icons/washi-2x.webp') 2x,
+      url('assets/icons/washi-3x.webp') 3x
+    )
+    0 0 / 256px 256px;
+  --ukiyo-asanoha: url('assets/icons/asanoha.svg') 0 0 / 28px 48.5px;
+  --ukiyo-seigaiha: url('assets/icons/seigaiha.svg') 0 0 / 24px 12px repeat-x;
+
+  /* Hand-cut keylines (tools/patterns.py): a 3px border image whose inner
+     edge swells and thins along its 300px length, with soft corners */
+  --ukiyo-cut-card: url('assets/icons/keyline-card.svg') 3 / 3px stretch;
+  --ukiyo-cut-sumi: url('assets/icons/keyline-sumi.svg') 3 / 3px stretch;
+
+  /* Blocks of colour, each a shade lighter at the top as a block prints */
+  --ukiyo-shu-block: linear-gradient(
+    180deg,
+    #bf3c20 0%,
+    #b9381f 50%,
+    #a5301a 100%
+  );
+  --ukiyo-bero-block: linear-gradient(
+    180deg,
+    #24508c 0%,
+    #1f4f8f 50%,
+    #1a4277 100%
+  );
+
+  /* Shape */
+  --ukiyo-radius: 2px;
+  --ukiyo-band: 12px;
+
+  /*
+   * The navbar is a bokashi band with a row of wave scales along its foot,
+   * taller than Stash's own 48.75px bar. Stash spaces the page, the sidebar
+   * and its sticky headers by that height, so 80-pages.css moves them with
+   * this.
+   */
+  --ukiyo-nav-height: 66px;
+
+  /* Type */
+  --ukiyo-font-display:
+    'Ukiyo Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', georgia, serif;
+  --ukiyo-font-label: 'Ukiyo Gothic', 'Hiragino Sans', system-ui, sans-serif;
+  --ukiyo-font-body:
+    system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial,
+    sans-serif;
+
+  /* Motion */
+  --ukiyo-ease: cubic-bezier(0.3, 0.7, 0.2, 1);
+  --ukiyo-fast: 160ms;
+  --ukiyo-medium: 280ms;
+}

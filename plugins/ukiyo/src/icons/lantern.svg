@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 118"><defs><clipPath id="c"><path d="M25 20 C3 28 3 86 25 94 L55 94 C77 86 77 28 55 20 Z"/></clipPath>
+<radialGradient id="g" cx="40" cy="55" r="40" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffd59a"/><stop offset=".3" stop-color="#f58a52"/><stop offset=".72" stop-color="#d0462a"/><stop offset="1" stop-color="#a8321c"/></radialGradient></defs>
+<path d="M40 2 V11" stroke="#15110f" stroke-width="2.4"/><circle cx="40" cy="5" r="3.4" fill="none" stroke="#15110f" stroke-width="2"/>
+<path d="M25 20 C3 28 3 86 25 94 L55 94 C77 86 77 28 55 20 Z" fill="url(#g)"/>
+<g clip-path="url(#c)" fill="none" stroke="#a8321c" stroke-width="1.4" opacity=".75"><path d="M2 27 Q40 22.2 78 27"/><path d="M2 34 Q40 30.32 78 34"/><path d="M2 41 Q40 38.44 78 41"/><path d="M2 48 Q40 46.56 78 48"/><path d="M2 55 Q40 54.68 78 55"/><path d="M2 62 Q40 62.8 78 62"/><path d="M2 69 Q40 70.92 78 69"/><path d="M2 76 Q40 79.04 78 76"/><path d="M2 83 Q40 87.16 78 83"/><path d="M2 90 Q40 95.28 78 90"/></g>
+<path d="M40 22 V92" stroke="#fff3d8" stroke-width="5" opacity=".18"/>
+<path d="M25 20 C3 28 3 86 25 94 L55 94 C77 86 77 28 55 20 Z" fill="none" stroke="#15110f" stroke-width="2.6" stroke-linejoin="round"/>
+<rect x="22" y="12" width="36" height="10" rx="1.5" fill="#15110f"/><rect x="22" y="15.5" width="36" height="1.6" fill="#c99a3e"/>
+<rect x="22" y="92" width="36" height="9" rx="1.5" fill="#15110f"/><rect x="22" y="95.5" width="36" height="1.6" fill="#c99a3e"/>
+<path d="M40 101 V112" stroke="#15110f" stroke-width="2"/><path d="M36 106 L40 116 L44 106 Z" fill="#a8321c" stroke="#15110f" stroke-width="1.2"/></svg>

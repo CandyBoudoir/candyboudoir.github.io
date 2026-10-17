@@ -1,0 +1,95 @@
+/* The night sky, the sea at the page foot, type, links, focus and selection */
+::selection {
+  background: var(--ukiyo-shu);
+  color: var(--ukiyo-on-shu);
+}
+
+/* The night sky: Prussian blue at the top, graded down to near black */
+body {
+  background:
+    radial-gradient(
+      1300px 520px at 50% -200px,
+      rgb(44 92 158 / 50%),
+      transparent 72%
+    ),
+    linear-gradient(180deg, #13284c 0, #0c1730 280px, var(--ukiyo-night) 760px);
+  background-attachment: fixed;
+  background-color: var(--ukiyo-night);
+  color: var(--ukiyo-kinari);
+}
+
+/*
+ * The sea at the foot of the night print stays at the bottom edge of the
+ * page. It is kept low, and its alpha fades in from the top, so text
+ * scrolling over it stays easy to read.
+ */
+body::before {
+  aspect-ratio: 1540 / 345;
+  background: url('assets/icons/night-sea.webp') center bottom / 100% 100%
+    no-repeat;
+  bottom: 0;
+  content: '';
+  left: 0;
+  mask-image: linear-gradient(to top, #000 35%, transparent);
+  opacity: 0.55;
+  pointer-events: none;
+  position: fixed;
+  right: 0;
+  z-index: -1;
+}
+
+a {
+  color: var(--ukiyo-kinari);
+}
+
+a:hover {
+  color: var(--ukiyo-shu-hi);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--ukiyo-font-display);
+  font-weight: 800;
+}
+
+h4,
+h5,
+h6 {
+  font-family: var(--ukiyo-font-label);
+  font-weight: 500;
+}
+
+.text-muted {
+  color: var(--ukiyo-muted) !important;
+}
+
+/* Bootstrap's status text, as the Tagger's match icons use it */
+.text-success {
+  color: var(--ukiyo-success) !important;
+}
+
+.text-warning {
+  color: var(--ukiyo-warning) !important;
+}
+
+.text-danger {
+  color: var(--ukiyo-danger) !important;
+}
+
+hr {
+  border-top-color: var(--ukiyo-line);
+}
+
+code {
+  color: var(--ukiyo-shu-hi);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ukiyo-shu-hi);
+  outline-offset: 2px;
+}
+
+* {
+  scrollbar-color: var(--ukiyo-line) var(--ukiyo-night);
+}

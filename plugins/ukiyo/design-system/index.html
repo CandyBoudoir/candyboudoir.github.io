@@ -1,0 +1,1729 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ukiyo design system</title>
+    <meta
+      name="description"
+      content="Ukiyo, an Edo woodblock night print theme for Stash: palette, type, motifs and Stash components in Ukiyo style."
+    />
+    <link rel="icon" href="Theme-Ukiyo/assets/icons/hanko.svg" />
+    <!-- Bootstrap 4.6 stands in for Stash's own base styles. -->
+    <link rel="stylesheet" href="ds/vendor/bootstrap.min.css" />
+    <link rel="stylesheet" href="Theme-Ukiyo/ukiyo.css" />
+    <link rel="stylesheet" href="ds/ds.css" />
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="i-tag" viewBox="0 0 16 16">
+        <path
+          fill-rule="evenodd"
+          d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l7.5 7.5-6 6L1 7ZM4.6 3.2a1.4 1.4 0 1 0 0 2.8a1.4 1.4 0 1 0 0-2.8Z"
+        />
+      </symbol>
+      <symbol id="i-user" viewBox="0 0 16 16">
+        <circle cx="8" cy="4.8" r="3.2" />
+        <path d="M1.8 15c0-3.5 2.8-6 6.2-6s6.2 2.5 6.2 6Z" />
+      </symbol>
+      <symbol id="i-box" viewBox="0 0 16 16">
+        <path d="M1 4.5 8 1l7 3.5v7L8 15l-7-3.5Zm7 1.8 4.6-2.2L8 2 3.4 4.1Z" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 16 16">
+        <path d="m1.5 8.6 1.6-1.6 3 3 6.8-6.8 1.6 1.6-8.4 8.4Z" />
+      </symbol>
+      <symbol id="i-cross" viewBox="0 0 16 16">
+        <path
+          d="m3.1 1.5 4.9 4.9 4.9-4.9 1.6 1.6L9.6 8l4.9 4.9-1.6 1.6L8 9.6l-4.9 4.9-1.6-1.6L6.4 8 1.5 3.1Z"
+        />
+      </symbol>
+      <symbol id="i-star" viewBox="0 0 576 512">
+        <path
+          fill="currentColor"
+          d="M288 0 359 186 576 186 400 300 466 512 288 384 110 512 176 300 0 186 217 186Z"
+        />
+      </symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M12 21.2C6.4 17.4 2.6 13.9 2.6 9.5C2.6 6.4 5 4 8 4C9.8 4 11.2 4.9 12 6.3C12.8 4.9 14.2 4 16 4C19 4 21.4 6.4 21.4 9.5C21.4 13.9 17.6 17.4 12 21.2Z"
+        />
+      </symbol>
+      <symbol id="i-drops" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M12 2s-7 8.5-7 13a7 7 0 0 0 14 0c0-4.5-7-13-7-13Z"
+        />
+      </symbol>
+      <symbol id="i-zoom" viewBox="0 0 512 512">
+        <path
+          fill="currentColor"
+          d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376C296.3 401.1 253.9 416 208 416 93.1 416 0 322.9 0 208S93.1 0 208 0 416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
+        />
+      </symbol>
+    </svg>
+
+    <!-- Like Stash's MainNavbar: below 1200px the page links fold behind the toggler -->
+    <nav class="navbar navbar-expand-xl navbar-dark bg-dark top-nav">
+      <button
+        class="navbar-toggler"
+        type="button"
+        aria-controls="ds-nav"
+        aria-expanded="false"
+        aria-label="Menu"
+        id="ds-toggler"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="navbar-brand">
+        <button class="btn btn-primary minimal brand-link">Stash</button>
+      </div>
+      <div class="navbar-collapse collapse" id="ds-nav">
+        <div class="navbar-nav">
+          <div class="nav-link">
+            <a class="minimal btn btn-primary active" href="#top">Scenes</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Images</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Groups</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Markers</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Galleries</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Performers</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Studios</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Tags</a>
+          </div>
+        </div>
+      </div>
+      <div class="nav-utility">
+        <button class="btn btn-primary minimal">Settings</button>
+      </div>
+    </nav>
+
+    <div class="ds-controls">
+      <span class="label">Try it</span>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-calm" />
+        <label class="custom-control-label" for="ds-calm">Calm mode</label>
+      </div>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-plain" />
+        <label class="custom-control-label" for="ds-plain">Plain labels</label>
+      </div>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-sfw" />
+        <label class="custom-control-label" for="ds-sfw">Stash SFW mode</label>
+      </div>
+    </div>
+
+    <div id="root">
+      <div class="main container-fluid p-0" id="ds-main">
+        <header class="ds-hero">
+          <div>
+            <div class="kicker">A theme for Stash</div>
+            <div class="ds-cartouche">
+              <h1 class="wordmark">Ukiyo</h1>
+              <img
+                class="ds-seal"
+                src="Theme-Ukiyo/assets/icons/seal-ukiyo.svg"
+                alt=""
+              />
+            </div>
+            <div class="ds-sub">
+              <img src="Theme-Ukiyo/assets/icons/seal-ukiyo.svg" alt="浮世" />
+              the floating world
+            </div>
+            <p class="tagline">
+              An Edo night print: Prussian-blue ground graded to black, indigo
+              washi, cream cartouches and vermilion, with whatever is chosen
+              printed a little out of register. Ratings are cherry blossoms, the
+              favourite is a red seal carved with 恋, and the O counter is a
+              breaking wave.
+            </p>
+          </div>
+          <div class="ds-hero-art" aria-hidden="true">
+            <img class="night" src="ds/prints/night-print.webp" alt="" />
+            <img
+              class="bijin"
+              src="Theme-Ukiyo/assets/icons/bijin.webp"
+              alt=""
+            />
+          </div>
+        </header>
+
+        <section class="ds-section">
+          <h2><img src="ds/prints/sensu.svg" alt="" />Palette</h2>
+          <p class="ds-lede">
+            Pigments a woodblock printer kept: Prussian blue (bero-ai) graded to
+            near black as the night sky, indigo for the paper, kinari cream for
+            cartouches, vermilion (shu) for what is chosen, cherry pink and
+            ochre as small accents. Text is kinari on indigo at 13.5:1,
+            secondary text 7.7:1 and dates 5.8:1.
+          </p>
+          <div class="ds-swatches">
+            <div class="ds-swatch">
+              <div class="chip ds-chip-shu"></div>
+              <div class="meta">
+                <code>--ukiyo-shu</code>
+                <div class="hex">#B9381F</div>
+                <div class="role">
+                  Vermilion: primary, active, chosen. Kinari on it 4.8:1
+                </div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #f2694c"></div>
+              <div class="meta">
+                <code>--ukiyo-shu-hi</code>
+                <div class="hex">#F2694C</div>
+                <div class="role">Vermilion text, numbers, focus (5.6:1)</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-bero"></div>
+              <div class="meta">
+                <code>--ukiyo-bero</code>
+                <div class="hex">#1F4F8F</div>
+                <div class="role">Prussian blue: sky bokashi, waves, info</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #f2a7b5"></div>
+              <div class="meta">
+                <code>--ukiyo-sakura</code>
+                <div class="hex">#F2A7B5</div>
+                <div class="role">Cherry pink: blossoms, petals</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-kinari"></div>
+              <div class="meta">
+                <code>--ukiyo-kinari</code>
+                <div class="hex">#EFE4CC</div>
+                <div class="role">
+                  Cream paper: cartouches, toasts, text (13.5:1)
+                </div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #c99a3e"></div>
+              <div class="meta">
+                <code>--ukiyo-ki</code>
+                <div class="hex">#C99A3E</div>
+                <div class="role">Ochre and mica: small highlights only</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #15110f"></div>
+              <div class="meta">
+                <code>--ukiyo-sumi</code>
+                <div class="hex">#15110F</div>
+                <div class="role">
+                  Sumi ink: keylines, text on cream (14.4:1)
+                </div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-ai"></div>
+              <div class="meta">
+                <code>--ukiyo-ai</code>
+                <div class="hex">#121C31</div>
+                <div class="role">Indigo washi: cards, panels, menus</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-ai-hi"></div>
+              <div class="meta">
+                <code>--ukiyo-ai-hi</code>
+                <div class="hex">#1B2944</div>
+                <div class="role">Raised indigo: secondary buttons, tags</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #080d18"></div>
+              <div class="meta">
+                <code>--ukiyo-night</code>
+                <div class="hex">#080D18</div>
+                <div class="role">The page, under the bokashi</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #b5ae9f"></div>
+              <div class="meta">
+                <code>--ukiyo-muted</code>
+                <div class="hex">#B5AE9F</div>
+                <div class="role">Secondary text (7.7:1 on indigo)</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #8f97ad"></div>
+              <div class="meta">
+                <code>--ukiyo-dim</code>
+                <div class="hex">#8F97AD</div>
+                <div class="role">
+                  Dates, captions (5.8:1 on indigo, 5.0:1 raised)
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section ds-type">
+          <h2>
+            <img src="Theme-Ukiyo/assets/icons/seal-ukiyo.svg" alt="" />Type
+          </h2>
+          <p class="ds-lede">
+            Shippori Mincho B1, a mincho drawn after old letterpress, carries
+            the wordmark, titles and her lines. Zen Kaku Gothic New in
+            letterspaced caps carries buttons, tags and labels. Both ship inside
+            the plugin, Latin only: the two Japanese words the theme prints,
+            浮世 and 恋, are carved into its seals as outlines, so no Japanese
+            font ships at all.
+          </p>
+          <div class="ds-panel">
+            <div class="specimen">
+              <div class="spec">
+                Shippori Mincho B1 800 · wordmark, section titles
+              </div>
+              <div class="t-display">The Floating World</div>
+            </div>
+            <div class="specimen">
+              <div class="spec">
+                Shippori Mincho B1 700 · card, modal and cartouche titles, her
+                lines
+              </div>
+              <div class="t-title">I refuse them all.</div>
+              <div class="t-cartouche">Moon over the Canal</div>
+            </div>
+            <div class="specimen">
+              <div class="spec">
+                Zen Kaku Gothic New 500 caps, tracked · buttons, tags, tabs,
+                overlays
+              </div>
+              <div class="t-label">
+                Scenes · Performers · Rating: 5 · 24:16 · 4K
+              </div>
+            </div>
+            <div class="specimen">
+              <div class="spec">
+                Every Japanese word on this page, with its reading
+              </div>
+              <div class="ds-words-head">Printed on things, as seals</div>
+              <div class="ds-words">
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja"
+                    ><img
+                      src="Theme-Ukiyo/assets/icons/seal-ukiyo.svg"
+                      alt="浮世" /></span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">ukiyo</span
+                    ><span class="ds-meaning"
+                      >the floating world; on the seal beside the wordmark</span
+                    ></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja"
+                    ><img
+                      src="Theme-Ukiyo/assets/icons/hanko.svg"
+                      alt="恋" /></span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">koi</span
+                    ><span class="ds-meaning"
+                      >romantic love; carved on the favourite seal</span
+                    ></span
+                  >
+                </div>
+              </div>
+              <div class="ds-words-head">Used in these notes</div>
+              <div class="ds-words">
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">浮世絵</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">ukiyo-e</span
+                    ><span class="ds-meaning"
+                      >pictures of the floating world: the woodblock print</span
+                    ></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">江戸</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">Edo</span
+                    ><span class="ds-meaning"
+                      >old Tokyo, and the period it names, 1603 to 1868</span
+                    ></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">吉原</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">Yoshiwara</span
+                    ><span class="ds-meaning"
+                      >Edo's licensed pleasure quarter</span
+                    ></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">花魁</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">oiran</span
+                    ><span class="ds-meaning"
+                      >a high-ranking courtesan of the Yoshiwara</span
+                    ></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">初会</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">shokai</span
+                    ><span class="ds-meaning"
+                      >a first meeting, at which she did not speak</span
+                    ></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">馴染み</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">najimi</span
+                    ><span class="ds-meaning"
+                      >a regular: a patron accepted on his third visit</span
+                    ></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">美人画</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">bijin-ga</span
+                    ><span class="ds-meaning"
+                      >pictures of beautiful women: the beauty print</span
+                    ></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">短冊</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">tanzaku</span
+                    ><span class="ds-meaning"
+                      >a narrow slip of paper a poem is written on</span
+                    ></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">ぼかし</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">bokashi</span
+                    ><span class="ds-meaning"
+                      >colour graded across the block by hand</span
+                    ></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">ベロ藍</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">bero-ai</span
+                    ><span class="ds-meaning"
+                      >Prussian blue, "Berlin indigo"</span
+                    ></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">朱</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">shu</span
+                    ><span class="ds-meaning">vermilion</span></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">紅</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">beni</span
+                    ><span class="ds-meaning">safflower crimson</span></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">生成り</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">kinari</span
+                    ><span class="ds-meaning"
+                      >unbleached: the cream of raw paper or cloth</span
+                    ></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">墨</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">sumi</span
+                    ><span class="ds-meaning">ink</span></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">和紙</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">washi</span
+                    ><span class="ds-meaning">Japanese paper</span></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">楮</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">kōzo</span
+                    ><span class="ds-meaning"
+                      >paper mulberry, whose long fibres make washi</span
+                    ></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">麻の葉</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">asanoha</span
+                    ><span class="ds-meaning">hemp leaf, a pattern</span></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">青海波</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">seigaiha</span
+                    ><span class="ds-meaning"
+                      >blue-sea waves, the wave-scale pattern</span
+                    ></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">扇子</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">sensu</span
+                    ><span class="ds-meaning">folding fan</span></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">提灯</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">chōchin</span
+                    ><span class="ds-meaning">paper lantern</span></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">桜</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">sakura</span
+                    ><span class="ds-meaning">cherry blossom</span></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">波</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">nami</span
+                    ><span class="ds-meaning">wave</span></span
+                  >
+                </div>
+                <div class="ds-word">
+                  <span class="ds-kanji" lang="ja">月</span
+                  ><span class="ds-gloss"
+                    ><span class="ds-reading">tsuki</span
+                    ><span class="ds-meaning">moon</span></span
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="specimen">
+              <div class="spec">System UI · descriptions and settings</div>
+              <div class="t-body">
+                Stash keeps your descriptions, settings and file details on the
+                system font, so long text stays easy to read.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/prints/wave.svg" alt="" />Motifs and glyphs</h2>
+          <p class="ds-lede">
+            Six motifs drawn as a printer cuts them: flat colour inside a sumi
+            keyline. The breaking wave with clawed foam, the cherry blossom, the
+            folding fan (sensu) with a cream moon, the paper lantern (chōchin),
+            the red seal carved with 恋, and the moon behind mist. The paper
+            under everything is washi, its long kōzo fibres laid in soft, and
+            the keylines on cards and pictures are cut by hand. Below are the
+            glyphs the controls use.
+          </p>
+          <div class="ds-panel">
+            <div class="ds-motifs">
+              <div class="ds-motif">
+                <img src="ds/prints/wave.svg" alt="" /><span>wave · nami</span>
+              </div>
+              <div class="ds-motif">
+                <img src="ds/prints/sakura.svg" alt="" /><span
+                  >blossom · sakura</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img src="ds/prints/sensu.svg" alt="" /><span
+                  >folding fan · sensu</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img src="Theme-Ukiyo/assets/icons/lantern.svg" alt="" /><span
+                  >lantern · chōchin</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img src="Theme-Ukiyo/assets/icons/hanko.svg" alt="" /><span
+                  >seal · koi</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img src="Theme-Ukiyo/assets/icons/moon.svg" alt="" /><span
+                  >moon · tsuki</span
+                >
+              </div>
+            </div>
+            <div class="ds-row m-0">
+              <span
+                class="ds-glyph"
+                title="rating"
+                style="
+                  background-image: url('Theme-Ukiyo/assets/icons/glyph-sakura.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph is-line"
+                title="rating, empty"
+                style="
+                  mask-image: url('Theme-Ukiyo/assets/icons/glyph-sakura-line.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                title="favourite"
+                style="
+                  background-image: url('Theme-Ukiyo/assets/icons/hanko.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph is-line"
+                title="favourite, unset"
+                style="
+                  mask-image: url('Theme-Ukiyo/assets/icons/glyph-hanko-line.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                title="O counter"
+                style="
+                  background-image: url('Theme-Ukiyo/assets/icons/glyph-wave.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                title="burst petal"
+                style="
+                  background-image: url('Theme-Ukiyo/assets/icons/petal.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph is-tall"
+                title="wordmark seal"
+                style="
+                  background-image: url('Theme-Ukiyo/assets/icons/seal-ukiyo.svg');
+                "
+              ></span>
+              <span class="ds-caption"
+                >Rating, empty rating, favourite, unset favourite, O counter, a
+                burst petal, and the 浮世 seal beside the wordmark.</span
+              >
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2>
+            <img src="Theme-Ukiyo/assets/icons/hanko.svg" alt="" />Buttons
+          </h2>
+          <p class="ds-lede">
+            Buttons are flat blocks of colour inside a sumi keyline. On hover
+            the colour block slips out of register, a few pixels off its
+            keyline, the way a misaligned block prints. Whatever is chosen stays
+            out of register at rest: the page in the navbar, the chosen button
+            of a group, the current page of a list, a focused field and the
+            chosen Tagger row. Primary is vermilion, secondary indigo, and the
+            others are grass green, ochre, Prussian blue and deep beni red.
+            Button keylines stay plain and even.
+          </p>
+          <div class="ds-row">
+            <button class="btn btn-primary">Save</button>
+            <button class="btn btn-secondary">Edit</button>
+            <button class="btn btn-success">Scan</button>
+            <button class="btn btn-warning">Generate</button>
+            <button class="btn btn-info">Identify</button>
+            <button class="btn btn-danger">Delete</button>
+            <button class="btn btn-primary" disabled>Disabled</button>
+          </div>
+          <div class="ds-row">
+            <button class="btn btn-primary btn-sm">Small</button>
+            <button class="btn btn-primary btn-lg">Large</button>
+            <div class="btn-group">
+              <button class="btn btn-secondary">Grid</button>
+              <button class="btn btn-secondary active">List</button>
+              <button class="btn btn-secondary">Wall</button>
+            </div>
+            <button class="btn btn-secondary dropdown-toggle">Date</button>
+            <button class="btn btn-primary minimal">Minimal</button>
+            <a class="btn btn-link" href="#top">Link button</a>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2>
+            <img src="ds/prints/sakura.svg" alt="" />Tags, ratings and
+            favourites
+          </h2>
+          <p class="ds-lede">
+            Tags are indigo slips with a vermilion dot. A rating is a row of
+            cherry blossoms, empty ones printed as keyline only. The favourite
+            is a red seal carved with 恋 (koi, romantic love), a letter sealed
+            in red, and it stamps itself on; the O counter is a breaking wave.
+            Click them and petals, foam and flecks of mica scatter and drift
+            down.
+          </p>
+          <div class="ds-row">
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Silk</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Night</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Slow</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Tease</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Behind the scenes</div></a></span
+            >
+            <span class="badge badge-primary">New</span>
+            <span class="badge badge-info">4K</span>
+          </div>
+          <div class="ds-row ds-panel">
+            <div class="rating-stars" id="ds-rating">
+              <button
+                class="btn btn-secondary minimal star-fill-100"
+                data-star="1"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div></button
+              ><button
+                class="btn btn-secondary minimal star-fill-100"
+                data-star="2"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div></button
+              ><button
+                class="btn btn-secondary minimal star-fill-100"
+                data-star="3"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div></button
+              ><button
+                class="btn btn-secondary minimal star-fill-0"
+                data-star="4"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div></button
+              ><button
+                class="btn btn-secondary minimal star-fill-0"
+                data-star="5"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div></button
+              ><span class="star-rating-number">3</span>
+            </div>
+            <span class="name-icons"
+              ><button
+                class="btn btn-primary minimal favorite-button not-favorite"
+                id="ds-fav"
+                title="Favourite"
+              >
+                <svg class="svg-inline--fa fa-heart" width="28" height="28">
+                  <use href="#i-heart" />
+                </svg></button
+            ></span>
+            <div class="btn-group count-button" id="ds-o">
+              <button
+                class="btn btn-secondary minimal count-icon"
+                title="O Count"
+              >
+                <span
+                  ><svg width="22" height="22"><use href="#i-drops" /></svg
+                ></span></button
+              ><button class="btn btn-secondary minimal count-value">
+                <span>2</span>
+              </button>
+            </div>
+            <span class="ds-caption"
+              >Click the rating, the favourite and the O counter.</span
+            >
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="Theme-Ukiyo/assets/icons/moon.svg" alt="" />Cards</h2>
+          <p class="ds-lede">
+            Cards are indigo washi with the picture framed like a print on its
+            paper. Both keylines are cut by hand: they swell and thin along
+            their length and soften at the corners. A scene title is plain
+            display type at rest and prints its cream cartouche on hover, so a
+            grid of forty stays calm; a performer's name keeps its cartouche, as
+            a bijin-ga names its sitter. On hover a vermilion block slides out
+            of register behind the card. Ratings hang on a vermilion tanzaku,
+            the slip a poem is written on, to the right of the card's checkbox.
+          </p>
+          <div class="ds-cards">
+            <div class="scene-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  aria-label="Select Moon over the Canal"
+                />
+              </div>
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards">
+                  <div class="scene-card-preview ph ph-1"></div>
+                  <div class="rating-banner rating-5">Rating: 5</div>
+                  <div class="scene-specs-overlay">
+                    <span class="overlay-resolution">4K</span
+                    ><span class="overlay-duration">24:16</span>
+                  </div>
+                </a>
+                <div class="studio-overlay">
+                  <a href="#cards">Night Ferry</a>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-indicator" style="width: 42%"></div>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <div class="TruncatedText">Moon over the Canal</div>
+                  </h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-09-14</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>6</span>
+                </button>
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>1</span>
+                </button>
+                <div class="btn-group count-button">
+                  <button
+                    class="btn btn-secondary minimal count-icon"
+                    title="O Count"
+                  >
+                    <span
+                      ><svg class="ds-ico" viewBox="0 0 24 24">
+                        <use href="#i-drops" /></svg
+                    ></span></button
+                  ><button class="btn btn-secondary minimal count-value">
+                    <span>3</span>
+                  </button>
+                </div>
+                <div class="organized">
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-box" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="scene-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  aria-label="Select The Third Visit"
+                />
+              </div>
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards">
+                  <div class="scene-card-preview ph ph-3"></div>
+                  <div class="rating-banner rating-4">Rating: 4</div>
+                  <div class="scene-specs-overlay">
+                    <span class="overlay-resolution">1080p</span
+                    ><span class="overlay-duration">31:02</span>
+                  </div>
+                </a>
+                <div class="studio-overlay">
+                  <a href="#cards">Lantern House</a>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <div class="TruncatedText">The Third Visit</div>
+                  </h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-08-30</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>9</span>
+                </button>
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>2</span>
+                </button>
+              </div>
+            </div>
+            <div class="scene-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  aria-label="Select Ink Still Wet"
+                />
+              </div>
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards">
+                  <div class="scene-card-preview ph ph-6"></div>
+
+                  <div class="scene-specs-overlay">
+                    <span class="overlay-resolution">720p</span
+                    ><span class="overlay-duration">18:40</span>
+                  </div>
+                </a>
+                <div class="studio-overlay"><a href="#cards">Blue Wave</a></div>
+                <div class="progress-bar">
+                  <div class="progress-indicator" style="width: 78%"></div>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <div class="TruncatedText">Ink Still Wet</div>
+                  </h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-07-02</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>5</span>
+                </button>
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>1</span>
+                </button>
+                <div class="organized">
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-box" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="ds-cards mt-4">
+            <div class="performer-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  aria-label="Select Dahlia Crane"
+                />
+              </div>
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div class="performer-card-image ph ph-5"></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button favorite"
+                  title="Favourite"
+                >
+                  <svg class="svg-inline--fa fa-heart">
+                    <use href="#i-heart" />
+                  </svg>
+                </button>
+                <div class="rating-banner rating-5">Rating: 5</div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <div class="TruncatedText">
+                      <div>
+                        <span class="performer-name">Dahlia Crane</span>
+                      </div>
+                    </div>
+                  </h5></a
+                >
+                <div class="performer-card__age">29 years old</div>
+              </div>
+            </div>
+            <div class="performer-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  aria-label="Select Ivy Larkspur"
+                />
+              </div>
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div class="performer-card-image ph ph-2"></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button not-favorite"
+                  title="Favourite"
+                >
+                  <svg class="svg-inline--fa fa-heart">
+                    <use href="#i-heart" />
+                  </svg>
+                </button>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <div class="TruncatedText">
+                      <div>
+                        <span class="performer-name">Ivy Larkspur</span>
+                      </div>
+                    </div>
+                  </h5></a
+                >
+                <div class="performer-card__age">26 years old</div>
+              </div>
+            </div>
+            <div class="performer-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  aria-label="Select Mira Vale"
+                />
+              </div>
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div class="performer-card-image ph ph-6"></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button not-favorite"
+                  title="Favourite"
+                >
+                  <svg class="svg-inline--fa fa-heart">
+                    <use href="#i-heart" />
+                  </svg>
+                </button>
+                <div class="rating-banner rating-4">Rating: 4</div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <div class="TruncatedText">
+                      <div><span class="performer-name">Mira Vale</span></div>
+                    </div>
+                  </h5></a
+                >
+                <div class="performer-card__age">34 years old</div>
+              </div>
+            </div>
+          </div>
+          <div class="ds-cards mt-4">
+            <div class="image-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  checked
+                  aria-label="Select lantern-row.jpg"
+                />
+              </div>
+              <div class="thumbnail-section">
+                <a class="image-card-link" href="#cards"
+                  ><div class="image-card-preview portrait ph ph-4">
+                    <div class="preview-button">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        title="Zoom"
+                      >
+                        <svg class="svg-inline--fa fa-magnifying-glass fa-icon">
+                          <use href="#i-zoom" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="rating-banner rating-5">Rating: 5</div></a
+                >
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <div class="TruncatedText">lantern-row.jpg</div>
+                  </h5></a
+                >
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>1</span>
+                </button>
+              </div>
+            </div>
+            <div class="image-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  aria-label="Select blossom-night.jpg"
+                />
+              </div>
+              <div class="thumbnail-section">
+                <a class="image-card-link" href="#cards"
+                  ><div class="image-card-preview ph ph-2">
+                    <div class="preview-button">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        title="Zoom"
+                      >
+                        <svg class="svg-inline--fa fa-magnifying-glass fa-icon">
+                          <use href="#i-zoom" />
+                        </svg>
+                      </button>
+                    </div></div
+                ></a>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <div class="TruncatedText">blossom-night.jpg</div>
+                  </h5></a
+                >
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>1</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section ds-performer">
+          <h2><img src="ds/prints/sensu.svg" alt="" />Performer page</h2>
+          <p class="ds-lede">
+            Stash's pages have no hero, so the art lives here. Her header is a
+            night print: a bokashi sky with the moon and wave scales (seigaiha)
+            at its foot. If Stash's own background-image setting is on, her
+            blurred picture stays only as a faint tone in the sky, so any
+            picture works. Her picture is framed on its paper with a hand-cut
+            keyline and a vermilion block out of register, and her name sits in
+            a cream cartouche, as a bijin-ga names its sitter. Her details are a
+            ruled ledger, and tab counts are small blocks, the chosen one in
+            vermilion.
+          </p>
+          <div class="detail-header full-width">
+            <div class="detail-container">
+              <div class="detail-header-image">
+                <button type="button" class="btn btn-link">
+                  <img
+                    class="performer ds-portrait ph ph-5"
+                    src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+                    alt=""
+                  />
+                </button>
+              </div>
+              <div class="row">
+                <div class="performer-head col">
+                  <h2>
+                    <span class="performer-name">Dahlia Crane</span
+                    ><span class="name-icons"
+                      ><button
+                        class="btn btn-primary minimal favorite-button favorite"
+                        title="Favourite"
+                      >
+                        <svg class="svg-inline--fa fa-heart">
+                          <use href="#i-heart" />
+                        </svg></button
+                    ></span>
+                  </h2>
+                  <div class="quality-group">
+                    <div class="rating-stars">
+                      <button
+                        class="btn btn-secondary minimal star-fill-100"
+                        data-star="1"
+                      >
+                        <div class="filled-star">
+                          <svg class="svg-inline--fa fa-star set">
+                            <use href="#i-star" />
+                          </svg>
+                        </div>
+                        <div class="unfilled-star">
+                          <svg class="svg-inline--fa fa-star unset">
+                            <use href="#i-star" />
+                          </svg>
+                        </div></button
+                      ><button
+                        class="btn btn-secondary minimal star-fill-100"
+                        data-star="2"
+                      >
+                        <div class="filled-star">
+                          <svg class="svg-inline--fa fa-star set">
+                            <use href="#i-star" />
+                          </svg>
+                        </div>
+                        <div class="unfilled-star">
+                          <svg class="svg-inline--fa fa-star unset">
+                            <use href="#i-star" />
+                          </svg>
+                        </div></button
+                      ><button
+                        class="btn btn-secondary minimal star-fill-100"
+                        data-star="3"
+                      >
+                        <div class="filled-star">
+                          <svg class="svg-inline--fa fa-star set">
+                            <use href="#i-star" />
+                          </svg>
+                        </div>
+                        <div class="unfilled-star">
+                          <svg class="svg-inline--fa fa-star unset">
+                            <use href="#i-star" />
+                          </svg>
+                        </div></button
+                      ><button
+                        class="btn btn-secondary minimal star-fill-100"
+                        data-star="4"
+                      >
+                        <div class="filled-star">
+                          <svg class="svg-inline--fa fa-star set">
+                            <use href="#i-star" />
+                          </svg>
+                        </div>
+                        <div class="unfilled-star">
+                          <svg class="svg-inline--fa fa-star unset">
+                            <use href="#i-star" />
+                          </svg>
+                        </div></button
+                      ><button
+                        class="btn btn-secondary minimal star-fill-0"
+                        data-star="5"
+                      >
+                        <div class="filled-star">
+                          <svg class="svg-inline--fa fa-star set">
+                            <use href="#i-star" />
+                          </svg>
+                        </div>
+                        <div class="unfilled-star">
+                          <svg class="svg-inline--fa fa-star unset">
+                            <use href="#i-star" />
+                          </svg>
+                        </div></button
+                      ><span class="star-rating-number">4</span>
+                    </div>
+                  </div>
+                  <div class="detail-group">
+                    <div class="detail-item">
+                      <span class="detail-item-title">Aliases</span
+                      ><span class="detail-item-value">Dahlia C.</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-item-title">Career</span
+                      ><span class="detail-item-value">2019 –</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-item-title">Height</span
+                      ><span class="detail-item-value">168 cm</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-item-title">Stash IDs</span
+                      ><span class="detail-item-value"
+                        ><span class="stash-id-pill"
+                          ><span>CandyDB</span
+                          ><a href="#performer">p-dahlia</a></span
+                        ></span
+                      >
+                    </div>
+                  </div>
+                  <div class="details-edit">
+                    <button class="btn btn-primary">Edit</button>
+                    <button class="btn btn-secondary">Merge…</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="detail-body mt-4">
+            <nav class="nav nav-tabs">
+              <a class="nav-item nav-link active" href="#performer"
+                >Scenes<span
+                  class="left-spacing badge badge-pill badge-secondary"
+                  >12</span
+                ></a
+              >
+              <a class="nav-item nav-link" href="#performer"
+                >Galleries<span
+                  class="left-spacing badge badge-pill badge-secondary"
+                  >3</span
+                ></a
+              >
+              <a class="nav-item nav-link" href="#performer"
+                >Images<span
+                  class="left-spacing badge badge-pill badge-secondary"
+                  >48</span
+                ></a
+              >
+              <a class="nav-item nav-link" href="#performer"
+                >Appears With<span
+                  class="left-spacing badge badge-pill badge-secondary"
+                  >4</span
+                ></a
+              >
+            </nav>
+          </div>
+        </section>
+        <section class="ds-section">
+          <h2>
+            <img src="Theme-Ukiyo/assets/icons/hanko.svg" alt="" />Forms and
+            menus
+          </h2>
+          <p class="ds-lede">
+            Fields are sunk into the indigo. Focus prints the field out of
+            register: its keyline turns to paper and a vermilion block lands off
+            to the lower right. Switches carry the moon across a red sky. Menus
+            and modals are washi with a faint hemp-leaf (asanoha) pattern;
+            tooltips and toasts are cream slips with a keyline and a seal, and a
+            modal's title sits in a cartouche over a band of wave scales.
+          </p>
+          <div class="ds-row ds-panel">
+            <input
+              class="form-control"
+              style="max-width: 280px"
+              placeholder="Search scenes…"
+            />
+            <select class="custom-select" style="max-width: 200px">
+              <option>Sort by rating</option>
+              <option>Sort by date</option>
+            </select>
+            <div class="custom-control custom-checkbox">
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="ds-check"
+                checked
+              />
+              <label class="custom-control-label" for="ds-check"
+                >Organised only</label
+              >
+            </div>
+            <div class="custom-control custom-switch">
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="ds-switch"
+                checked
+              />
+              <label class="custom-control-label" for="ds-switch"
+                >Show previews</label
+              >
+            </div>
+          </div>
+          <div class="ds-overlays ds-static">
+            <div>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="#menu">Play random</a>
+                <a class="dropdown-item active" href="#menu"
+                  >Generate previews</a
+                >
+                <a class="dropdown-item" href="#menu">Export</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#menu">Delete…</a>
+              </div>
+              <div class="tooltip bs-tooltip-top show mt-3" role="tooltip">
+                <div class="tooltip-inner">Organised</div>
+              </div>
+            </div>
+            <div class="toast-container">
+              <div class="toast success show" role="status">
+                <div class="toast-header">Started generating</div>
+              </div>
+              <div class="toast success show mt-3" role="status">
+                <div class="toast-header">Performer Favourited</div>
+              </div>
+            </div>
+            <div>
+              <div class="modal-content">
+                <div class="modal-header"><span>Delete scene?</span></div>
+                <div class="modal-body">
+                  The file stays on disk unless you tick the box.
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary">Cancel</button>
+                  <button class="btn btn-danger">Delete</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2>
+            <img src="Theme-Ukiyo/assets/icons/lantern.svg" alt="" />Stash-box
+          </h2>
+          <p class="ds-lede">
+            Tagger rows stay flat and still, since you clear hundreds of them.
+            The chosen row is printed out of register like every chosen thing, a
+            sumi keyline with a vermilion block behind it, but it never moves,
+            and the decoration stays on the buttons that act. In a scrape dialog
+            the winning side's toggle is printed in vermilion. StashIDs carry a
+            cream cartouche.
+          </p>
+          <div class="ds-row">
+            <span class="stash-id-pill" data-endpoint="StashDB"
+              ><span>StashDB</span><a href="#stash-box">7c2e91b4-canal</a></span
+            >
+            <span class="text-success"
+              ><svg class="ds-ico"><use href="#i-check" /></svg> Duration is a
+              match</span
+            >
+            <span class="text-warning">Duration off by at least 2s</span>
+            <span class="text-danger">No results found</span>
+          </div>
+          <div class="search-item mb-4">
+            <ul class="list-unstyled m-0">
+              <li class="row mx-0 search-result selected-result active">
+                <div class="col-lg-5 d-flex">
+                  <div class="scene-image-container">
+                    <div class="scene-image ds-cover ph ph-1"></div>
+                  </div>
+                  <div class="scene-metadata">
+                    <h4 class="m-0">Moon over the Canal</h4>
+                    <h5>Night Ferry · 2026-09-14</h5>
+                    <span class="stash-id-pill" data-endpoint="StashDB"
+                      ><span>StashDB</span
+                      ><a href="#stash-box">7c2e91b4</a></span
+                    >
+                  </div>
+                </div>
+                <div class="col-lg-7">
+                  <div class="ds-match">
+                    <span class="entity-name">Studio: Night Ferry</span>
+                    <div class="btn-group">
+                      <button class="btn btn-secondary">Create</button
+                      ><button class="btn btn-secondary">Skip</button>
+                    </div>
+                    <div
+                      class="studio-select studio-select-active react-select"
+                    >
+                      <div class="react-select__control">
+                        <span class="react-select__single-value"
+                          >Night Ferry</span
+                        ><span class="react-select__indicator">▾</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ds-match">
+                    <span class="entity-name">Performer: Ivy Larkspur</span>
+                    <div class="btn-group">
+                      <button class="btn btn-secondary">Create</button
+                      ><button class="btn btn-primary">Skip</button>
+                    </div>
+                    <div class="performer-select react-select">
+                      <div class="react-select__control">
+                        <span class="react-select__placeholder"
+                          >Select Performer</span
+                        ><span class="react-select__indicator">▾</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ds-match">
+                    <span class="entity-name">Performer: Dahlia Crane</span>
+                    <span class="text-success"
+                      ><svg class="ds-ico"><use href="#i-check" /></svg>
+                      Matched: Dahlia Crane</span
+                    >
+                  </div>
+                </div>
+              </li>
+              <li class="row mx-0 mt-2 search-result">
+                <div class="col">
+                  <h4 class="m-0">Lantern Row</h4>
+                  <h5 class="m-0">Lantern House · 2026-02-14</h5>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="ds-static">
+            <div class="modal-dialog scrape-dialog modal-lg m-0">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <span>Scene Scrape Results</span>
+                </div>
+                <div class="modal-body">
+                  <div class="row">
+                    <div class="col-3"></div>
+                    <div class="col column-label">Existing</div>
+                    <div class="col column-label">Scraped</div>
+                  </div>
+                  <div class="row align-items-center mt-3">
+                    <div class="col-3 col-form-label">Title</div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-muted">
+                              <use href="#i-cross" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="Lantern Row"
+                          readonly
+                        />
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-success">
+                              <use href="#i-check" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="Moon over the Canal"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row align-items-center mt-3">
+                    <div class="col-3 col-form-label">Date</div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-success">
+                              <use href="#i-check" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="2026-09-11"
+                          readonly
+                        />
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-muted">
+                              <use href="#i-cross" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="2026-09-14"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary">Cancel</button>
+                  <button class="btn btn-primary">Apply</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/prints/wave.svg" alt="" />Navigation</h2>
+          <p class="ds-lede">
+            The navbar is the bokashi band across the top of a print, dark at
+            its edge and blue at its foot, with the lantern row from the night
+            print at its right end and wave scales along its foot. The active
+            page is a vermilion block printed out of register. On a phone held
+            upright Stash docks the bar at the bottom, and the waves move to its
+            top edge. The chosen tab is underlined in vermilion, and in the
+            pager the current page is printed out of register too.
+          </p>
+          <div class="ds-panel">
+            <ul class="nav nav-tabs mb-3">
+              <li class="nav-item">
+                <a class="nav-link active" href="#nav">Details</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#nav">Scenes</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#nav">Galleries</a>
+              </li>
+              <li class="nav-item"><a class="nav-link" href="#nav">Edit</a></li>
+            </ul>
+            <div role="group" class="pagination btn-group">
+              <button disabled type="button" class="btn btn-secondary">
+                «
+              </button>
+              <button disabled type="button" class="btn btn-secondary">
+                &lt;
+              </button>
+              <div class="page-count-container">
+                <div role="group" class="btn-group">
+                  <button type="button" class="page-count btn btn-secondary">
+                    1 of 4
+                  </button>
+                </div>
+              </div>
+              <button type="button" class="btn btn-secondary">&gt;</button>
+              <button type="button" class="btn btn-secondary">»</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2>
+            <img src="Theme-Ukiyo/assets/icons/lantern.svg" alt="" />Loading and
+            empty
+          </h2>
+          <p class="ds-lede">
+            The loader is the night canal from the print, on its paper: a
+            lantern sways in front of it, a petal falls past and moonlight
+            drifts on the water, all slowly. An empty list shows the beauty
+            print, a bijin-ga of a courtesan, beside her line. SFW mode hides
+            the print; Plain labels drop the line and the print together.
+          </p>
+          <div class="ds-row" style="align-items: stretch">
+            <div class="ds-panel" style="min-width: 260px">
+              <div class="LoadingIndicator">
+                <div class="spinner-border" role="status">
+                  <span class="sr-only">Loading…</span>
+                </div>
+                <h4 class="LoadingIndicator-message">Loading…</h4>
+              </div>
+            </div>
+            <div class="ds-panel" style="min-width: 260px">
+              <div>No results found.</div>
+            </div>
+            <div class="ds-panel" style="min-width: 260px">
+              <span
+                class="filter-container text-muted paginationIndex center-text"
+                >0-0 of 0<br
+              /></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="Theme-Ukiyo/assets/icons/hanko.svg" alt="" />Copy</h2>
+          <p class="ds-lede">
+            Formal, unhurried and a little haughty: the oiran's voice, taken
+            from the Yoshiwara's real customs and never from her costume. She
+            does not speak at a first meeting (shokai), accepts a patron only on
+            his third visit (najimi), refuses whom she pleases and seals her
+            letters in red; the rest is the printer's craft, blocks cut, ink
+            drying, a print sealed. Matches are exact and whole-text, so titles,
+            tags and descriptions are never touched. Plain labels and Stash's
+            SFW mode turn them off.
+          </p>
+          <div class="ds-panel">
+            <table class="ds-copy">
+              <thead>
+                <tr>
+                  <th>Stash says</th>
+                  <th>Ukiyo says</th>
+                </tr>
+              </thead>
+              <tbody id="ds-copy-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <footer class="ds-footer">
+          <p>
+            Shippori Mincho B1 by FONTDASU and Zen Kaku Gothic New by Yoshimichi
+            Ohira, both SIL OFL 1.1 and bundled with the plugin, since Stash
+            blocks font hosts; the kanji on the seals are outlines drawn from
+            Yuji Syuku by Kinuta Font Factory (SIL OFL 1.1). The night print and
+            the beauty print were rendered locally with Qwen-Image 2512 (Apache
+            2.0). Bootstrap 4.6 stands in for Stash's own styles. Built with
+            Claude, Anthropic's AI coding assistant.
+            <a
+              href="https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/ukiyo"
+              >Source and install</a
+            >.
+          </p>
+        </footer>
+      </div>
+    </div>
+
+    <script src="Theme-Ukiyo/ukiyo.js"></script>
+    <script src="ds/ds.js"></script>
+  </body>
+</html>

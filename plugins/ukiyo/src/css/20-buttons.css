@@ -1,0 +1,260 @@
+/*
+ * Buttons: a flat block of colour printed inside a sumi keyline. The block is
+ * ::before and the keyline ::after, so on hover the block can slip out of
+ * register while the keyline stays put, as a misaligned block prints. The
+ * chosen button of a group stays out of register at rest; pressing lands a
+ * block back in register. Keylines on buttons stay plain and even. Stash
+ * renders its icon buttons as `.btn.btn-primary.minimal`, so every block
+ * rule skips `.minimal` and those stay flat.
+ */
+.btn {
+  border-radius: 1px;
+  font-family: var(--ukiyo-font-label);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition:
+    color var(--ukiyo-fast) var(--ukiyo-ease),
+    filter var(--ukiyo-fast) var(--ukiyo-ease);
+}
+
+/*
+ * The block and the keyline hang off the button, so it needs a position. A
+ * zero-specificity rule keeps every Stash rule that places a button
+ * absolutely (card favourites, the Tagger's sprite button) in charge.
+ */
+:where(.btn:not(.minimal, .btn-link)) {
+  position: relative;
+}
+
+/* Each block is washi over its colour (--ukiyo-fill), with a caret printed
+   on it when the button opens a menu (--ukiyo-caret) */
+.btn:not(.minimal, .btn-link) {
+  --ukiyo-fill: var(--ukiyo-ai-hi);
+  --ukiyo-caret: none;
+  --ukiyo-key: var(--ukiyo-sumi);
+
+  background: none !important;
+  border: 1.5px solid transparent !important;
+  box-shadow: none !important;
+  color: var(--ukiyo-kinari);
+  isolation: isolate;
+}
+
+.btn:not(.minimal, .btn-link)::before,
+.btn:not(.minimal, .btn-link)::after {
+  content: '';
+  inset: -1.5px;
+  margin: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.btn:not(.minimal, .btn-link)::before {
+  background:
+    var(--ukiyo-caret) right 0.75rem center / 10px 10px no-repeat,
+    var(--ukiyo-washi),
+    var(--ukiyo-fill);
+  box-shadow: 0 2px 0 rgb(0 0 0 / 35%);
+  transition: transform var(--ukiyo-medium) var(--ukiyo-ease);
+  z-index: -1;
+}
+
+/* The keyline, with a hair of paper outside it so it reads on the night */
+.btn:not(.minimal, .btn-link)::after {
+  border: 1.5px solid var(--ukiyo-key);
+  box-shadow: 0 0 0 1px rgb(239 228 204 / 16%);
+}
+
+.btn:not(.minimal, .btn-link, :disabled, .disabled):hover::before {
+  transform: translate(3px, 2px);
+}
+
+/* Chosen: printed out of register, and it stays that way */
+.btn:not(.minimal, .btn-link).active::before,
+.show > .btn.dropdown-toggle:not(.minimal, .btn-link)::before {
+  transform: translate(4px, 3px);
+}
+
+/* Pressed: the block lands back in register, a shade deeper */
+.btn:not(.minimal, .btn-link, :disabled, .disabled):active::before {
+  filter: brightness(0.86);
+  transform: none;
+}
+
+/* Stash's dropdown toggles draw their caret in ::after, which here is the
+   keyline, so the caret is printed on the block instead */
+.btn.dropdown-toggle:not(.minimal, .btn-link) {
+  --ukiyo-caret: url('assets/icons/chevron.svg');
+
+  padding-right: 2.1rem;
+}
+
+.btn:focus,
+.btn.focus {
+  box-shadow: none !important;
+  outline: none;
+}
+
+.btn:not(.minimal, .btn-link):focus-visible::after {
+  border-color: var(--ukiyo-kinari);
+  box-shadow: 0 0 0 2px var(--ukiyo-shu-hi);
+}
+
+.btn.minimal:focus-visible,
+.btn-link:focus-visible {
+  box-shadow: 0 0 0 2px var(--ukiyo-shu-hi) !important;
+}
+
+.btn-primary:not(.minimal) {
+  --ukiyo-fill: var(--ukiyo-shu-block);
+
+  color: var(--ukiyo-on-shu) !important;
+  padding-inline: 1.5rem;
+}
+
+/* Primary carries a reserved inner line, like the border of a seal */
+.btn-primary:not(.minimal, .btn-link)::after {
+  outline: 1px solid rgb(246 238 220 / 40%);
+  outline-offset: -5px;
+}
+
+.btn-secondary,
+.btn-secondary:hover,
+.btn-secondary:focus {
+  color: var(--ukiyo-kinari) !important;
+}
+
+.btn-secondary:not(.minimal) {
+  --ukiyo-key: #050810;
+}
+
+/* The chosen item of a group is printed in vermilion */
+.btn.btn-secondary:not(.minimal, :disabled, .disabled).active {
+  --ukiyo-fill: var(--ukiyo-shu-block);
+
+  color: var(--ukiyo-on-shu) !important;
+}
+
+.btn-success:not(.minimal) {
+  --ukiyo-fill: linear-gradient(180deg, #326b47, #2c5f3f 55%, #234d33);
+
+  color: var(--ukiyo-on-shu) !important;
+}
+
+.btn-warning:not(.minimal) {
+  --ukiyo-fill: linear-gradient(180deg, #e0ae52, #d9a64a 55%, #c4903a);
+
+  color: var(--ukiyo-sumi) !important;
+}
+
+.btn-info:not(.minimal) {
+  --ukiyo-fill: var(--ukiyo-bero-block);
+
+  color: var(--ukiyo-on-shu) !important;
+}
+
+.btn-danger:not(.minimal) {
+  --ukiyo-fill: linear-gradient(180deg, #a83045, #9c2b3d 55%, #842334);
+
+  color: var(--ukiyo-on-shu) !important;
+}
+
+.btn:disabled,
+.btn.disabled {
+  cursor: not-allowed;
+  filter: saturate(0.3) brightness(0.8);
+  opacity: 0.5;
+}
+
+.btn-sm {
+  font-size: 0.72rem;
+}
+
+.btn-lg {
+  font-size: 1rem;
+}
+
+.btn.minimal {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--ukiyo-muted);
+}
+
+.btn.minimal:not(:disabled):hover,
+.btn.minimal:not(:disabled, .disabled):active {
+  background: none;
+  border-color: transparent;
+  color: var(--ukiyo-kinari);
+}
+
+.btn-link {
+  color: var(--ukiyo-kinari);
+  text-decoration: underline 1px var(--ukiyo-shu-hi);
+  text-underline-offset: 6px;
+}
+
+.btn-link:hover {
+  color: var(--ukiyo-shu-hi);
+}
+
+/* Buttons joined to a field stay in register */
+.input-group .btn:not(.minimal, .btn-link)::before {
+  transform: none !important;
+}
+
+/* Selects styled as buttons (the page-size picker in list toolbars) */
+select.btn-secondary {
+  background:
+    url('assets/icons/chevron.svg') right 0.6rem center / 10px 10px no-repeat,
+    var(--ukiyo-washi),
+    var(--ukiyo-ai-hi);
+  border: 1.5px solid #050810;
+  border-radius: 1px;
+  box-shadow:
+    0 0 0 1px rgb(239 228 204 / 16%),
+    0 2px 0 rgb(0 0 0 / 35%);
+  color: var(--ukiyo-kinari);
+  font-family: var(--ukiyo-font-label);
+  letter-spacing: 0.08em;
+  padding-right: 1.8rem;
+}
+
+select option {
+  background-color: var(--ukiyo-ai);
+  color: var(--ukiyo-kinari);
+}
+
+/*
+ * Chrome that Stash renders as plain buttons: the bars that fold the details
+ * panel away on scene and gallery pages, and the player's scrubber arrows.
+ * Keep them quiet.
+ */
+#root :is(.scene-divider, .gallery-divider, .details-divider) .btn,
+#root .scrubber-button {
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--ukiyo-muted);
+}
+
+#root :is(.scene-divider, .gallery-divider, .details-divider) .btn::before,
+#root :is(.scene-divider, .gallery-divider, .details-divider) .btn::after,
+#root .scrubber-button::before,
+#root .scrubber-button::after {
+  content: none;
+}
+
+#root .scrubber-button {
+  background: var(--ukiyo-ai-hi) !important;
+}
+
+#root :is(.scene-divider, .gallery-divider, .details-divider) .btn:hover,
+#root .scrubber-button:hover {
+  color: var(--ukiyo-shu-hi);
+}
+
+#root .scrubber-tags-background {
+  background-color: var(--ukiyo-ai-hi);
+}

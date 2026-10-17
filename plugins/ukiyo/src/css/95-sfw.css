@@ -1,0 +1,65 @@
+/*
+ * Empty states: the beauty print (bijin-ga) beside her line, on its paper.
+ * Stash marks an empty list with nothing but "0-0 of 0" in .paginationIndex,
+ * and ukiyo.js adds the line. The print comes and goes with her voice, so
+ * Plain labels and Stash's SFW mode show Stash's own words alone.
+ */
+.ukiyo-empty,
+.paginationIndex[data-ukiyo-empty] {
+  align-items: center;
+  color: var(--ukiyo-kinari);
+  display: flex;
+  font-family: var(--ukiyo-font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  justify-content: center;
+  line-height: 1.25;
+  text-align: left;
+  text-wrap: balance;
+}
+
+.ukiyo-empty::before,
+.paginationIndex[data-ukiyo-empty]::before {
+  aspect-ratio: 420 / 753;
+  background:
+    url('assets/icons/bijin.webp') center / cover padding-box no-repeat,
+    var(--ukiyo-washi),
+    var(--ukiyo-paper);
+  border: 5px solid transparent;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 60%),
+    5px 5px 0 -1px var(--ukiyo-shu-ink),
+    0 16px 26px -14px #000;
+  content: '';
+  flex: none;
+  margin-right: 1.2rem;
+  outline: 1px solid var(--ukiyo-sumi);
+  outline-offset: -6px;
+  transform: rotate(-2deg);
+  width: 76px;
+}
+
+/* Stash marks the line .text-muted, which Bootstrap sets with !important */
+.paginationIndex[data-ukiyo-empty] {
+  color: var(--ukiyo-kinari) !important;
+  font-size: 0;
+  padding-block: 1.5rem;
+}
+
+.paginationIndex[data-ukiyo-empty]::after {
+  content: attr(data-ukiyo-empty);
+  font-size: 1.4rem;
+  max-width: 22ch;
+}
+
+/*
+ * Stash's SFW content mode keeps the print and drops her voice and every
+ * figure: ukiyo.js stops the copy, and the beauty print never shows. The
+ * blossoms, the seal and the wave stay. Stash swaps the O counter for a
+ * thumbs-up of its own, which the wave skips.
+ */
+.sfw-content-mode :is(.ukiyo-empty, .paginationIndex[data-ukiyo-empty])::before,
+body:has(.sfw-content-mode)
+  :is(.ukiyo-empty, .paginationIndex[data-ukiyo-empty])::before {
+  display: none;
+}
