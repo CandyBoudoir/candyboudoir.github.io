@@ -542,6 +542,7 @@ function handBracket({ anchorRatings, decisions = [], championRating = null }) {
   let b = {
     id: 'hand',
     kind: 'performer',
+    gender: 'FEMALE',
     size: 8,
     seeds: slots,
     slots,
@@ -567,8 +568,12 @@ test('Apply: each candidate rated from the anchors around it in the tree', () =>
   const by = Object.fromEntries(rows.map((x) => [x.id, x]))
   const name = (k) => Mx.db.performers.get(ids[k]).name
   // anchors never; C2 and C4 lost round one to an anchor, which fits any
-  // rating under it, so it sets nothing
-  assert.deepEqual(Object.keys(by).sort(), [ids.C1, ids.C3].sort())
+  // rating under it: they are rated from where they finished, never above
+  // half a star under the anchor that beat them
+  assert.deepEqual(
+    Object.keys(by).sort(),
+    [ids.C1, ids.C2, ids.C3, ids.C4].sort(),
+  )
   // above A1 (3★) and A2 (4★), below A4 (5★): between the closest two
   assert.equal(by[ids.C1].to, 90)
   assert.equal(
@@ -576,11 +581,19 @@ test('Apply: each candidate rated from the anchors around it in the tree', () =>
     `Above ${name('A2')} (4.0★), below ${name('A4')} (5.0★)`,
   )
   assert.equal(by[ids.C3].to, 70, 'between 2★ and 5★')
-  assert.ok(rows.every((x) => !x.provisional && x.from == null))
+  assert.ok(!by[ids.C1].provisional && !by[ids.C3].provisional)
+  assert.ok(by[ids.C2].provisional && by[ids.C2].to <= 70, 'under A2 (4★)')
+  assert.ok(by[ids.C4].provisional && by[ids.C4].to <= 90, 'under A4 (5★)')
+  assert.ok(rows.every((x) => x.from == null))
   assert.deepEqual(
     rows.map((x) => x.short),
-    [1, 2],
+    [1, 2, 3, 3],
     'best finish first',
+  )
+  assert.deepEqual(
+    rows.slice(2).map((x) => x.id),
+    [ids.C4, ids.C2],
+    'out to the champion before out to a semifinalist',
   )
   // a midpoint off the half-star grid keeps its quarter
   const q = handBracket({
@@ -607,39 +620,99 @@ test('Apply: a champion that beat every anchor goes half a star above the best',
   assert.equal(by[ids.C4].to, 100)
 })
 
-test('Apply with no anchors: the champion is rated by hand, the rest step down', () => {
+test('Apply with no anchors: every entrant is rated from where it finished', () => {
   const play = ['C1', 'C2', 'C3', 'C4', 'C1', 'C3', 'C1']
-  const before = handBracket({ decisions: play })
-  const asked = BR.ratingProposals(before.Mx, before.b)
-  assert.equal(asked.askChampion, true)
-  assert.deepEqual(asked.rows, [], 'nothing until the champion is rated')
-  const { Mx, ids, b } = handBracket({ decisions: play, championRating: 80 })
+  const { Mx, ids, b } = handBracket({ decisions: play })
   const { rows, askChampion } = BR.ratingProposals(Mx, b)
-  assert.equal(askChampion, false)
-  const by = Object.fromEntries(rows.map((x) => [x.id, x]))
+  assert.equal(askChampion, false, 'nothing to ask')
   assert.equal(b.result.champion, ids.C1)
-  assert.deepEqual(by[ids.C1], {
-    id: ids.C1,
-    from: null,
-    to: 80,
-    why: 'Your rating for the champion',
-    provisional: false,
-    short: 0,
+  assert.equal(rows.length, 8, 'all eight, first-round losers too')
+  assert.deepEqual(
+    rows.slice(0, 2).map((x) => x.id),
+    [ids.C1, ids.C3],
+  )
+  assert.deepEqual(
+    rows.map((x) => x.short),
+    [0, 1, 2, 2, 3, 3, 3, 3],
+  )
+  for (let i = 1; i < rows.length; i++)
+    assert.ok(rows[i].to <= rows[i - 1].to, 'never above a better finish')
+  assert.ok(rows[0].to > rows[7].to)
+  assert.ok(rows.every((x) => x.provisional && x.from == null))
+  // too few ratings of your own: one to five stars, evenly
+  assert.equal(BR.ratingScale(Mx, 'performer', 'FEMALE').source, 'even')
+  assert.match(
+    rows[0].why,
+    /^Champion, in the top \d+% of a one to five star scale$/,
+  )
+  // stars given for the champion by hand move everyone with it
+  const given = BR.ratingProposals(Mx, { ...b, championRating: 40 })
+  const by = Object.fromEntries(given.rows.map((x) => [x.id, x]))
+  assert.equal(by[ids.C1].to, 40)
+  assert.equal(by[ids.C1].why, 'Your rating for the champion')
+  assert.equal(by[ids.C1].provisional, false)
+  const shift = 40 - rows[0].to
+  for (const x of rows.slice(1)) {
+    const y = by[x.id]
+    assert.ok(Math.abs(y.to - Math.max(10, x.to + shift)) <= 5)
+    assert.match(y.why, /, moved with the champion$/)
+  }
+})
+
+// A stand-in model of n Female performers, every one eligible and unrated,
+// with the affinity given by index
+function flatModel(n, affinity = () => 0) {
+  const localPerformers = Array.from({ length: n }, (_, i) => ({
+    id: 'p' + i,
+    image: '/img',
+    local: { gender: 'FEMALE', scene_count: 1 },
+  }))
+  return {
+    db: {
+      localPerformers,
+      performers: new Map(localPerformers.map((p) => [p.id, p])),
+      favoritePerformerIds: new Set(),
+    },
+    performerAffinity: (id) => affinity(Number(id.slice(1))),
+    // nobody rated
+    ratingSource: () => null,
+    stashPerformerRating: () => null,
+  }
+}
+
+test('where entrants sit: their share of the library, ties spread evenly', () => {
+  const ids = Array.from({ length: 16 }, (_, i) => 'p' + i * 6)
+  // a model that can't tell anyone apart: the 16 span the library evenly
+  const flat = BR.entrantSpread(flatModel(100), 'performer', 'FEMALE', ids)
+  assert.equal(flat.length, 16)
+  assert.equal(flat[0], 0.969)
+  assert.equal(flat[15], 0.031)
+  for (let i = 1; i < 16; i++)
+    assert.ok(Math.abs(flat[i - 1] - flat[i] - 0.0625) < 0.002)
+  // a model that ranks everyone (p0 strongest): each at its own share
+  const ranked = BR.entrantSpread(
+    flatModel(100, (i) => -i),
+    'performer',
+    'FEMALE',
+    ['p0', 'p50', 'p99'],
+  )
+  assert.deepEqual(ranked, [0.995, 0.495, 0.005])
+  assert.equal(BR.quantileOf([20, 100], 0.5), 60)
+  assert.equal(BR.quantileOf([10, 20, 30], 0.25), 15)
+  assert.equal(BR.quantileOf([], 0.5), null)
+})
+
+test('the scale: your own ratings from ten, else Your score, else one to five stars', () => {
+  assert.deepEqual(BR.ratingScale(flatModel(5), 'performer', 'FEMALE'), {
+    values: [20, 100],
+    source: 'even',
   })
-  assert.deepEqual(by[ids.C3], {
-    id: ids.C3,
-    from: null,
-    to: 70,
-    why: 'Finalist, ½★ under the champion',
-    provisional: true,
-    short: 1,
-  })
-  // the anchors of handBracket are candidates here: A1 to A4 lost in round
-  // one, which gets nothing; C2 and C4 lost in the semifinals
-  assert.equal(by[ids.C2].to, 60)
-  assert.equal(by[ids.C2].why, 'Semifinalist, 1★ under the champion')
-  assert.equal(by[ids.C4].to, 60)
-  assert.equal(rows.length, 4)
+  // the synthetic library has scenes enough of the user's own
+  const own = BR.ratingScale(M, 'clip', null)
+  assert.equal(own.source, 'own')
+  assert.ok(own.values.length >= BR.SCALE_MIN)
+  for (let i = 1; i < own.values.length; i++)
+    assert.ok(own.values[i] >= own.values[i - 1], 'lowest first')
 })
 
 test('Apply with one anchor: bounds where it reaches, steps from the champion elsewhere', () => {
@@ -654,10 +727,11 @@ test('Apply with one anchor: bounds where it reaches, steps from the champion el
   const by = Object.fromEntries(rows.map((x) => [x.id, x]))
   assert.equal(by[ids.C1].to, 70, 'beat the 3★: half a star above')
   assert.equal(by[ids.C1].provisional, false)
-  assert.equal(by[ids.C3].to, 60, 'a finalist: ½★ under the champion')
-  assert.equal(by[ids.C3].provisional, true)
-  assert.equal(by[ids.C2].to, 50)
-  assert.equal(by[ids.A2], undefined, 'out in round one, unbounded: nothing')
+  // the rest are rated from where they finished, moved with the champion
+  assert.ok(by[ids.C3].provisional && by[ids.C3].to <= 70)
+  assert.match(by[ids.C3].why, /^Finalist, .*, moved with the champion$/)
+  assert.ok(by[ids.C2].to <= by[ids.C3].to)
+  assert.ok(by[ids.A2].provisional, 'out in round one: rated too')
 })
 
 test('Apply: ranked records and those rated since are left out', () => {
@@ -682,9 +756,10 @@ test('Apply: ranked records and those rated since are left out', () => {
     rows.find((x) => x.id === ids.C3),
     undefined,
   )
+  // C1 measured; C4 and C2 out in round one to an anchor, from their finish
   assert.deepEqual(
     rows.map((x) => x.id),
-    [ids.C1],
+    [ids.C1, ids.C4, ids.C2],
   )
 })
 
@@ -841,7 +916,7 @@ test('Undo leaves alone a rating changed since Apply', () => {
   })
 })
 
-test('clip brackets play unrated scenes, and the champion sets the scale', () => {
+test('clip brackets play unrated scenes, and their finish rates every one', () => {
   const watched = watchedScenes().map((s) => s.id)
   const b = playOut(
     BR.createBracket(M, {
@@ -855,15 +930,20 @@ test('clip brackets play unrated scenes, and the champion sets the scale', () =>
   assert.deepEqual(b.anchors, {}, 'unrated scenes fill all 16 places')
   for (const id of b.seeds)
     assert.equal(BR.entrantRole(M, 'clip', id), 'candidate')
-  const asked = BR.ratingProposals(M, b)
-  assert.equal(asked.askChampion, true)
-  assert.deepEqual(asked.rows, [])
-  const { rows } = BR.ratingProposals(M, { ...b, championRating: 80 })
-  assert.equal(rows.length, 8, 'the champion and seven placed')
-  for (const x of rows) {
+  assert.equal(b.spread.length, 16, 'where the 16 sat in the library')
+  const fromFinish = BR.ratingProposals(M, b)
+  assert.equal(fromFinish.askChampion, false)
+  assert.equal(fromFinish.rows.length, 16, 'all sixteen')
+  for (const [i, x] of fromFinish.rows.entries()) {
     assert.equal(BR.entrantRole(M, 'clip', x.id), 'candidate')
-    assert.ok(x.to >= 10 && x.to <= 100)
+    assert.ok(x.to >= 10 && x.to <= 100 && x.provisional)
+    if (i) assert.ok(x.to <= fromFinish.rows[i - 1].to)
   }
+  assert.equal(fromFinish.rows[0].id, b.result.champion)
+  const { rows } = BR.ratingProposals(M, { ...b, championRating: 80 })
+  assert.equal(rows.length, 16)
+  assert.equal(rows[0].to, 80)
+  for (const x of rows) assert.ok(x.to >= 10 && x.to <= 100)
   // the Challenge round: three rated scenes that did not play, lowest first
   const c = BR.challengeFor(M, b)
   assert.equal(c.rungs.length, BR.CHALLENGE_RUNGS)
@@ -1164,8 +1244,10 @@ test('Apply measures against scene-average anchors and never rates one', () => {
     const anchor = m.a in b.anchors ? m.a : m.b
     const other = anchor === m.a ? m.b : m.a
     if (m.winner === anchor) {
-      // out in round one to an anchor: nothing
-      assert.equal(by[other], undefined)
+      // out in round one to an anchor: rated from where it finished, never
+      // above half a star under that anchor
+      assert.ok(by[other].provisional)
+      assert.ok(by[other].to <= b.anchors[anchor] - 10)
       continue
     }
     // above the anchor it beat, below the one that beat it next
@@ -1180,7 +1262,10 @@ test('Apply measures against scene-average anchors and never rates one', () => {
     assert.equal(x.provisional, false)
   }
   assert.deepEqual(
-    rows.map((x) => x.to).sort(),
+    rows
+      .filter((x) => !x.provisional)
+      .map((x) => x.to)
+      .sort(),
     [65, 70],
     '1.75★ to 4.5★, and 3★ to 3.75★: midpoints to the quarter star',
   )
@@ -1287,7 +1372,8 @@ test('the Challenge round: three of your rated, lowest first, a loss ends it', (
     { kind: 'performer', winner: champ, loser: 'D', bracket: b.id },
     { kind: 'performer', winner: 'B', loser: champ, bracket: b.id },
   ])
-  // Apply: the champion between D and B, the finalist ½★ under it
+  // Apply: the champion between D and B; the rest rated from where they
+  // finished, moved with it
   const { rows, askChampion } = BR.ratingProposals(M, x)
   assert.equal(askChampion, false)
   const by = Object.fromEntries(rows.map((r) => [r.id, r]))
@@ -1297,9 +1383,10 @@ test('the Challenge round: three of your rated, lowest first, a loss ends it', (
     'Above Performer D (1.5★), below Performer B (3.5★)',
   )
   assert.equal(by[champ].provisional, false)
-  assert.equal(by[b.result.finalist].to, 40)
-  assert.equal(by[b.result.finalist].provisional, true)
-  assert.equal(rows.length, 2, 'first-round losers get nothing')
+  const fin = by[b.result.finalist]
+  assert.ok(fin.provisional && fin.to <= 50)
+  assert.match(fin.why, /^Finalist, .*, moved with the champion$/)
+  assert.equal(rows.length, 4, 'first-round losers too')
   // Undo, then beat B and A: every favorite beaten, half a star above A
   x = BR.challengeUndo(x)
   assert.equal(BR.challengeState(x).current, 'B')
@@ -1313,7 +1400,8 @@ test('the Challenge round: three of your rated, lowest first, a loss ends it', (
   )
   assert.equal(won[champ].to, 100)
   assert.equal(won[champ].why, 'Above Performer A (4.5★)')
-  assert.equal(won[b.result.finalist].to, 90)
+  assert.ok(won[b.result.finalist].to <= 100)
+  assert.ok(won[b.result.finalist].to >= fin.to, 'moved up with the champion')
   assert.deepEqual(BR.performerHonours([x])[champ], {
     champion: 1,
     finalist: 0,
@@ -1322,18 +1410,27 @@ test('the Challenge round: three of your rated, lowest first, a loss ends it', (
   assert.equal(BR.performerHonours([b])[champ].challenger, 0)
 })
 
-test('the Challenge round: a first loss or a skip leaves the stars to the user', () => {
+test('the Challenge round is optional: the finish rates the champion before it or after a first loss', () => {
   const M = challengeLibrary()
   const b = playedWith(M, ['N1', 'N2', 'N3', 'N4'])
   const champ = b.result.champion
   let x = { ...b, challenge: BR.challengeFor(M, b) }
-  // before the round, as with no Challenge round, the user is asked
-  assert.equal(BR.ratingProposals(M, x).askChampion, true)
+  // before the round: nothing to ask, every entrant rated from its finish
+  const before = BR.ratingProposals(M, x)
+  assert.equal(before.askChampion, false)
+  assert.equal(before.rows.length, 4)
+  assert.equal(before.rows[0].id, champ)
+  assert.ok(before.rows.every((r) => r.provisional))
+  // a first loss, to D (1.5★): the champion half a star under it, the rest
+  // moved down with it
   x = BR.challengePick(x, 'D', 'D')
   assert.equal(BR.challengeState(x).lostTo, 'D')
   const lost = BR.ratingProposals(M, x)
-  assert.equal(lost.askChampion, true, 'a loss alone places nothing')
-  assert.deepEqual(lost.rows, [])
+  assert.equal(lost.askChampion, false)
+  assert.equal(lost.rows[0].id, champ)
+  assert.equal(lost.rows[0].to, 20)
+  assert.equal(lost.rows[0].why, 'Champion, below Performer D (1.5★)')
+  assert.ok(lost.rows.slice(1).every((r) => r.to <= 20))
   const rated = BR.ratingProposals(M, { ...x, championRating: 40 })
   assert.equal(rated.askChampion, false)
   const top = rated.rows.find((r) => r.id === champ)

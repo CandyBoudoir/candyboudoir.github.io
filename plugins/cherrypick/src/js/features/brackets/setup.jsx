@@ -183,7 +183,7 @@ export function SetupSheet({ listFilter, choice: given, picked: wasPicked }) {
 
         <p className="small text-muted cherrypick-new-faces">
           Performers you haven&apos;t rated play first. The ones you&apos;ve
-          rated wait for the champion in a Challenge round.
+          rated wait for the champion&apos;s optional Challenge round.
         </p>
 
         {!size ? (
@@ -438,7 +438,7 @@ export function ClipSetup({ ids, poolLabel, poolNote, short, origin }) {
         {rated ? (
           <p className="small text-muted cherrypick-new-faces">
             {e < n
-              ? `${rated} ${plural(rated, "scene you've rated sits", "scenes you've rated sit")} out, and the champion meets ${rated > BR.CHALLENGE_RUNGS ? `up to ${BR.CHALLENGE_RUNGS} of them` : rated === 1 ? 'it' : 'them'} in a Challenge round.`
+              ? `${rated} ${plural(rated, "scene you've rated sits", "scenes you've rated sit")} out, and the champion can meet ${rated > BR.CHALLENGE_RUNGS ? `up to ${BR.CHALLENGE_RUNGS} of them` : rated === 1 ? 'it' : 'them'} in an optional Challenge round.`
               : `Fewer than ${BR.MIN_CLIP_POOL} scenes here have no rating of yours, so the ones you've rated play too.`}
           </p>
         ) : null}
