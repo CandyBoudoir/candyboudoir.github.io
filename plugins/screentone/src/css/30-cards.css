@@ -196,7 +196,11 @@
   opacity: 0.5;
 }
 
-/* The studio is a narration box: paper, black lettering */
+/*
+ * The studio is a narration box: paper, black lettering, on one line. Stash
+ * caps the overlay at a tenth of the picture's height and 40% of its width,
+ * where a long name would wrap out of the box.
+ */
 .grid-card .studio-overlay {
   background: var(--st-paper);
   border: 1.5px solid #000;
@@ -205,18 +209,24 @@
   font-family: var(--st-font-label);
   font-size: 0.68rem;
   font-weight: 900;
+  height: auto;
   letter-spacing: 0.08em;
   line-height: 1;
+  max-width: 55%;
   opacity: 1;
+  overflow: hidden;
   padding: 0.28rem 0.45rem;
   right: 0.7rem;
+  text-overflow: ellipsis;
   text-transform: uppercase;
   top: 0.7rem;
+  white-space: nowrap;
   z-index: 3;
 }
 
 .grid-card .studio-overlay a {
   color: #000;
+  display: inline;
   text-shadow: none;
 }
 

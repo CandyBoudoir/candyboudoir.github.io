@@ -1,7 +1,6 @@
 /*
  * Screentone design tokens. Stash compiles its colours from SCSS and exposes
  * no custom properties, so every rule in this theme reads from these instead.
- * Every url() here resolves against screentone.css.
  */
 
 /* The panel frame thickens on hover, so it is a length that can transition */
