@@ -4,7 +4,7 @@
 
 Glossy sticker icons for the tags in [Stash](https://github.com/stashapp/stash), the self-hosted media organizer. Tag Candy matches each tag in your library to an icon by its StashDB link or its name, and Stash downloads the icon and sets it as the tag's image. Out of the box it fills tags that have no image and leaves every image you set alone. New, renamed and merged tags get their icon as they appear. The [icon gallery](https://candyboudoir.github.io/tagcandy/) shows every icon on the background Stash shows tags on.
 
-![Sixty of Tag Candy's sticker icons on Stash's dark background](docs/preview.webp)
+![Forty of Tag Candy's sticker icons on Stash's dark background: hair colours, outfits, shoes and a few animal puns](docs/preview.webp)
 
 ## Install
 
