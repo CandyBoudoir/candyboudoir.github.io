@@ -1,0 +1,515 @@
+/*
+ * The page under the taller navbar. Stash spaces the page, the filter sidebar
+ * and its sticky bars by its own 48.75px bar (98.75px on detail pages, which
+ * add a 50px tab bar), so each of those moves with --overclock-nav-height. On
+ * a phone held upright the bar is at the bottom.
+ */
+body {
+  padding-top: var(--overclock-nav-height);
+}
+
+.sidebar-pane .sidebar {
+  margin-top: var(--overclock-nav-height);
+}
+
+.sidebar-toggle-button-container .sidebar-toggle-button {
+  background: var(--overclock-raised);
+  border-color: var(--overclock-line);
+  border-radius: 0;
+  color: var(--overclock-yellow);
+  opacity: 1;
+  top: calc(var(--overclock-nav-height) + 0.5rem);
+}
+
+.sticky.detail-header,
+.item-list-container .filtered-list-toolbar.has-selection {
+  top: var(--overclock-nav-height);
+}
+
+.detail-body .sidebar-pane,
+.detail-body .sidebar,
+.detail-body .filtered-list-toolbar.has-selection {
+  top: calc(var(--overclock-nav-height) + 50px);
+}
+
+.detail-body .sidebar {
+  max-height: calc(100vh - var(--overclock-nav-height) - 69px);
+}
+
+.detail-body .sidebar-pane:not(.hide-sidebar) .sidebar {
+  height: calc(100vh - var(--overclock-nav-height) - 69px);
+}
+
+.detail-body .sidebar-toggle-button-container .sidebar-toggle-button {
+  top: calc(var(--overclock-nav-height) + 62px);
+}
+
+/* The task queue at the top of Settings > Tasks sticks under the bar */
+@media (width >= 576px) and (height >= 600px) {
+  #tasks-panel .tasks-panel-queue {
+    background-color: var(--overclock-bg);
+    top: var(--overclock-nav-height);
+  }
+}
+
+@media (width >= 575px) and (width <= 1199px) {
+  #scene-edit-details .edit-buttons-container {
+    top: var(--overclock-nav-height);
+  }
+}
+
+/* The job list, which Stash paints slate two classes deep */
+#root .job-table.card {
+  background-color: var(--overclock-field);
+}
+
+/* Bootstrap's progress bars, as in a running job: a segmented yellow bar */
+.progress {
+  background: var(--overclock-field);
+  border: 1px solid var(--overclock-yellow-lo);
+  border-radius: 0;
+  padding: 1px;
+}
+
+.progress .progress-bar {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--overclock-yellow) 0 8px,
+    rgb(243 230 0 / 55%) 8px 10px
+  );
+  color: var(--overclock-black);
+  font-family: var(--overclock-font-label);
+}
+
+#queue-viewer .queue-controls {
+  background-color: var(--overclock-bg);
+}
+
+#queue-viewer .current {
+  background-color: var(--overclock-raised);
+}
+
+@media (width <= 575.98px) {
+  .detail-body .sidebar {
+    height: calc(100vh - var(--overclock-nav-height));
+    max-height: calc(100vh - var(--overclock-nav-height));
+  }
+}
+
+@media (width <= 575.98px) and (orientation: portrait) {
+  body {
+    padding-bottom: var(--overclock-nav-height);
+    padding-top: 0.5rem;
+  }
+
+  .pagination-footer-container {
+    bottom: var(--overclock-nav-height);
+  }
+
+  .sidebar-pane .sidebar {
+    margin-top: 0;
+  }
+
+  .troubleshooting-mode-overlay .troubleshooting-mode-alert {
+    bottom: var(--overclock-nav-height);
+  }
+}
+
+/* List toolbars and the filter sidebar */
+.filtered-list-toolbar {
+  background-color: transparent;
+}
+
+.item-list-container .filtered-list-toolbar.has-selection {
+  background: var(--overclock-panel);
+  border: 1px solid var(--overclock-line);
+  border-left: 3px solid var(--overclock-yellow);
+  border-radius: 0;
+}
+
+/* The count of selected items in the selection bar */
+.filtered-list-toolbar .selected-items-info {
+  border-color: var(--overclock-line);
+  font-family: var(--overclock-font-label);
+}
+
+.sidebar-pane .sidebar,
+.sidebar {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgb(255 255 255 / 1.6%) 0 1px,
+      transparent 1px 3px
+    ),
+    var(--overclock-panel);
+  border-right: 1px solid var(--overclock-line);
+}
+
+/* The sidebar's sticky footer on phones */
+.sidebar-pane .sidebar .sidebar-footer {
+  background-color: var(--overclock-panel);
+  border-top: 1px dashed var(--overclock-rule);
+}
+
+.sidebar .collapse-button.btn.minimal,
+.sidebar-section .collapse-button {
+  font-family: var(--overclock-font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sidebar-section + .sidebar-section {
+  border-top: 1px dashed var(--overclock-rule);
+}
+
+:is(.selectable-filter ul, ul.selectable-list)
+  :is(.selected-object, .excluded-object, .unselected-object)
+  a:is(:hover, :focus-visible),
+.sidebar-saved-filter-list-container
+  .saved-filter-item
+  a:is(:hover, :focus-visible) {
+  background-color: rgb(243 230 0 / 9%);
+}
+
+.selectable-filter .include-button,
+ul.selectable-list .include-button {
+  color: var(--overclock-cyan) !important;
+}
+
+.selectable-filter .exclude-button,
+ul.selectable-list .exclude-button,
+.sidebar-saved-filter-list-container .saved-filter-item .delete-button {
+  color: var(--overclock-red) !important;
+}
+
+.paginationIndex {
+  color: var(--overclock-dim);
+  font-family: var(--overclock-font-label);
+  letter-spacing: 0.08em;
+}
+
+/*
+ * Pagination: separate clipped keys with a gap, as Bootstrap's page links
+ * would be. Stash builds it as one group of secondary buttons: numbered keys
+ * with the current one active, or, past a few pages, a page count split
+ * button in the middle. The current page or the count is the lit key.
+ */
+.pagination.btn-group {
+  gap: 0.3rem;
+}
+
+.pagination .btn,
+.pagination .btn:first-child,
+.pagination .btn:last-child {
+  --overclock-cut: 7px;
+
+  border: 1px solid var(--overclock-edge) !important;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 7px),
+    calc(100% - 7px) 100%,
+    0 100%
+  );
+  font-family: var(--overclock-font-label);
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  min-width: 2.4rem;
+}
+
+/* A locked key keeps its dashed frame */
+.pagination .btn:disabled {
+  border-style: dashed !important;
+}
+
+/* The current page is the lit key, as Bootstrap's active page link */
+.pagination .btn.btn-secondary.active:not(:disabled) {
+  --overclock-fill: var(--overclock-yellow);
+  --overclock-edge: var(--overclock-yellow);
+  --overclock-ink: var(--overclock-black);
+  --overclock-glow: none;
+}
+
+.pagination .page-count-container .btn-group {
+  gap: 0;
+}
+
+.pagination .page-count-container .btn.page-count {
+  --overclock-fill: var(--overclock-yellow);
+  --overclock-edge: var(--overclock-yellow);
+  --overclock-ink: var(--overclock-black);
+
+  clip-path: none;
+  padding-left: 12px;
+  padding-right: 10px;
+}
+
+.pagination .page-count-container .btn.page-count-dropdown {
+  --overclock-fill: var(--overclock-yellow);
+  --overclock-edge: var(--overclock-yellow);
+  --overclock-ink: var(--overclock-black);
+
+  border-left: 1px solid var(--overclock-black) !important;
+  min-width: 0;
+  padding-left: 8px;
+  padding-right: 10px;
+}
+
+.pagination-footer-container .pagination {
+  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 70%));
+}
+
+/* Bootstrap's own page links, where Stash uses them */
+.pagination {
+  gap: 0.3rem;
+}
+
+.page-link {
+  --overclock-cut: 7px;
+  --overclock-edge: var(--overclock-line);
+
+  background:
+    linear-gradient(
+        315deg,
+        var(--overclock-edge) calc(var(--overclock-cut) * 0.7071 + 1px),
+        transparent 0
+      )
+      border-box,
+    var(--overclock-control);
+  border: 1px solid var(--overclock-edge);
+  border-radius: 0 !important;
+  color: var(--overclock-text);
+  font-family: var(--overclock-font-label);
+  font-size: 0.95rem;
+  margin-left: 0;
+  min-width: 2.4rem;
+  text-align: center;
+}
+
+.page-link:hover {
+  --overclock-edge: var(--overclock-yellow);
+
+  background-color: var(--overclock-control);
+  color: var(--overclock-yellow);
+  z-index: 2;
+}
+
+.page-link:focus {
+  box-shadow: inset 0 0 0 2px var(--overclock-cyan);
+}
+
+.page-item.active .page-link {
+  --overclock-edge: var(--overclock-yellow);
+
+  background: var(--overclock-yellow);
+  color: var(--overclock-black);
+}
+
+/* Tabs: the active tab is a yellow-lit readout with a heavy underline */
+.nav-tabs {
+  border-bottom: 1px solid var(--overclock-line);
+  gap: 0.2rem;
+}
+
+.nav-tabs .nav-link {
+  --overclock-cut: 8px;
+
+  background: none;
+  border: 0;
+  border-radius: 0;
+  color: var(--overclock-muted);
+  font-family: var(--overclock-font-display);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  margin-bottom: 0;
+  padding: 0.5rem 1rem;
+  text-transform: uppercase;
+}
+
+.nav-tabs .nav-link:hover,
+.nav-tabs .nav-link:focus {
+  border: 0;
+  color: var(--overclock-yellow);
+}
+
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-link.active:hover,
+.nav-tabs .nav-item.show .nav-link {
+  background: rgb(243 230 0 / 8%);
+  border: 0;
+  box-shadow: inset 0 -3px 0 var(--overclock-yellow);
+  color: var(--overclock-yellow);
+}
+
+/* The bar of tabs under a detail header */
+.detail-body nav {
+  border-bottom-color: var(--overclock-line);
+}
+
+/* Settings and other pill navs: the chosen pill is a yellow tab with a pip */
+.nav-pills .nav-link {
+  --overclock-cut: 8px;
+
+  border-radius: 0;
+  color: var(--overclock-muted);
+  font-family: var(--overclock-font-display);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  position: relative;
+  text-transform: uppercase;
+}
+
+.nav-pills .nav-link:hover {
+  color: var(--overclock-yellow);
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+  background: var(--overclock-yellow);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    0 100%
+  );
+  color: var(--overclock-black);
+  padding-left: 1.3rem;
+}
+
+.nav-pills .nav-link.active::before {
+  background: var(--overclock-black);
+  content: '';
+  height: 5px;
+  left: 0.55rem;
+  position: absolute;
+  top: calc(50% - 2.5px);
+  width: 5px;
+}
+
+/* Settings: display section titles, the rest on the system font */
+.setting-section > h1 {
+  color: var(--overclock-yellow);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.setting-section .setting h3,
+.setting-section .sub-heading {
+  font-family: var(--overclock-font-body);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.setting-section .setting h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.setting-section .setting .value,
+.setting-section .sub-heading {
+  color: var(--overclock-muted);
+}
+
+/* Detail pages: a HUD header with a cyan haze from the top */
+.detail-header {
+  background:
+    radial-gradient(
+      900px 420px at 20% -120px,
+      rgb(0 229 255 / 9%),
+      transparent 70%
+    ),
+    var(--overclock-panel);
+  border-bottom: 1px solid var(--overclock-line);
+}
+
+.detail-header .performer-name,
+.detail-header :is(.studio-name, .tag-name, .group-name),
+.scene-header {
+  color: var(--overclock-yellow);
+  font-family: var(--overclock-font-display);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow:
+    -1.5px 0 0 rgb(255 47 208 / 45%),
+    1.5px 0 0 rgb(0 229 255 / 45%);
+  text-transform: uppercase;
+}
+
+.detail-item-title {
+  color: var(--overclock-dim);
+  font-family: var(--overclock-font-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.detail-item-value {
+  color: var(--overclock-text);
+}
+
+/* video.js player: a yellow scrub bar over a fading black strip */
+.video-js .vjs-control-bar {
+  background-color: transparent;
+  background-image: linear-gradient(0deg, rgb(5 5 6 / 92%), rgb(5 5 6 / 0%));
+}
+
+.video-js .vjs-play-progress,
+.video-js .vjs-volume-level {
+  background-color: var(--overclock-yellow);
+}
+
+.video-js .vjs-play-progress::before,
+.video-js .vjs-volume-level::before {
+  color: var(--overclock-yellow);
+}
+
+.video-js .vjs-load-progress,
+.video-js .vjs-load-progress div {
+  background: rgb(0 229 255 / 25%);
+}
+
+.video-js .vjs-time-control {
+  font-family: var(--overclock-font-label);
+}
+
+/*
+ * Tables: a raised header and dashed rows. Modals render outside #root, so
+ * :is(#root, .modal) keeps #root's weight and reaches tables in dialogs too.
+ */
+:is(#root, .modal) table thead {
+  background-color: var(--overclock-raised);
+}
+
+:is(#root, .modal) .table td,
+:is(#root, .modal) .table th {
+  background-color: transparent;
+  color: var(--overclock-text);
+}
+
+:is(#root, .modal) .table thead th {
+  border-bottom: 1px solid var(--overclock-line);
+  color: var(--overclock-muted);
+  font-family: var(--overclock-font-label);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+:is(#root, .modal) .table td {
+  border-top: 1px dashed var(--overclock-rule);
+}
+
+:is(#root, .modal) .table-striped tr:nth-child(odd) td {
+  background: rgb(0 229 255 / 3%);
+}
+
+.table-list tbody tr:hover {
+  background-color: rgb(243 230 0 / 6%);
+}
+
+/* The scene edit form's sticky button bar, which Stash paints slate */
+#scene-edit-details .edit-buttons-container {
+  background-color: var(--overclock-bg);
+}

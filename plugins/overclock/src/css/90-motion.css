@@ -1,0 +1,385 @@
+/*
+ * Glitch: the type jumps and splits red and cyan, with a sliced band, then
+ * settles. Nothing here moves, resizes or clips the hovered element itself,
+ * so the pointer never falls off what it is hovering: the glyphs are painted
+ * transparent and their shadow, offset, stands in for them, and the slice is
+ * a pseudo-element band that inverts what is under it.
+ */
+@keyframes overclock-glitch {
+  0% {
+    -webkit-text-fill-color: transparent;
+    text-shadow:
+      -7px 0 0 currentcolor,
+      -9px 0 0 rgb(255 31 75 / 85%),
+      -5px 0 0 rgb(0 229 255 / 85%);
+  }
+
+  25% {
+    -webkit-text-fill-color: transparent;
+    text-shadow:
+      8px 0 0 currentcolor,
+      10px 0 0 rgb(255 31 75 / 85%),
+      6px 0 0 rgb(0 229 255 / 85%);
+  }
+
+  50% {
+    -webkit-text-fill-color: transparent;
+    text-shadow:
+      -4px 0 0 currentcolor,
+      -2px 0 0 rgb(255 31 75 / 85%),
+      -6px 0 0 rgb(0 229 255 / 85%);
+  }
+
+  75% {
+    -webkit-text-fill-color: transparent;
+    text-shadow:
+      2px 0 0 currentcolor,
+      1px 0 0 rgb(255 31 75 / 80%),
+      3px 0 0 rgb(0 229 255 / 80%);
+  }
+
+  100% {
+    -webkit-text-fill-color: currentcolor;
+    text-shadow: none;
+  }
+}
+
+@keyframes overclock-slice {
+  0% {
+    height: 24%;
+    left: -6px;
+    opacity: 1;
+    top: 14%;
+  }
+
+  25% {
+    height: 18%;
+    left: 5px;
+    top: 58%;
+  }
+
+  50% {
+    height: 12%;
+    left: -3px;
+    top: 34%;
+  }
+
+  75%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* For icons the colour lives in a mask: split with a filter, jitter the svg */
+@keyframes overclock-split {
+  0% {
+    filter: drop-shadow(-2px 0 0 #ff1f4b) drop-shadow(2px 0 0 #00e5ff);
+  }
+
+  33% {
+    filter: drop-shadow(2px 0 0 #ff1f4b) drop-shadow(-2px 0 0 #00e5ff);
+  }
+
+  66% {
+    filter: drop-shadow(-1px 0 0 #ff2fd0) drop-shadow(1px 0 0 #00e5ff);
+  }
+
+  100% {
+    filter: none;
+  }
+}
+
+@keyframes overclock-jitter {
+  0% {
+    transform: translateX(-2px) skewX(-12deg);
+  }
+
+  33% {
+    transform: translateX(2px) scaleY(0.82);
+  }
+
+  66% {
+    transform: translateX(-1px);
+  }
+
+  100% {
+    transform: none;
+  }
+}
+
+/* What glitches, and the band that slices it */
+:where(
+  .btn:not(.minimal),
+  .top-nav .btn.minimal,
+  .tag-item.badge,
+  .nav-tabs .nav-link,
+  .page-link
+) {
+  isolation: isolate;
+  position: relative;
+}
+
+:where(
+  .btn:not(.minimal, .favorite-button, .dropdown-toggle),
+  .top-nav .btn.minimal,
+  .tag-item.badge,
+  .nav-tabs .nav-link,
+  .page-link
+)::after {
+  background: var(--overclock-cyan);
+  content: '';
+  height: 20%;
+  left: 0;
+  mix-blend-mode: difference;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 40%;
+  width: 100%;
+}
+
+.btn:not(:disabled, .disabled, .minimal):hover,
+.top-nav .btn.minimal:hover,
+.tag-item.badge:hover,
+.nav-tabs .nav-link:not(.active):hover,
+.page-item:not(.active) .page-link:hover,
+.grid-card:hover .card-section-title {
+  animation: overclock-glitch 170ms steps(1, end) 1;
+}
+
+.btn:not(:disabled, .disabled, .minimal, .dropdown-toggle):hover::after,
+.top-nav .btn.minimal:hover::after,
+.tag-item.badge:hover::after,
+.nav-tabs .nav-link:not(.active):hover::after,
+.page-item:not(.active) .page-link:hover::after {
+  animation: overclock-slice 170ms steps(1, end) 1;
+}
+
+:is(.rating-stars, .card-popovers, .count-button)
+  .btn.minimal:not(:disabled):hover,
+#root .favorite-button:hover {
+  animation: overclock-split 150ms steps(1, end) 1;
+}
+
+:is(.rating-stars, .card-popovers, .count-button)
+  .btn.minimal:not(:disabled):hover
+  svg,
+#root .favorite-button:hover svg {
+  animation: overclock-jitter 150ms steps(1, end) 1;
+}
+
+/* The reticle closes and turns as it locks */
+@keyframes overclock-lock {
+  0% {
+    opacity: 0.4;
+    transform: scale(1.8) rotate(90deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes overclock-blink-in {
+  0% {
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  55% {
+    opacity: 0;
+  }
+
+  80% {
+    opacity: 1;
+  }
+}
+
+@keyframes overclock-scan {
+  0% {
+    opacity: 1;
+    transform: translateY(-100%);
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(300%);
+  }
+}
+
+@keyframes overclock-count {
+  from {
+    --overclock-pct: 0;
+  }
+
+  to {
+    --overclock-pct: 100;
+  }
+}
+
+/*
+ * Bursts: square pixels, data shards and hex digits, with a red fringe.
+ * overclock.js places each particle at the click and removes it when its
+ * animation ends, so every kind animates.
+ */
+.overclock-burst {
+  animation: overclock-burst 460ms steps(9, end) forwards;
+  background: var(--overclock-yellow);
+  box-shadow:
+    -2px 0 0 var(--overclock-red),
+    2px 0 0 var(--overclock-cyan);
+  height: 6px;
+  pointer-events: none;
+  position: fixed;
+  width: 6px;
+  z-index: 2000;
+}
+
+.overclock-burst.is-cyan {
+  background: var(--overclock-cyan);
+  box-shadow:
+    -2px 0 0 var(--overclock-magenta),
+    2px 0 0 #fff;
+  height: 5px;
+  width: 5px;
+}
+
+.overclock-burst.is-red {
+  background: var(--overclock-red);
+  box-shadow: 2px 0 0 var(--overclock-yellow);
+  height: 4px;
+  width: 4px;
+}
+
+.overclock-burst.is-shard {
+  animation-duration: 560ms;
+  background: linear-gradient(
+    90deg,
+    var(--overclock-red) 0 18%,
+    var(--overclock-yellow) 18% 82%,
+    var(--overclock-cyan) 82%
+  );
+  box-shadow: none;
+  height: 13px;
+  mask: url('assets/icons/glyph-shard.svg') center / contain no-repeat;
+  width: 13px;
+}
+
+.overclock-burst.is-shard.is-cyan {
+  background: linear-gradient(
+    90deg,
+    var(--overclock-magenta) 0 18%,
+    var(--overclock-cyan) 18% 82%,
+    #fff 82%
+  );
+  height: 11px;
+  width: 11px;
+}
+
+.overclock-burst.is-char {
+  animation-name: overclock-burst-char;
+  background: none;
+  box-shadow: none;
+  color: var(--overclock-yellow);
+  font: 0.85rem/1 var(--overclock-font-label);
+  height: auto;
+  text-shadow:
+    -1.5px 0 0 var(--overclock-red),
+    1.5px 0 0 var(--overclock-cyan);
+  width: auto;
+}
+
+.overclock-burst.is-c0::after {
+  content: '0';
+}
+
+.overclock-burst.is-c1::after {
+  color: var(--overclock-cyan);
+  content: '1';
+}
+
+.overclock-burst.is-cf::after {
+  content: 'F';
+}
+
+.overclock-burst.is-c7a::after {
+  color: var(--overclock-cyan);
+  content: '7A';
+}
+
+@keyframes overclock-burst {
+  0% {
+    opacity: 1;
+    rotate: 0deg;
+    translate: -50% -50%;
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    rotate: var(--spin);
+    translate: calc(-50% + var(--dx)) calc(-50% + var(--dy));
+  }
+}
+
+@keyframes overclock-burst-char {
+  0% {
+    opacity: 1;
+    translate: -50% -50%;
+  }
+
+  75% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    translate: calc(-50% + var(--dx) * 1.15) calc(-50% + var(--dy) * 1.15);
+  }
+}
+
+/*
+ * Calm mode and reduced motion: everything holds still, the session clock
+ * included, and the loader stays on a still frame. Stash fades its loader in
+ * with an animation, so it is shown outright. Calm mode leaves particles
+ * already in flight to finish, since overclock.js removes each one when its
+ * animation ends.
+ */
+.overclock-calm :not(.overclock-burst),
+.overclock-calm :not(.overclock-burst)::before,
+.overclock-calm :not(.overclock-burst)::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+.overclock-calm .LoadingIndicator {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .LoadingIndicator {
+    opacity: 1;
+  }
+
+  .overclock-burst {
+    display: none;
+  }
+}

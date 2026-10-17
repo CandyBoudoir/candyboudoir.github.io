@@ -1,0 +1,221 @@
+/*
+ * Ratings: five charge chevrons that fill left to right. The Font Awesome
+ * star paths are hidden and the svg box paints a chevron through a mask.
+ */
+.rating-stars {
+  font-size: 1.55rem;
+}
+
+.rating-stars .btn.minimal {
+  padding: 0 0.03rem;
+}
+
+.rating-stars svg {
+  background: currentcolor;
+  mask: url('assets/icons/glyph-charge-outline.svg') center / 100% no-repeat;
+}
+
+.rating-stars svg path,
+.rating-stars svg use {
+  visibility: hidden;
+}
+
+.rating-stars .unfilled-star svg {
+  color: var(--overclock-yellow-lo);
+}
+
+.rating-stars .filled-star svg {
+  color: var(--overclock-yellow);
+  mask-image: url('assets/icons/glyph-charge.svg');
+}
+
+/* A full chevron covers its outline, which would show at its edges */
+.rating-stars .star-fill-100 .unfilled-star {
+  visibility: hidden;
+}
+
+/* Hovering a chevron lights the outline of every chevron up to it */
+.rating-stars .btn.minimal:not(:disabled):hover .unfilled-star svg,
+.rating-stars
+  .btn.minimal:has(~ .btn.minimal:not(:disabled):hover)
+  .unfilled-star
+  svg {
+  color: var(--overclock-yellow);
+}
+
+.star-rating-number {
+  color: var(--overclock-yellow);
+  font-family: var(--overclock-font-label);
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.rating-stars-precision-full .star-rating-number::after {
+  color: var(--overclock-dim);
+  content: '/5';
+  font-size: 0.8em;
+}
+
+/*
+ * Favourite: a targeting reticle that closes and locks. Stash colours
+ * favourites and their shadow three classes deep, so these rules start at
+ * #root.
+ */
+#root .favorite-button {
+  overflow: visible;
+}
+
+#root
+  .favorite-button:not(
+    :is(.performer-card, .studio-card, .tag-card) .favorite-button
+  ) {
+  position: relative;
+}
+
+#root .favorite-button svg {
+  background: currentcolor;
+  mask: url('assets/icons/glyph-reticle-open.svg') center / 100% no-repeat;
+}
+
+#root .favorite-button svg path,
+#root .favorite-button svg use {
+  visibility: hidden;
+}
+
+#root .favorite-button.not-favorite {
+  --overclock-ink: var(--overclock-muted);
+}
+
+#root .favorite-button.not-favorite:hover {
+  --overclock-ink: var(--overclock-yellow);
+}
+
+#root .favorite-button.favorite,
+#root .favorite-button.favorite:hover {
+  --overclock-ink: var(--overclock-yellow);
+}
+
+#root .favorite-button.favorite svg {
+  animation: overclock-lock 300ms steps(5, end) both;
+  mask-image: url('assets/icons/glyph-reticle.svg');
+}
+
+/* The small Locked tag under a locked reticle */
+#root .favorite-button.favorite::after {
+  animation: overclock-blink-in 360ms steps(1, end) both;
+  background: var(--overclock-yellow);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 4px),
+    calc(100% - 4px) 100%,
+    0 100%
+  );
+  color: var(--overclock-black);
+  content: 'Locked';
+  font: 0.56rem/1 var(--overclock-font-label);
+  left: 50%;
+  letter-spacing: 0.1em;
+  padding: 0.16rem 0.32rem 0.14rem;
+  pointer-events: none;
+  position: absolute;
+  text-transform: uppercase;
+  top: calc(100% - 0.15rem);
+  translate: -50% 0;
+}
+
+/* On a card the reticle sits on the picture, so it takes a dark edge */
+#root :is(.performer-card, .studio-card, .tag-card) .favorite-button {
+  filter: drop-shadow(0 0 1px #000) drop-shadow(0 1px 2px rgb(0 0 0 / 80%));
+}
+
+#root
+  :is(.performer-card, .studio-card, .tag-card)
+  .favorite-button.not-favorite {
+  --overclock-ink: var(--overclock-text);
+}
+
+/* The reticle beside a name, on detail pages */
+#root .name-icons .favorite-button svg {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+/*
+ * The O counter is an overload bolt with a mono readout. Stash draws it with
+ * its own SweatDrops svg (no Font Awesome class), and the play count beside
+ * it uses Font Awesome, so the mask skips those.
+ */
+.count-button .count-icon svg:not(.svg-inline--fa),
+.o-counter .btn svg:not(.svg-inline--fa) {
+  background: currentcolor;
+  mask: url('assets/icons/glyph-bolt.svg') center / 100% no-repeat;
+}
+
+.count-button .count-icon svg:not(.svg-inline--fa) :is(path, rect, use),
+.o-counter .btn svg:not(.svg-inline--fa) :is(path, rect, use) {
+  visibility: hidden;
+}
+
+.count-button .count-icon {
+  --overclock-ink: var(--overclock-muted);
+}
+
+.count-button .count-icon:not(:disabled):hover {
+  --overclock-ink: var(--overclock-yellow);
+}
+
+.count-button .count-icon:not(:disabled):active {
+  --overclock-ink: var(--overclock-red);
+}
+
+.count-button .count-value {
+  --overclock-ink: var(--overclock-yellow);
+
+  font-family: var(--overclock-font-label);
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+}
+
+.count-button,
+.count-button:hover {
+  background: none;
+  border-radius: 0;
+}
+
+/* Outside a card the value sits in a small framed gauge */
+:not(.card-popovers) > .count-button .count-value {
+  --overclock-cut: 6px;
+  --overclock-edge: var(--overclock-line);
+
+  background-image:
+    linear-gradient(
+      315deg,
+      var(--overclock-edge) calc(var(--overclock-cut) * 0.7071 + 1px),
+      transparent 0
+    ),
+    linear-gradient(90deg, var(--overclock-yellow) 0 3px, transparent 3px);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 6px),
+    calc(100% - 6px) 100%,
+    0 100%
+  );
+  border: 1px solid var(--overclock-edge) !important;
+  font-size: 1.15rem;
+  line-height: 1.2;
+  padding: 0.1rem 0.6rem 0.1rem 0.85rem;
+  white-space: nowrap;
+}
+
+/* and the O counter's gauge reads OVL, for overload */
+:not(.card-popovers)
+  > .count-button:has(.count-icon svg:not(.svg-inline--fa))
+  .count-value
+  span::before {
+  color: var(--overclock-dim);
+  content: 'OVL ';
+  font-size: 0.7em;
+}

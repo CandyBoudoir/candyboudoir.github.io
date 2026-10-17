@@ -1,0 +1,705 @@
+/* Cards: chamfered panels with corner brackets round the picture */
+.card {
+  --overclock-cut: 14px;
+  --overclock-edge: var(--overclock-line);
+
+  background:
+    linear-gradient(
+        315deg,
+        var(--overclock-edge) calc(var(--overclock-cut) * 0.7071 + 1px),
+        transparent 0
+      )
+      border-box,
+    var(--overclock-panel);
+  border: 1px solid var(--overclock-edge);
+  border-radius: 0;
+  color: var(--overclock-text);
+}
+
+.grid-card:hover {
+  --overclock-edge: var(--overclock-yellow);
+}
+
+/* The top-left cut, drawn as a line over the picture's corner */
+.grid-card::before {
+  background: linear-gradient(
+    135deg,
+    transparent calc(50% - 0.5px),
+    var(--overclock-line) calc(50% - 0.5px) calc(50% + 1px),
+    transparent 0
+  );
+  content: '';
+  height: 14px;
+  left: -1px;
+  pointer-events: none;
+  position: absolute;
+  top: -1px;
+  width: 14px;
+  z-index: 4;
+}
+
+.grid-card:hover::before {
+  background: linear-gradient(
+    135deg,
+    transparent calc(50% - 0.5px),
+    var(--overclock-yellow) calc(50% - 0.5px) calc(50% + 1.5px),
+    transparent 0
+  );
+}
+
+/* A small cyan bracket in the bottom-left corner of the panel */
+.grid-card::after {
+  background:
+    linear-gradient(var(--overclock-cyan) 0 0) 0 100% / 10px 2px no-repeat,
+    linear-gradient(var(--overclock-cyan) 0 0) 0 100% / 2px 10px no-repeat;
+  bottom: 3px;
+  content: '';
+  height: 10px;
+  left: 3px;
+  opacity: 0.7;
+  pointer-events: none;
+  position: absolute;
+  width: 10px;
+}
+
+.grid-card .thumbnail-section {
+  overflow: hidden;
+  position: relative;
+}
+
+/* Stash leaves a 5px gap under the picture; the brackets close round it */
+.grid-card :is(.scene-card-preview, .image-card-preview, .gallery-card-cover) {
+  margin-bottom: 0;
+}
+
+/* Corner brackets: at the edges of the picture, snapping inward on hover */
+.grid-card .thumbnail-section::after {
+  --overclock-bracket: 16px;
+  --overclock-bracket-w: 2px;
+
+  background:
+    linear-gradient(currentcolor 0 0) 0 0 / var(--overclock-bracket)
+      var(--overclock-bracket-w),
+    linear-gradient(currentcolor 0 0) 0 0 / var(--overclock-bracket-w)
+      var(--overclock-bracket),
+    linear-gradient(currentcolor 0 0) 100% 0 / var(--overclock-bracket)
+      var(--overclock-bracket-w),
+    linear-gradient(currentcolor 0 0) 100% 0 / var(--overclock-bracket-w)
+      var(--overclock-bracket),
+    linear-gradient(currentcolor 0 0) 0 100% / var(--overclock-bracket)
+      var(--overclock-bracket-w),
+    linear-gradient(currentcolor 0 0) 0 100% / var(--overclock-bracket-w)
+      var(--overclock-bracket),
+    linear-gradient(currentcolor 0 0) 100% 100% / var(--overclock-bracket)
+      var(--overclock-bracket-w),
+    linear-gradient(currentcolor 0 0) 100% 100% / var(--overclock-bracket-w)
+      var(--overclock-bracket);
+  background-repeat: no-repeat;
+  color: rgb(232 239 238 / 50%);
+  content: '';
+  inset: 7px;
+  pointer-events: none;
+  position: absolute;
+  transition: inset 120ms steps(3, end);
+  z-index: 1;
+}
+
+.grid-card:hover .thumbnail-section::after {
+  --overclock-bracket: 22px;
+  --overclock-bracket-w: 3px;
+
+  color: var(--overclock-yellow);
+  inset: 16px;
+}
+
+/* The scan line: one sweep down the picture per hover, then gone */
+.grid-card .thumbnail-section::before {
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgb(0 229 255 / 8%) 60%,
+    rgb(0 229 255 / 30%) 93%,
+    var(--overclock-cyan) 97%,
+    #fff 100%
+  );
+  content: '';
+  height: 34%;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transform: translateY(-100%);
+  z-index: 1;
+}
+
+.grid-card:hover .thumbnail-section::before {
+  animation: overclock-scan 640ms linear 1 both;
+}
+
+/* The readout: counts to 100% while the scan runs */
+.grid-card .thumbnail-section > a::after {
+  --overclock-cut: 5px;
+  --overclock-pct: 100;
+
+  background: rgb(5 5 6 / 86%);
+  border-left: 2px solid var(--overclock-cyan);
+  bottom: 22px;
+  color: var(--overclock-cyan);
+  counter-reset: overclock-pct var(--overclock-pct);
+  font: 0.64rem/1 var(--overclock-font-label);
+  left: 22px;
+  letter-spacing: 0.1em;
+  padding: 0.24rem 0.5rem 0.22rem 0.4rem;
+  pointer-events: none;
+  position: absolute;
+  text-transform: uppercase;
+  white-space: pre;
+  z-index: 2;
+}
+
+.grid-card:is(.scene-card, .image-card):hover .thumbnail-section > a::after {
+  animation: overclock-count 640ms steps(20, end) both;
+  content: 'Scan ' counter(overclock-pct) '%  ·  trk';
+}
+
+/*
+ * Performers: an ID readout beside the age, and a target bracket on hover.
+ * Stash hangs the favourite in the picture's top-right corner, so that corner
+ * takes the reticle instead of a bracket.
+ */
+.performer-card .performer-card__age {
+  align-items: baseline;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
+.performer-card .performer-card__age::after {
+  border-left: 2px solid var(--overclock-cyan);
+  color: var(--overclock-cyan);
+  content: 'ID:7F3A';
+  padding-left: 0.35rem;
+}
+
+.performer-card:nth-child(3n + 2) .performer-card__age::after {
+  content: 'ID:2C91';
+}
+
+.performer-card:nth-child(3n + 3) .performer-card__age::after {
+  content: 'ID:B04E';
+}
+
+.performer-card:hover .performer-card__age::after {
+  border-left-color: var(--overclock-yellow);
+  color: var(--overclock-yellow);
+}
+
+.performer-card:hover .thumbnail-section > a::before {
+  --overclock-cut: 5px;
+
+  animation: overclock-blink-in 300ms steps(1, end) both;
+  background: var(--overclock-yellow);
+  bottom: 24px;
+  color: var(--overclock-black);
+  content: 'Target acquired';
+  font: 0.6rem/1 var(--overclock-font-label);
+  left: 24px;
+  letter-spacing: 0.1em;
+  padding: 0.22rem 0.45rem 0.2rem;
+  pointer-events: none;
+  position: absolute;
+  text-transform: uppercase;
+  z-index: 2;
+}
+
+.performer-card .thumbnail-section::after {
+  background:
+    linear-gradient(currentcolor 0 0) 0 0 / var(--overclock-bracket)
+      var(--overclock-bracket-w),
+    linear-gradient(currentcolor 0 0) 0 0 / var(--overclock-bracket-w)
+      var(--overclock-bracket),
+    linear-gradient(currentcolor 0 0) 0 100% / var(--overclock-bracket)
+      var(--overclock-bracket-w),
+    linear-gradient(currentcolor 0 0) 0 100% / var(--overclock-bracket-w)
+      var(--overclock-bracket),
+    linear-gradient(currentcolor 0 0) 100% 100% / var(--overclock-bracket)
+      var(--overclock-bracket-w),
+    linear-gradient(currentcolor 0 0) 100% 100% / var(--overclock-bracket-w)
+      var(--overclock-bracket);
+  background-repeat: no-repeat;
+}
+
+/* On hover a performer's brackets close into crosshairs */
+.performer-card:hover .thumbnail-section::after {
+  background:
+    linear-gradient(currentcolor 0 0) 0 0 / var(--overclock-bracket)
+      var(--overclock-bracket-w),
+    linear-gradient(currentcolor 0 0) 0 0 / var(--overclock-bracket-w)
+      var(--overclock-bracket),
+    linear-gradient(currentcolor 0 0) 0 100% / var(--overclock-bracket)
+      var(--overclock-bracket-w),
+    linear-gradient(currentcolor 0 0) 0 100% / var(--overclock-bracket-w)
+      var(--overclock-bracket),
+    linear-gradient(currentcolor 0 0) 100% 100% / var(--overclock-bracket)
+      var(--overclock-bracket-w),
+    linear-gradient(currentcolor 0 0) 100% 100% / var(--overclock-bracket-w)
+      var(--overclock-bracket),
+    linear-gradient(currentcolor 0 0) 50% 0 / 2px 9px,
+    linear-gradient(currentcolor 0 0) 50% 100% / 2px 9px,
+    linear-gradient(currentcolor 0 0) 0 50% / 9px 2px,
+    linear-gradient(currentcolor 0 0) 100% 50% / 9px 2px;
+  background-repeat: no-repeat;
+}
+
+.card a {
+  color: inherit;
+}
+
+.card a:hover {
+  text-decoration: none;
+}
+
+.card-section-title,
+.grid-card a .card-section-title {
+  color: var(--overclock-text);
+  font-size: 1.02rem;
+  line-height: 1.15;
+}
+
+.card a:hover .card-section-title,
+.grid-card:hover .card-section-title,
+.grid-card:hover a .card-section-title {
+  color: var(--overclock-yellow);
+}
+
+:is(
+  .scene-card__details,
+  .gallery-card__details,
+  .group-card__details,
+  .image-card__details,
+  .studio-card__details,
+  .performer-card__age
+) {
+  color: var(--overclock-dim);
+  font-family: var(--overclock-font-label);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+}
+
+.scene-card__date::before {
+  color: var(--overclock-cyan-lo);
+  content: 'T ';
+}
+
+/* Descriptions under a card stay on the system font */
+.grid-card
+  .TruncatedText:is(
+    .scene-card__description,
+    .gallery-card__description,
+    .group-card__description
+  ) {
+  font-family: var(--overclock-font-body);
+  letter-spacing: 0;
+}
+
+.performer-card .performer-name {
+  font-size: 1.15rem;
+}
+
+/* The divider: a dashed rule with a tick at each end */
+.card > hr {
+  background:
+    linear-gradient(var(--overclock-line) 0 0) 0 50% / 1px 7px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 100% 50% / 1px 7px no-repeat,
+    repeating-linear-gradient(
+        90deg,
+        var(--overclock-line) 0 4px,
+        transparent 4px 7px
+      )
+      50% 50% / calc(100% - 8px) 1px no-repeat;
+  border: 0;
+  height: 7px;
+  margin-inline: 0.8rem;
+}
+
+/* Overlays on the picture: mono tags on near-black */
+.studio-overlay {
+  right: 8px;
+  top: 8px;
+}
+
+.studio-overlay a {
+  --overclock-cut: 5px;
+
+  background: rgb(5 5 6 / 84%);
+  border-left: 2px solid var(--overclock-cyan);
+  color: var(--overclock-text);
+  display: inline-block;
+  font: 0.66rem/1 var(--overclock-font-label);
+  letter-spacing: 0.1em;
+  padding: 0.26rem 0.5rem 0.24rem 0.4rem;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+.studio-overlay a:hover {
+  color: var(--overclock-yellow);
+  text-decoration: none;
+}
+
+/* A studio logo stays a picture: no tag behind it */
+.studio-overlay a:has(.image-thumbnail) {
+  background: none;
+  border-left: 0;
+  clip-path: none;
+  padding: 0;
+}
+
+.scene-specs-overlay {
+  bottom: 14px;
+  display: flex;
+  gap: 0.3rem;
+  right: 8px;
+  text-shadow: none;
+  z-index: 2;
+}
+
+.scene-specs-overlay > span:not(:last-child) {
+  margin-right: 0;
+}
+
+.scene-specs-overlay > span,
+.scene-interactive-speed-overlay:not(:empty) {
+  --overclock-cut: 4px;
+
+  background: rgb(5 5 6 / 86%);
+  color: var(--overclock-text);
+  font: 0.68rem/1 var(--overclock-font-label);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  padding: 0.24rem 0.4rem 0.22rem;
+  text-transform: uppercase;
+}
+
+.scene-specs-overlay .overlay-resolution {
+  background: var(--overclock-yellow);
+  color: var(--overclock-black);
+}
+
+/*
+ * The rating: a yellow chamfered tag with a mono number and a five-segment
+ * meter, in place of Stash's diagonal ribbon. Stash names a star rating
+ * rating-1 to rating-5, and finer ratings rating-100-0 to rating-100-20.
+ */
+.grid-card .rating-banner {
+  --overclock-cut: 7px;
+  --overclock-rating: 0;
+
+  align-items: center;
+  background: var(--overclock-yellow);
+  color: var(--overclock-black);
+  display: flex;
+  font: 0.66rem/1 var(--overclock-font-label);
+  gap: 0.45rem;
+  left: 2.1rem;
+  letter-spacing: 0.08em;
+  padding: 0.3rem 0.55rem 0.28rem 0.85rem;
+  text-align: left;
+  text-transform: uppercase;
+  top: 10px;
+  transform: none;
+  width: auto;
+  z-index: 2;
+
+  /* The pointer passes through to the picture's link, as before */
+  pointer-events: none;
+}
+
+.grid-card .rating-banner::after {
+  background:
+    linear-gradient(
+      90deg,
+      var(--overclock-black) calc(var(--overclock-rating) * 5%),
+      transparent 0
+    ),
+    rgb(10 10 12 / 22%);
+  content: '';
+  flex: none;
+  height: 7px;
+  mask: repeating-linear-gradient(90deg, #000 0 5px, transparent 5px 6.5px);
+  width: 31px;
+}
+
+.rating-banner.rating-1 {
+  --overclock-rating: 4;
+}
+
+.rating-banner.rating-2 {
+  --overclock-rating: 8;
+}
+
+.rating-banner.rating-3 {
+  --overclock-rating: 12;
+}
+
+.rating-banner.rating-4 {
+  --overclock-rating: 16;
+}
+
+.rating-banner.rating-5 {
+  --overclock-rating: 20;
+}
+
+.rating-banner.rating-100-1 {
+  --overclock-rating: 1;
+}
+
+.rating-banner.rating-100-2 {
+  --overclock-rating: 2;
+}
+
+.rating-banner.rating-100-3 {
+  --overclock-rating: 3;
+}
+
+.rating-banner.rating-100-4 {
+  --overclock-rating: 4;
+}
+
+.rating-banner.rating-100-5 {
+  --overclock-rating: 5;
+}
+
+.rating-banner.rating-100-6 {
+  --overclock-rating: 6;
+}
+
+.rating-banner.rating-100-7 {
+  --overclock-rating: 7;
+}
+
+.rating-banner.rating-100-8 {
+  --overclock-rating: 8;
+}
+
+.rating-banner.rating-100-9 {
+  --overclock-rating: 9;
+}
+
+.rating-banner.rating-100-10 {
+  --overclock-rating: 10;
+}
+
+.rating-banner.rating-100-11 {
+  --overclock-rating: 11;
+}
+
+.rating-banner.rating-100-12 {
+  --overclock-rating: 12;
+}
+
+.rating-banner.rating-100-13 {
+  --overclock-rating: 13;
+}
+
+.rating-banner.rating-100-14 {
+  --overclock-rating: 14;
+}
+
+.rating-banner.rating-100-15 {
+  --overclock-rating: 15;
+}
+
+.rating-banner.rating-100-16 {
+  --overclock-rating: 16;
+}
+
+.rating-banner.rating-100-17 {
+  --overclock-rating: 17;
+}
+
+.rating-banner.rating-100-18 {
+  --overclock-rating: 18;
+}
+
+.rating-banner.rating-100-19 {
+  --overclock-rating: 19;
+}
+
+.rating-banner.rating-100-20 {
+  --overclock-rating: 20;
+}
+
+/*
+ * Stash shows the card's checkbox in the picture's top-left corner whenever a
+ * card is hovered or selected, and always on touch screens, where it is
+ * wider, so the tag hangs to its right and never covers it (and past a
+ * group's drag handle where there is one).
+ */
+.grid-card:has(.card-drag-handle) .rating-banner {
+  left: 3.6rem;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .grid-card .rating-banner {
+    left: 2.4rem;
+  }
+
+  .grid-card:has(.card-drag-handle) .rating-banner {
+    left: 4rem;
+  }
+}
+
+/* Progress: a segmented bar along the bottom of the picture */
+.grid-card .progress-bar {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 16%) 0 6px,
+      transparent 6px 8px
+    ),
+    rgb(0 0 0 / 70%);
+  bottom: 0;
+  height: 6px;
+  z-index: 2;
+}
+
+.grid-card .progress-indicator {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--overclock-yellow) 0 6px,
+    transparent 6px 8px
+  );
+  height: 6px;
+}
+
+/* Where a hover over the picture scrubs the preview, the marker is yellow */
+.grid-card .hover-scrubber .hover-scrubber-indicator-marker {
+  background-color: var(--overclock-yellow);
+}
+
+/* Counts under the card */
+.card-popovers .btn.minimal {
+  --overclock-ink: var(--overclock-muted);
+
+  font-family: var(--overclock-font-label);
+  font-size: 0.82rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.card-popovers .btn.minimal:not(:disabled, .disabled):hover {
+  --overclock-ink: var(--overclock-yellow);
+}
+
+.card-popovers .organized .btn.minimal {
+  --overclock-ink: var(--overclock-cyan);
+}
+
+/*
+ * The selection box: a clipped square that fills yellow. Stash makes it a
+ * .form-control, so it drops the field's frame and caret.
+ */
+.grid-card .card-check {
+  animation: none;
+  appearance: none;
+  background: rgb(5 5 6 / 85%);
+  border: 1px solid var(--overclock-yellow);
+  border-radius: 0;
+  box-shadow: none;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 5px),
+    calc(100% - 5px) 100%,
+    0 100%
+  );
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+}
+
+.grid-card .card-check:checked {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m2.5 8.4 1.6-1.6 2.6 2.6 5.2-5.2 1.6 1.6-6.8 6.8Z' fill='%230a0a0c'/%3E%3C/svg%3E")
+      center / 82% no-repeat,
+    var(--overclock-yellow);
+  opacity: 1;
+}
+
+/*
+ * The zoom button on image cards, which opens the lightbox. Stash draws it as
+ * a bare 5em magnifier in the middle of the picture. Here it is a clipped
+ * square in the bottom-right corner that appears on hover. #root outranks
+ * Stash's hover, focus and active reset.
+ */
+#root .image-card .preview-button {
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 0.5rem;
+
+  /* Only the button takes the pointer; the rest is the picture and its link */
+  pointer-events: none;
+  z-index: 2;
+}
+
+#root .image-card .preview-button .btn {
+  --overclock-fill: rgb(5 5 6 / 86%);
+  --overclock-edge: var(--overclock-yellow);
+  --overclock-ink: var(--overclock-yellow);
+  --overclock-cut: 7px;
+
+  align-items: center;
+  background-image: linear-gradient(
+    315deg,
+    var(--overclock-edge) calc(var(--overclock-cut) * 0.7071 + 1px),
+    transparent 0
+  );
+  border: 1px solid var(--overclock-yellow) !important;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 7px),
+    calc(100% - 7px) 100%,
+    0 100%
+  );
+  display: flex;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  pointer-events: auto;
+  width: 32px;
+}
+
+#root .image-card .preview-button .fa-icon {
+  color: inherit;
+  filter: none;
+  height: 15px;
+  margin: 0;
+  opacity: 1;
+  transition: none;
+  width: 15px;
+}
+
+/*
+ * With a mouse the button waits for the card: it shows on hover, or when the
+ * keyboard reaches anything on the card. Touch screens have no hover, so
+ * there it always shows.
+ */
+@media (hover: hover) and (pointer: fine) {
+  #root .image-card .preview-button .btn {
+    opacity: 0;
+  }
+
+  #root .image-card:hover .preview-button .btn,
+  #root .image-card:has(:focus-visible) .preview-button .btn {
+    opacity: 1;
+  }
+}
+
+#root .image-card .preview-button .btn:hover {
+  --overclock-fill: var(--overclock-yellow);
+  --overclock-ink: var(--overclock-black);
+}

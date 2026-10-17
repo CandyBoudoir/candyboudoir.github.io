@@ -1,0 +1,335 @@
+/*
+ * Forms: dark fields with a bottom rule and corner ticks. Focus turns the
+ * frame yellow and starts a blinking block, a terminal cursor at the end of
+ * the field.
+ */
+.form-control,
+.custom-select,
+.input-control,
+div.react-select__control {
+  --overclock-tick: var(--overclock-line);
+
+  background:
+    linear-gradient(var(--overclock-caret) 0 0) right 0.7rem center / 7px 1.05em
+      no-repeat,
+    linear-gradient(var(--overclock-tick) 0 0) 0 0 / 1px 7px no-repeat,
+    linear-gradient(var(--overclock-tick) 0 0) 0 0 / 7px 1px no-repeat,
+    linear-gradient(var(--overclock-tick) 0 0) 100% 0 / 1px 7px no-repeat,
+    linear-gradient(var(--overclock-tick) 0 0) 100% 0 / 7px 1px no-repeat,
+    var(--overclock-field);
+  border: 0;
+  border-bottom: 1px solid var(--overclock-line);
+  border-radius: 0;
+  box-shadow: none;
+  caret-color: var(--overclock-yellow);
+  color: var(--overclock-text);
+}
+
+.form-control::placeholder {
+  color: var(--overclock-dim);
+  font-family: var(--overclock-font-label);
+  letter-spacing: 0.04em;
+}
+
+.form-control:focus,
+.custom-select:focus,
+.input-control:focus,
+div.react-select__control--is-focused {
+  --overclock-tick: var(--overclock-yellow);
+
+  background-color: var(--overclock-field);
+  border-bottom-color: var(--overclock-yellow);
+  box-shadow: 0 0 0 1px rgb(243 230 0 / 70%);
+  color: var(--overclock-text);
+}
+
+/* Only fields that take typing get the blinking block */
+:is(input.form-control, textarea.form-control, .input-control):focus {
+  animation: overclock-caret 1s steps(1, end) infinite;
+}
+
+@keyframes overclock-caret {
+  0% {
+    --overclock-caret: var(--overclock-yellow);
+  }
+
+  50% {
+    --overclock-caret: transparent;
+  }
+}
+
+.custom-select {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M0 0h4l2 3 2-3h4L6 8Z' fill='%23f3e600'/%3E%3C/svg%3E")
+      right 0.8rem center / 11px 7px no-repeat,
+    linear-gradient(var(--overclock-tick) 0 0) 0 0 / 1px 7px no-repeat,
+    linear-gradient(var(--overclock-tick) 0 0) 0 0 / 7px 1px no-repeat,
+    linear-gradient(var(--overclock-tick) 0 0) 100% 0 / 1px 7px no-repeat,
+    linear-gradient(var(--overclock-tick) 0 0) 100% 0 / 7px 1px no-repeat,
+    var(--overclock-field);
+  font-family: var(--overclock-font-label);
+  letter-spacing: 0.04em;
+  padding-right: 2.2rem;
+}
+
+.custom-select option {
+  background: var(--overclock-panel);
+  color: var(--overclock-text);
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+  color: var(--overclock-muted);
+}
+
+/*
+ * Stash paints its own .input-control fields (the Tagger's selects, the
+ * scrape dialog's lists) slate, focused and disabled ones two classes deep
+ */
+:is(#root, .modal) .input-control,
+:is(#root, .modal) .input-control:is(:focus, :disabled) {
+  background-color: var(--overclock-field);
+}
+
+:is(#root, .modal) .input-control:focus {
+  box-shadow: 0 0 0 1px rgb(243 230 0 / 70%);
+}
+
+/* Scrape fields arrive as Bootstrap's grey, white and bordered, with !important */
+.form-control.bg-secondary {
+  background-color: var(--overclock-field) !important;
+  border-color: var(--overclock-line) !important;
+  color: var(--overclock-text) !important;
+}
+
+.form-control.bg-secondary:focus {
+  border-color: var(--overclock-yellow) !important;
+}
+
+.form-control.text-white {
+  color: var(--overclock-text) !important;
+}
+
+.input-group-text {
+  background: var(--overclock-control);
+  border: 1px solid var(--overclock-line);
+  border-radius: 0;
+  color: var(--overclock-muted);
+  font-family: var(--overclock-font-label);
+  letter-spacing: 0.06em;
+}
+
+/* Validation, as in the stash-box endpoint form */
+.form-control.is-valid,
+.was-validated .form-control:valid {
+  --overclock-tick: var(--overclock-cyan);
+
+  border-bottom-color: var(--overclock-cyan);
+  padding-right: 0.75rem;
+}
+
+.form-control.is-valid:focus,
+.was-validated .form-control:valid:focus {
+  border-bottom-color: var(--overclock-cyan);
+  box-shadow: 0 0 0 1px rgb(0 229 255 / 70%);
+}
+
+.form-control.is-invalid,
+.was-validated .form-control:invalid {
+  --overclock-tick: var(--overclock-red);
+
+  border-bottom-color: var(--overclock-red);
+  padding-right: 0.75rem;
+}
+
+.form-control.is-invalid:focus,
+.was-validated .form-control:invalid:focus {
+  border-bottom-color: var(--overclock-red);
+  box-shadow: 0 0 0 1px rgb(255 31 75 / 70%);
+}
+
+.invalid-feedback {
+  color: var(--overclock-red-hi);
+  font-family: var(--overclock-font-label);
+}
+
+.valid-feedback {
+  color: var(--overclock-cyan);
+  font-family: var(--overclock-font-label);
+}
+
+/* Checkboxes and switches: square, and yellow when on */
+.custom-control-label::before {
+  background-color: var(--overclock-field);
+  border: 1px solid var(--overclock-line);
+  border-radius: 0 !important;
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+  background-color: var(--overclock-yellow);
+  border-color: var(--overclock-yellow);
+}
+
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m2.5 8.4 1.6-1.6 2.6 2.6 5.2-5.2 1.6 1.6-6.8 6.8Z' fill='%230a0a0c'/%3E%3C/svg%3E");
+}
+
+.custom-control-input:focus ~ .custom-control-label::before {
+  box-shadow:
+    0 0 0 1px var(--overclock-bg),
+    0 0 0 3px var(--overclock-cyan);
+}
+
+.custom-control-input:focus:not(:checked) ~ .custom-control-label::before {
+  border-color: var(--overclock-yellow);
+}
+
+.custom-control-input:not(:disabled):active ~ .custom-control-label::before {
+  background-color: var(--overclock-yellow-lo);
+  border-color: var(--overclock-yellow-lo);
+}
+
+.custom-control-input:disabled ~ .custom-control-label {
+  color: var(--overclock-dim);
+}
+
+.custom-switch .custom-control-label::after {
+  background-color: var(--overclock-line);
+  border-radius: 0;
+}
+
+.custom-switch .custom-control-input:checked ~ .custom-control-label::after {
+  background-color: var(--overclock-black);
+}
+
+/* Stash's searchable selects (react-select) */
+div.react-select__control .react-select__single-value,
+div.react-select__control .react-select__input-container {
+  color: var(--overclock-text);
+}
+
+.react-select__placeholder {
+  color: var(--overclock-dim) !important;
+  font-family: var(--overclock-font-label);
+}
+
+.react-select__indicator {
+  color: var(--overclock-yellow) !important;
+}
+
+.react-select__indicator-separator {
+  background-color: var(--overclock-rule) !important;
+}
+
+/*
+ * The Tagger marks a match linked to something already in Stash, which Stash
+ * fills blue three classes deep: here it takes the yellow frame of a focused
+ * field.
+ */
+.search-result
+  :is(.studio-select-active, .performer-select-active)
+  div.react-select__control,
+:is(.studio-select-active, .performer-select-active) div.react-select__control {
+  --overclock-tick: var(--overclock-yellow);
+
+  background-color: var(--overclock-field);
+  border-bottom-color: var(--overclock-yellow);
+  box-shadow: 0 0 0 1px rgb(243 230 0 / 70%);
+}
+
+/* Select menus match the dropdowns: a clipped panel with a yellow left rule */
+div.react-select__menu {
+  background: var(--overclock-panel);
+  border: 1px solid var(--overclock-line);
+  border-left: 3px solid var(--overclock-yellow);
+  border-radius: 0;
+  box-shadow: 0 14px 28px -12px #000;
+  color: var(--overclock-text);
+}
+
+div.react-select__menu .react-select__option {
+  color: var(--overclock-text);
+}
+
+div.react-select__menu .react-select__option--is-focused {
+  background: rgb(243 230 0 / 9%);
+  color: var(--overclock-yellow);
+}
+
+div.react-select__menu .react-select__option--is-selected {
+  background: var(--overclock-yellow);
+  color: var(--overclock-black);
+}
+
+div.react-select__control .react-select__multi-value {
+  background: var(--overclock-chip);
+  border: 1px solid var(--overclock-line);
+  border-radius: 0;
+  color: var(--overclock-text);
+}
+
+.react-select__multi-value__label {
+  color: var(--overclock-text) !important;
+  font-family: var(--overclock-font-label);
+  letter-spacing: 0.04em;
+}
+
+.react-select__multi-value__remove:hover {
+  background: var(--overclock-red) !important;
+  color: var(--overclock-black) !important;
+}
+
+/*
+ * Sliders: Stash draws its own (styles/_range.scss), so repaint the track and
+ * the thumb. The scene filter sliders keep their colour tracks.
+ */
+#root
+  input[type='range']:not(
+    .blue-slider,
+    .brightness-slider,
+    .contrast-slider,
+    .double-range-slider-max,
+    .green-slider,
+    .hue-rotate-slider,
+    .red-slider,
+    .saturation-slider,
+    .white-balance-slider
+  )::-webkit-slider-runnable-track {
+  background: repeating-linear-gradient(
+      90deg,
+      var(--overclock-line) 0 1px,
+      transparent 1px 8px
+    )
+    var(--overclock-field);
+  border-bottom: 1px solid var(--overclock-line);
+}
+
+#root input[type='range']::-webkit-slider-thumb {
+  background: var(--overclock-yellow);
+  border: 0;
+  border-radius: 0;
+  height: 16px;
+  margin-top: -5px;
+  width: 10px;
+}
+
+#root
+  input[type='range']:not(
+    .blue-slider,
+    .brightness-slider,
+    .contrast-slider,
+    .double-range-slider-max,
+    .green-slider,
+    .hue-rotate-slider,
+    .red-slider,
+    .saturation-slider,
+    .white-balance-slider
+  )::-moz-range-track {
+  background: var(--overclock-field);
+}
+
+#root input[type='range']::-moz-range-thumb {
+  background: var(--overclock-yellow);
+  border: 0;
+  border-radius: 0;
+}
