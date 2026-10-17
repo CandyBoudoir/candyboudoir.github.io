@@ -179,9 +179,10 @@ test('a frame or Look closer opens the inspector without picking, and Esc goes b
   // the bar follows the mouse
   const box = await scrub.boundingBox()
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-  const mid = +(await scrub.getAttribute('aria-valuenow'))
-  expect(mid).toBeGreaterThan(35)
-  expect(mid).toBeLessThan(46)
+  // pointermove arrives with the next frame
+  const now = async () => +(await scrub.getAttribute('aria-valuenow'))
+  await expect.poll(now).toBeGreaterThan(35)
+  expect(await now()).toBeLessThan(46)
   await insp.locator('.cherrypick-insp-grid .cherrypick-frame').nth(3).click()
   await expect(insp.locator('.cherrypick-frame.active')).toHaveCount(1)
 
