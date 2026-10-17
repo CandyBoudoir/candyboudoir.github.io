@@ -323,7 +323,7 @@ function SceneOps({ where, desc, pathname }) {
     title = error
       ? failedTitle(error)
       : ok
-        ? `A bracket of ${BR.clipPoolPhrase(plays)}${unrated} scenes of ${her} you've watched`
+        ? `A bracket of ${BR.clipPoolPhrase(plays)}${unrated} scenes of ${her} you've watched${BR.clipPoolSpread(plays)}`
         : `Needs ${BR.MIN_CLIP_POOL} watched scenes; you've watched ${n}`
   } else {
     pool = {
@@ -343,7 +343,7 @@ function SceneOps({ where, desc, pathname }) {
         : n == null
           ? undefined
           : ok
-            ? `Bracket ${BR.clipPoolPhrase(plays)}${unrated} watched scenes in this list`
+            ? `Bracket ${BR.clipPoolPhrase(plays)}${unrated} watched scenes in this list${BR.clipPoolSpread(plays)}`
             : `Needs ${BR.MIN_CLIP_POOL} watched scenes in this list`
   }
   const herTab = where.place === 'performer-scenes'

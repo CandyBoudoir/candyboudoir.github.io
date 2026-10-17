@@ -134,9 +134,9 @@ Cherry Pick runs in Stash's web interface and keeps its data in your Stash:
 
 - **Stash's plugin configuration** (`config.yml`): the settings above, the Hall of Fame, a bracket in progress, Not interested, Don't learn, applied ratings, whether you turned StashDB off and your answer about Your score beside Stash Curator. A few kilobytes.
 - **Custom fields**: the three bracket fields above on performers, written once when a bracket ends, and `cherrypick_provisional` on performers and scenes whose rating Apply set from the champion's.
-- **Your Stash ratings**: only through Apply to my ratings, or when you close a bracket's champion screen with Apply bracket ratings automatically on; never on a record you rated yourself, another plugin ranks or whose rating Restash mirrors; and Undo puts them back.
+- **Your Stash ratings**: only through Apply to my ratings, or when you close a bracket's champion screen with Apply bracket ratings automatically on; never on a record you rated yourself, another plugin ranks or whose rating Restash mirrors. Undo puts them back, except a rating you changed since Apply, which stays yours.
 
-Your browser keeps only what Cherry Pick can rebuild from Stash: a copy of your library for a fast start, the taste model, the StashDB cache and which For you cards you opened. A new browser rebuilds them.
+Your browser keeps only what Cherry Pick can do without: a copy of your library for a fast start and the StashDB cache in IndexedDB, and which For you cards you opened or passed over and a copy of the plugin configuration in local storage. A new browser fetches the library and the StashDB answers again, and its record of For you's cards starts empty. The taste model is never stored. Cherry Pick fits it again from what your Stash holds each time Stash loads.
 
 ### Network requests
 

@@ -66,7 +66,13 @@ test('clip brackets: every scene under 16, with byes for the top seeds', () => {
   )
   assert.equal(BR.clipPoolPhrase(7), 'the 7')
   assert.equal(BR.clipPoolPhrase(16), 'the 16')
-  assert.equal(BR.clipPoolPhrase(60), 'your top 16 of the 60')
+  assert.equal(BR.clipPoolPhrase(60), '16 of the 60')
+  assert.equal(BR.clipPoolSpread(16), '')
+  assert.equal(
+    BR.clipPoolSpread(60),
+    ', from likely best to likely worst',
+    'the 16 spread over the whole range',
+  )
 })
 
 test('a clip bracket of 7: one bye, then six picks to a champion', () => {
@@ -735,6 +741,48 @@ test('the provisional mark on write and on Undo', () => {
       ranked: [],
     },
   )
+})
+
+test('Undo leaves alone a rating changed since Apply', () => {
+  const F = BR.PROVISIONAL_FIELD
+  const change = (id, to, provisional, from = null) => ({
+    id,
+    from,
+    to,
+    provisional,
+    fromProvisional: null,
+  })
+  const batch = [
+    change('1', 80, false),
+    change('2', 80, false),
+    change('3', 60, true, 40),
+    change('4', 60, true),
+    change('5', 60, true),
+    change('6', 60, true),
+    change('7', 70, false, 50),
+    change('8', 70, false),
+  ]
+  const current = new Map([
+    // as Apply left them: measured, and provisional with its mark (Stash
+    // may return the mark as a string)
+    ['1', { id: '1', rating100: 80, custom_fields: {} }],
+    ['3', { id: '3', rating100: 60, custom_fields: { [F]: '60' } }],
+    // rated by hand since
+    ['2', { id: '2', rating100: 60, custom_fields: {} }],
+    ['4', { id: '4', rating100: 90, custom_fields: { [F]: 60 } }],
+    // a later bracket stepped it down again
+    ['5', { id: '5', rating100: 50, custom_fields: { [F]: 50 } }],
+    // its mark taken off: the 60 is the user's now
+    ['6', { id: '6', rating100: 60, custom_fields: {} }],
+    // its rating cleared by hand
+    ['7', { id: '7', rating100: null, custom_fields: {} }],
+    // '8' is gone from Stash
+  ])
+  assert.deepEqual(BR.undoableChanges(batch, current), {
+    write: [batch[0], batch[2]],
+    ranked: [],
+    changed: ['2', '4', '5', '6', '7'],
+  })
 })
 
 test('clip brackets play unrated scenes, and the champion sets the scale', () => {

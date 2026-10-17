@@ -68,13 +68,23 @@ function useMoved(bracketId) {
   }, [bracketId, M])
 }
 
-// What an applied batch left alone because another plugin ranks or mirrors
-// its rating (at Apply, or since, at Undo): "Left 2 as they are: another
-// plugin rates them."
+// What an applied batch left alone: records another plugin ranks or
+// mirrors (at Apply, or since, at Undo), and records whose rating changed
+// since Apply (at Undo): "Left 2 as they are: another plugin rates them.
+// Left 1 as it is: its rating changed since Apply."
 export function keptText(a) {
-  const n = a.kept || 0
-  if (!n) return null
-  return `Left ${n} as ${n === 1 ? 'it is' : 'they are'}: another plugin rates ${n === 1 ? 'it' : 'them'}.`
+  const left = (n, why) =>
+    n ? `Left ${n} as ${n === 1 ? 'it is' : 'they are'}: ${why(n === 1)}.` : ''
+  const text = [
+    left(a.kept || 0, (one) => `another plugin rates ${one ? 'it' : 'them'}`),
+    left(
+      a.changed || 0,
+      (one) => `${one ? 'its rating' : 'their ratings'} changed since Apply`,
+    ),
+  ]
+    .filter(Boolean)
+    .join(' ')
+  return text || null
 }
 
 // Undo while there is something to put back; Dismiss once only the note
