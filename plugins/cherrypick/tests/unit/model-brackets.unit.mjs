@@ -408,7 +408,7 @@ test('the first round: rank-matched pairs, byes to anchors first', () => {
   assert.equal(pairOf(slots, 'a1'), 'u1')
   assert.equal(pairOf(slots, 'a2'), 'u3')
   assert.equal(pairOf(slots, 'a3'), 'u5')
-  assert.equal(pairOf(slots, 'u2'), 'u4', 'the rest play among themselves')
+  assert.equal(pairOf(slots, 'u2'), 'u4', 'the rest play across their halves')
   // the top anchor's match and the next one's sit in opposite halves
   const half = (id) => (slots.indexOf(id) < 4 ? 0 : 1)
   assert.notEqual(half('a1'), half('a2'))
@@ -419,6 +419,34 @@ test('the first round: rank-matched pairs, byes to anchors first', () => {
     if (!small[i] || !small[i + 1]) byes.push(small[i] || small[i + 1])
   assert.deepEqual(byes.sort(), ['a2', 'u2', 'u3'])
   assert.equal(pairOf(small, 'a1'), 'u1')
+})
+
+test('the first round: entrants with no anchor play across their halves', () => {
+  const pairOf = (slots, id) => {
+    const i = slots.indexOf(id)
+    return slots[i % 2 ? i - 1 : i + 1]
+  }
+  // sixteen candidates, strongest first: 1 v 9, 2 v 10, ... 8 v 16
+  const u = Array.from({ length: 16 }, (_, i) => 'u' + (i + 1))
+  const slots = BR.firstRoundSlots([], u, 16, 7)
+  assert.deepEqual(slots.slice().sort(), u.slice().sort())
+  for (let i = 1; i <= 8; i++)
+    assert.equal(pairOf(slots, 'u' + i), 'u' + (i + 8), `u${i} v u${i + 8}`)
+  // the two strongest pairs sit in opposite halves, so u1 and u2 can only
+  // meet in the final
+  const side = (id) => (slots.indexOf(id) < 8 ? 0 : 1)
+  assert.notEqual(side('u1'), side('u2'))
+  // eleven in sixteen: five byes to the strongest, the other six across
+  // their halves
+  const eleven = u.slice(0, 11)
+  const small = BR.firstRoundSlots([], eleven, 16, 7)
+  const byes = []
+  for (let i = 0; i < 16; i += 2)
+    if (!small[i] || !small[i + 1]) byes.push(small[i] || small[i + 1])
+  assert.deepEqual(byes.sort(), ['u1', 'u2', 'u3', 'u4', 'u5'])
+  assert.equal(pairOf(small, 'u6'), 'u9')
+  assert.equal(pairOf(small, 'u7'), 'u10')
+  assert.equal(pairOf(small, 'u8'), 'u11')
 })
 
 // finished brackets for the Hall of Fame

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- In a bracket's first round, the unrated ones meet across the bracket's halves: of 16, the one Cherry Pick rates highest meets the ninth, the second the tenth, and so on. They met their neighbour (first against second), so since 0.1.4 rates every entrant from where it finished, a strong scene or performer that lost to the next strongest in the first round was rated at about the middle of your scale.
+
 ## 0.1.4
 
 - More like this no longer makes the scene page scroll sideways in a desktop browser. Its arrows sat past the page's edges, the right one 10px beyond the page and the left one half off it.
