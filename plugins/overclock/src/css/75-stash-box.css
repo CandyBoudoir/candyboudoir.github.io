@@ -1,0 +1,241 @@
+/*
+ * Stash-box screens: the Tagger, the scrape dialogs, StashID links and the
+ * stash-box search lists. Stash paints these slate in its own stylesheet. The
+ * Tagger is a work surface where people clear hundreds of rows in a sitting,
+ * so it stays still and flat: no glitch, scan line or motion. The chosen row
+ * takes a yellow edge and the chosen select a yellow frame.
+ */
+.search-item {
+  --overclock-cut: 12px;
+
+  background: var(--overclock-panel);
+  border: 1px solid var(--overclock-rule);
+  border-radius: 0;
+}
+
+/* The performer, studio and tag taggers sit inside a card, so raise them */
+.PerformerTagger-performer,
+.StudioTagger-studio,
+.TagTagger-tag,
+.modal .search-item {
+  background: var(--overclock-raised);
+  border: 1px solid var(--overclock-rule);
+  border-radius: 0;
+}
+
+.StudioTagger-studio .studio-card img,
+.TagTagger-tag .tag-card img {
+  background-color: var(--overclock-bg);
+}
+
+/* Clickable results in the stash-box search modals */
+.PerformerScrapeModal-list .search-item:hover,
+.StashBoxIDSearchModal-list .search-item:hover {
+  border-left: 3px solid var(--overclock-yellow);
+}
+
+/* Scene Tagger results: the picked one takes a yellow edge */
+.search-result {
+  background-color: transparent;
+  border-left: 3px solid transparent;
+}
+
+.search-result + .search-result {
+  border-top: 1px dashed var(--overclock-rule);
+}
+
+.search-result.selected-result,
+.selected-result:hover {
+  background: linear-gradient(90deg, rgb(243 230 0 / 7%), transparent 70%);
+  border-left-color: var(--overclock-yellow);
+}
+
+.search-result:not(.selected-result):hover {
+  background-color: rgb(255 255 255 / 3%);
+}
+
+.search-result h4 {
+  font-size: 1.15rem;
+}
+
+.search-result h5 {
+  color: var(--overclock-muted);
+  font-family: var(--overclock-font-label);
+  font-size: 0.82rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: none;
+}
+
+.tagger-container .scene-card-preview,
+.search-result .scene-image,
+.search-item .scene-image {
+  border: 1px solid var(--overclock-rule);
+}
+
+.entity-name {
+  color: var(--overclock-muted);
+  font-family: var(--overclock-font-label);
+  letter-spacing: 0.04em;
+}
+
+/* Fields left out of a save, or missing from the result */
+li.active .optional-field.missing .optional-field-content,
+li.active .optional-field.excluded .optional-field-content,
+li.active .optional-field.excluded .scene-link {
+  color: var(--overclock-dim);
+}
+
+/* StashID links: the box name on cyan and the ID on a chip, one clipped tag */
+.stash-id-pill {
+  --overclock-cut: 5px;
+
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+  padding: 0;
+  vertical-align: middle;
+}
+
+.stash-id-pill span {
+  background: var(--overclock-cyan);
+  border-radius: 0;
+  color: var(--overclock-black);
+  font-family: var(--overclock-font-label);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stash-id-pill a {
+  background: var(--overclock-chip);
+  border-radius: 0;
+  color: var(--overclock-cyan);
+  font-family: var(--overclock-font-label);
+  font-weight: 400;
+}
+
+.stash-id-pill a:hover {
+  color: var(--overclock-yellow);
+}
+
+/*
+ * Scrape dialogs set Stash's current value against the scraped one, and the
+ * toggle in front of each says which wins: the winning side's field takes
+ * the yellow frame.
+ */
+.scrape-dialog .column-label,
+.scrape-dialog .col-form-label {
+  color: var(--overclock-dim);
+  font-family: var(--overclock-font-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.scrape-dialog .column-label {
+  font-size: 0.85rem;
+}
+
+.scrape-dialog
+  .input-group:has(> .input-group-prepend .text-success)
+  :is(.form-control, div.react-select__control) {
+  --overclock-tick: var(--overclock-yellow);
+
+  border-bottom-color: var(--overclock-yellow) !important;
+}
+
+/* Icons on control buttons keep their meaning */
+.btn-secondary .text-muted {
+  color: var(--overclock-dim) !important;
+}
+
+/* The filter bar at the top of the "Scrape with…" menu */
+.scraper-menu .dropdown-menu .scraper-filter-container {
+  background: transparent;
+  border-bottom: 1px dashed var(--overclock-rule);
+}
+
+/* Identify task: the ordered list of sources */
+.scraper-source-list .list-group-item,
+.list-group-item {
+  background: var(--overclock-panel);
+  border-color: var(--overclock-rule);
+  color: var(--overclock-text);
+}
+
+.identify-source-editor .default-value {
+  color: var(--overclock-dim);
+}
+
+/*
+ * Nothing moves anywhere in the Tagger, the stash-box lists or the scrape
+ * dialog: no glitch, scan line, blink or snap. Cards in the Tagger keep their
+ * brackets where they are and lose the hover readouts. :is() drops
+ * pseudo-elements, so each one is named on its own.
+ */
+:is(
+    .search-item,
+    .tagger-container,
+    .scrape-dialog,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag
+  )
+  *,
+:is(
+    .search-item,
+    .tagger-container,
+    .scrape-dialog,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag
+  )
+  *::before,
+:is(
+    .search-item,
+    .tagger-container,
+    .scrape-dialog,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag
+  )
+  *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+:is(
+    .tagger-container,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag
+  )
+  .grid-card:hover
+  .thumbnail-section::after {
+  --overclock-bracket: 16px;
+  --overclock-bracket-w: 2px;
+
+  color: rgb(232 239 238 / 50%);
+  inset: 7px;
+}
+
+:is(
+    .tagger-container,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag
+  )
+  .grid-card:hover
+  .thumbnail-section
+  > a::before,
+:is(
+    .tagger-container,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag
+  )
+  .grid-card:hover
+  .thumbnail-section
+  > a::after {
+  content: none;
+}
