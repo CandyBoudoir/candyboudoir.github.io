@@ -3,7 +3,9 @@
 // tests/stash-versions.json does not list yet. Each companion plugin
 // (companions.mjs) adds an optional leg on the baseline version with it
 // installed, and Firefox and WebKit each add one that runs Cherry Pick's
-// contract specs in that browser (the screenshots stay Chromium's).
+// contract specs in that browser (the screenshots stay Chromium's). A
+// companion leg's `zips` keys the cache of its pinned zip (companion-zips.mjs)
+// on the pin's sha256.
 import { readFile } from 'node:fs/promises'
 import { COMPANIONS } from './companions.mjs'
 
@@ -48,6 +50,7 @@ if (baseline)
       channel: 'companion',
       baseline: false,
       companions: key,
+      zips: COMPANIONS[key].package.sha256,
     })
 if (baseline)
   for (const browser of ['firefox', 'webkit'])

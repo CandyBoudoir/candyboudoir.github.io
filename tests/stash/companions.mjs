@@ -4,9 +4,11 @@
 // them from a package source of its own, the way users install plugins,
 // and usePlugins leaves them enabled. Each is pinned to one release: its zip,
 // which Stash checks against sha256 as it installs it, at a fixed commit when
-// the author keeps the zip in git. The pin is always the author's latest
-// release: `latest` says where to look, and tested-with.mjs holds back a
-// Cherry Pick release while a newer one is out.
+// the author keeps the zip in git. The source serves a copy of each zip
+// fetched once per pin (companion-zips.mjs), never the author's URL, so test
+// runs leave release download counts alone. The pin is always the author's
+// latest release: `latest` says where to look, and tested-with.mjs holds
+// back a Cherry Pick release while a newer one is out.
 const CURATOR_RELEASE =
   'https://github.com/mrx-31415/stash-curator/releases/download/v0.39.1'
 const CURATOR_ZIPS = {
@@ -150,8 +152,9 @@ export function companions() {
 // The companions' plugin ids, which stay enabled beside the plugin under test
 export const companionPluginIds = () => companions().flatMap((c) => c.enable)
 
-// The package source index.yml listing the companions
-export const companionIndex = () =>
+// The package source index.yml listing the companions, whose zips are served
+// from base under their sha256
+export const companionIndex = (base) =>
   companions()
     .map(({ package: p }) =>
       [
@@ -159,7 +162,7 @@ export const companionIndex = () =>
         `  name: ${p.name}`,
         `  version: ${p.version}`,
         `  date: "${p.date}"`,
-        `  path: ${p.path}`,
+        `  path: ${base}/${p.sha256}.zip`,
         `  sha256: ${p.sha256}`,
       ].join('\n'),
     )
