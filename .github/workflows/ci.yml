@@ -1,4 +1,5 @@
-# Checks every pull request and every push to main: format, lint and a build.
+# Checks every pull request and every push to main: format, lint, unit tests,
+# the companion versions Cherry Pick names and a build.
 name: CI
 
 on:
@@ -25,4 +26,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
       - run: pnpm test:unit
+      # Cherry Pick's README names the companion plugin versions it is tested
+      # beside, and a Cherry Pick release needs each to be the latest
+      - run: node tests/stash/tested-with.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - run: pnpm build
