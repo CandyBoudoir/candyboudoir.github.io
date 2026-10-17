@@ -8,21 +8,21 @@ The design-system page (`design-system/index.html`, built to `dist/site/overcloc
 
 Every rule in `src/css` reads these custom properties, because Stash compiles its colours from SCSS and exposes none of its own.
 
-| Token                 | Hex       | Use                                              |
-| --------------------- | --------- | ------------------------------------------------ |
-| `--overclock-yellow`  | `#F3E600` | Primary, active, ratings, the lock, focus        |
-| `--overclock-cyan`    | `#00E5FF` | Readouts, info, links, the scan line, matches    |
-| `--overclock-red`     | `#FF1F4B` | Danger, denied, misses, the glitch's left fringe |
-| `--overclock-magenta` | `#FF2FD0` | Glitch fringe only                               |
-| `--overclock-panel`   | `#0D1416` | Cards, panels, menus                             |
-| `--overclock-raised`  | `#122024` | Raised panels                                    |
-| `--overclock-line`    | `#3B5A60` | Frame lines, brackets, ticks                     |
-| `--overclock-bg`      | `#0A0A0C` | Page, behind a dot grid                          |
-| `--overclock-text`    | `#E8EFEE` | Text                                             |
-| `--overclock-muted`   | `#A8BAB9` | Secondary text, 9.2:1 on panels                  |
-| `--overclock-dim`     | `#86999A` | Captions and labels, 6.2:1 on panels             |
+| Token                 | Hex       | Use                                           |
+| --------------------- | --------- | --------------------------------------------- |
+| `--overclock-yellow`  | `#F3E600` | Primary, active, ratings, the lock, focus     |
+| `--overclock-cyan`    | `#00E5FF` | Readouts, info, links, the scan line, matches |
+| `--overclock-red`     | `#FF1F4B` | Danger, misses, the glitch's left fringe      |
+| `--overclock-magenta` | `#FF2FD0` | Glitch fringe only                            |
+| `--overclock-panel`   | `#0D1416` | Cards, panels, menus                          |
+| `--overclock-raised`  | `#122024` | Raised panels                                 |
+| `--overclock-line`    | `#3B5A60` | Frame lines, brackets, ticks                  |
+| `--overclock-bg`      | `#0A0A0C` | Page, behind a dot grid                       |
+| `--overclock-text`    | `#E8EFEE` | Text                                          |
+| `--overclock-muted`   | `#A8BAB9` | Secondary text, 9.2:1 on panels               |
+| `--overclock-dim`     | `#86999A` | Captions and labels, 6.2:1 on panels          |
 
-Yellow marks what the system wants from the viewer. Cyan carries information. Red is kept for danger and denial, and yellow-and-black hazard stripes (`--overclock-hazard`) mark danger and locked states and nothing else.
+Yellow marks what the system wants from the viewer. Cyan carries information. Red is kept for danger and misses, and yellow-and-black hazard stripes (`--overclock-hazard`) mark danger and locked states and nothing else.
 
 ## Type
 
@@ -34,7 +34,7 @@ Two fixed layers sit behind the page, under every picture: a faint cyan dot grid
 
 ## Motifs and glyphs
 
-The motifs are flat technical line art in yellow and cyan on teal-black: a neural jack plug on its cable, a targeting reticle, an optical implant with an aperture iris, a microchip, a digital padlock with a hazard band, a wired controller and a countdown timer. Only the padlock ships in the plugin, for empty lists; the rest live with the design-system page (`design-system/ds/motifs`), which keeps the plugin small.
+The motifs are flat technical line art in yellow and cyan on teal-black: a neural jack plug on its cable, a targeting reticle, an optical implant with an aperture iris, a microchip, a digital padlock with a hazard band, a wired controller and a countdown timer. They live with the design-system page (`design-system/ds/motifs`), which keeps the plugin small. The plugin ships the glyphs, the hex dump behind the loader and `flatline.svg`, a dead scope with a flat trace for empty lists.
 
 Glyphs (`glyph-*.svg`) are flat silhouettes used as CSS masks, so one file takes any fill: `glyph-charge` and `glyph-charge-outline` for a rating and an empty rating, `glyph-reticle-open` and `glyph-reticle` for the favourite off and on, `glyph-bolt` for the O counter and `glyph-shard` for bursts.
 
@@ -48,7 +48,7 @@ Glyphs (`glyph-*.svg`) are flat silhouettes used as CSS masks, so one file takes
 - **Tags** are clipped mono chips with a cyan status light.
 - **Forms** are dark fields with a bottom rule and corner ticks. Focus turns the frame yellow and starts a blinking block cursor. Checkboxes and switches are square.
 - **Overlays** (menus, popovers, tooltips, toasts and modals) are clipped teal-black panels with a yellow left rule. A toast carries a `STASH` band and a message number, with a red variant for errors. A modal's header is a plain HUD bar, or a hazard band when its footer holds a danger button.
-- **Loading** is a segmented bar that counts its percentage up over a scrolling hex dump. **Empty lists** show a lock between two hazard stripes and the access-denied line.
+- **Loading** is a segmented bar that counts its percentage up over a scrolling hex dump. **Empty lists** show a dead scope with a flat cyan trace and the line No signal, in cyan, since an empty list is not an error.
 - **Stash-box screens** (the Tagger, scrape dialogs, StashID links and Identify) are where people clear hundreds of rows, so nothing in them glitches, scans or moves, pseudo-elements and transitions included. The chosen result takes a yellow edge and the chosen select a yellow frame. Matches read cyan, warnings yellow and misses red, and StashID links are a cyan tag.
 
 ## Motion
@@ -57,11 +57,11 @@ Hovering a nav link, a button, a tab, a tag or a card title glitches it for 170m
 
 ## Copy
 
-The system voice swaps a short list of Stash's own messages for short, cold lines (the list is `VOICE_COPY` in `src/js/overclock.js`). Matches are exact and whole-text, so titles, tags and descriptions are never touched. An empty list, where Stash shows only "0-0 of 0", also gets "Access denied. You haven't earned it." The Plain labels setting turns all of it off and leaves the lock.
+The system voice swaps a short list of Stash's own messages for short, cold lines (the list is `VOICE_COPY` in `src/js/overclock.js`). Matches are exact and whole-text, so titles, tags and descriptions are never touched. An empty list, where Stash shows only "0-0 of 0", also gets "No signal. Nothing on this channel." The Plain labels setting turns all of it off and leaves the scope.
 
 ## SFW mode
 
-Stash's SFW content mode keeps the display and drops the voice: the copy is off, bursts lose their red, and an empty list shows the lock with no line. Stash's own SFW icon for the O counter (a thumbs-up) is left alone.
+Stash's SFW content mode keeps the display and drops the voice: the copy is off, bursts lose their red, and an empty list shows the scope with no line. Stash's own SFW icon for the O counter (a thumbs-up) is left alone.
 
 ## Settings
 

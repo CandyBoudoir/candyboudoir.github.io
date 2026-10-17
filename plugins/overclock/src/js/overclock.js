@@ -14,7 +14,7 @@
   const VOICE_COPY = new Map([
     ['Loading…', 'Syncing…'],
     ['Loading plugins…', 'Loading your restraints…'],
-    ['No results found.', 'Access denied.'],
+    ['No results found.', 'No signal.'],
     ['No tasks are currently running.', 'Idle. Hands where I can see them.'],
     ['Performer Favourited', 'Target locked.'],
     ['Started generating', 'Countdown started.'],
@@ -27,7 +27,7 @@
   const EMPTY_STATES = new Set(['No results found.'])
 
   // Stash marks an empty list with nothing but "0-0 of 0" in .paginationIndex.
-  const EMPTY_LIST_LINE = "Access denied. You haven't earned it."
+  const EMPTY_LIST_LINE = 'No signal. Nothing on this channel.'
 
   // Yellow and cyan pixels, data shards, hex digits and a red fringe; SFW
   // mode drops the red.

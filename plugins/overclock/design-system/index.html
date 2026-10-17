@@ -174,7 +174,7 @@
             are a deep teal-black. Acid yellow marks what the system wants from
             you: primary buttons, the active tab, ratings and the lock. Data
             cyan carries readouts, info and the scan line. Alert red is kept for
-            danger and denial, magenta appears only as a glitch fringe, and
+            danger and misses, magenta appears only as a glitch fringe, and
             yellow-and-black hazard stripes mark danger and locked states.
           </p>
           <div class="ds-swatches">
@@ -201,7 +201,7 @@
               <div class="meta">
                 <code>--overclock-red</code>
                 <div class="hex">#FF1F4B</div>
-                <div class="role">Alert red: danger and denied</div>
+                <div class="role">Alert red: danger and misses</div>
               </div>
             </div>
             <div class="ds-swatch">
@@ -328,9 +328,10 @@
             Flat technical line art in acid yellow and data cyan on teal-black:
             a neural jack plug on its cable, a targeting reticle, an optical
             implant with an aperture iris, a microchip, a digital padlock with a
-            hazard band, a wired controller and a countdown timer. The padlock
-            ships with the theme for empty lists; the rest appear on this page
-            only. The flat glyphs are CSS masks, so they take any fill.
+            hazard band, a wired controller and a countdown timer. They appear
+            on this page only; the theme ships the glyphs, the hex dump and the
+            flat scope trace for empty lists. The flat glyphs are CSS masks, so
+            they take any fill.
           </p>
           <div class="ds-panel">
             <div class="ds-motifs">
@@ -351,10 +352,9 @@
                 <img src="ds/motifs/chip.svg" alt="" /><span>microchip</span>
               </div>
               <div class="ds-motif">
-                <img
-                  src="Theme-Overclock/assets/icons/padlock.svg"
-                  alt=""
-                /><span>firewall lock</span>
+                <img src="ds/motifs/padlock.svg" alt="" /><span
+                  >firewall lock</span
+                >
               </div>
               <div class="ds-motif">
                 <img src="ds/motifs/deck.svg" alt="" /><span>controller</span>
@@ -921,10 +921,7 @@
         </section>
 
         <section class="ds-section">
-          <h2>
-            <img src="Theme-Overclock/assets/icons/padlock.svg" alt="" />Forms
-            and menus
-          </h2>
+          <h2><img src="ds/motifs/padlock.svg" alt="" />Forms and menus</h2>
           <p class="ds-lede">
             Inputs are dark fields with a bottom rule and corner ticks. Focus
             turns the frame yellow and starts a blinking block. Menus, popovers
@@ -1241,9 +1238,9 @@
           <p class="ds-lede">
             The loader is a segmented bar that counts its percentage up over a
             scrolling hex dump, and Calm mode holds it on a still frame at 64%.
-            An empty list gets an access denied panel with hazard stripes and a
-            lock, and keeps the lock with no line under Plain labels or in SFW
-            mode.
+            An empty list gets a dead scope with a flat cyan trace and the line
+            No signal, and keeps the scope with no line under Plain labels or in
+            SFW mode.
           </p>
           <div class="ds-row" style="align-items: stretch">
             <div class="ds-panel" style="min-width: 260px">

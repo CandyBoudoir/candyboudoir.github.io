@@ -1,13 +1,13 @@
 /*
- * Empty states: access denied, a lock between hazard stripes. Stash marks an
- * empty list with nothing but "0-0 of 0" in .paginationIndex, and
- * overclock.js adds the line; without the voice (Plain labels or SFW mode)
- * the list keeps the lock and no line.
+ * Empty states: no signal, a flat trace on a dead scope. Stash marks an empty
+ * list with nothing but "0-0 of 0" in .paginationIndex, and overclock.js adds
+ * the line; without the voice (Plain labels or SFW mode) the list keeps the
+ * scope and no line. Cyan, since nothing here is an error.
  */
 .overclock-empty,
 .paginationIndex[data-overclock-empty]:not([data-overclock-empty='']) {
   align-items: center;
-  color: var(--overclock-red);
+  color: var(--overclock-cyan);
   display: flex;
   flex-direction: column;
   font-family: var(--overclock-font-display);
@@ -17,25 +17,22 @@
   letter-spacing: 0.06em;
   line-height: 1.15;
   text-align: center;
-  text-shadow: -1px 0 0 rgb(0 229 255 / 40%);
+  text-shadow: 0 0 12px rgb(0 229 255 / 35%);
   text-transform: uppercase;
 }
 
 .overclock-empty::before,
 .paginationIndex[data-overclock-empty]::before {
-  background:
-    url('assets/icons/padlock.svg') center / 58px 58px no-repeat,
-    var(--overclock-hazard) left center / calc(50% - 40px) 14px no-repeat,
-    var(--overclock-hazard) right center / calc(50% - 40px) 14px no-repeat;
+  background: url('assets/icons/flatline.svg') center / contain no-repeat;
   content: '';
-  height: 60px;
-  max-width: 280px;
+  height: 64px;
+  max-width: 220px;
   width: 100%;
 }
 
 .overclock-empty::after {
   color: var(--overclock-dim);
-  content: 'Err 403 · clearance insufficient';
+  content: 'Ch.07 · no carrier';
   font: 0.66rem/1 var(--overclock-font-label);
   letter-spacing: 0.14em;
   text-shadow: none;
@@ -53,7 +50,7 @@
 }
 
 .paginationIndex[data-overclock-empty]:not([data-overclock-empty='']) {
-  color: var(--overclock-red) !important;
+  color: var(--overclock-cyan) !important;
   font-size: 0;
 }
 

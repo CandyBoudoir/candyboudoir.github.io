@@ -11,7 +11,7 @@ First release, for Stash v0.31.1.
 - Hovering a button, a tab, a tag or a card title glitches it for 170ms: the type jumps and splits red and cyan. Nothing moves or resizes under the pointer.
 - Fields have corner ticks and a blinking block cursor on focus. Delete dialogs carry a hazard-striped header.
 - The Tagger's rows stay flat and still. Matches read cyan, warnings yellow and misses red, and StashID links are a cyan tag.
-- A segmented loader that counts its percentage up over a scrolling hex dump, and an access-denied lock between hazard stripes on empty lists.
+- A segmented loader that counts its percentage up over a scrolling hex dump, and a dead scope with a flat cyan trace and No signal on empty lists.
 - The voice of the system running the session for a short list of Stash's messages, matched whole so titles, tags and descriptions are never touched.
 - Bursts of pixels, data shards and hex digits on rating, favouriting and the O counter.
 - Calm mode and Plain labels settings. Stash's SFW mode keeps the display and drops the voice.

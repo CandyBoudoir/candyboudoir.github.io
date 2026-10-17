@@ -10,4 +10,4 @@ export const onlyOverclock = () => usePlugins(PLUGIN_ID)
 
 export const setPlugin = (input) => setPluginSettings(PLUGIN_ID, input)
 
-export const VOICE_EMPTY_LINE = "Access denied. You haven't earned it."
+export const VOICE_EMPTY_LINE = 'No signal. Nothing on this channel.'
