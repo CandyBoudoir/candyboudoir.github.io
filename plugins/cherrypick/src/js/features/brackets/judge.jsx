@@ -176,6 +176,20 @@ const meta = (s) =>
     .filter(Boolean)
     .join(' · ')
 
+// A scene of the bracket, or a stand-in for one deleted from Stash since
+// the bracket started, which can still be picked
+const sceneOf = (M, id) =>
+  M.db.scenes.get(id) || {
+    id,
+    title: 'A removed scene',
+    performers: [],
+    tags: [],
+    image: null,
+    duration: null,
+    studio: null,
+    date: null,
+  }
+
 function Faces({ db, performers, max, big = false }) {
   const shown = performers.slice(0, max)
   const more = performers.length - shown.length
@@ -211,8 +225,8 @@ function Faces({ db, performers, max, big = false }) {
 export function SceneContender({ id, side, onPick, onLook }) {
   const M = useAppState((s) => s.M)
   useJudgeData()
-  const s = M?.db.scenes.get(id)
-  if (!s) return null
+  if (!M) return null
+  const s = sceneOf(M, id)
   const sheet = sheets.get(id)
   const title = s.title || 'Untitled scene'
   const n = sheet?.frames.length || 0
@@ -430,8 +444,8 @@ export function SceneInspector({ id, frame, setFrame }) {
   }, [id, previewUrl])
   // moving through the frames stops the preview
   React.useEffect(() => setPlaying(false), [frame])
-  const s = M?.db.scenes.get(id)
-  if (!s) return null
+  if (!M) return null
+  const s = sceneOf(M, id)
   const sheet = sheets.get(id)
   const n = sheet?.frames.length || 0
   const f = frame >= 0 && n ? sheet.frames[Math.min(frame, n - 1)] : null
