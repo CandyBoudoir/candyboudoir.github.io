@@ -1,7 +1,9 @@
-// Tier 3: browser storage, only for what can be rebuilt from Stash's records:
-// the library copy and the taste model (IndexedDB, too big for
-// localStorage), For you's row signals, the StashDB cache and the tier 1
-// mirror. A private window or full storage degrades to no persistence.
+// Tier 3: browser storage, only for what Cherry Pick can do without: the
+// library copy (data/library.js) and the StashDB cache (stashdb/client.js)
+// in IndexedDB, too big for localStorage, and For you's row signals and the
+// tier 1 mirror in localStorage. The taste model is not stored: it is fitted
+// again on each load (runtime/engine.js). A private window or full storage
+// degrades to no persistence.
 import {
   clear,
   createStore,
