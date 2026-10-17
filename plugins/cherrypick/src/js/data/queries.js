@@ -23,7 +23,7 @@ export const SCENES = `
         play_history
         last_played_at
         resume_time
-        files { duration }
+        files { duration video_codec width height }
         paths { screenshot }
         stash_ids { endpoint stash_id }
         studio { id name parent_studio { id name } }
@@ -31,6 +31,33 @@ export const SCENES = `
         tags { id name }
         custom_fields
       }
+    }
+  }
+`
+
+// What a scene bracket's match shows beyond the library copy: the
+// description, the tags with their parents (the inspector groups by
+// them), and where Stash keeps the scene's sprite list and preview clip
+// (features/brackets/judge.jsx)
+export const SCENE_LOOK = `
+  query CherryPickSceneLook($ids: [ID!]) {
+    findScenes(ids: $ids, filter: { per_page: -1 }) {
+      scenes {
+        id
+        details
+        paths { vtt preview }
+        tags { id name parents { id name } }
+      }
+    }
+  }
+`
+
+// Whether Stash plays previews with sound, and how long it makes them
+export const PREVIEW_SETTINGS = `
+  query CherryPickPreviewSettings {
+    configuration {
+      interface { soundOnPreview }
+      general { previewSegments previewSegmentDuration }
     }
   }
 `

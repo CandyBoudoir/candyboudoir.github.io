@@ -55,7 +55,9 @@ Your score needs 10 rated scenes before it can check itself. Until then, For you
 
 ### Brackets
 
-Bracket on the Performers list starts a 16-performer, single-elimination bracket in one click, from the performers in your library with a photo and a scene, of your library's largest gender or the one the list is filtered to. Options picks the gender, 16, 32 or 64, and the pool (your library, favorites, or the list's current filter). When a gender's pool is short, Set genders lets you set missing genders in Stash with a tap; Cherry Pick never guesses one. Bracket on the Scenes list, or "Bracket her scenes" on a performer page, does the same with scenes you have watched. Scenes you have rated sit out while four unrated ones can play, and a pool under 16 plays every unrated scene, with byes.
+Bracket on the Performers list starts a 16-performer, single-elimination bracket in one click, from the performers in your library with a photo and a scene, of your library's largest gender or the one the list is filtered to. Options picks the gender, 16, 32 or 64, and the pool (your library, favorites, or the list's current filter). When a gender's pool is short, Set genders lets you set missing genders in Stash with a tap; Cherry Pick never guesses one. Bracket on the Scenes list, or "Bracket her scenes" on a performer page, does the same with every scene you own, watched or not, leaving out audio-only files and scenes marked Don't learn from this. Scenes you have rated sit out while four unrated ones can play, and a pool under 16 plays every unrated scene, with byes.
+
+Each side of a scene match shows the scene's cover and eight frames spread over its length, its studio, year, length and resolution, up to four performers' faces and a row of tags, so you can judge a scene you have never watched. A click or a tap on the cover picks it, and so does Pick this. A frame opens one scene large at that moment, and Look closer (1 or 2 on the keyboard) opens it on the cover: step through its frames with the arrow keys or the buttons, scrub along the bar, play its preview, and read every performer, the description and every tag. There Enter picks, O switches to the other scene and Esc goes back to the match. The frames and the preview are the sprite sheet and preview clip Stash generated, so they work whatever the scene's format; the preview plays muted unless Stash is set to play sound on previews. Nothing in a bracket plays a scene's own file or records a play. A scene Stash has no previews for shows its cover and details and says so; Stash's Generate task, with previews and sprites ticked, makes them. A second pick within 400 ms of the last is ignored, so a double tap can't also pick in the next match.
 
 Pick with a click, a tap or the arrow keys: U undoes, Esc pauses, and a paused bracket waits for you, even after a reload. Every pick teaches the model. When a performer bracket ends, the champion, finalist, semifinalists and quarterfinalists get three custom fields on their Stash record (`cherrypick_titles`, `cherrypick_best_finish`, `cherrypick_last_bracket`), which Stash shows on the performer page and can filter on. Four different champions of one gender unlock a Champions round.
 
@@ -72,6 +74,10 @@ With Apply bracket ratings automatically on, under Settings > Plugins, the champ
 | Playing                                                                   | The champion                                                                                                                     |
 | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | ![Two performers side by side in a bracket](docs/screenshots/bracket.png) | ![A champion who beat your favorites in the Challenge round, with the finalist and semifinalists](docs/screenshots/champion.png) |
+
+| A scene match                                                                                                                       | Look closer                                                                                                                                                           |
+| ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Two scenes side by side in a bracket, each with its cover, eight frames, performers and tags](docs/screenshots/scene-bracket.png) | ![Look closer on one scene: a frame from its sprite sheet, the scrub bar, sixteen frames, its performers, description and tags](docs/screenshots/scene-inspector.png) |
 
 ### StashDB
 
@@ -140,7 +146,7 @@ Your browser keeps only what Cherry Pick can do without: a copy of your library 
 
 ### Network requests
 
-- **Your Stash server**, through Stash's own GraphQL API: your library, the plugin configuration, and the custom fields and ratings above.
+- **Your Stash server**, through Stash's own GraphQL API: your library, the plugin configuration, and the custom fields and ratings above. In a scene bracket, also the sprite sheets and preview clips Stash generated for the scenes on screen and the next match's.
 - **StashDB** (`https://stashdb.org/graphql`), only when Stash has a StashDB key, and never after you choose Stop using StashDB on Cherry Pick's page: the StashDB ids of the performers, scenes and studios on the pages you open, sent with your key in StashDB's `ApiKey` header, at most six requests per page, one a second. Answers are cached in your browser for 7 days. The covers of scenes you don't have load from StashDB's image server.
 
 Cherry Pick sends nothing to CandyBoudoir or anyone else.

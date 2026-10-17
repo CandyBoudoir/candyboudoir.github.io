@@ -50,6 +50,16 @@ Checked against the Stash source for v0.31.1 and the develop branch of 2026-10-1
 - The performer edit form re-submits `custom_fields: { full }`, so a stale edit form can overwrite a concurrent plugin write.
 - Scenes take custom fields the same way: `sceneUpdate` accepts `custom_fields`, and `SceneFilterType.custom_fields` filters on them (checked on v0.31.1). Cherry Pick writes one there, `cherrypick_provisional`, in the same `sceneUpdate` or `performerUpdate` that sets a rating Apply stepped down from a champion's, so a provisional rating costs no extra write.
 
+## The library and scene brackets
+
+- `SceneFilterType.updated_at` compares the value sent with the time Stash stores as text in the server's own zone. On a server at UTC−4 (v0.31.1 started with `TZ=America/Toronto`), a UTC value ten minutes back matched 0 of 8 scenes and the same moment in local time matched all 8. Stash returns `updated_at` as the right instant with the server's offset (`2026-10-17T00:15:31-04:00`) and `last_played_at` and `o_history` in UTC. So `data/library.js` sends no timestamp filter: it sorts by `updated_at`, `last_played_at` or `last_o_at` (descending, ties by id) and compares the times in the browser.
+- `sceneAddPlay`, `sceneAddO` and `sceneSaveActivity` leave `updated_at` alone; `sceneUpdate` moves it.
+- `findScenes` takes `ids: [ID!]` (with `filter: { per_page: -1 }`).
+- An audio-only file comes back with `video_codec: ""` and a width and height of 0.
+- `paths.vtt` is `/scene/<hash>_thumbs.vtt` (also served at `/scene/{id}/vtt/thumbs`): `WEBVTT` with 81 cues over the runtime, each `<hash>_sprite.jpg#xywh=x,y,w,h` (160×90 for 16:9), the sprite path relative to the list. It answers 404 when Stash hasn't generated sprites, and `paths.vtt` is set either way. The sprite sheet is JPEG and the preview (`paths.preview`, `/scene/{id}/preview`) H.264, whatever the scene's codec.
+- `/scene/{id}/preview` answers HEAD with 405, a GET with `Range: bytes=0-0` with 206, and 404 when Stash hasn't generated the preview. Serving it records nothing. Stash's own `ScenePlayer` saves activity as it plays and counts a play, and its ←/→ keys seek, so scene brackets never use it.
+- `configuration.interface.soundOnPreview` says whether Stash's previews play with sound; `configuration.general.previewSegments × previewSegmentDuration` is a preview's length (12 × 0.75 s = 9 s by default).
+
 ## StashDB
 
 - `https://stashdb.org/graphql` answers cross-origin requests (`Access-Control-Allow-Origin: *`, `apikey` allowed) and authenticates with the `ApiKey` header. Stash's default CSP blocks it; the manifest's `ui.csp.connect-src` adds it.

@@ -17,7 +17,6 @@
 // so a finish alone says nothing about stars. No rating or seed shows
 // during play.
 
-import { behaviourOf } from './behaviour.js'
 import { pluginRating } from './rankings.js'
 import { fmtStars } from './util.js'
 import { FIELD_PREFIX } from '../name.js'
@@ -144,9 +143,13 @@ export const clipPoolSpread = (n) =>
 export const clipByes = (n) =>
   n >= MIN_CLIP_POOL && n < DEFAULT_SIZE ? clipSize(n) - n : 0
 
-export const watchedScenes = (db) => db.owned.filter((s) => behaviourOf(s))
+// The scenes a scene bracket draws from: every owned scene, watched or not,
+// except one with no picture to judge (an audio-only file) and one marked
+// Don't learn from this, since every pick teaches the model
+export const bracketScenes = (M) =>
+  M.db.owned.filter((s) => !s.audioOnly && !M.dontLearn.has(s.id))
 
-// The scenes a clip bracket plays out of a pool of watched ones: those with
+// The scenes a clip bracket plays out of a pool: those with
 // no rating of the user's own, when there are MIN_CLIP_POOL of them, so the
 // rated ones wait for the champion's Challenge round; else the whole pool.
 // A clip pool under 16 plays every scene it gets, so without this the rated
@@ -697,7 +700,7 @@ export function challengeFor(M, b, genderOf = stashGender) {
           .filter(eligible)
           .filter((p) => genderOf(p) === b.gender)
           .map((p) => p.id)
-      : M.db.owned.filter((s) => !M.dontLearn.has(s.id)).map((s) => s.id)
+      : bracketScenes(M).map((s) => s.id)
   ).filter((id) => !played.has(id))
   const inLibrary = new Set(library)
   const held = (b.waiting || []).filter((id) => inLibrary.has(id))

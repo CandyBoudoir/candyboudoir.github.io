@@ -823,7 +823,7 @@ test.describe('beside Stash Curator', () => {
     await expect(bracket).toBeEnabled({ timeout: 20_000 })
     await expect(bracket).toHaveAttribute(
       'title',
-      /watched scenes in this list(, from likely best to likely worst)? · Curator Appeal not applied$/,
+      / scenes in this list(, from likely best to likely worst)? · Curator Appeal not applied$/,
     )
     await bracket.click()
     await expect(page.locator('.cherrypick-play-modal')).toContainText(
@@ -914,11 +914,11 @@ test.describe('beside Stash Curator', () => {
       await expect(offer(page)).toHaveCount(0)
 
       // No Your score on the Scenes list, once the model that draws them is
-      // in (Bracket's title counts the list's watched scenes)
+      // in (Bracket's title counts the list's scenes)
       await page.goto('/scenes?sortby=title&perPage=120')
       await expect(
         page.locator('.cherrypick-bracket-button').filter({ visible: true }),
-      ).toHaveAttribute('title', /watched scenes in this list/, {
+      ).toHaveAttribute('title', / scenes in this list/, {
         timeout: 20_000,
       })
       await expect(

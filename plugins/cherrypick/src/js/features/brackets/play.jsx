@@ -1,8 +1,9 @@
 // The play dialog: two big cards, pick one. ←/→ or a tap picks, U or
 // Backspace undoes, Esc or × pauses. Every pick needs an answer: there is no
-// "Can't decide". No video plays in a bracket. A card shows no rating, seed
-// or rating-based reason, so a pick is not pulled toward past ratings, and
-// an anchor looks like any other entrant.
+// "Can't decide". A card shows no rating, seed or rating-based reason, so a
+// pick is not pulled toward past ratings, and an anchor looks like any
+// other entrant. A scene match shows contact sheets; a frame, Look closer
+// or 1 and 2 open an inspector (judge.jsx), and no scene's own file plays.
 import { FontAwesomeSolid, React } from '../../runtime/api.js'
 import { store } from '../../runtime/app.js'
 import * as BR from '../../model/brackets.js'
@@ -15,6 +16,18 @@ import {
   VIEWS,
 } from './actions.js'
 import {
+  LookFooter,
+  LookHints,
+  MatchHints,
+  SceneContender,
+  SceneInspector,
+  lookClaims,
+  lookKey,
+  prepareScenes,
+  settled,
+  useLook,
+} from './judge.jsx'
+import {
   BracketIcon,
   BracketTree,
   ByesNote,
@@ -22,11 +35,13 @@ import {
   Icon,
   plural,
 } from './parts.jsx'
+import { nextPair } from './sheet.js'
 
 const { faRotateLeft, faUndo } = FontAwesomeSolid
 
-// One side of a match, as a big card. Also the Challenge round's.
-export function Contender({ b, id, side, onPick }) {
+// One side of a match, as a big card. Also the Challenge round's. A scene
+// is a contact sheet (SceneContender), with Look closer.
+export function Contender({ b, id, side, onPick, onLook }) {
   const M = useAppState((s) => s.M)
   if (!M) return null
   const key = (
@@ -40,57 +55,30 @@ export function Contender({ b, id, side, onPick }) {
       onPick()
     }
   }
-  if (b.kind === 'performer') {
-    const p = M.db.performers.get(id)
-    const n = p?.local?.scene_count ?? p?.ownedSceneIds.length ?? 0
+  if (b.kind === 'clip')
     return (
-      <div
-        role="button"
-        tabIndex={0}
-        className={`card cherrypick-contender performer side-${side}`}
-        onClick={onPick}
-        onKeyDown={onKeyDown}
-      >
-        <div className="cherrypick-cont-img">
-          {p?.image ? <img src={p.image} alt="" /> : null}
-          {key}
-        </div>
-        <div className="cherrypick-cont-body">
-          <div className="cherrypick-cont-title">
-            {p?.name || 'A removed performer'}
-          </div>
-          <div className="small text-muted">
-            {n} {plural(n, 'scene')}
-          </div>
-        </div>
-      </div>
+      <SceneContender id={id} side={side} onPick={onPick} onLook={onLook} />
     )
-  }
-  const s = M.db.scenes.get(id)
+  const p = M.db.performers.get(id)
+  const n = p?.local?.scene_count ?? p?.ownedSceneIds.length ?? 0
   return (
     <div
       role="button"
       tabIndex={0}
-      className={`card cherrypick-contender clip side-${side}`}
+      className={`card cherrypick-contender performer side-${side}`}
       onClick={onPick}
       onKeyDown={onKeyDown}
     >
       <div className="cherrypick-cont-img">
-        {s?.image ? <img src={s.image} alt="" /> : null}
+        {p?.image ? <img src={p.image} alt="" /> : null}
         {key}
       </div>
       <div className="cherrypick-cont-body">
         <div className="cherrypick-cont-title">
-          {s?.title || 'A removed scene'}
+          {p?.name || 'A removed performer'}
         </div>
         <div className="small text-muted">
-          {[s?.studio?.name, s?.date].filter(Boolean).join(' · ')}
-        </div>
-        <div className="small cherrypick-cont-reason">
-          {(s?.performers || [])
-            .slice(0, 3)
-            .map((p) => p.name)
-            .join(', ')}
+          {n} {plural(n, 'scene')}
         </div>
       </div>
     </div>
@@ -100,20 +88,21 @@ export function Contender({ b, id, side, onPick }) {
 // Keys while a dialog of `view` is up. They go no further, so Stash's own
 // shortcuts (page keys, "e" to edit) don't act on the page behind. Esc is
 // left to the Modal, which pauses; Tab, Enter and Space to the focused
-// control. onKey(key) acts on the store as it is now and returns whether
-// it took the key.
+// control, unless claims(event) takes them (the scene inspector takes Esc
+// and Enter). onKey(key, event) acts on the store as it is now and returns
+// whether it took the key.
 const PASS = new Set(['Escape', 'Tab', 'Enter', ' '])
 
-export function usePickKeys(view, onKey) {
-  const latest = React.useRef(onKey)
-  latest.current = onKey
+export function usePickKeys(view, onKey, claims) {
+  const latest = React.useRef({ onKey, claims })
+  latest.current = { onKey, claims }
   React.useEffect(() => {
     const listener = (e) => {
       if (store.get().dialog?.view !== view) return
-      if (PASS.has(e.key)) return
+      if (PASS.has(e.key) && !latest.current.claims?.(e)) return
       e.stopPropagation()
       if (e.type !== 'keydown' || e.altKey || e.ctrlKey || e.metaKey) return
-      if (latest.current(e.key)) e.preventDefault()
+      if (latest.current.onKey(e.key, e)) e.preventDefault()
     }
     window.addEventListener('keydown', listener, true)
     window.addEventListener('keypress', listener, true)
@@ -126,31 +115,85 @@ export function usePickKeys(view, onKey) {
 
 export const isUndoKey = (k) => k === 'Backspace' || k === 'u' || k === 'U'
 
-function useBracketKeys(setTree) {
-  usePickKeys(VIEWS.play, (k) => {
-    const a = store.get().brackets.active
-    const cur = a ? BR.bracketState(a).current : null
-    if (!cur) return false
-    if (k === 'ArrowLeft') pickWinner(cur.a)
-    else if (k === 'ArrowRight') pickWinner(cur.b)
-    else if (isUndoKey(k)) undoPick()
-    else if (k === 't' || k === 'T') setTree((x) => !x)
-    else return false
-    return true
-  })
+// A scene match: the inspector's state, and a pick that takes only a side
+// of the match on screen and, in a scene bracket, not within 400 ms of the
+// last pick. Fetches what the two scenes and the next pair show.
+export function useSceneMatch(kind, pair, next, onPick) {
+  const [look, setLook] = useLook(kind === 'clip' ? pair : null)
+  const pick = (id) => {
+    if (!pair || (id !== pair[0] && id !== pair[1])) return
+    if (kind === 'clip' && !settled()) return
+    setLook(null)
+    onPick(id)
+  }
+  const ids = kind === 'clip' && pair ? [...pair, ...next] : []
+  React.useEffect(() => {
+    if (ids.length) prepareScenes(ids)
+    // the ids say it all
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ids.join()])
+  // the keys a scene match adds: 1 and 2 look closer, and the inspector's
+  const onKey = (k, e) => {
+    if (look) return lookKey(k, e, { look, setLook, pair, pick })
+    if (kind === 'clip' && pair && (k === '1' || k === '2')) {
+      setLook({ id: k === '1' ? pair[0] : pair[1], frame: -1 })
+      return true
+    }
+    return null
+  }
+  const claims = (e) => !!look && lookClaims(e)
+  return { look, setLook, pick, onKey, claims }
 }
+
+const titleOf = (id) =>
+  store.get().M?.db.scenes.get(id)?.title || 'the other scene'
 
 export function PlayDialog() {
   const b = useAppState((s) => s.brackets.active)
   const [tree, setTree] = React.useState(false)
   const [abandoning, setAbandoning] = React.useState(false)
-  useBracketKeys(setTree)
-  if (!b) return null
-  const st = BR.bracketState(b)
-  const cur = st.current
-  if (!cur) return null
+  const st = b ? BR.bracketState(b) : null
+  const cur = st?.current
+  const pair = cur && !tree ? [cur.a, cur.b] : null
+  const match = useSceneMatch(
+    b?.kind,
+    pair,
+    st && cur ? nextPair(st) : [],
+    pickWinner,
+  )
+  const undo = () => {
+    match.setLook(null)
+    undoPick()
+  }
+  usePickKeys(
+    VIEWS.play,
+    (k, e) => {
+      const taken = match.onKey(k, e)
+      if (taken != null) return taken
+      const a = store.get().brackets.active
+      const now = a ? BR.bracketState(a).current : null
+      if (!now) return false
+      if (k === 'ArrowLeft') match.pick(now.a)
+      else if (k === 'ArrowRight') match.pick(now.b)
+      else if (isUndoKey(k)) undo()
+      else if (k === 't' || k === 'T') setTree((x) => !x)
+      else return false
+      return true
+    },
+    match.claims,
+  )
+  if (!b || !cur) return null
   const kind = b.kind === 'performer' ? 'performers' : 'scenes'
-  const footer = abandoning ? (
+  const look = match.look
+  const footer = look ? (
+    <LookFooter
+      look={look}
+      setLook={match.setLook}
+      pair={pair}
+      pick={match.pick}
+      titleOf={titleOf}
+    />
+  ) : abandoning ? (
     <>
       <span className="cherrypick-abandon-ask">
         Abandon this bracket? Its picks are dropped and nothing is recorded.
@@ -173,7 +216,7 @@ export function PlayDialog() {
         type="button"
         className="btn btn-secondary"
         disabled={!b.decisions.length}
-        onClick={undoPick}
+        onClick={undo}
       >
         <Icon icon={faRotateLeft || faUndo} />
         <span>Undo</span>
@@ -201,7 +244,7 @@ export function PlayDialog() {
       title={`${b.poolLabel} · ${b.seeds.length} ${kind}`}
       size="xl"
       onHide={pauseBracket}
-      className="cherrypick-play-modal"
+      className={`cherrypick-play-modal${look ? ' cherrypick-looking' : ''}`}
       headerExtra={
         <span className="cherrypick-round text-muted">{st.label}</span>
       }
@@ -218,11 +261,22 @@ export function PlayDialog() {
       </div>
       {b.kind === 'clip' &&
       b.seeds.length < BR.DEFAULT_SIZE &&
-      cur.round === 0 ? (
+      cur.round === 0 &&
+      !look ? (
         <ByesNote n={b.seeds.length} className="cherrypick-play-byes" />
       ) : null}
       {tree ? (
         <BracketTree b={b} st={st} />
+      ) : look ? (
+        <>
+          <SceneInspector
+            key={look.id}
+            id={look.id}
+            frame={look.frame}
+            setFrame={(frame) => match.setLook({ ...look, frame })}
+          />
+          <LookHints id={look.id} />
+        </>
       ) : (
         <>
           <div className={`cherrypick-match ${b.kind}`}>
@@ -231,25 +285,31 @@ export function PlayDialog() {
               b={b}
               id={cur.a}
               side="left"
-              onPick={() => pickWinner(cur.a)}
+              onPick={() => match.pick(cur.a)}
+              onLook={(frame) => match.setLook({ id: cur.a, frame })}
             />
             <Contender
               key={'b' + cur.b}
               b={b}
               id={cur.b}
               side="right"
-              onPick={() => pickWinner(cur.b)}
+              onPick={() => match.pick(cur.b)}
+              onLook={(frame) => match.setLook({ id: cur.b, frame })}
             />
           </div>
-          <p className="cherrypick-hints small text-muted">
-            <span className="cherrypick-hints-keys">
-              <kbd>←</kbd> <kbd>→</kbd> pick · <kbd>U</kbd> undo ·{' '}
-              <kbd>Esc</kbd> pause
-            </span>
-            <span className="cherrypick-hints-touch">
-              Tap a side to pick it. Close to pause.
-            </span>
-          </p>
+          {b.kind === 'clip' ? (
+            <MatchHints esc="pause" />
+          ) : (
+            <p className="cherrypick-hints small text-muted">
+              <span className="cherrypick-hints-keys">
+                <kbd>←</kbd> <kbd>→</kbd> pick · <kbd>U</kbd> undo ·{' '}
+                <kbd>Esc</kbd> pause
+              </span>
+              <span className="cherrypick-hints-touch">
+                Tap a side to pick it. Close to pause.
+              </span>
+            </p>
+          )}
         </>
       )}
     </Dialog>

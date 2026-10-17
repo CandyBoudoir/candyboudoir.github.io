@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { buildDb } from '../../src/js/model/db.js'
 import { createEngine } from '../../src/js/model/index.js'
 import * as BR from '../../src/js/model/brackets.js'
+import { behaviourOf } from '../../src/js/model/behaviour.js'
 import { fmtStars } from '../../src/js/model/util.js'
 import { FIELD_PREFIX } from '../../src/js/name.js'
 import { syntheticLibrary } from './fixtures/synthetic.mjs'
@@ -10,6 +11,8 @@ import { syntheticLibrary } from './fixtures/synthetic.mjs'
 const { input } = syntheticLibrary()
 const db = buildDb(input)
 const M = createEngine(db).compute({})
+// The watched scenes: a pool these tests know the roles in
+const watchedScenes = () => db.owned.filter((s) => behaviourOf(s))
 
 // play a bracket out, always picking side a (the higher seed in round one)
 function playOut(b) {
@@ -76,7 +79,7 @@ test('clip brackets: every scene under 16, with byes for the top seeds', () => {
 })
 
 test('a clip bracket of 7: one bye, then six picks to a champion', () => {
-  const ids = BR.watchedScenes(db)
+  const ids = watchedScenes()
     .slice(0, 7)
     .map((s) => s.id)
   const b = BR.createBracket(M, {
@@ -104,7 +107,7 @@ test('a clip bracket of 7: one bye, then six picks to a champion', () => {
 })
 
 test('pick and undo', () => {
-  const ids = BR.watchedScenes(db)
+  const ids = watchedScenes()
     .slice(0, 16)
     .map((s) => s.id)
   const b = BR.createBracket(M, {
@@ -137,7 +140,7 @@ test('pick and undo', () => {
 })
 
 test('a pick feeds the model and Undo takes it back', () => {
-  const ids = BR.watchedScenes(db)
+  const ids = watchedScenes()
     .slice(0, 8)
     .map((s) => s.id)
   const b = BR.createBracket(M, {
@@ -839,7 +842,7 @@ test('Undo leaves alone a rating changed since Apply', () => {
 })
 
 test('clip brackets play unrated scenes, and the champion sets the scale', () => {
-  const watched = BR.watchedScenes(db).map((s) => s.id)
+  const watched = watchedScenes().map((s) => s.id)
   const b = playOut(
     BR.createBracket(M, {
       kind: 'clip',
@@ -1399,7 +1402,7 @@ test('who the champion challenges', () => {
 })
 
 test('clip brackets: rated scenes wait while four unrated ones can play', () => {
-  const watched = BR.watchedScenes(db).map((s) => s.id)
+  const watched = watchedScenes().map((s) => s.id)
   const role = (id) => BR.entrantRole(M, 'clip', id)
   const unrated = watched.filter((id) => role(id) !== 'anchor')
   const rated = watched.filter((id) => role(id) === 'anchor')

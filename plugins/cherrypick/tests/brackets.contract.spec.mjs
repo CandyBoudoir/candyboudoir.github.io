@@ -567,7 +567,8 @@ test('a scene bracket plays the unrated scenes and keeps the rated ones for the 
     for (const title of await contenders(play))
       expect(rated.has(title), title).toBe(false)
     await page.keyboard.press('ArrowLeft')
-    await page.waitForTimeout(150)
+    // a scene bracket ignores a pick within 400 ms of the last
+    await page.waitForTimeout(450)
     picks++
   }
   const result = page.locator('.cherrypick-result-modal')

@@ -29,8 +29,10 @@ import { markRatingSources } from './rankings.js'
  * @property {string|null} [date]  release date, YYYY-MM-DD
  * @property {string} created_at  ISO time it was added to the library
  * @property {number|null} [rating100]
- * @property {{ duration: number|null }[]} [files]  the first file's duration
- *   (seconds) is the scene's
+ * @property {{ duration: number|null, video_codec?: string,
+ *   width?: number, height?: number }[]} [files]  the first file's duration
+ *   (seconds) and size are the scene's; an empty video_codec means it has
+ *   no picture
  * @property {number} [play_count]
  * @property {number} [play_duration]  seconds played, over every play
  * @property {string[]} [play_history]  ISO times, one per play
@@ -157,6 +159,9 @@ import { markRatingSources } from './rankings.js'
  * @property {string} title
  * @property {string|null} date
  * @property {number|null} duration  seconds
+ * @property {number|null} [width]  the owned file's width in pixels
+ * @property {number|null} [height]
+ * @property {boolean} [audioOnly]  an owned file with no video stream
  * @property {string|null} image
  * @property {{ id: string, name: string, parent: { id: string, name: string }|null }|null} studio
  * @property {{ id: string, name: string, gender: string|null }[]} performers
@@ -305,6 +310,9 @@ export function buildDb(input) {
       title: row.title || '',
       date: row.date || null,
       duration: row.files?.[0]?.duration ?? null,
+      width: row.files?.[0]?.width || null,
+      height: row.files?.[0]?.height || null,
+      audioOnly: row.files?.[0]?.video_codec === '',
       image: row.paths?.screenshot || null,
       studio: st
         ? {

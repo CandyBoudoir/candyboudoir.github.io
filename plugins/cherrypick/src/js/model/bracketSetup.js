@@ -142,10 +142,10 @@ export function resolvePerformerPool(M, choice, listFilter, genderOf) {
   return { ids, size: BR.resolveSize(choice.size, ids.length), pool, poolLabel }
 }
 
-// The watched scenes in a clip pool: every watched scene, or those among
-// ids (the scenes a list's filter matches)
-export const watchedPool = (db, ids) =>
-  BR.watchedScenes(db)
+// A clip pool: every scene a bracket can draw from (BR.bracketScenes), or
+// those among ids (the scenes a list's filter matches)
+export const scenePool = (M, ids) =>
+  BR.bracketScenes(M)
     .filter((s) => !ids || ids.has(s.id))
     .map((s) => s.id)
 
