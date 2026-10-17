@@ -478,6 +478,12 @@ test('Apply and Undo re-check for Xenith and Restash too', () => {
     write: [],
     ranked: ['6'],
   })
+  // Restash's score, not a rating changed by hand
+  assert.deepEqual(BR.undoableChanges(undo, after), {
+    write: [],
+    ranked: ['6'],
+    changed: [],
+  })
 })
 
 test("a bracket's custom-field writes leave Ascension's and HotOrNot's untouched", () => {

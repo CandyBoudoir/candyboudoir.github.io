@@ -1153,6 +1153,32 @@ export function writableChanges(changes, current) {
   return { write, ranked }
 }
 
+// The changes of an applied batch that Undo may still put back, against the
+// records as Stash has them right before the write (as for writableChanges).
+// A record gone from Stash is left out, and one another plugin started
+// ranking or mirroring since is listed in `ranked`. A record whose rating is
+// no longer the one the batch wrote is listed in `changed`: the user rated
+// it by hand, or a later bracket rewrote a provisional one. So is a
+// provisional one that lost its mark, which makes its rating the user's
+// (isProvisional). Undo leaves both alone.
+export function undoableChanges(changes, current) {
+  const write = []
+  const ranked = []
+  const changed = []
+  for (const c of changes) {
+    const rec = current.get(c.id)
+    if (!rec) continue
+    if (pluginRating(rec)) ranked.push(c.id)
+    else if (
+      (rec.rating100 ?? null) !== c.to ||
+      (c.provisional && !isProvisional(rec))
+    )
+      changed.push(c.id)
+    else write.push(c)
+  }
+  return { write, ranked, changed }
+}
+
 // The custom_fields input a rating write sends: a provisional rating marks
 // the record with the value written; a measured one clears an old mark.
 // had: the mark the record carries now.

@@ -533,23 +533,25 @@ export async function applyRatingChanges(bracket, changes) {
 
 // Puts each rating, and its provisional mark, back. A record another plugin
 // has ranked or mirrored since keeps its rating, which is that plugin's
-// score now: the batch then stays, with nothing left to undo, to say so
-// until it is dismissed.
+// score now, and so does one whose rating changed since Apply (counted in
+// `changed`): Undo never writes over a rating it didn't set. The batch then
+// stays, with nothing left to undo, to say so until it is dismissed.
 export async function undoApplied(batchId) {
   const batch = store.get().applied.find((b) => b.id === batchId)
   if (!batch) return
   let undo = batch.changes
   let kept = batch.kept || 0
+  let changed = batch.changed || 0
   if (undo.length) {
     try {
       const now = await currentRecords(
         batch.kind,
         undo.map((c) => c.id),
       )
-      const { write, ranked } = BR.writableChanges(undo, now)
-      const back = new Set(write.map((c) => c.id))
-      undo = undo.filter((c) => back.has(c.id))
-      kept += ranked.length
+      const still = BR.undoableChanges(undo, now)
+      undo = still.write
+      kept += still.ranked.length
+      changed += still.changed.length
     } catch (e) {
       reportError(e)
       return
@@ -574,11 +576,12 @@ export async function undoApplied(batchId) {
     }
   }
   patchRated(batch.kind, patches)
-  const stays = left.length || kept > (batch.kept || 0)
+  const stays =
+    left.length || kept > (batch.kept || 0) || changed > (batch.changed || 0)
   store.set((s) => ({
     applied: stays
       ? s.applied.map((b) =>
-          b.id === batchId ? { ...b, changes: left, kept } : b,
+          b.id === batchId ? { ...b, changes: left, kept, changed } : b,
         )
       : s.applied.filter((b) => b.id !== batchId),
   }))

@@ -1,9 +1,9 @@
 // Checks Cherry Pick's brackets in Stash: the Bracket button beside the
 // Performers and Scenes lists, a bracket played to its champion with the
 // keyboard, the custom fields written at the end, no ratings while you pick,
-// Apply's ratings for the unrated only, performers anchored by their scenes'
-// ratings, a bracket of unrated performers and its Challenge round, and
-// pause and resume.
+// Apply's ratings for the unrated only, Undo leaving a rating set by hand
+// since, performers anchored by their scenes' ratings, a bracket of unrated
+// performers and its Challenge round, and pause and resume.
 import { expect, test } from '@playwright/test'
 import {
   DEMO,
@@ -371,7 +371,7 @@ test('a bracket of unrated performers, then its champion takes on your favorites
   }
 })
 
-test('with auto-apply on, closing the champion screen sets its ratings, and Undo puts them back', async ({
+test('with auto-apply on, closing the champion screen sets its ratings, and Undo puts them back but one rated by hand since', async ({
   page,
 }) => {
   await setAutoApply(true)
@@ -407,18 +407,40 @@ test('with auto-apply on, closing the champion screen sets its ratings, and Undo
   await expect(result).toBeHidden()
   await expect.poll(changed).toBe(n)
 
-  // Cherry Pick's page lists the batch, with Undo
-  await visible(page.locator('a.cherrypick-nav-icon')).click()
-  await expect(page.locator('#your-score')).toContainText(
-    'within half a star',
-    { timeout: 20_000 },
+  // One of them rated by hand since: Undo leaves it as it is
+  const applied = await performerRatings(ids)
+  const mine = ids.find((id) => applied[id] !== before[id])
+  const hand = [20, 40, 60, 80, 100].find(
+    (r) => r !== applied[mine] && r !== before[mine],
   )
-  const batches = page.locator('.cherrypick-applied-batches')
-  await expect(batches).toContainText(
-    `Applied ${n} performer ${n === 1 ? 'rating' : 'ratings'}`,
-  )
-  await batches.getByRole('button', { name: 'Undo' }).first().click()
-  await expect.poll(changed).toBe(0)
+  try {
+    await setPerformerRating(mine, hand)
+
+    // Cherry Pick's page lists the batch, with Undo
+    await visible(page.locator('a.cherrypick-nav-icon')).click()
+    await expect(page.locator('#your-score')).toContainText(
+      'within half a star',
+      { timeout: 20_000 },
+    )
+    const batches = page.locator('.cherrypick-applied-batches')
+    await expect(batches).toContainText(
+      `Applied ${n} performer ${n === 1 ? 'rating' : 'ratings'}`,
+    )
+    await batches.getByRole('button', { name: 'Undo' }).first().click()
+    await expect(batches).toContainText(
+      'Left 1 as it is: its rating changed since Apply.',
+    )
+    await expect.poll(changed).toBe(1)
+    expect((await performerRatings([mine]))[mine]).toBe(hand)
+    // nothing left to undo: Dismiss drops the note
+    await batches.getByRole('button', { name: 'Dismiss' }).first().click()
+    await expect(page.getByText('its rating changed since Apply')).toHaveCount(
+      0,
+    )
+  } finally {
+    await setPerformerRating(mine, before[mine])
+    await clearProvisional([mine])
+  }
 })
 
 // Takes the provisional mark off the demo performers that carry one
