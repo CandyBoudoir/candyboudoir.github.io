@@ -6,7 +6,8 @@
 # Pick beside <plugin> <version>" issue per companion release. Companion legs
 # (tests/stash/companions.mjs) install another author's plugin beside these
 # and run Cherry Pick's contract specs with it enabled; they never fail the
-# workflow.
+# workflow, and neither do the browser legs or the tz leg (Stash's server at
+# UTC-7).
 name: Compatibility
 
 on:
@@ -56,6 +57,7 @@ jobs:
       WORK: ${{ github.workspace }}/stash-work
       COMPANIONS: ${{ matrix.leg.companions || '' }}
       BROWSER: ${{ matrix.leg.browser || 'chromium' }}
+      STASH_TZ: ${{ matrix.leg.tz || '' }}
     steps:
       # Full history: build.mjs dates each plugin from its last commit.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -89,10 +91,10 @@ jobs:
       - name: Elements the plugins depend on
         id: contract
         if: steps.prepare.outcome == 'success'
-        run: pnpm exec playwright test ${{ (matrix.leg.companions || matrix.leg.browser) && 'plugins/cherrypick/tests/.*contract' || 'contract' }}
+        run: pnpm exec playwright test ${{ (matrix.leg.companions || matrix.leg.browser || matrix.leg.tz) && 'plugins/cherrypick/tests/.*contract' || 'contract' }}
       - name: Screenshots
         id: visual
-        if: always() && steps.prepare.outcome == 'success' && !matrix.leg.companions && !matrix.leg.browser
+        if: always() && steps.prepare.outcome == 'success' && !matrix.leg.companions && !matrix.leg.browser && !matrix.leg.tz
         continue-on-error: ${{ matrix.leg.channel != 'stable' }}
         run: pnpm exec playwright test visual ${{ inputs.update_snapshots && matrix.leg.baseline && '--update-snapshots=all' || '' }}
       - name: Record result
