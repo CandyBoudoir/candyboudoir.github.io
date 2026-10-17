@@ -136,6 +136,14 @@
   --overclock-ink: var(--overclock-text);
 }
 
+/* Beside a name on a detail page, the Locked tag sits to the right of the
+   reticle: hung below it, it lands on the rating row */
+#root .name-icons .favorite-button.favorite::after {
+  left: calc(100% - 0.1rem);
+  top: 50%;
+  translate: 0 -50%;
+}
+
 /* The reticle beside a name, on detail pages */
 #root .name-icons .favorite-button svg {
   height: 1.5rem;
