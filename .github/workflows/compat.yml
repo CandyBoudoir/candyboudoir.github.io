@@ -7,7 +7,9 @@
 # (tests/stash/companions.mjs) install another author's plugin beside these
 # and run Cherry Pick's contract specs with it enabled; they never fail the
 # workflow, and neither do the browser legs or the tz leg (Stash's server at
-# UTC-7).
+# UTC-7). Each companion's pinned zip is fetched from its author once per pin
+# and cached on its sha256 (tests/stash/companion-zips.mjs), so these runs add
+# nothing to the download counts on the author's releases.
 name: Compatibility
 
 on:
@@ -56,6 +58,7 @@ jobs:
       STASH_URL: http://127.0.0.1:9999
       WORK: ${{ github.workspace }}/stash-work
       COMPANIONS: ${{ matrix.leg.companions || '' }}
+      COMPANION_ZIPS: ${{ github.workspace }}/companion-zips
       BROWSER: ${{ matrix.leg.browser || 'chromium' }}
       STASH_TZ: ${{ matrix.leg.tz || '' }}
     steps:
@@ -82,6 +85,24 @@ jobs:
       - name: Python packages for Restash
         if: matrix.leg.companions == 'restash'
         run: python3 -m pip install --user --break-system-packages stashapp-tools==0.2.59
+      # A cache hit leaves the author's release alone; on a miss the zip is
+      # fetched and saved before Stash starts, whatever the specs make of it
+      - name: Restore companion zips
+        id: zips
+        if: matrix.leg.companions
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.COMPANION_ZIPS }}
+          key: companion-zips-${{ matrix.leg.zips }}
+      - name: Fetch companion zips
+        if: matrix.leg.companions && steps.zips.outputs.cache-hit != 'true'
+        run: node tests/stash/companion-zips.mjs
+      - name: Save companion zips
+        if: matrix.leg.companions && steps.zips.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.COMPANION_ZIPS }}
+          key: companion-zips-${{ matrix.leg.zips }}
       - name: Start Stash ${{ matrix.leg.name }}
         id: prepare
         run: |

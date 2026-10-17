@@ -6,7 +6,8 @@
 // contract specs in that browser (the screenshots stay Chromium's). The tz
 // leg runs Cherry Pick's contract specs on a Stash whose server is at UTC-7
 // all year: Stash compares its timestamp filters with the server's local
-// time, which a server in UTC never shows.
+// time, which a server in UTC never shows. A companion leg's `zips` keys the
+// cache of its pinned zip (companion-zips.mjs) on the pin's sha256.
 import { readFile } from 'node:fs/promises'
 import { COMPANIONS } from './companions.mjs'
 
@@ -51,6 +52,7 @@ if (baseline)
       channel: 'companion',
       baseline: false,
       companions: key,
+      zips: COMPANIONS[key].package.sha256,
     })
 if (baseline)
   for (const browser of ['firefox', 'webkit'])

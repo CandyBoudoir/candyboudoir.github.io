@@ -8,13 +8,15 @@
 // Env: STASH_URL (default http://127.0.0.1:9999), WORK (the folder stash.sh
 // used), SITE (default dist/site), PLUGINS (plugin IDs to install, comma
 // separated, default every plugin in SITE's index.yml), COMPANIONS (other
-// authors' plugins to install beside them, companions.mjs), PW_CHANNEL
-// (optional Playwright channel).
+// authors' plugins to install beside them, companions.mjs, from the copies of
+// their zips in COMPANION_ZIPS, companion-zips.mjs), PW_CHANNEL (optional
+// Playwright channel).
 import { createReadStream } from 'node:fs'
 import { readFile, stat } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { extname, join, resolve } from 'node:path'
 import { BOX_NAME, ENDPOINT, LINKS } from './stashbox-data.mjs'
+import { fetchCompanionZips, zipFile } from './companion-zips.mjs'
 import { companionIndex, companions } from './companions.mjs'
 import { renderStickers } from './stickers.mjs'
 
@@ -245,17 +247,22 @@ async function stashBox() {
 const TYPES = { '.yml': 'text/yaml', '.zip': 'application/zip' }
 
 async function install() {
+  const extra = companions()
   const server = createServer(async (req, res) => {
     const path = decodeURIComponent(new URL(req.url, 'http://x').pathname)
-    // The companions' source: their pinned packages, served from here
+    // The companions' source: their pinned packages, whose zips are the
+    // copies companion-zips.mjs keeps
     if (path === '/companions/index.yml') {
       res.writeHead(200, { 'Content-Type': TYPES['.yml'] })
-      res.end(companionIndex())
+      res.end(companionIndex(`${origin}/companions`))
       return
     }
-    const file = join(SITE, path)
+    const zip = extra.find(
+      (c) => path === `/companions/${c.package.sha256}.zip`,
+    )
+    const file = zip ? zipFile(zip.package) : join(SITE, path)
     try {
-      if (!file.startsWith(SITE) || !(await stat(file)).isFile())
+      if (!(zip || file.startsWith(SITE)) || !(await stat(file)).isFile())
         throw new Error()
       res.writeHead(200, {
         'Content-Type': TYPES[extname(file)] ?? 'application/octet-stream',
@@ -268,7 +275,6 @@ async function install() {
   await new Promise((r) => server.listen(0, '127.0.0.1', r))
   const origin = `http://127.0.0.1:${server.address().port}`
   const source = `${origin}/index.yml`
-  const extra = companions()
   const extraSource = `${origin}/companions/index.yml`
 
   await gql(
@@ -318,6 +324,7 @@ async function install() {
     )
 }
 
+await fetchCompanionZips()
 await setup()
 await seed()
 await stashBox()
