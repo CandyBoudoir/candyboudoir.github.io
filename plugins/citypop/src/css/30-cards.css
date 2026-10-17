@@ -1,0 +1,608 @@
+/* Cards: record sleeves on a hard airbrush shadow */
+.card {
+  background: var(--citypop-panel-grad);
+  border: 1px solid var(--citypop-edge);
+  border-radius: var(--citypop-radius);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 8%),
+    var(--citypop-hard);
+  color: var(--citypop-text);
+}
+
+/* Catalogue numbers for the sleeves: 28CP-001, 28CP-002 … */
+@counter-style citypop-cat {
+  system: extends decimal;
+  pad: 3 '0';
+}
+
+body {
+  counter-reset: citypop-cat;
+}
+
+/* Stash zeroes each card type's padding two classes deep */
+.grid-card.card {
+  counter-increment: citypop-cat;
+  padding: 6px;
+  transition:
+    transform var(--citypop-medium) var(--citypop-ease),
+    box-shadow var(--citypop-medium) var(--citypop-ease);
+}
+
+/* Hover lifts the sleeve off its shadow */
+.grid-card:hover {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    9px 9px 0 var(--citypop-drop);
+  transform: translate(-2px, -2px);
+}
+
+.grid-card .thumbnail-section {
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Stash leaves a 5px gap under the picture; the sleeve closes round it */
+.grid-card :is(.scene-card-preview, .image-card-preview, .gallery-card-cover) {
+  margin-bottom: 0;
+}
+
+/*
+ * The printed white keyline inside the picture, and the sunset that sweeps
+ * across it on hover
+ */
+.grid-card .thumbnail-section::after {
+  background: linear-gradient(
+      100deg,
+      transparent 38%,
+      rgb(255 179 107 / 0%) 39%,
+      rgb(255 179 107 / 45%) 42%,
+      rgb(255 138 110 / 70%) 45.5%,
+      rgb(245 80 138 / 65%) 49%,
+      rgb(140 70 200 / 45%) 52.5%,
+      transparent 56%
+    )
+    82% 0 / 320% 100% no-repeat;
+  content: '';
+  inset: 0;
+  mix-blend-mode: screen;
+  outline: 1px solid rgb(255 250 244 / 72%);
+  outline-offset: -6px;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+.grid-card:hover .thumbnail-section::after {
+  animation: citypop-sweep 1000ms cubic-bezier(0.4, 0, 0.3, 1) forwards;
+}
+
+/* The glint that flashes on the sleeve's corner as the sunset passes */
+.grid-card .thumbnail-section::before {
+  background: var(--citypop-glint) center / contain no-repeat;
+  content: '';
+  height: 40px;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 26%;
+  top: 18%;
+  transform: scale(0) rotate(-60deg);
+  width: 38px;
+  z-index: 3;
+}
+
+.grid-card:hover .thumbnail-section::before {
+  animation: citypop-glint 1000ms 420ms ease-out both;
+}
+
+/* What Stash puts on the picture stays above the keyline and the sweep */
+.grid-card .card-controls {
+  left: calc(6px + 0.5rem);
+  top: calc(6px + 0.5rem);
+  z-index: 3;
+}
+
+.grid-card .thumbnail-section :is(.rating-banner, .favorite-button, .fi) {
+  z-index: 2;
+}
+
+.card a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.grid-card .card-section {
+  flex-grow: 1;
+  padding: 0.6rem 0.45rem 0.2rem;
+}
+
+.card-section-title,
+.grid-card a .card-section-title {
+  color: var(--citypop-text);
+  font-family: var(--citypop-font-label);
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+}
+
+.grid-card a:hover .card-section-title {
+  color: var(--citypop-coral);
+}
+
+/* Performers sign their sleeve, in the script */
+.performer-card .card-section-title .performer-name {
+  font-family: var(--citypop-font-display);
+  font-size: 1.9rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+  word-spacing: 0.2em;
+}
+
+.performer-card .card-section {
+  padding-top: 0.85rem;
+}
+
+:is(
+  .scene-card__details,
+  .gallery-card__details,
+  .image-card__details,
+  .studio-card__details
+) {
+  color: var(--citypop-dim);
+}
+
+:is(
+  .scene-card__date,
+  .gallery-card__date,
+  .image-card__date,
+  .performer-card__age
+) {
+  color: var(--citypop-dim);
+  font-family: var(--citypop-font-label);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/*
+ * The catalogue label printed on the spine: side and number. Forty of them
+ * read as data, so it shows only on the sleeve you are looking at. A scene's
+ * sits at the end of its date line, a performer's under her name.
+ */
+.scene-card__details {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.scene-card__details > * {
+  flex-basis: 100%;
+  order: 2;
+}
+
+.scene-card__details > .scene-card__date {
+  flex-basis: auto;
+  order: 0;
+}
+
+.scene-card__details::after,
+.performer-card .card-section::after {
+  color: var(--citypop-dim);
+  content: 'A面 · 28CP-' counter(citypop-cat, citypop-cat);
+  font-family: var(--citypop-font-label);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  margin-left: auto;
+  opacity: 0;
+  order: 1;
+  transition: opacity var(--citypop-medium) var(--citypop-ease);
+  white-space: nowrap;
+}
+
+.performer-card .card-section::after {
+  content: 'B面 · 28CP-' counter(citypop-cat, citypop-cat);
+  display: block;
+  text-align: right;
+}
+
+.grid-card:hover :is(.scene-card__details, .card-section)::after {
+  opacity: 1;
+}
+
+/* The card rule is the sleeve's fold: a pressed crease, dark under light */
+.grid-card > hr {
+  border: 0;
+  border-top: 1px solid rgb(4 3 22 / 60%);
+  box-shadow: 0 1px 0 rgb(185 166 240 / 16%);
+  height: 0;
+  margin: 0.55rem 0.15rem 0.45rem;
+  opacity: 1;
+}
+
+/* Overlays on the picture */
+.studio-overlay a {
+  color: #fff;
+  font-family: var(--citypop-font-label);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-shadow:
+    1px 1px 0 rgb(10 6 40 / 90%),
+    0 0 8px rgb(10 6 40 / 85%),
+    0 0 16px rgb(10 6 40 / 60%);
+  text-transform: uppercase;
+}
+
+.scene-specs-overlay {
+  display: flex;
+  gap: 0.3rem;
+  text-shadow: none;
+}
+
+.scene-specs-overlay > span:not(:last-child) {
+  margin-right: 0;
+}
+
+.scene-specs-overlay > span,
+.scene-interactive-speed-overlay:not(:empty) {
+  background: rgb(12 14 48 / 84%);
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 16%);
+  color: var(--citypop-text);
+  font-family: var(--citypop-font-label);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  padding: 0.14rem 0.42rem;
+}
+
+.scene-specs-overlay > .extra-scene-info {
+  display: none;
+}
+
+.scene-specs-overlay .overlay-resolution {
+  color: var(--citypop-pool-hi);
+}
+
+/*
+ * The rating is a small cassette-label sticker with a coral edge, set on
+ * barely crooked, in place of Stash's diagonal ribbon, so half a grid of them
+ * stays quiet. Stash names a star rating rating-1 to rating-5 and finer
+ * ratings rating-100-0 to rating-100-20, each with its own colour.
+ */
+.rating-banner,
+.rating-banner[class*='rating-'] {
+  background:
+    linear-gradient(var(--citypop-sun), var(--citypop-sun)) 0 0 / 100% 2px
+      no-repeat,
+    var(--citypop-cream);
+  border-radius: 2px;
+  box-shadow: 2px 2px 0 rgb(4 3 22 / 55%);
+  color: var(--citypop-ink);
+  font-family: var(--citypop-font-label);
+  font-size: 0.6rem;
+  font-weight: 600;
+  left: 12px;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  padding: 0.45rem 0.5rem 0.32rem;
+  text-transform: uppercase;
+  top: 12px;
+  transform: rotate(-2deg);
+}
+
+/*
+ * Stash shows the card's checkbox in the picture's top-left corner whenever a
+ * card is hovered or selected, and always on touch screens, so the sticker
+ * sits to its right (and past a group's drag handle where there is one).
+ */
+.grid-card .rating-banner {
+  left: calc(6px + 0.5rem + 1.75rem);
+}
+
+.grid-card:has(.card-drag-handle) .rating-banner {
+  left: calc(6px + 0.5rem + 3.75rem);
+}
+
+/* Progress is an FM dial: ticks along the band, a sunset to the needle */
+.grid-card .progress-bar {
+  background:
+    repeating-linear-gradient(
+        90deg,
+        rgb(203 195 236 / 55%) 0 1px,
+        transparent 1px 8px
+      )
+      0 0 / 100% 3px no-repeat,
+    repeating-linear-gradient(
+        90deg,
+        rgb(255 255 255 / 80%) 0 1px,
+        transparent 1px 40px
+      )
+      0 0 / 100% 5px no-repeat,
+    rgb(9 8 32 / 86%);
+  bottom: 0;
+  height: 7px;
+  z-index: 2;
+}
+
+.grid-card .progress-indicator {
+  background: linear-gradient(
+    90deg,
+    rgb(255 179 107 / 75%),
+    rgb(255 122 107 / 90%) 60%,
+    #f5508a
+  );
+  height: 7px;
+  position: relative;
+}
+
+.grid-card .progress-indicator::after {
+  background: #fff;
+  box-shadow: 0 0 0 1px rgb(194 58 142 / 60%);
+  content: '';
+  height: 100%;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 2px;
+}
+
+/* Counts under the card */
+.card-popovers .btn.minimal {
+  color: var(--citypop-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+.card-popovers .btn.minimal:not(:disabled):hover {
+  color: var(--citypop-coral);
+}
+
+.card-popovers .count-button .btn.minimal {
+  color: var(--citypop-pool-hi);
+}
+
+.card-popovers .count-button .count-value.btn.minimal {
+  color: var(--citypop-muted);
+}
+
+.card-popovers .organized .btn,
+.card-popovers .organized svg {
+  color: var(--citypop-pool-hi);
+}
+
+/*
+ * Audio-only scenes have no picture, so citypop.js gives their sleeve a
+ * cassette laid across a pool at dusk. Stash's own hover preview and scrubber
+ * stay above it.
+ */
+.citypop-audio-cover {
+  align-items: center;
+  background:
+    url('assets/icons/stars.svg') center top / 220% auto no-repeat,
+    linear-gradient(
+      180deg,
+      #121244 0%,
+      #2a1f6e 26%,
+      #7a2f88 46%,
+      #e0507e 58%,
+      #ff9a72 64%
+    );
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+}
+
+/* The sun on the horizon */
+.citypop-audio-cover::before {
+  background: url('assets/icons/sun-horizon.svg') 50% 100% / auto 92% no-repeat;
+  content: '';
+  inset: 0 0 36%;
+  position: absolute;
+}
+
+/* The pool: turquoise at dusk, with soft caustics and the sun's reflection in
+   bars. Kept a shade deep, since a third of some grids is tapes */
+.citypop-audio-cover::after {
+  background:
+    repeating-linear-gradient(
+        180deg,
+        transparent 0 4px,
+        rgb(255 154 114 / 48%) 4px 6px
+      )
+      50% 0 / 30% 70% no-repeat,
+    linear-gradient(rgb(14 60 112 / 42%), rgb(14 60 112 / 42%)),
+    var(--citypop-caustic),
+    linear-gradient(180deg, #3cc4cc 0%, #1a8cae 40%, #11477e 100%);
+  border-top: 1px solid #ffd9b0;
+  bottom: 0;
+  content: '';
+  height: 36%;
+  left: 0;
+  position: absolute;
+  right: 0;
+}
+
+/* The tape: its shell, two reels that turn on hover, the label and two glints */
+.citypop-tape {
+  aspect-ratio: 248 / 172;
+  background: url('assets/icons/tape-blank.svg') center / contain no-repeat;
+  container-type: inline-size;
+  position: relative;
+  transform: translateY(6%) rotate(-7deg);
+  transition: transform var(--citypop-medium) var(--citypop-ease);
+  width: 58%;
+  z-index: 1;
+}
+
+.grid-card:hover .citypop-tape {
+  transform: translateY(4%) rotate(-5deg) scale(1.03);
+}
+
+.citypop-tape::before,
+.citypop-tape::after {
+  aspect-ratio: 1;
+  background: url('assets/icons/reel.svg') center / contain no-repeat;
+  content: '';
+  left: 26.61%;
+  position: absolute;
+  top: 33.72%;
+  width: 9.68%;
+}
+
+.citypop-tape::after {
+  left: 60.48%;
+}
+
+.grid-card:hover .citypop-tape::before,
+.grid-card:hover .citypop-tape::after {
+  animation: citypop-spin 1.6s linear infinite;
+}
+
+/* A grid can hold a dozen tapes: their glints wait for the pointer instead of
+   sparkling all at once */
+.citypop-tape-glints::before,
+.citypop-tape-glints::after {
+  aspect-ratio: 1;
+  background: var(--citypop-glint) center / contain no-repeat;
+  content: '';
+  left: 22.18%;
+  opacity: 0;
+  position: absolute;
+  top: 25.58%;
+  transition: opacity var(--citypop-medium) var(--citypop-ease);
+  width: 8.87%;
+}
+
+.citypop-tape-glints::after {
+  left: 83.47%;
+  top: 61.05%;
+  width: 5.65%;
+}
+
+.grid-card:hover .citypop-tape-glints::before,
+.grid-card:hover .citypop-tape-glints::after {
+  opacity: 1;
+}
+
+/* Handwritten on the label, and the side stamped on its corner */
+.citypop-tape-title {
+  color: #3a2a7a;
+  font-size: 6.4cqi;
+  left: 25%;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  position: absolute;
+  top: 13.5%;
+  transform: rotate(-1.5deg);
+  white-space: nowrap;
+}
+
+.citypop-tape-side {
+  background: var(--citypop-ink);
+  border-radius: 2px;
+  color: var(--citypop-cream);
+  font-size: 4.2cqi;
+  left: 11%;
+  line-height: 1;
+  padding: 0.3em 0.25em 0.25em;
+  position: absolute;
+  top: 14%;
+}
+
+/*
+ * The zoom button on image cards, which opens the lightbox. Stash draws it as
+ * a bare 5em magnifier in the middle of the picture. Here it is a glossy
+ * sunset bubble in the bottom-right corner. #root outranks Stash's hover,
+ * focus and active reset.
+ */
+#root .image-card .preview-button {
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 0.6rem;
+
+  /* Only the bubble takes the pointer; the rest is the picture and its link */
+  pointer-events: none;
+  z-index: 2;
+}
+
+#root .image-card .preview-button .btn {
+  align-items: center;
+  background:
+    var(--citypop-glint) 22% 18% / 46% 46% no-repeat,
+    var(--citypop-gloss),
+    var(--citypop-sunset-btn);
+  border-radius: 50%;
+  box-shadow: 2px 2px 0 rgb(4 3 22 / 75%);
+  color: var(--citypop-ink);
+  display: inline-flex;
+  filter: none;
+  height: 34px;
+  justify-content: center;
+  padding: 0;
+  pointer-events: auto;
+  position: relative;
+  transition:
+    opacity var(--citypop-fast) var(--citypop-ease),
+    transform var(--citypop-medium) var(--citypop-ease);
+  width: 34px;
+}
+
+#root .image-card .preview-button .btn::after {
+  content: none;
+}
+
+#root .image-card .preview-button .fa-icon {
+  color: inherit;
+  filter: none;
+  height: 15px;
+  margin: 0;
+  opacity: 1;
+  transition: none;
+  width: 15px;
+}
+
+/*
+ * With a mouse the bubble waits for the card: it shows on hover, or when the
+ * keyboard reaches anything on the card. Touch screens have no hover, so
+ * there it always shows.
+ */
+@media (hover: hover) and (pointer: fine) {
+  #root .image-card .preview-button .btn {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+
+  #root .image-card:hover .preview-button .btn,
+  #root .image-card:has(:focus-visible) .preview-button .btn {
+    opacity: 1;
+    transform: none;
+  }
+
+  #root .image-card .preview-button .btn:hover {
+    filter: brightness(1.06) saturate(1.08);
+  }
+}
+
+#root .image-card .preview-button .btn:active {
+  box-shadow: 1px 1px 0 rgb(4 3 22 / 75%);
+  transform: translate(1px, 1px) scale(0.94);
+}
+
+#root .image-card .preview-button .btn:focus-visible {
+  box-shadow:
+    2px 2px 0 rgb(4 3 22 / 75%),
+    0 0 0 2px var(--citypop-night),
+    0 0 0 4px var(--citypop-pool);
+}
+
+.grid-card .card-check {
+  accent-color: var(--citypop-sun);
+}
