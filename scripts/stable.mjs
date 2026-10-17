@@ -2,14 +2,17 @@
 // release tag (<folder>-vX.Y.Z) reachable from HEAD, so releasing one plugin
 // never ships another plugin's unreleased work from main. A plugin with no
 // tag yet stays out of the stable channel. Tags passed with --tags replace a
-// plugin's latest tag, to roll it back.
+// plugin's latest tag, to roll it back. Each entry's path is the zip attached
+// to its tag's GitHub Release, which must hash to the same sha256 as the build;
+// the zips are also copied next to the index, for indexes read before a switch.
 // Usage: node scripts/stable.mjs <out> [--tags "juicy-v0.3.2 remix-v0.1.0"]
 import { execFileSync } from 'node:child_process'
-import { cp, mkdtemp, readFile, rm } from 'node:fs/promises'
+import { cp, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
-import { listPlugins, root, writeSource } from './site.mjs'
+import { assetDigest, assetURL } from './release-assets.mjs'
+import { indexYml, listPlugins, root, writeSource } from './site.mjs'
 
 const out = resolve(process.argv[2])
 const pins = process.argv.includes('--tags')
@@ -62,6 +65,14 @@ for (const tag of new Set(tags.values())) {
       await cp(join(site, `${e.id}.zip`), join(out, `${e.id}.zip`))
       if (existsSync(join(site, e.folder)))
         await cp(join(site, e.folder), join(out, e.folder), { recursive: true })
+      e.path = assetURL(tag, `${e.id}.zip`)
+      const digest = await assetDigest(e.path)
+      if (digest !== e.sha256)
+        throw new Error(
+          `${tag}: the release's ${e.id}.zip hashes to ${digest}, the build to ${e.sha256}`,
+        )
+      if (e.legacy)
+        await writeFile(join(out, e.folder, 'index.yml'), indexYml([e]))
       entries.push(e)
       console.log(`${e.folder}: ${e.version} from ${tag}`)
     }

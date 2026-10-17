@@ -1,11 +1,14 @@
 # Publishes the CandyBoudoir plugin source to GitHub Pages on every push to
 # main or prod:
 #   /index.yml           stable channel: each plugin built from its own latest
-#                        release tag (<folder>-vX.Y.Z) on prod
+#                        release tag (<folder>-vX.Y.Z) on prod, its zip served
+#                        from that tag's GitHub Release
 #   /develop/index.yml   develop channel: every plugin built from main, for
 #                        Stash develop builds and for plugins not released yet
 #   /juicy/index.yml     Juicy alone, for installs made from Juicy's own source
-#                        before the shared one existed (and /juicy/develop/)
+#                        before the shared one existed, its zip served from
+#                        the release like the stable channel's (and
+#                        /juicy/develop/, served like the develop channel's)
 # On prod, the release job first tags and releases each plugin whose version
 # has no tag yet, so a version bump reaches the stable channel in the same run.
 # A manual run can publish older tags as the stable channel to roll back.
@@ -83,6 +86,7 @@ jobs:
         run: pnpm install --frozen-lockfile && node scripts/stable.mjs ../stable-site --tags "$STABLE_TAGS"
         env:
           STABLE_TAGS: ${{ inputs.stable_tags }}
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Build the develop channel
         working-directory: develop
         run: pnpm install --frozen-lockfile && pnpm check && pnpm build
@@ -123,3 +127,5 @@ jobs:
         run: |
           mkdir site && tar -xf built/artifact.tar -C site
           node scripts/verify-live.mjs site https://candyboudoir.github.io
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
