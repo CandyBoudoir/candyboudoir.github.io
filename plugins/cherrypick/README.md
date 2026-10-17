@@ -2,7 +2,7 @@
 
 A [Stash](https://github.com/stashapp/stash) plugin that learns what you like from your own ratings and plays, and shows it inside Stash's pages: a For you row on the front page, Your score on scenes you haven't rated, More like this on scene pages, and performer and scene brackets that sharpen what it learns. It needs no account and no setup. A StashDB key, if you have one in Stash, adds popularity and the scenes you don't have.
 
-Cherry Pick 0.1.3 is built and tested on Stash v0.31.1.
+Cherry Pick 0.1.5 is built and tested on Stash v0.31.1.
 
 ![The front page with Cherry Pick: For you first, each card saying why it is there, then a row of one performer's scenes](docs/screenshots/front.png)
 
@@ -139,7 +139,7 @@ Settings > Plugins > Cherry Pick switches each piece on or off. All start on exc
 Cherry Pick runs in Stash's web interface and keeps its data in your Stash:
 
 - **Stash's plugin configuration** (`config.yml`): the settings above, the Hall of Fame, a bracket in progress, Not interested, Don't learn, applied ratings, whether you turned StashDB off and your answer about Your score beside Stash Curator. A few kilobytes.
-- **Custom fields**: the three bracket fields above on performers, written once when a bracket ends, and `cherrypick_provisional` on performers and scenes whose rating Apply set from the champion's.
+- **Custom fields**: the three bracket fields above on performers, written once when a bracket ends, and `cherrypick_provisional` on performers and scenes whose rating Apply set from where they finished in a bracket.
 - **Your Stash ratings**: only through Apply to my ratings, or when you close a bracket's champion screen with Apply bracket ratings automatically on; never on a record you rated yourself, another plugin ranks or whose rating Restash mirrors. Undo puts them back, except a rating you changed since Apply, which stays yours.
 
 Your browser keeps only what Cherry Pick can do without: a copy of your library for a fast start and the StashDB cache in IndexedDB, and which For you cards you opened or passed over and a copy of the plugin configuration in local storage. A new browser fetches the library and the StashDB answers again, and its record of For you's cards starts empty. The taste model is never stored. Cherry Pick fits it again from what your Stash holds each time Stash loads.
@@ -161,7 +161,7 @@ Other Stash plugins cover parts of this: Stash Curator and Binge recommend scene
 
 <img src="docs/screenshots/phone.png" alt="For you at phone width" width="260">
 
-The screenshots use an invented demo library with test-pattern covers and silhouettes.
+The screenshots show a demo library with invented names, cut from Blender Foundation open movies: Big Buck Bunny (© 2008 Blender Foundation, www.bigbuckbunny.org) and Sintel (© Blender Foundation, durian.blender.org) under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/), and Elephants Dream (© 2006 Blender Foundation and Netherlands Media Art Institute, www.elephantsdream.org) under [CC BY 2.5](https://creativecommons.org/licenses/by/2.5/).
 
 ## Made with AI
 
@@ -176,6 +176,7 @@ The repo's [README](../../README.md) covers building, testing and releasing. Che
 - `src/css/` holds numbered partials, layout only.
 - `docs/stash-seams.md` records where Cherry Pick hooks into Stash, checked against Stash's source.
 - `tests/unit/` holds the model's unit tests, run by `pnpm test:unit`; `tests/demo-library.mjs` seeds the invented library the compatibility tests use.
+- `tests/screenshots/` retakes the screenshots in `docs/screenshots/`: `blender-library.mjs` downloads the films, cuts the demo library from them and seeds a throwaway Stash, and `take-screenshots.mjs` takes each shot. Each script's header has its commands.
 
 ## License
 

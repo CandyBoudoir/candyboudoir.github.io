@@ -653,8 +653,8 @@ function describeSource(src) {
 
 // 0–2 rows, only when recent watching justifies them, of scenes you own:
 // "More with <performer>" (2+ of their scenes in the window, decayed plays
-// ≥ 1.2) and "Back to <tag>" (3+ recent scenes, a third more of your recent
-// plays than of your library).
+// ≥ 1.2) and "Back to <tag>" (3+ recent scenes, and a share of your recent
+// plays at least 33 percentage points above its share of your library).
 export function followRows(ctx, signals, shownIds) {
   const { db, M, mom } = ctx
   const shown = new Set(shownIds)
