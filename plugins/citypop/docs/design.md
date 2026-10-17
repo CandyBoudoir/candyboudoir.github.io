@@ -62,7 +62,7 @@ A new Japanese word needs its characters added to `TEXT` in the script, the scri
 
 The page is a fixed backdrop behind everything: night blue overhead, violet low down, a sunset glow along the bottom edge, stars, and palm silhouettes in the bottom-left corner. A striped sun sits low in the bottom-right corner, smaller and dimmer than the art. Text over its disc would be hard to read, so it sets whenever full-width content crosses the horizon.
 
-The sun's fade is a scroll-driven animation. Each block that can cover the horizon is a view timeline: a list (`.item-list-container`), a detail page's header (`.detail-header.full-width`) and body (`.detail-body`), the front page's rows (`.recommendations-container`), and the player or picture that fills a scene or image page (`.scene-player-container`, `.image-container`). The sun fades out as a block's top edge comes up from 15vh below the screen and back in once its bottom edge has cleared the sun. On Stash's own pages those blocks cover the horizon from the top of the page to the bottom, so the sun stays down there and rises in Settings, where the horizon is free. Browsers without scroll timelines (Firefox) get the same result from `:has()`: the sun is down on any page with one of those blocks. The fade follows scrolling, not time, so Calm mode and reduced motion keep it.
+The sun rises only where the horizon is free. Every Stash page that shows a list (`.item-list-container`), a detail page's header or body (`.detail-header`, `.detail-body`), the front page's rows (`.recommendations-container`) or the player or picture of a scene or image page (`.scene-player-container`, `.image-container`) has that content across the horizon from its top to its bottom, so on those pages the sun stays down, and it rises in Settings. One `:has()` rule decides it, the same in every browser, and the sun fades over 700ms as you move between pages. It starts down, so it never shows while a page loads. The prototype set the sun with scroll-driven animations, one view timeline per block; on Stash's real pages those always ended with the sun down, so the plugin uses the rule that gives the same result without per-scroll work.
 
 ## Motifs and glyphs
 
@@ -88,7 +88,7 @@ Glyphs (`glyph-*.svg`) are flat silhouettes on a 24-unit grid, used as CSS masks
 
 ## Motion
 
-Motion is short and soft (`--citypop-ease`, 140 to 240ms), except the sunset sweep and the glint on a hovered card, which take a second. Rating, favouriting and bumping the O counter throw a burst of glints, little striped suns and pool drops. All animation stops when the viewer's system asks for reduced motion, and when the Calm mode setting is on; the sun's fade, which follows scrolling, stays.
+Motion is short and soft (`--citypop-ease`, 140 to 240ms), except the sunset sweep and the glint on a hovered card, which take a second. Rating, favouriting and bumping the O counter throw a burst of glints, little striped suns and pool drops. All animation stops when the viewer's system asks for reduced motion, and when the Calm mode setting is on; the sun then rises and sets without the fade.
 
 ## Copy
 

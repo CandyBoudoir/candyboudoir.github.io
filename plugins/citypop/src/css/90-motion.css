@@ -1,172 +1,17 @@
 /*
- * The sun sets as full-width content rises over the horizon and comes back
- * once it has passed, so it never sits behind cards or text. Each block that
- * can cover the horizon (a list, a detail page's header and body, the front
- * page's rows, the scene player) is a view timeline, and the sun fades out as
- * the block's top edge comes up from below the screen and back in once its
- * bottom edge has cleared the sun. On Stash's own pages those blocks always
- * cover the horizon, so the sun stays down; it rises where the horizon is
- * free, as in Settings.
+ * The sun rises only where the horizon is free. Every Stash page that shows
+ * a list, a detail page's header or body, the front page's rows or the player
+ * or picture of a scene or image page has full-width content across the
+ * horizon from its top to its bottom, so the sun stays down there and never
+ * sits behind cards or text. It rises in Settings, and fades as you move
+ * between them. It starts down, so it never shows while a page loads.
  */
-@property --citypop-set-list {
-  inherits: false;
-  initial-value: 0;
-  syntax: '<number>';
-}
-
-@property --citypop-set-head {
-  inherits: false;
-  initial-value: 0;
-  syntax: '<number>';
-}
-
-@property --citypop-set-body {
-  inherits: false;
-  initial-value: 0;
-  syntax: '<number>';
-}
-
-@property --citypop-set-cards {
-  inherits: false;
-  initial-value: 0;
-  syntax: '<number>';
-}
-
-html {
-  timeline-scope:
-    --citypop-list, --citypop-head, --citypop-body, --citypop-cards;
-}
-
-.item-list-container:not(.detail-body *) {
-  view-timeline: --citypop-list block;
-}
-
-/* A detail page's header, or the player or picture that fills a scene or
-   image page (only one of them is ever on a page) */
-:is(.detail-header.full-width, .scene-player-container, .image-container) {
-  view-timeline: --citypop-head block;
-}
-
-.detail-body {
-  view-timeline: --citypop-body block;
-}
-
-.recommendations-container {
-  view-timeline: --citypop-cards block;
-}
-
-/* Each view reaches 15vh below the screen, so the sun is already down when
-   the block's top edge comes into sight */
-:is(
-  .item-list-container:not(.detail-body *),
-  .detail-header.full-width,
-  .scene-player-container,
-  .image-container,
-  .detail-body,
-  .recommendations-container
-) {
-  view-timeline-inset: 0 -15vh;
-}
-
 body::after {
-  animation:
-    citypop-set-list linear both,
-    citypop-set-head linear both,
-    citypop-set-body linear both,
-    citypop-set-cards linear both;
-  animation-timeline:
-    --citypop-list, --citypop-head, --citypop-body, --citypop-cards;
-  opacity: calc(
-    0.5 - 0.5 *
-      max(
-        var(--citypop-set-list),
-        var(--citypop-set-head),
-        var(--citypop-set-body),
-        var(--citypop-set-cards)
-      )
-  );
+  transition: opacity 700ms var(--citypop-ease);
 }
 
-@keyframes citypop-set-list {
-  entry 0% {
-    --citypop-set-list: 0;
-  }
-
-  entry 12% {
-    --citypop-set-list: 1;
-  }
-
-  exit 33% {
-    --citypop-set-list: 1;
-  }
-
-  exit 42% {
-    --citypop-set-list: 0;
-  }
-}
-
-@keyframes citypop-set-head {
-  entry 0% {
-    --citypop-set-head: 0;
-  }
-
-  entry 12% {
-    --citypop-set-head: 1;
-  }
-
-  exit 33% {
-    --citypop-set-head: 1;
-  }
-
-  exit 42% {
-    --citypop-set-head: 0;
-  }
-}
-
-@keyframes citypop-set-body {
-  entry 0% {
-    --citypop-set-body: 0;
-  }
-
-  entry 12% {
-    --citypop-set-body: 1;
-  }
-
-  exit 33% {
-    --citypop-set-body: 1;
-  }
-
-  exit 42% {
-    --citypop-set-body: 0;
-  }
-}
-
-@keyframes citypop-set-cards {
-  entry 0% {
-    --citypop-set-cards: 0;
-  }
-
-  entry 12% {
-    --citypop-set-cards: 1;
-  }
-
-  exit 33% {
-    --citypop-set-cards: 1;
-  }
-
-  exit 42% {
-    --citypop-set-cards: 0;
-  }
-}
-
-/* Without scroll timelines (Firefox) the sun stays down on any page with such
-   a block, and rises only where there is none */
-@supports not (animation-timeline: view()) {
-  body::after {
-    opacity: 0.5;
-  }
-
-  :root:has(
+:root:has(.setting-section):not(
+    :has(
       .item-list-container,
       .detail-header,
       .detail-body,
@@ -174,9 +19,9 @@ body::after {
       .scene-player-container,
       .image-container
     )
-    body::after {
-    opacity: 0;
-  }
+  )
+  body::after {
+  opacity: 0.5;
 }
 
 @keyframes citypop-sweep {
@@ -294,31 +139,5 @@ body::after {
 
   .citypop-burst {
     display: none;
-  }
-}
-
-/*
- * The sun's fade is tied to scrolling, not to time: it is what keeps the sun
- * from behind the cards, so Calm mode and reduced motion keep it.
- */
-html.citypop-calm body::after {
-  animation:
-    citypop-set-list linear both,
-    citypop-set-head linear both,
-    citypop-set-body linear both,
-    citypop-set-cards linear both !important;
-  animation-timeline:
-    --citypop-list, --citypop-head, --citypop-body, --citypop-cards !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html body::after {
-    animation:
-      citypop-set-list linear both,
-      citypop-set-head linear both,
-      citypop-set-body linear both,
-      citypop-set-cards linear both !important;
-    animation-timeline:
-      --citypop-list, --citypop-head, --citypop-body, --citypop-cards !important;
   }
 }

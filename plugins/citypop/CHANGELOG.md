@@ -5,7 +5,7 @@
 First release, for Stash v0.31.1.
 
 - An airbrushed 1980s dusk after Japanese city pop album covers: a night-blue sky graded into violet with stars, palm silhouettes and a sunset glow, deep navy panels, sunset coral and pool turquoise.
-- A striped sun low in the corner that sets whenever a list, a detail page or the player covers the horizon, so it never sits behind cards. Browsers without scroll timelines keep it down on those pages.
+- A striped sun low in the corner that stays down wherever a list, a detail page or the player covers the horizon, so it never sits behind cards, and rises in Settings.
 - The navbar carries the J-card stripe band along its foot, with the active page as a sunset sticker and the brand in chrome script. On a phone held upright the band runs along the top of Stash's bottom bar.
 - Cards are record sleeves with a printed keyline and a pressed crease. Hover lifts the sleeve, sweeps a sunset across the picture, flashes a glint and shows the catalogue label. The rating is a cream cassette-label sticker beside the checkbox, and progress is an FM dial.
 - Audio-only scenes with no cover of their own are a cassette on a pool at dusk, found with one GraphQL request per batch of new cards.

@@ -43,10 +43,9 @@ body::before {
 
 /*
  * The setting sun, smaller and dimmer than the art, low in the right corner.
- * Text over its disc would be hard to read, so it sets whenever full-width
- * content crosses the horizon and rises only where the horizon is free (see
- * 90-motion.css). It starts down, so it never shows behind cards while a
- * page loads.
+ * Text over its disc would be hard to read, so it stays down wherever
+ * full-width content crosses the horizon and rises only where the horizon is
+ * free (90-motion.css).
  */
 body::after {
   background: url('assets/icons/sun-horizon.svg') right 6vw bottom -1px / auto
