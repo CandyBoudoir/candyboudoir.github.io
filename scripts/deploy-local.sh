@@ -39,3 +39,7 @@ curl -fsS "$STASH_URL/graphql" ${auth[@]+"${auth[@]}"} \
   -d '{"query":"mutation { reloadPlugins }"}' >/dev/null
 
 echo "Reloaded plugins. Refresh Stash to see them; a new plugin starts enabled (Settings > Plugins to turn it off)."
+
+case " $* " in
+  *" cherrypick "*) echo "Check Cherry Pick on this Stash with pnpm smoke." ;;
+esac

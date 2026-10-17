@@ -36,9 +36,12 @@ pnpm install
 pnpm build                # dist/site: each plugin's folder and zip, the source index.yml and the site's pages
 pnpm check                # prettier, eslint, stylelint
 pnpm deploy:local juicy   # build, copy the named plugins into a Stash plugins folder over SSH and reload plugins
+pnpm smoke                # after deploy:local cherrypick: a headless check of Cherry Pick on that Stash
 ```
 
 `deploy:local` reads `STASH_URL`, `STASH_SSH_HOST`, `STASH_PLUGINS_DIR` (the folder holding the installed plugins, such as `/root/.stash/plugins/candyboudoir`) and, when Stash has a login, `STASH_API_KEY_FILE` from the environment. A gitignored `.envrc` is a good home for them.
+
+`pnpm smoke` (`plugins/cherrypick/tests/smoke.mjs`) opens that Stash in headless Chromium and checks that the deployed files hash the same as `dist/site/CherryPick` (over `STASH_SSH_HOST`), that the navbar cherries and For you show on the front page, the bracket controls on the Scenes and Performers lists, the plugin page across a reload and the matches switch in Settings › Plugins, and that More like this on five scene pages at 1440 and 390 wide causes no sideways scroll, keeps its arrows on screen and, below 1200 wide, starts below the scene's tabs. It reads the same variables as `deploy:local`, prints statuses and counts only (nothing from the library, so its output is safe to share), and exits non-zero on a failed check or any page error. CI never runs it, since it needs your own Stash and its library.
 
 Each plugin lives in `plugins/<name>/`: a `plugin.mjs` that tells the shared build (`scripts/build.mjs`) what goes into its plugin folder, its `CHANGELOG.md` and README, and its compatibility tests in `tests/`. `tests/stash/` is the Stash test harness the plugins share.
 
