@@ -153,6 +153,30 @@ test('Your score shows on unrated scene cards only', async ({ page }) => {
   await expect(banner(rated)).toHaveCount(0)
 })
 
+// Stash's ribbon is rotated about its center, so a narrower one stops inside
+// the picture and its end shows (#90).
+test("Your score's ribbon is as long as Stash's rating ribbon", async ({
+  page,
+}) => {
+  const unrated = demoScene(demo, { rated: false, played: true })
+  const rated = demoScene(demo, { rated: true, played: true })
+  await page.goto('/scenes?sortby=title&perPage=120')
+  const card = (id) =>
+    page.locator(
+      `.scene-card:has(a[href="/scenes/${id}"], a[href^="/scenes/${id}?"])`,
+    )
+  const ours = card(unrated).locator('.cherrypick-score-banner')
+  const stash = card(rated).locator('.rating-banner')
+  await expect(ours).toBeVisible({ timeout: 20_000 })
+  await expect(stash).toHaveText(/^Rating: \d$/i)
+  // offsetWidth is the ribbon's length before the rotation. Ascension and
+  // Xenith hide Stash's ribbon on their cards, leaving it no width.
+  const width = (l) => l.evaluate((el) => el.offsetWidth)
+  const theirs = await width(stash)
+  if (!companionPluginIds().length) expect(theirs).toBeGreaterThan(0)
+  expect(await width(ours)).toBeGreaterThanOrEqual(theirs - 1)
+})
+
 test("Your score shows where another plugin set the rating, in place of Stash's banner", async ({
   page,
 }) => {
