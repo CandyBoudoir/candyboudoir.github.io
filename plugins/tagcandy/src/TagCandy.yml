@@ -1,0 +1,53 @@
+name: Tag Candy
+description: Glossy sticker icons for your tags. Matches each tag by its StashDB link or its name and has Stash download the icon from candyboudoir.github.io. Needs Stash v0.31.0 or later.
+version: 0.1.0
+url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/tagcandy
+exec:
+  - tagcandy.js
+interface: js
+errLog: error
+tasks:
+  - name: Apply icons
+    description: Gives every matching tag its icon. Tags with an image you set keep it unless Replace my own tag images is on.
+    defaultArgs:
+      mode: apply
+  - name: Dry run
+    description: Reports what Apply icons would do with the current settings, and lists the tags that match nothing. Changes nothing.
+    defaultArgs:
+      mode: dryrun
+  - name: Restore replaced images
+    description: Puts back the images Tag Candy replaced, on tags that still hold its icon.
+    defaultArgs:
+      mode: restore
+  - name: Delete backups
+    description: Deletes the Tag Candy backups tags, once you are happy with a swap.
+    defaultArgs:
+      mode: deletebackups
+  - name: Remove Tag Candy icons
+    description: Clears the icons Tag Candy set and leaves every other image.
+    defaultArgs:
+      mode: remove
+hooks:
+  - name: Icons for new tags
+    description: Gives a new, renamed or merged tag its icon when it has no image.
+    triggeredBy:
+      - Tag.Create.Post
+      - Tag.Update.Post
+      - Tag.Merge.Post
+settings:
+  replaceOwnImages:
+    displayName: Replace my own tag images
+    description: Apply icons also swaps the images you set, after copying each to a backup tag. Needs an API key when Stash has a password.
+    type: BOOLEAN
+  leaveNewTagsAlone:
+    displayName: Leave new and renamed tags alone
+    description: Stop giving new, renamed and merged tags their icon. Apply icons still works.
+    type: BOOLEAN
+  extraMatches:
+    displayName: Extra matches
+    description: tag=concept pairs, separated by semicolons, checked before anything else, for example Nylons=Stockings / Hosiery
+    type: STRING
+  explicitIconsUrl:
+    displayName: Explicit icons URL
+    description: Where nude versions are served, as a web address or a path on this Stash such as /custom/tag-candy-explicit/. Each file is named like the regular icon without its hash. Empty uses the regular icons.
+    type: STRING
