@@ -1,0 +1,61 @@
+/* Tags: caption boxes; the corner carries a scrap of tone */
+.tag-item.badge,
+.badge-secondary {
+  background:
+    linear-gradient(135deg, transparent 0 7px, #000 7px), var(--st-dots);
+  border: 1.5px solid var(--st-white);
+  border-radius: 0;
+  color: var(--st-text);
+  font-family: var(--st-font-label);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  padding: 0.45em 0.8em 0.45em 0.95em;
+  transition:
+    background-color var(--st-fast),
+    color var(--st-fast);
+}
+
+.tag-item.badge a {
+  color: inherit;
+}
+
+.tag-item.badge:hover,
+.tag-item.badge:has(a:hover) {
+  background:
+    linear-gradient(135deg, transparent 0 7px, var(--st-paper) 7px),
+    var(--st-dots-ink), var(--st-paper);
+  color: #000;
+  text-decoration: none;
+}
+
+.tag-item.badge a:hover {
+  color: #000;
+  text-decoration: none;
+}
+
+.badge-primary {
+  background: var(--st-spot);
+  border: 1.5px solid var(--st-white);
+  border-radius: 0;
+  color: #fff;
+  font-family: var(--st-font-label);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  padding: 0.45em 0.75em;
+  text-transform: uppercase;
+}
+
+.badge-info {
+  background: var(--st-paper);
+  border: 1.5px solid var(--st-white);
+  border-radius: 0;
+  color: #000;
+  font-family: var(--st-font-label);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  padding: 0.45em 0.7em;
+}

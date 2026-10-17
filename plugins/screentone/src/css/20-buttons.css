@@ -1,0 +1,365 @@
+/*
+ * Buttons: inked boxes with a screentone shadow. Hover lifts the box off its
+ * shadow and a press lands it. Stash renders its icon buttons as
+ * `.btn.btn-primary.minimal`, so every inked rule skips `.minimal` and those
+ * stay flat.
+ */
+.btn {
+  --st-off: 5px;
+
+  border-radius: 0;
+  font-family: var(--st-font-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition:
+    transform var(--st-fast) var(--st-ease),
+    background-color var(--st-fast) var(--st-ease),
+    color var(--st-fast) var(--st-ease);
+}
+
+/*
+ * The shadow and the doki hang off the button, so it needs a position. A
+ * zero-specificity rule keeps every Stash rule that places a button
+ * absolutely (card favourites, the Tagger's sprite button) in charge.
+ */
+:where(.btn) {
+  position: relative;
+}
+
+.btn:not(.minimal, .btn-minimal, .btn-link) {
+  border: 2px solid var(--st-white) !important;
+  box-shadow: none !important;
+  font-size: 0.82rem;
+}
+
+/*
+ * The tone shadow is a copy of the button pushed down and right, masked to
+ * the L that shows past the face, so it needs no z-index trick and works
+ * inside any stacking context Stash builds.
+ */
+.btn:not(.minimal, .btn-minimal, .btn-link)::after {
+  background: var(--st-dots);
+  border: 0;
+  content: '';
+  height: calc(100% + 4px);
+  left: -2px;
+  margin: 0;
+  mask:
+    linear-gradient(#000, #000) right / calc(var(--st-off) - 1px) 100% no-repeat,
+    linear-gradient(#000, #000) bottom / 100% calc(var(--st-off) - 1px)
+      no-repeat;
+  pointer-events: none;
+  position: absolute;
+  top: -2px;
+  transform: translate(calc(var(--st-off) + 1px), calc(var(--st-off) + 1px));
+  transition: transform var(--st-fast) var(--st-ease);
+  vertical-align: 0;
+  width: calc(100% + 4px);
+}
+
+.btn:not(.minimal, .btn-minimal, .btn-link, :disabled, .disabled):hover {
+  --st-off: 7px;
+
+  transform: translate(-1px, -1px);
+}
+
+/* Pressed: the box lands on its shadow */
+.btn:not(.minimal, .btn-minimal, .btn-link, :disabled, .disabled):active {
+  --st-off: 1px;
+
+  transform: translate(3px, 3px);
+}
+
+/* In a group the boxes share their rules, and the chosen one stays put */
+.btn-group
+  > .btn:not(.minimal, .btn-minimal, .btn-link)
+  + .btn:not(.minimal, .btn-minimal, .btn-link) {
+  margin-left: -2px;
+}
+
+.btn-group > .btn:not(.minimal, .btn-minimal, .btn-link).active,
+.btn-group > .btn:not(.minimal, .btn-minimal, .btn-link):hover {
+  transform: none;
+  z-index: 1;
+}
+
+/* A group casts one shadow, not one per button */
+.btn-group > .btn:not(.minimal, .btn-minimal, .btn-link)::after {
+  content: none;
+}
+
+.btn-group:has(> .btn:not(.minimal, .btn-minimal, .btn-link))::after {
+  background: var(--st-dots);
+  content: '';
+  height: 100%;
+  left: 0;
+  mask:
+    linear-gradient(#000, #000) right / 4px 100% no-repeat,
+    linear-gradient(#000, #000) bottom / 100% 4px no-repeat;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  transform: translate(6px, 6px);
+  width: 100%;
+}
+
+/* Buttons fused to a field are part of the field: no shadow, no lift */
+.input-group .btn:not(.minimal, .btn-minimal, .btn-link)::after,
+.input-group .btn-group:has(> .btn)::after {
+  content: none;
+}
+
+.input-group
+  .btn:not(.minimal, .btn-minimal, .btn-link, :disabled, .disabled):is(
+    :hover,
+    :active
+  ) {
+  transform: none;
+}
+
+.btn:focus,
+.btn.focus {
+  box-shadow: none !important;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--st-spot-hi);
+  outline-offset: 4px;
+}
+
+.btn-primary:not(.minimal),
+.btn-primary:not(.minimal):hover,
+.btn-primary:not(.minimal):focus,
+.btn-primary:not(.minimal, :disabled, .disabled):active,
+.show > .btn-primary.dropdown-toggle:not(.minimal) {
+  background: var(--st-spot);
+  color: #fff;
+}
+
+.btn-primary:not(.minimal, :disabled, .disabled):hover {
+  background:
+    linear-gradient(
+      100deg,
+      transparent 30%,
+      rgb(255 255 255 / 16%) 30% 46%,
+      transparent 46%
+    ),
+    var(--st-spot);
+}
+
+.btn-primary:not(.minimal, :disabled, .disabled):active {
+  background: var(--st-spot-deep);
+}
+
+.btn-secondary:not(.minimal),
+.btn-secondary:not(.minimal):hover,
+.btn-secondary:not(.minimal):focus,
+.btn-secondary:not(.minimal, :disabled, .disabled):active,
+.show > .btn-secondary.dropdown-toggle:not(.minimal) {
+  background: #000;
+  color: var(--st-text);
+}
+
+.btn-secondary:not(.minimal, :disabled, .disabled):hover {
+  background: var(--st-dots-soft), #000;
+  color: #fff;
+}
+
+/* The chosen item of a group is the white of a bubble */
+.btn.btn-secondary:not(.minimal, :disabled, .disabled).active {
+  background: var(--st-paper);
+  color: #000;
+}
+
+/* Scan is paper, Generate hatched, Identify toned */
+.btn-success:not(.minimal),
+.btn-success:not(.minimal):hover,
+.btn-success:not(.minimal):focus,
+.btn-success:not(.minimal, :disabled, .disabled):active {
+  background: var(--st-paper);
+  color: #000;
+}
+
+.btn-warning:not(.minimal),
+.btn-warning:not(.minimal):hover,
+.btn-warning:not(.minimal):focus,
+.btn-warning:not(.minimal, :disabled, .disabled):active {
+  background: var(--st-hatch-soft), var(--st-tone-hi);
+  color: #fff;
+}
+
+.btn-info:not(.minimal),
+.btn-info:not(.minimal):hover,
+.btn-info:not(.minimal):focus,
+.btn-info:not(.minimal, :disabled, .disabled):active {
+  background: var(--st-dots-soft), var(--st-tone);
+  color: #fff;
+}
+
+/* Delete is outlined in red until you mean it */
+.btn-danger:not(.minimal),
+.btn-danger:not(.minimal):hover,
+.btn-danger:not(.minimal):focus,
+.btn-danger:not(.minimal, :disabled, .disabled):active {
+  background: #000;
+  border-color: var(--st-spot-hi) !important;
+  color: var(--st-spot-hi);
+}
+
+.btn-danger:not(.minimal, :disabled, .disabled):hover {
+  background: var(--st-spot);
+  border-color: var(--st-white) !important;
+  color: #fff;
+}
+
+:is(.btn-success, .btn-warning, .btn-info):not(
+    .minimal,
+    :disabled,
+    .disabled
+  ):hover {
+  filter: brightness(1.1);
+}
+
+.btn:disabled,
+.btn.disabled {
+  cursor: not-allowed;
+  filter: grayscale(1);
+  opacity: 0.45;
+  transform: none;
+}
+
+.btn:not(.minimal, .btn-minimal, .btn-link):disabled,
+.btn:not(.minimal, .btn-minimal, .btn-link).disabled {
+  border-style: dashed !important;
+}
+
+.btn:disabled::after,
+.btn.disabled::after {
+  opacity: 0.35;
+}
+
+.btn-sm:not(.minimal, .btn-minimal, .btn-link) {
+  --st-off: 4px;
+
+  font-size: 0.72rem;
+}
+
+.btn-lg:not(.minimal, .btn-minimal, .btn-link) {
+  --st-off: 6px;
+
+  font-size: 1rem;
+}
+
+.btn.minimal {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--st-muted);
+}
+
+.btn.minimal:not(:disabled):hover,
+.btn.minimal:not(:disabled, .disabled):active {
+  background: rgb(253 252 249 / 7%);
+  border-color: transparent;
+  color: #fff;
+}
+
+.btn-link {
+  color: var(--st-text);
+  text-decoration: underline 2px var(--st-spot);
+  text-underline-offset: 5px;
+}
+
+.btn-link:hover {
+  color: var(--st-spot-hi);
+  text-decoration-color: var(--st-spot-hi);
+}
+
+/*
+ * Bootstrap draws a dropdown's caret in ::after, which inked buttons spend on
+ * the tone shadow, so the caret moves to ::before.
+ */
+.btn.dropdown-toggle:not(.minimal, .btn-minimal, .btn-link) {
+  padding-right: 1.9rem;
+}
+
+.btn.dropdown-toggle:not(.minimal, .btn-minimal, .btn-link)::before {
+  background: currentcolor;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  content: '';
+  height: 6px;
+  margin-top: -3px;
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  width: 9px;
+}
+
+/* A split button's caret half is narrow and carries no label */
+.btn.dropdown-toggle.dropdown-toggle-split:not(
+    .minimal,
+    .btn-minimal,
+    .btn-link
+  ) {
+  padding-left: 0.6rem;
+  padding-right: 0.6rem;
+}
+
+.btn.dropdown-toggle.dropdown-toggle-split:not(
+    .minimal,
+    .btn-minimal,
+    .btn-link
+  )::before {
+  position: static;
+  display: inline-block;
+  margin: 0;
+  vertical-align: 0.1em;
+}
+
+/* Selects styled as buttons (the page-size picker in list toolbars) */
+select.btn-secondary {
+  appearance: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M0 0h12L6 8z' fill='%23fdfcf9'/%3E%3C/svg%3E")
+      right 0.6rem center / 9px 6px no-repeat,
+    #000;
+  color: var(--st-text);
+  padding-right: 1.6rem;
+}
+
+select option {
+  background-color: #000;
+  color: var(--st-text);
+}
+
+/*
+ * Chrome that Stash renders as plain buttons: the bars that fold the details
+ * panel away on scene and gallery pages, and the player's scrubber arrows.
+ * Keep them quiet.
+ */
+#root :is(.scene-divider, .gallery-divider, .details-divider) .btn,
+#root .scrubber-button {
+  background: none;
+  border: 0 !important;
+  color: var(--st-muted);
+  transform: none;
+}
+
+#root :is(.scene-divider, .gallery-divider, .details-divider) .btn::after,
+#root .scrubber-button::after {
+  content: none;
+}
+
+#root .scrubber-button {
+  background: var(--st-tone);
+}
+
+#root :is(.scene-divider, .gallery-divider, .details-divider) .btn:hover,
+#root .scrubber-button:hover {
+  color: var(--st-spot-hi);
+}
+
+#root .scrubber-tags-background {
+  background-color: var(--st-tone);
+}

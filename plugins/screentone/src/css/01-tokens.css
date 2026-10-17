@@ -1,0 +1,117 @@
+/*
+ * Screentone design tokens. Stash compiles its colours from SCSS and exposes
+ * no custom properties, so every rule in this theme reads from these instead.
+ * Every url() here resolves against screentone.css.
+ */
+
+/* The panel frame thickens on hover, so it is a length that can transition */
+@property --st-frame {
+  inherits: true;
+  initial-value: 2.5px;
+  syntax: '<length>';
+}
+
+:root {
+  color-scheme: dark;
+  accent-color: var(--st-spot);
+
+  /* Beta and white ink, and the one spot colour */
+  --st-beta: #000;
+  --st-panel: #0a0a0a;
+  --st-tone: #1d1d1d;
+  --st-tone-hi: #2e2e2e;
+  --st-line: #3a3a3a;
+  --st-white: #fdfcf9;
+  --st-paper: #fdfcf9;
+  --st-spot: #e8173f;
+  --st-spot-hi: #ff4d6d;
+  --st-spot-deep: #b30e30;
+
+  /* Text, measured on the panel (#0a0a0a): 17.7:1, 9.8:1 and 6.3:1 */
+  --st-text: #f3f2ef;
+  --st-muted: #b8b6b1;
+  --st-dim: #94918c;
+
+  /*
+   * Screentone. Dots sit on a 45-degree lattice, as cut tone does: two
+   * offset layers of the same grid. Each is a background shorthand list.
+   */
+  --st-dots:
+    radial-gradient(circle, var(--st-white) 0.85px, transparent 1.2px) 0 0 / 5px
+      5px,
+    radial-gradient(circle, var(--st-white) 0.85px, transparent 1.2px) 2.5px
+      2.5px / 5px 5px;
+  --st-dots-soft:
+    radial-gradient(circle, rgb(253 252 249 / 26%) 0.8px, transparent 1.15px) 0
+      0 / 5px 5px,
+    radial-gradient(circle, rgb(253 252 249 / 26%) 0.8px, transparent 1.15px)
+      2.5px 2.5px / 5px 5px;
+  --st-dots-ink:
+    radial-gradient(circle, #000 0.95px, transparent 1.3px) 0 0 / 5px 5px,
+    radial-gradient(circle, #000 0.95px, transparent 1.3px) 2.5px 2.5px / 5px
+      5px;
+  --st-hatch: repeating-linear-gradient(
+    -45deg,
+    rgb(253 252 249 / 42%) 0 1px,
+    transparent 1px 4.5px
+  );
+  --st-hatch-soft: repeating-linear-gradient(
+    -45deg,
+    rgb(253 252 249 / 16%) 0 1px,
+    transparent 1px 4.5px
+  );
+
+  /* Speed lines: three periods that never line up, so the spacing reads hand-ruled */
+  --st-speed:
+    repeating-linear-gradient(
+      0deg,
+      rgb(255 255 255 / 70%) 0 1px,
+      transparent 1px 7px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 3px,
+      rgb(255 255 255 / 45%) 3px 3.6px,
+      transparent 3.6px 11px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 5px,
+      rgb(255 255 255 / 80%) 5px 6.4px,
+      transparent 6.4px 17px
+    );
+
+  /* A white ink line drawn round a red shape, so red reads on black */
+  --st-outline: drop-shadow(1.2px 0 0 var(--st-white))
+    drop-shadow(-1.2px 0 0 var(--st-white))
+    drop-shadow(0 1.2px 0 var(--st-white))
+    drop-shadow(0 -1.2px 0 var(--st-white));
+
+  /*
+   * The navbar is a beta title band ruled off like the top of a page, taller
+   * than Stash's own 48.75px bar. Stash spaces the page, the sidebar and its
+   * sticky headers by that height, so 80-pages.css moves them with this.
+   */
+  --st-nav-height: 60px;
+
+  /* Type */
+  --st-font-display: 'Screentone Dela', 'Arial Black', sans-serif;
+  --st-font-label: 'Screentone Kaku', 'Helvetica Neue', arial, sans-serif;
+  --st-font-body:
+    'Screentone Kaku', system-ui, -apple-system, 'Segoe UI', roboto,
+    'Helvetica Neue', arial, sans-serif;
+
+  /*
+   * Bubble lettering: Caveat Brush, a condensed brush hand, set in caps and
+   * slanted (it has no italic, so the browser obliques it) like translated
+   * manga lettering. It has one weight; never ask it for bold.
+   */
+  --st-font-letter:
+    'Screentone Brush', 'Comic Sans MS', 'Trebuchet MS', sans-serif;
+
+  /* Motion */
+  --st-snap: cubic-bezier(0.2, 0.9, 0.2, 1.25);
+  --st-ease: cubic-bezier(0.2, 0.8, 0.25, 1);
+  --st-fast: 120ms;
+  --st-medium: 200ms;
+}

@@ -1,0 +1,20 @@
+name: Theme - Screentone
+description: A black-and-white manga page with one crimson-pink. Panels and gutters, screentone and speed lines, speech-bubble toasts, inked stars for ratings and a tsundere voice.
+version: 0.1.0
+url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/screentone
+ui:
+  css:
+    - screentone.css
+  javascript:
+    - screentone.js
+  assets:
+    /: assets
+settings:
+  calmMode:
+    displayName: Calm mode
+    description: Turn off Screentone's animations (speed and focus lines on cards, sparkle bursts, the pounding heart, the spinning loader).
+    type: BOOLEAN
+  plainCopy:
+    displayName: Plain labels
+    description: Keep Stash's own wording instead of Screentone's tsundere lines. Stash's SFW mode always uses plain labels.
+    type: BOOLEAN

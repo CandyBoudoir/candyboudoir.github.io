@@ -1,0 +1,274 @@
+/*
+ * Stash-box screens: the Tagger, the scrape dialogs, StashID links and the
+ * stash-box search lists. Stash paints these slate in its own stylesheet. The
+ * Tagger is a work surface where people clear hundreds of rows, so its rows
+ * stay flat: no tone, no lines, no motion. The chosen row takes a red edge,
+ * and verdicts are tick, bang and cross boxes in black, white and the red.
+ */
+
+/* Tagger rows, and the stash-box result lists that reuse .search-item */
+.search-item {
+  background: var(--st-panel);
+  border: 2px solid var(--st-white);
+  border-radius: 0;
+  box-shadow: none;
+  position: relative;
+}
+
+/* The performer, studio and tag taggers sit inside a card */
+.PerformerTagger-performer,
+.StudioTagger-studio,
+.TagTagger-tag,
+.modal .search-item {
+  background: var(--st-panel);
+  border: 2px solid var(--st-white);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.StudioTagger-studio .studio-card img,
+.TagTagger-tag .tag-card img {
+  background-color: #000;
+}
+
+/* Cards inside the Tagger keep still: no lines, no SFX, no thicker frame */
+:is(
+    .tagger-container,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag
+  )
+  .grid-card:hover {
+  --st-frame: 2.5px;
+}
+
+:is(
+    .tagger-container,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag
+  )
+  .grid-card
+  .thumbnail-section::before,
+:is(
+    .tagger-container,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag
+  )
+  .grid-card
+  .thumbnail-section::after {
+  content: none;
+}
+
+:is(.PerformerTagger-performer, .StudioTagger-studio, .TagTagger-tag)
+  .card::after {
+  content: none;
+}
+
+/* Clickable results in the stash-box search modals */
+.PerformerScrapeModal-list .search-item:hover,
+.StashBoxIDSearchModal-list .search-item:hover {
+  box-shadow: inset 4px 0 0 var(--st-spot);
+}
+
+/* Scene Tagger results: the picked one takes a red edge */
+.search-result {
+  background-color: transparent;
+  border-radius: 0;
+  position: relative;
+}
+
+.search-result + .search-result {
+  border-top: 1px solid var(--st-line);
+}
+
+.search-result:hover {
+  background-color: rgb(253 252 249 / 4%);
+}
+
+.selected-result,
+.selected-result:hover {
+  background: rgb(232 23 63 / 9%);
+  box-shadow: inset 4px 0 0 var(--st-spot);
+}
+
+.search-result h4 {
+  font-size: 1.12rem;
+  font-weight: 900;
+}
+
+.search-result h5 {
+  color: var(--st-dim);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.4rem;
+}
+
+.tagger-container .scene-card-preview,
+.search-result .scene-image,
+.search-item .scene-image {
+  border: 2px solid var(--st-white);
+  border-radius: 0;
+}
+
+.entity-name {
+  color: var(--st-muted);
+  font-family: var(--st-font-label);
+  font-weight: 700;
+}
+
+/* A verdict with no icon of its own gets the chip drawn before it */
+:is(
+    .tagger-container,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag,
+    .search-item
+  )
+  :is(.text-success, .text-warning, .text-danger):not(
+    svg,
+    :has(> svg)
+  )::before {
+  background: var(--st-chip) center / 100% 100% no-repeat;
+  content: '';
+  display: inline-block;
+  height: var(--st-chip-size);
+  margin-right: 0.45em;
+  vertical-align: -0.17em;
+  width: var(--st-chip-size);
+}
+
+/*
+ * The Tagger's own verdict icons (the fingerprint and match marks) are drawn
+ * as the same chips: their Font Awesome paths give way to the box.
+ */
+:is(
+    .tagger-container,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag,
+    .search-item
+  )
+  svg:is(.text-success, .text-warning, .text-danger):not(
+    .include-exclude-button svg
+  ) {
+  background: var(--st-chip) center / 100% 100% no-repeat;
+  border-radius: 0;
+}
+
+:is(
+    .tagger-container,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag,
+    .search-item
+  )
+  svg:is(.text-success, .text-warning, .text-danger):not(
+    .include-exclude-button svg
+  )
+  :is(path, use) {
+  visibility: hidden;
+}
+
+/* The include and exclude toggles beside each field are bare chips */
+.include-exclude-button.btn {
+  background: none;
+  border: 0;
+  line-height: 1;
+  padding: 0.15rem 0.3rem;
+}
+
+/* Fields left out of a save, or missing from the result */
+li.active .optional-field.missing .optional-field-content,
+li.active .optional-field.excluded .optional-field-content,
+li.active .optional-field.excluded .scene-link {
+  color: var(--st-dim);
+}
+
+/* StashID links: the box name on paper and the ID on beta, one caption */
+.stash-id-pill {
+  border: 1.5px solid var(--st-white);
+  border-radius: 0;
+  overflow: hidden;
+  padding: 0;
+  vertical-align: middle;
+}
+
+.stash-id-pill span {
+  background: var(--st-paper);
+  border-radius: 0;
+  color: #000;
+  font-family: var(--st-font-label);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.stash-id-pill a {
+  background: #000;
+  border-radius: 0;
+  color: var(--st-text);
+  font-family: ui-monospace, monospace;
+  font-weight: 400;
+}
+
+.stash-id-pill a:hover {
+  color: var(--st-spot-hi);
+}
+
+/*
+ * Scrape dialogs set Stash's current value against the scraped one, and the
+ * toggle in front of each says which wins. The winning side's toggle turns
+ * paper, its tick black, and its field takes the red offset.
+ */
+.scrape-dialog .column-label,
+.scrape-dialog .col-form-label {
+  color: var(--st-muted);
+  font-family: var(--st-font-label);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.scrape-dialog .input-group-prepend .btn:has(.text-success),
+.scrape-dialog .input-group-prepend .btn:has(.text-success):hover {
+  background: var(--st-paper);
+}
+
+.scrape-dialog .input-group-prepend .btn .text-success {
+  background: none;
+  color: #000 !important;
+  fill: #000;
+}
+
+.scrape-dialog
+  .input-group:has(> .input-group-prepend .text-success)
+  :is(.form-control, div.react-select__control) {
+  border-color: var(--st-spot-hi);
+}
+
+/* Icons on inked buttons keep their meaning */
+.btn-secondary .text-muted {
+  color: var(--st-muted) !important;
+}
+
+/* The filter bar at the top of the "Scrape with…" menu */
+.scraper-menu .dropdown-menu .scraper-filter-container {
+  background: transparent;
+  border-bottom: 1px solid var(--st-line);
+}
+
+/* Identify task: the ordered list of sources */
+.scraper-source-list .list-group-item,
+.list-group-item {
+  background: var(--st-panel);
+  border-color: var(--st-line);
+  color: var(--st-text);
+}
+
+.identify-source-editor .default-value {
+  color: var(--st-dim);
+}

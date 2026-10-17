@@ -1,0 +1,218 @@
+/*
+ * Ratings: inked stars in the spot colour, outlined in white, that catch a
+ * glint now and then. The Font Awesome star paths are hidden and the svg box
+ * paints a star or an empty star through a mask.
+ */
+.rating-stars svg {
+  background: var(--st-dim);
+  mask: url('assets/icons/glyph-star-empty.svg') center / 86% no-repeat;
+}
+
+.rating-stars .filled-star svg {
+  background:
+    url('assets/icons/shine-star.svg') center / 100% no-repeat,
+    var(--st-spot);
+  mask-image: url('assets/icons/glyph-star.svg');
+  mask-size: 100%;
+}
+
+/* A white ink line round the filled star, so red reads on black */
+.rating-stars .filled-star {
+  filter: var(--st-outline);
+}
+
+.rating-stars svg path,
+.rating-stars svg use {
+  visibility: hidden;
+}
+
+/* A full star covers its outline, which would show round the points */
+.rating-stars .star-fill-100 .unfilled-star {
+  visibility: hidden;
+}
+
+/* The glint: every filled star catches the light now and then */
+.rating-stars .star-fill-100 .filled-star::after {
+  animation: st-twinkle 3.6s ease-in-out infinite;
+  background: #fff;
+  content: '';
+  height: 0.34em;
+  mask: url('assets/icons/glyph-sparkle.svg') center / contain no-repeat;
+  opacity: 0;
+  position: absolute;
+  right: 0.02em;
+  top: 0;
+  width: 0.34em;
+}
+
+.rating-stars button:nth-of-type(2) .filled-star::after {
+  animation-delay: 0.7s;
+}
+
+.rating-stars button:nth-of-type(3) .filled-star::after {
+  animation-delay: 1.4s;
+}
+
+.rating-stars button:nth-of-type(4) .filled-star::after {
+  animation-delay: 2.1s;
+}
+
+.rating-stars button:nth-of-type(5) .filled-star::after {
+  animation-delay: 2.8s;
+}
+
+.rating-stars .btn.minimal {
+  transition: transform var(--st-medium) var(--st-snap);
+}
+
+.rating-stars .btn.minimal:not(:disabled):hover,
+.rating-stars .btn.minimal:not(:disabled, .disabled):active {
+  background: none;
+}
+
+.rating-stars .btn.minimal:not(:disabled):hover {
+  transform: scale(1.18) rotate(-10deg);
+}
+
+.rating-stars .btn.minimal:not(:disabled):active {
+  transform: scale(0.88);
+}
+
+.rating-stars .btn.minimal:not(:disabled):hover .filled-star::after {
+  animation: st-twinkle-now 600ms ease-out;
+}
+
+.star-rating-number {
+  color: var(--st-spot-hi);
+  font-family: var(--st-font-label);
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+/*
+ * Favourite: a heart that jolts. Stash colours favourites and their shadow
+ * three classes deep, so these rules start at #root.
+ */
+.favorite-button svg {
+  background-color: currentcolor;
+  mask: url('assets/icons/glyph-heart-empty.svg') center / contain no-repeat;
+  transition: transform var(--st-medium) var(--st-snap);
+}
+
+.favorite-button svg path,
+.favorite-button svg use {
+  visibility: hidden;
+}
+
+#root button.btn.favorite-button.not-favorite {
+  color: var(--st-muted);
+}
+
+/* No hover box: the outline filter would draw round it */
+#root button.btn.favorite-button:not(:disabled):hover {
+  background: none;
+}
+
+#root button.btn.favorite-button.not-favorite:hover {
+  color: #fff;
+}
+
+.favorite-button.not-favorite:hover svg {
+  transform: scale(1.12);
+}
+
+.favorite-button.favorite svg {
+  background:
+    url('assets/icons/shine-heart.svg') center / 100% no-repeat,
+    var(--st-spot);
+  mask-image: url('assets/icons/glyph-heart.svg');
+}
+
+#root button.btn.favorite-button.favorite,
+#root button.btn.favorite-button.favorite:hover {
+  color: var(--st-spot);
+  filter: var(--st-outline);
+}
+
+/* Hover or tab to a favourite and the heart pounds twice */
+.favorite-button.favorite:is(:hover, :focus-visible) svg {
+  animation: st-doki-doki 700ms ease-out;
+}
+
+/* ...and ドキッ (a jolt of the heart) pops beside it */
+.favorite-button::after {
+  -webkit-text-stroke-width: 4px;
+  color: var(--st-spot-hi);
+  content: 'ドキッ';
+  font-size: 0.95rem;
+  left: 78%;
+  opacity: 0;
+  position: absolute;
+  top: -0.35rem;
+  transform: rotate(-12deg) scale(0.4);
+  transform-origin: 0 100%;
+  transition:
+    opacity var(--st-fast),
+    transform var(--st-medium) var(--st-snap);
+  z-index: 3;
+}
+
+/*
+ * It shows while the pointer or the keyboard is on a favourite, so setting
+ * one by click or by Space pops it at once. On a touch screen a tap leaves a
+ * sticky hover or focus behind, so there it flashes once and lets go.
+ */
+.favorite-button.favorite:is(:hover, :focus-visible)::after {
+  opacity: 1;
+  transform: rotate(-12deg) scale(1);
+}
+
+@media (hover: none) {
+  .favorite-button.favorite:is(:hover, :focus-visible)::after {
+    opacity: 0;
+  }
+
+  .favorite-button.favorite:is(:hover, :focus)::after {
+    animation: st-doki-flash 1.5s var(--st-ease) both;
+  }
+}
+
+/* The heart beside a name, on detail pages */
+.name-icons .favorite-button svg {
+  height: 1.6rem;
+  width: 1.6rem;
+}
+
+/*
+ * The O counter is the anime sweat drop. Stash draws it with its own
+ * SweatDrops svg (no Font Awesome class), and the play count beside it uses
+ * Font Awesome, so the mask skips those.
+ */
+.count-button .count-icon svg:not(.svg-inline--fa) {
+  background-color: currentcolor;
+  mask: url('assets/icons/glyph-drop.svg') center / 100% no-repeat;
+}
+
+.count-button .count-icon svg:not(.svg-inline--fa) :is(path, rect, use) {
+  visibility: hidden;
+}
+
+.count-button .btn.minimal {
+  color: var(--st-text);
+}
+
+.count-button .btn.minimal:not(:disabled):hover,
+.count-button button.count-icon:hover {
+  background: none;
+  color: var(--st-spot-hi);
+}
+
+.count-button .count-icon:not(:disabled):hover svg:not(.svg-inline--fa) {
+  animation: st-wobble 500ms ease-in-out;
+}
+
+.count-value {
+  font-family: var(--st-font-label);
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+}
