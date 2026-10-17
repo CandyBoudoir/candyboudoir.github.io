@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.4
 
 - More like this no longer makes the scene page scroll sideways in a desktop browser. Its arrows sat past the page's edges, the right one 10px beyond the page and the left one half off it.
 - In a window or on a phone narrower than 1200px, More like this no longer covers the scene's performers. Stash keeps the scene's details to the window's height and lets the rest run past, and More like this started where that box ended.
