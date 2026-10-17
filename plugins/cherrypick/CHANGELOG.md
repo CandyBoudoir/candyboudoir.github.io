@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.3
 
 - Brackets play the performers and scenes you haven't rated. People rate their favorites, so the rated ones won their way to nearly every final; they now play only when there aren't enough unrated ones to fill a bracket. Performers and scenes from your last three brackets of the same kind and gender sit out while others can take their places.
 - The Challenge round: after the final, a champion with no rating of yours meets up to three performers or scenes you have rated, lowest rated first, until one beats it. Where it stops sets the champion's rating in Apply, and the finalist and semifinalists step down from it. A champion that beats every one gets a trophy on its performer card, "beat your favorites" in its For you line and a mark in the Hall of Fame. Rate them myself skips it.
