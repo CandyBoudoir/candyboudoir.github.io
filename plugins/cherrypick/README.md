@@ -93,6 +93,19 @@ Stash Curator puts its own Appeal score on scene cards, so with both plugins an 
 
 Bracket on a list filtered by Curator Appeal or Curator affinity leaves that criterion out, since Stash can't filter on it, and says so in the pool's name.
 
+## Tested with
+
+Cherry Pick's tests run on these Stash versions and on Stash's latest develop build, and beside the latest release of each plugin above. A Cherry Pick release waits until every one of them is that plugin's newest, and its release notes name the versions it was tested beside.
+
+| Tested on     | Version       |
+| ------------- | ------------- |
+| Stash         | v0.31.1       |
+| Ascension     | 1.4.1         |
+| HotOrNot      | 1.0.0-c4106bf |
+| Stash Curator | 0.39.1        |
+| Xenith        | 3.2.0         |
+| Restash       | 0.3.0-55c1cb2 |
+
 ## Settings
 
 Settings > Plugins > Cherry Pick switches each piece on or off. All start on except Relative badge style, and Apply bracket ratings automatically starts off beside a plugin that writes your ratings.

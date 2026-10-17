@@ -8,6 +8,8 @@
 - Scene brackets work the same way: scenes you have rated sit out while four unrated ones can play, so "Bracket her scenes" plays the ones you haven't rated and her rated ones wait for the champion. A champion meets the rated ones from its own list first.
 - Apply bracket ratings automatically, a new switch under Settings > Plugins: closing a bracket's champion screen sets its ratings, and Cherry Pick's page keeps each batch with Undo. While nothing places the champion yet, the screen says closing would set none. It starts on, and off while Ascension, HotOrNot, Xenith or Restash's mirror writes your ratings, and follows those plugins until you set it yourself.
 
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.39.1, Xenith 3.2.0 and Restash 0.3.0-55c1cb2.
+
 ## 0.1.2
 
 - On a browser's first visit, and after a day away, For you's header says what is happening while its row of placeholder cards waits: "Reading your library: 4,500 of 25,000 scenes", then "Learning your taste from 25,000 scenes". On a library of 25,000 scenes that takes about 6 seconds. Other visits start from the browser's copy of your library, take about 2 to 3 seconds and show no line.

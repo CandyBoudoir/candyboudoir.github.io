@@ -2,7 +2,8 @@
 # develop build, then checks that Stash still renders the elements each plugin
 # depends on and compares screenshots. Runs nightly, on pushes to main and on pull requests.
 # The report job keeps one issue per failing channel and opens a "Support
-# Stash vX.Y.Z" issue when Stash ships a stable release. Companion legs
+# Stash vX.Y.Z" issue when Stash ships a stable release, and one "Test Cherry
+# Pick beside <plugin> <version>" issue per companion release. Companion legs
 # (tests/stash/companions.mjs) install another author's plugin beside these
 # and run Cherry Pick's contract specs with it enabled; they never fail the
 # workflow.
@@ -146,3 +147,8 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           NEW_STABLE: ${{ needs.matrix.outputs.new_stable }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      # One issue per companion plugin with a release newer than its pin
+      - run: node tests/stash/tested-with.mjs --issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
