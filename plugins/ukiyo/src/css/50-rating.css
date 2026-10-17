@@ -1,0 +1,132 @@
+/*
+ * Ratings: cherry blossoms; an empty one is printed as keyline only. The
+ * Font Awesome star paths are hidden and the svg box paints the blossom.
+ */
+.rating-stars svg path,
+.rating-stars svg use {
+  visibility: hidden;
+}
+
+.rating-stars .unfilled-star svg {
+  background-color: rgb(239 228 204 / 50%);
+  mask: url('assets/icons/glyph-sakura-line.svg') center / 90% no-repeat;
+}
+
+.rating-stars .filled-star svg {
+  background: url('assets/icons/glyph-sakura.svg') center / 90% no-repeat;
+}
+
+.rating-stars .filled-star {
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 70%));
+}
+
+/* A full blossom covers its keyline */
+.rating-stars .star-fill-100 .unfilled-star {
+  visibility: hidden;
+}
+
+.rating-stars .btn.minimal {
+  transition: transform var(--ukiyo-medium) var(--ukiyo-ease);
+}
+
+.rating-stars .btn.minimal:not(:disabled):hover,
+.rating-stars .btn.minimal:not(:disabled, .disabled):active {
+  background: none;
+}
+
+.rating-stars .btn.minimal:not(:disabled):hover {
+  transform: translateY(-2px) rotate(18deg);
+}
+
+.rating-stars .btn.minimal:not(:disabled):hover .unfilled-star svg {
+  background-color: var(--ukiyo-sakura);
+}
+
+.rating-stars .btn.minimal:not(:disabled):active {
+  transform: scale(0.9);
+}
+
+.star-rating-number {
+  color: var(--ukiyo-shu-hi);
+  font-family: var(--ukiyo-font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+/*
+ * Favourite: a seal carved with 恋 (koi, romantic love), a letter sealed in
+ * red. Unset it is a keyline; set, it stamps. Stash colours favourites and
+ * their shadow three classes deep, so these rules start at #root.
+ */
+.favorite-button svg path,
+.favorite-button svg use {
+  visibility: hidden;
+}
+
+.favorite-button.not-favorite svg {
+  background-color: currentcolor;
+  mask: url('assets/icons/glyph-hanko-line.svg') center / 88% no-repeat;
+}
+
+#root button.btn.favorite-button.not-favorite {
+  color: rgb(239 228 204 / 55%);
+}
+
+#root button.btn.favorite-button.not-favorite:hover {
+  color: var(--ukiyo-shu-hi);
+}
+
+.favorite-button.favorite svg {
+  background: url('assets/icons/hanko.svg') center / 92% no-repeat;
+  transform: rotate(-6deg);
+}
+
+/* The seal stamps under the pointer and when the keyboard reaches it, never
+   on page load, so a grid of favourites does not all stamp at once */
+.favorite-button.favorite:is(:hover, :focus-visible) svg {
+  animation: ukiyo-stamp 420ms var(--ukiyo-ease);
+}
+
+#root button.btn.favorite-button.favorite,
+#root button.btn.favorite-button.favorite:hover {
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 70%));
+}
+
+/* The seal beside a name, on detail pages */
+.name-icons .favorite-button svg {
+  height: 36px;
+  width: 36px;
+}
+
+/*
+ * The O counter is a breaking wave. Stash draws it with its own SweatDrops
+ * svg (no Font Awesome class), and the play count beside it uses Font
+ * Awesome, so the wave skips those. In SFW mode Stash swaps in a Font Awesome
+ * thumbs-up, which keeps its own look.
+ */
+.count-button .count-icon svg:not(.svg-inline--fa) {
+  background: url('assets/icons/glyph-wave.svg') center / contain no-repeat;
+  transition: transform var(--ukiyo-medium) var(--ukiyo-ease);
+}
+
+.count-button .count-icon svg:not(.svg-inline--fa) :is(path, rect, use) {
+  visibility: hidden;
+}
+
+.count-button .count-icon:not(:disabled):hover svg:not(.svg-inline--fa) {
+  transform: rotate(-8deg) translateY(-1px);
+}
+
+.count-button .btn.minimal {
+  color: var(--ukiyo-muted);
+}
+
+.count-button .btn.minimal:not(:disabled):hover,
+.count-button button.count-icon:hover {
+  color: var(--ukiyo-shu-hi);
+}
+
+.count-value {
+  font-family: var(--ukiyo-font-display);
+  font-weight: 800;
+}

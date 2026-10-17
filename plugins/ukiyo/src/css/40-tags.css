@@ -1,0 +1,64 @@
+/* Tags: indigo slips with a vermilion dot */
+.tag-item.badge,
+.badge-secondary {
+  align-items: center;
+  background: var(--ukiyo-washi), var(--ukiyo-ai-hi);
+  border: 1px solid var(--ukiyo-line-hi);
+  border-radius: 1px;
+  box-shadow: 0 2px 0 rgb(0 0 0 / 30%);
+  color: var(--ukiyo-kinari);
+  display: inline-flex;
+  font-family: var(--ukiyo-font-label);
+  font-size: 0.74rem;
+  font-weight: 500;
+  gap: 0.55em;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  padding: 0.55em 0.9em 0.55em 0.7em;
+  text-transform: uppercase;
+  transition:
+    box-shadow var(--ukiyo-fast) var(--ukiyo-ease),
+    border-color var(--ukiyo-fast) var(--ukiyo-ease);
+}
+
+.tag-item.badge::before {
+  background: var(--ukiyo-shu-hi);
+  box-shadow: 0 0 0 1px var(--ukiyo-sumi);
+  content: '';
+  flex: none;
+  height: 0.45em;
+  width: 0.45em;
+}
+
+.tag-item.badge a {
+  color: inherit;
+}
+
+.tag-item.badge:hover,
+.tag-item.badge a:hover {
+  border-color: var(--ukiyo-shu-hi);
+  box-shadow: 2px 2px 0 var(--ukiyo-shu-ink);
+  color: #fff;
+  text-decoration: none;
+}
+
+.badge-primary,
+.badge-info {
+  border: 1px solid var(--ukiyo-sumi);
+  border-radius: 1px;
+  color: var(--ukiyo-on-shu);
+  font-family: var(--ukiyo-font-label);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  outline: 1px solid rgb(246 238 220 / 40%);
+  outline-offset: -3px;
+  text-transform: uppercase;
+}
+
+.badge-primary {
+  background: var(--ukiyo-washi), var(--ukiyo-shu-block);
+}
+
+.badge-info {
+  background: var(--ukiyo-washi), var(--ukiyo-bero-block);
+}

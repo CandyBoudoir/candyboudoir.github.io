@@ -1,0 +1,116 @@
+/*
+ * Loading: the night canal from the print, on its paper, in place of
+ * Bootstrap's spinner. A lantern sways at its corner, a petal falls past and
+ * moonlight drifts across the water, all slowly. Calm mode holds it still.
+ */
+.LoadingIndicator {
+  position: relative;
+}
+
+.LoadingIndicator .spinner-border {
+  animation: none;
+  background:
+    url('assets/icons/night-canal.webp') center / cover padding-box no-repeat,
+    var(--ukiyo-washi),
+    var(--ukiyo-paper);
+  border: 7px solid transparent;
+  border-radius: 1px;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 60%),
+    6px 6px 0 -1px var(--ukiyo-shu-ink),
+    0 20px 32px -16px #000;
+  height: 142px;
+  margin-top: 18px;
+  outline: 1.5px solid var(--ukiyo-sumi);
+  outline-offset: -8px;
+  position: relative;
+  width: 206px;
+}
+
+/* Moonlight on the canal, under the bridge */
+.LoadingIndicator .spinner-border::before {
+  animation: ukiyo-glint 6s ease-in-out infinite;
+  background: linear-gradient(
+      100deg,
+      transparent 25%,
+      rgb(255 246 220 / 55%) 50%,
+      transparent 75%
+    )
+    0 0 / 45% 100% no-repeat;
+  bottom: 0;
+  content: '';
+  height: 26%;
+  left: 28%;
+  mask-image: radial-gradient(closest-side, #000 40%, transparent);
+  mix-blend-mode: screen;
+  position: absolute;
+  width: 34%;
+}
+
+/* A lantern hung in front of the print, swaying */
+.LoadingIndicator .spinner-border::after {
+  animation: ukiyo-sway 3.6s ease-in-out infinite;
+  background: url('assets/icons/lantern.svg') center top / contain no-repeat;
+  content: '';
+  filter: drop-shadow(0 0 12px rgb(242 105 76 / 55%));
+  height: 44px;
+  left: -16px;
+  position: absolute;
+  top: -26px;
+  transform-origin: 50% 0;
+  width: 30px;
+}
+
+/* A petal falling past */
+.LoadingIndicator::before {
+  animation: ukiyo-fall 6.4s linear infinite;
+  background: url('assets/icons/petal.svg') center / contain no-repeat;
+  content: '';
+  height: 13px;
+  left: calc(50% + 64px);
+  pointer-events: none;
+  position: absolute;
+  top: 1.2rem;
+  width: 10px;
+  z-index: 2;
+}
+
+/* Small and inline loaders, as in menus and the package manager, keep only
+   the lantern, swaying */
+.LoadingIndicator:is(.small, .inline) .spinner-border,
+.saved-filter-list-menu .LoadingIndicator .spinner-border {
+  background: none;
+  border: 0;
+  box-shadow: none;
+  height: 1.1rem;
+  margin: 0 0.35rem;
+  outline: 0;
+  width: 0.8rem;
+}
+
+.LoadingIndicator:is(.small, .inline) .spinner-border::before,
+.saved-filter-list-menu .LoadingIndicator .spinner-border::before,
+.LoadingIndicator:is(.small, .inline)::before,
+.saved-filter-list-menu .LoadingIndicator::before {
+  content: none;
+}
+
+.LoadingIndicator:is(.small, .inline) .spinner-border::after,
+.saved-filter-list-menu .LoadingIndicator .spinner-border::after {
+  filter: drop-shadow(0 0 4px rgb(242 105 76 / 55%));
+  height: 100%;
+  left: 0;
+  top: 0;
+  width: 100%;
+}
+
+.LoadingIndicator-message {
+  color: var(--ukiyo-kinari);
+  font-family: var(--ukiyo-font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0.4rem 0 0;
+  text-align: center;
+  text-wrap: balance;
+}

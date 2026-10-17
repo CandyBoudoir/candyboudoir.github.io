@@ -1,0 +1,363 @@
+/*
+ * Menus, popovers, tooltips, toasts and modals. Menus and modals are washi
+ * with a faint hemp-leaf (asanoha) pattern and a double rule; tooltips and
+ * toasts are cream slips with a keyline. Stash paints its menus slate through
+ * div.dropdown-menu rules, so the menu rules name the div too, and some menus
+ * and their items carry Bootstrap's !important bg-secondary.
+ */
+.dropdown-menu,
+div.dropdown-menu {
+  background: var(--ukiyo-asanoha), var(--ukiyo-washi), var(--ukiyo-ai);
+  border: 1px solid var(--ukiyo-line);
+  border-radius: 2px;
+  box-shadow:
+    inset 0 0 0 3px var(--ukiyo-ai),
+    inset 0 0 0 4px var(--ukiyo-rule),
+    0 18px 36px -14px #000;
+  color: var(--ukiyo-kinari);
+  padding: 0.55rem;
+}
+
+.dropdown-menu.bg-secondary {
+  background-color: var(--ukiyo-ai) !important;
+}
+
+.dropdown-menu .dropdown-item.bg-secondary {
+  background-color: transparent !important;
+}
+
+.dropdown-item,
+div.dropdown-menu .dropdown-item {
+  border-radius: 1px;
+  color: var(--ukiyo-kinari);
+  font-family: var(--ukiyo-font-label);
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+  padding: 0.4rem 0.8rem;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item.active,
+.dropdown-item:active,
+div.dropdown-menu .dropdown-item:hover,
+div.dropdown-menu .dropdown-item:focus,
+div.dropdown-menu .dropdown-item.active,
+div.dropdown-menu .dropdown-item:active {
+  background: var(--ukiyo-washi), var(--ukiyo-shu-block);
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 45%);
+  color: var(--ukiyo-on-shu);
+}
+
+.dropdown-menu .dropdown-item.bg-secondary:is(:hover, :focus, .active) {
+  background-color: var(--ukiyo-shu) !important;
+}
+
+.dropdown-divider {
+  border-top: 1px solid var(--ukiyo-line);
+}
+
+.dropdown-header {
+  color: var(--ukiyo-dim);
+  font-family: var(--ukiyo-font-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.popover {
+  background: var(--ukiyo-asanoha), var(--ukiyo-washi), var(--ukiyo-ai);
+  border: 1px solid var(--ukiyo-line);
+  border-radius: 2px;
+  box-shadow:
+    inset 0 0 0 3px var(--ukiyo-ai),
+    inset 0 0 0 4px var(--ukiyo-rule),
+    0 18px 36px -14px #000;
+}
+
+.popover-header {
+  background: var(--ukiyo-washi), var(--ukiyo-paper);
+  border-bottom: 1px solid var(--ukiyo-sumi);
+  color: var(--ukiyo-sumi);
+  font-family: var(--ukiyo-font-display);
+  font-weight: 700;
+}
+
+.popover-body {
+  color: var(--ukiyo-kinari);
+}
+
+.bs-popover-top > .arrow::after,
+.bs-popover-auto[x-placement^='top'] > .arrow::after {
+  border-top-color: var(--ukiyo-ai);
+}
+
+.bs-popover-bottom > .arrow::after,
+.bs-popover-auto[x-placement^='bottom'] > .arrow::after {
+  border-bottom-color: var(--ukiyo-ai);
+}
+
+.bs-popover-left > .arrow::after,
+.bs-popover-auto[x-placement^='left'] > .arrow::after {
+  border-left-color: var(--ukiyo-ai);
+}
+
+.bs-popover-right > .arrow::after,
+.bs-popover-auto[x-placement^='right'] > .arrow::after {
+  border-right-color: var(--ukiyo-ai);
+}
+
+/* Tooltips: a cream slip */
+.tooltip {
+  font-family: var(--ukiyo-font-label);
+}
+
+.tooltip.show {
+  opacity: 1;
+}
+
+.tooltip-inner {
+  background: var(--ukiyo-washi), var(--ukiyo-paper);
+  border: 1px solid var(--ukiyo-sumi);
+  border-radius: 1px;
+  box-shadow: 2px 3px 0 rgb(0 0 0 / 45%);
+  color: var(--ukiyo-sumi);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  outline: 1px solid rgb(21 17 15 / 70%);
+  outline-offset: -3px;
+  padding: 0.45rem 0.85rem;
+  text-transform: uppercase;
+}
+
+/* A title Stash cut short reads in full in its tooltip, in sentence case */
+.TruncatedText-tooltip .tooltip-inner {
+  font-family: var(--ukiyo-font-display);
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+
+.bs-tooltip-top .arrow::before,
+.bs-tooltip-auto[x-placement^='top'] .arrow::before {
+  border-top-color: var(--ukiyo-sumi);
+}
+
+.bs-tooltip-bottom .arrow::before,
+.bs-tooltip-auto[x-placement^='bottom'] .arrow::before {
+  border-bottom-color: var(--ukiyo-sumi);
+}
+
+.bs-tooltip-left .arrow::before,
+.bs-tooltip-auto[x-placement^='left'] .arrow::before {
+  border-left-color: var(--ukiyo-sumi);
+}
+
+.bs-tooltip-right .arrow::before,
+.bs-tooltip-auto[x-placement^='right'] .arrow::before {
+  border-right-color: var(--ukiyo-sumi);
+}
+
+/*
+ * Toasts: a printed notice on cream, stamped with the seal. Stash puts the
+ * whole message in the toast's header and colours the toast by kind; here
+ * every toast is cream, the message is set in the display face, and a dyed
+ * edge on the left says which kind it is.
+ */
+.toast,
+.toast-container .toast {
+  backdrop-filter: none;
+  background: var(--ukiyo-washi), var(--ukiyo-paper);
+  border: 1px solid var(--ukiyo-sumi);
+  border-radius: 1px;
+  box-shadow:
+    5px 5px 0 -1px var(--ukiyo-shu-ink),
+    0 16px 30px -14px #000;
+  color: var(--ukiyo-sumi);
+  outline: 1px solid rgb(21 17 15 / 80%);
+  outline-offset: -5px;
+  padding-right: 2.6rem;
+  position: relative;
+}
+
+.toast-container {
+  opacity: 1;
+}
+
+.toast::after {
+  background: url('assets/icons/hanko.svg') center / contain no-repeat;
+  content: '';
+  height: 26px;
+  pointer-events: none;
+  position: absolute;
+  right: 12px;
+  top: calc(50% - 13px);
+  transform: rotate(-6deg);
+  width: 26px;
+}
+
+.toast-container .toast.danger {
+  box-shadow:
+    inset 5px 0 0 #9c2b3d,
+    5px 5px 0 -1px var(--ukiyo-shu-ink),
+    0 16px 30px -14px #000;
+}
+
+.toast-container .toast.warning {
+  box-shadow:
+    inset 5px 0 0 #c4903a,
+    5px 5px 0 -1px var(--ukiyo-shu-ink),
+    0 16px 30px -14px #000;
+}
+
+.toast-header,
+.toast-container .toast-header {
+  background: none;
+  border-bottom: 0;
+  color: var(--ukiyo-sumi);
+  font-family: var(--ukiyo-font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  padding: 0.8rem 1rem;
+}
+
+.toast-container .toast-header .close {
+  color: var(--ukiyo-sumi);
+  font-family: var(--ukiyo-font-label);
+  opacity: 0.6;
+  text-shadow: none;
+}
+
+.toast-body {
+  font-family: var(--ukiyo-font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Modals: washi, a cream title cartouche and a band of wave scales */
+.modal-content {
+  background: var(--ukiyo-asanoha), var(--ukiyo-washi), var(--ukiyo-ai);
+  border: 1px solid var(--ukiyo-line);
+  border-radius: 2px;
+  box-shadow:
+    inset 0 0 0 4px var(--ukiyo-ai),
+    inset 0 0 0 5px var(--ukiyo-rule),
+    0 30px 60px -20px #000;
+  color: var(--ukiyo-kinari);
+}
+
+/* Stash paints each modal section slate; let the washi show through */
+.modal-header,
+.modal-body,
+.modal-footer {
+  background-color: transparent;
+  color: var(--ukiyo-kinari);
+}
+
+.modal-content > .modal-header {
+  align-items: center;
+  border-bottom: 0;
+  gap: 0.6rem;
+  justify-content: flex-start;
+  padding: 1.15rem 1.25rem 1.7rem;
+  position: relative;
+}
+
+.modal-content > .modal-header::after {
+  background: url('assets/icons/seigaiha.svg') 0 0 / 20px 10px repeat-x;
+  border-block: 1px solid var(--ukiyo-sumi);
+  bottom: 0.55rem;
+  content: '';
+  height: 12px;
+  left: 1.25rem;
+  pointer-events: none;
+  position: absolute;
+  right: 1.25rem;
+}
+
+/* The title in its cartouche: Stash's dialogs set it as .modal-title or as
+   the header's own span */
+.modal-title,
+.modal-content > .modal-header > span:not(:empty) {
+  background: var(--ukiyo-washi), var(--ukiyo-paper);
+  border: 1px solid var(--ukiyo-sumi);
+  box-shadow: 3px 3px 0 var(--ukiyo-shu-ink);
+  color: var(--ukiyo-sumi);
+  font-family: var(--ukiyo-font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.2;
+  outline: 1px solid rgb(21 17 15 / 80%);
+  outline-offset: -4px;
+  padding: 0.35rem 0.85rem 0.4rem;
+}
+
+.modal-header .fa-icon {
+  color: var(--ukiyo-shu-hi);
+}
+
+.modal-body {
+  color: var(--ukiyo-muted);
+  padding: 0.6rem 1.25rem 1.1rem;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--ukiyo-line);
+  padding: 0.9rem 1.1rem 1.1rem;
+}
+
+.modal-header .close,
+.modal .close {
+  color: var(--ukiyo-muted);
+  text-shadow: none;
+}
+
+/* The edit filter dialog's criteria are a list, not cards */
+.edit-filter-dialog .criterion-list .card {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--ukiyo-line);
+  border-image: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.edit-filter-dialog .criterion-list .card .filter-item-header {
+  background: none;
+  border-bottom: 0;
+}
+
+.modal-backdrop.show {
+  background-color: #03060c;
+  opacity: 0.8;
+}
+
+.alert {
+  background: var(--ukiyo-washi), var(--ukiyo-ai-hi);
+  border: 1px solid var(--ukiyo-line);
+  border-radius: 1px;
+  box-shadow:
+    inset 4px 0 0 var(--ukiyo-shu-hi),
+    0 6px 14px -8px #000;
+  color: var(--ukiyo-kinari);
+}
+
+.alert-danger {
+  box-shadow:
+    inset 4px 0 0 var(--ukiyo-danger),
+    0 6px 14px -8px #000;
+}
+
+.alert-warning {
+  box-shadow:
+    inset 4px 0 0 var(--ukiyo-warning),
+    0 6px 14px -8px #000;
+}
+
+.alert-success {
+  box-shadow:
+    inset 4px 0 0 var(--ukiyo-success),
+    0 6px 14px -8px #000;
+}

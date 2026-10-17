@@ -1,0 +1,1055 @@
+/*
+ * Design-system page only. Stash's own stylesheet positions card overlays,
+ * stacks the rating stars and fixes the navbar to the window; this file stands
+ * in for those few rules so the specimens below match Stash's layout, and
+ * dresses the page itself. Everything Stash shows comes from ukiyo.css.
+ */
+
+/*
+ * The Ukiyo tokens hold url()s relative to ukiyo.css, and browsers resolve a
+ * url() in a custom property against the stylesheet that uses it, so this
+ * page's own panels take copies that point into the plugin folder.
+ */
+:root {
+  --ds-washi: image-set(
+      url('../Theme-Ukiyo/assets/icons/washi-1x.webp') 1x,
+      url('../Theme-Ukiyo/assets/icons/washi-2x.webp') 2x,
+      url('../Theme-Ukiyo/assets/icons/washi-3x.webp') 3x
+    )
+    0 0 / 256px 256px;
+  --ds-asanoha: url('../Theme-Ukiyo/assets/icons/asanoha.svg') 0 0 / 28px 48.5px;
+}
+
+/* Stash fixes its navbar and pads the page for it; here the bar is sticky */
+body {
+  font-family: var(--ukiyo-font-body);
+  padding: 0 0 6rem;
+}
+
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+.top-nav .nav-utility {
+  margin-left: auto;
+}
+
+.top-nav .navbar-collapse {
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+@media (width < 1200px) {
+  .top-nav.navbar {
+    flex-wrap: wrap;
+  }
+
+  .top-nav .navbar-toggler {
+    margin-right: 0.5rem;
+  }
+
+  .top-nav .navbar-collapse {
+    flex-basis: 100%;
+    order: 3;
+    padding: 0.4rem 0 0.2rem;
+  }
+
+  .top-nav .navbar-collapse.show {
+    display: flex;
+  }
+}
+
+/* On this page the bar stays at the top of a phone, with its waves below */
+@media (width <= 575.98px) and (orientation: portrait) {
+  body {
+    padding: 0 0 6rem;
+  }
+
+  .top-nav.navbar {
+    background:
+      url('../Theme-Ukiyo/assets/icons/night-lanterns.webp') right top / auto
+        52px no-repeat,
+      linear-gradient(180deg, #03060c 0%, #081430 42%, #173a6c 100%) !important;
+    border-bottom: 2px solid var(--ukiyo-sumi);
+    border-top: 0;
+    padding: 0.3rem 1rem calc(0.3rem + var(--ukiyo-band));
+  }
+
+  .top-nav.navbar::after {
+    border-bottom: 0;
+    border-top: 1px solid var(--ukiyo-sumi);
+    bottom: 0;
+    top: auto;
+  }
+}
+
+/* The "Try it" switches */
+.ds-controls {
+  align-items: center;
+  backdrop-filter: blur(8px);
+  background: rgb(8 13 24 / 88%);
+  border-bottom: 1px solid var(--ukiyo-sumi);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  padding: 0.6rem 1rem;
+  position: sticky;
+  top: var(--ukiyo-nav-height);
+  z-index: 1020;
+}
+
+.ds-controls .label {
+  color: var(--ukiyo-dim);
+  font-family: var(--ukiyo-font-label);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Below 1200px the demo navbar wraps, so the switches stop sticking under it */
+@media (width < 1200px) {
+  .ds-controls {
+    position: static;
+  }
+}
+
+/* Sections */
+.ds-section {
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 3.5rem 1rem 0;
+}
+
+/* Each section opens on a hairline with a blossom */
+.ds-section::before {
+  background:
+    url('../Theme-Ukiyo/assets/icons/glyph-sakura.svg') center / 16px 16px
+      no-repeat,
+    linear-gradient(
+        90deg,
+        transparent,
+        var(--ukiyo-line) 20% 47%,
+        transparent 47% 53%,
+        var(--ukiyo-line) 53% 80%,
+        transparent
+      )
+      center / 100% 1px no-repeat;
+  content: '';
+  display: block;
+  height: 16px;
+  margin-bottom: 2.6rem;
+}
+
+.ds-section > h2 {
+  align-items: center;
+  color: var(--ukiyo-kinari);
+  display: flex;
+  font-size: 2.45rem;
+  font-weight: 800;
+  gap: 0.7rem;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+  margin-bottom: 0.6rem;
+  text-shadow: 0.05em 0.04em 0 rgb(208 70 42 / 55%);
+}
+
+.ds-section > h2 img {
+  filter: drop-shadow(0 3px 4px rgb(0 0 0 / 60%));
+  height: 2.6rem;
+  object-fit: contain;
+  width: 2.6rem;
+}
+
+.ds-lede {
+  color: var(--ukiyo-muted);
+  margin-bottom: 1.5rem;
+  max-width: 68ch;
+}
+
+.ds-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+/* A washi panel with the hemp-leaf pattern, to show specimens on */
+.ds-panel {
+  background: var(--ds-asanoha), var(--ds-washi), var(--ukiyo-ai);
+  border: 1px solid var(--ukiyo-line);
+  border-radius: 2px;
+  box-shadow:
+    inset 0 0 0 3px var(--ukiyo-ai),
+    inset 0 0 0 4px var(--ukiyo-rule),
+    0 14px 26px -18px #000;
+  padding: 1.4rem;
+  position: relative;
+}
+
+.ds-caption {
+  color: var(--ukiyo-dim);
+  font-size: 0.85rem;
+}
+
+/* Hero: the title cartouche, signed with the seal */
+.ds-hero {
+  align-items: center;
+  display: grid;
+  gap: 2.5rem;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  margin: 0 auto;
+  max-width: 1180px;
+  min-height: 500px;
+  padding: 3rem 1rem 1rem;
+  position: relative;
+}
+
+.ds-hero .kicker {
+  color: var(--ukiyo-muted);
+  font-family: var(--ukiyo-font-label);
+  font-size: 0.8rem;
+  letter-spacing: 0.24em;
+  margin-bottom: 1.1rem;
+  text-transform: uppercase;
+}
+
+.ds-cartouche {
+  align-items: center;
+  background: var(--ds-washi), var(--ukiyo-paper);
+  border: 2px solid var(--ukiyo-sumi);
+  box-shadow:
+    9px 9px 0 -2px var(--ukiyo-shu-ink),
+    0 26px 40px -20px #000;
+  display: inline-flex;
+  gap: 1.1rem;
+  max-width: 100%;
+  outline: 1px solid var(--ukiyo-sumi);
+  outline-offset: -8px;
+  padding: 0.5rem 1.3rem 0.7rem 1.7rem;
+}
+
+.ds-hero .wordmark {
+  color: var(--ukiyo-sumi);
+  font-family: var(--ukiyo-font-display);
+  font-size: clamp(3.6rem, 10vw, 7.2rem);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  margin: 0;
+}
+
+.ds-seal {
+  flex: none;
+  height: clamp(4rem, 8.5vw, 6.4rem);
+  transform: rotate(4deg);
+}
+
+.ds-sub {
+  align-items: center;
+  color: var(--ukiyo-muted);
+  display: flex;
+  font-family: var(--ukiyo-font-label);
+  font-size: 0.85rem;
+  gap: 0.75rem;
+  letter-spacing: 0.22em;
+  margin-top: 1.6rem;
+  text-transform: uppercase;
+}
+
+.ds-sub img {
+  height: 2.2rem;
+}
+
+.ds-hero .tagline {
+  color: var(--ukiyo-muted);
+  font-size: 1.1rem;
+  margin-top: 1.25rem;
+  max-width: 48ch;
+}
+
+.ds-hero-art {
+  aspect-ratio: 1120 / 760;
+  position: relative;
+}
+
+.ds-hero-art img {
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 60%),
+    0 26px 40px -18px #000;
+  position: absolute;
+}
+
+/* The night print, with its paper margin, and the beauty print (bijin-ga)
+   laid over its corner */
+.ds-hero-art .night {
+  left: 0;
+  top: 4%;
+  width: 100%;
+}
+
+.ds-hero-art .bijin {
+  left: -7%;
+  outline: 1.5px solid var(--ukiyo-sumi);
+  outline-offset: -1px;
+  top: 30%;
+  transform: rotate(-2deg);
+  width: 38%;
+}
+
+/* SFW mode hides every figure, so the beauty print goes */
+.sfw-content-mode .ds-hero-art .bijin {
+  display: none;
+}
+
+/* Palette */
+.ds-swatches {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+}
+
+.ds-swatch {
+  background: var(--ds-washi), var(--ukiyo-ai);
+  border: 1px solid var(--ukiyo-line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.ds-swatch .chip {
+  border-bottom: 1.5px solid var(--ukiyo-sumi);
+  height: 84px;
+}
+
+.ds-swatch .meta {
+  padding: 0.65rem 0.85rem 0.85rem;
+}
+
+.ds-swatch code {
+  color: var(--ukiyo-dim);
+  display: block;
+  font-family: var(--ukiyo-font-label);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+.ds-swatch .hex {
+  color: var(--ukiyo-kinari);
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+}
+
+.ds-swatch .role {
+  color: var(--ukiyo-muted);
+  font-size: 0.8rem;
+}
+
+/* Swatches that show the material, not only the colour */
+.ds-chip-shu {
+  background: var(--ds-washi), var(--ukiyo-shu-block);
+}
+
+.ds-chip-bero {
+  background: linear-gradient(180deg, #24508c, #12305e 60%, #080d18);
+}
+
+.ds-chip-kinari {
+  background: var(--ds-washi), var(--ukiyo-paper);
+}
+
+.ds-chip-ai {
+  background: var(--ds-washi), var(--ukiyo-ai);
+}
+
+.ds-chip-ai-hi {
+  background: var(--ds-washi), var(--ukiyo-ai-hi);
+}
+
+/* Type */
+.ds-type .specimen {
+  border-bottom: 1px solid var(--ukiyo-line);
+  padding: 1rem 0;
+}
+
+.ds-type .specimen:last-child {
+  border-bottom: 0;
+}
+
+.ds-type .spec {
+  color: var(--ukiyo-dim);
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.ds-type .t-display {
+  color: var(--ukiyo-kinari);
+  font: 800 3.4rem/1.05 var(--ukiyo-font-display);
+}
+
+.ds-type .t-title {
+  color: var(--ukiyo-shu-hi);
+  font: 700 1.7rem/1.2 var(--ukiyo-font-display);
+}
+
+.ds-type .t-cartouche {
+  background: var(--ds-washi), var(--ukiyo-paper);
+  border: 1px solid var(--ukiyo-sumi);
+  color: var(--ukiyo-sumi);
+  font: 700 1.25rem/1.2 var(--ukiyo-font-display);
+  margin-top: 0.6rem;
+  outline: 1px solid rgb(21 17 15 / 80%);
+  outline-offset: -4px;
+  padding: 0.4rem 0.9rem 0.45rem;
+  width: fit-content;
+}
+
+.ds-type .t-label {
+  color: var(--ukiyo-muted);
+  font: 500 1rem var(--ukiyo-font-label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.ds-type .t-body {
+  color: var(--ukiyo-muted);
+}
+
+/*
+ * Every Japanese word on the page, with its reading. The two printed on
+ * things are shown as the seals that carry them, since the plugin draws them
+ * as outlines; the rest use the viewer's own Japanese system font.
+ */
+.ds-words-head {
+  color: var(--ukiyo-dim);
+  font-family: var(--ukiyo-font-label);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  margin: 0.4rem 0 0.7rem;
+  text-transform: uppercase;
+}
+
+.ds-words + .ds-words-head {
+  border-top: 1px solid var(--ukiyo-line);
+  margin-top: 1.2rem;
+  padding-top: 1rem;
+}
+
+.ds-words {
+  display: grid;
+  gap: 0.75rem 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.ds-word {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.8rem;
+}
+
+.ds-kanji {
+  color: var(--ukiyo-kinari);
+  flex: none;
+  font-family:
+    'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif CJK JP',
+    serif;
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.1;
+  min-width: 2.3em;
+}
+
+.ds-kanji img {
+  display: block;
+  height: 3rem;
+}
+
+.ds-gloss {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding-top: 0.3rem;
+}
+
+/* Readings use the system face: the label face has no macron vowels */
+.ds-reading {
+  color: var(--ukiyo-shu-hi);
+  font-family: var(--ukiyo-font-body);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ds-meaning {
+  color: var(--ukiyo-muted);
+  font-size: 0.85rem;
+}
+
+/* Motifs and glyphs */
+.ds-motifs {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  margin-bottom: 1.5rem;
+}
+
+.ds-motif {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ds-motif img {
+  filter: drop-shadow(0 6px 8px rgb(0 0 0 / 50%));
+  height: 100px;
+  object-fit: contain;
+  transition: transform 220ms ease;
+  width: 100px;
+}
+
+.ds-motif:hover img {
+  transform: rotate(-4deg) scale(1.06);
+}
+
+.ds-motif span {
+  color: var(--ukiyo-dim);
+  font-family: var(--ukiyo-font-label);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* The glyphs are printed in their own colours; the unset ones are keylines */
+.ds-glyph {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  display: inline-block;
+  height: 40px;
+  width: 40px;
+}
+
+.ds-glyph.is-line {
+  background-color: rgb(239 228 204 / 60%);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+
+.ds-glyph.is-tall {
+  width: 24px;
+}
+
+/* Cards, as Stash lays them out */
+.ds-cards {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.ds-cards .scene-card {
+  width: 300px;
+}
+
+.ds-cards .performer-card {
+  width: 220px;
+}
+
+.ds-cards .image-card {
+  width: 240px;
+}
+
+.scene-card .video-section,
+.performer-card .thumbnail-section,
+.image-card .thumbnail-section {
+  position: relative;
+}
+
+.scene-card-preview {
+  align-items: center;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  justify-content: center;
+}
+
+.performer-card-image {
+  align-items: center;
+  aspect-ratio: 2 / 3;
+  display: flex;
+  justify-content: center;
+}
+
+.image-card-preview {
+  align-items: center;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.image-card-preview.portrait {
+  aspect-ratio: 3 / 4;
+}
+
+.grid-card .card-controls {
+  align-items: center;
+  display: flex;
+  position: absolute;
+}
+
+.grid-card .card-check {
+  height: 1.2rem;
+  opacity: 0;
+  width: 1.2rem;
+}
+
+.grid-card .card-check:checked,
+.grid-card:hover .card-check {
+  opacity: 0.75;
+}
+
+.preview-button {
+  display: flex;
+  height: 100%;
+  position: absolute;
+  width: 100%;
+}
+
+.rating-banner {
+  position: absolute;
+}
+
+.grid-card:hover .rating-banner {
+  opacity: 0;
+}
+
+.studio-overlay {
+  position: absolute;
+  right: 0.7rem;
+  top: 0.7rem;
+}
+
+.overlay-resolution {
+  text-transform: uppercase;
+}
+
+.scene-specs-overlay {
+  bottom: 0.7rem;
+  font-size: 0.8rem;
+  position: absolute;
+  right: 0.5rem;
+}
+
+.grid-card .progress-bar {
+  left: 0;
+  position: absolute;
+  right: 0;
+}
+
+.card-popovers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0 0.4rem 0.3rem;
+}
+
+.card-popovers .btn {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+.ds-ico {
+  fill: currentcolor;
+  height: 14px;
+  width: 14px;
+}
+
+.performer-card .favorite-button {
+  padding: 0;
+  position: absolute;
+  right: 5px;
+  top: 10px;
+}
+
+/* Rating stars, as Stash's Rating/styles.scss stacks them */
+.rating-stars {
+  display: inline-flex;
+  font-size: 1.6rem;
+  vertical-align: middle;
+}
+
+.rating-stars button {
+  font-size: inherit;
+  line-height: 1;
+  padding: 0 0.1rem;
+  position: relative;
+}
+
+.rating-stars .filled-star {
+  height: 100%;
+  left: 0.1rem;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+}
+
+.rating-stars .star-fill-0 .filled-star {
+  width: 0;
+}
+
+.rating-stars .star-fill-100 .filled-star {
+  width: 1em;
+}
+
+.rating-stars svg {
+  display: block;
+  height: 1em;
+  width: 1em;
+}
+
+.star-rating-number {
+  margin-left: 0.5rem;
+}
+
+/* Overlays shown in place rather than floating */
+.ds-static .dropdown-menu,
+.ds-static .toast,
+.ds-static .modal-content,
+.ds-static .tooltip {
+  display: block;
+  float: none;
+  left: auto;
+  opacity: 1;
+  position: relative;
+  top: auto;
+}
+
+.ds-static .tooltip-inner {
+  display: inline-block;
+}
+
+.ds-overlays {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+/* Bootstrap's spinner box */
+.LoadingIndicator {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1rem 1rem 2rem;
+}
+
+/* Stash-box: the layout the Tagger and react-select give these */
+.search-item {
+  padding: 1rem;
+}
+
+.search-result {
+  padding: 1rem 0.5rem;
+}
+
+.scene-metadata {
+  margin-left: 1rem;
+}
+
+.ds-cover {
+  aspect-ratio: 16 / 9;
+  height: 7rem;
+}
+
+.ds-match {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.ds-match .entity-name {
+  flex: 1 1 10rem;
+}
+
+.ds-match .react-select {
+  width: 14rem;
+}
+
+.react-select__control {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 0 0.75rem;
+}
+
+.stash-id-pill {
+  display: inline-flex;
+  font-size: 90%;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.stash-id-pill span,
+.stash-id-pill a {
+  padding: 0.25em 0.6em;
+}
+
+.scrape-dialog {
+  max-width: 760px;
+}
+
+/*
+ * The performer header, as Stash v0.31 lays it out: the picture floats left
+ * of her name, rating and details. Stash's own stylesheet gives the header
+ * its height, its overflow and the stacking of its parts.
+ */
+.ds-performer .detail-header {
+  min-height: 15rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.ds-performer .detail-container {
+  position: relative;
+  z-index: 20;
+}
+
+.ds-performer .detail-header-image {
+  display: flex;
+  float: left;
+  justify-content: center;
+}
+
+.ds-performer .detail-header-image img {
+  max-width: 16rem;
+}
+
+.ds-performer .performer-head {
+  display: inline-block;
+}
+
+.ds-performer .quality-group {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+.ds-performer .detail-item {
+  display: table;
+  width: 100%;
+}
+
+.ds-performer .detail-item .detail-item-title {
+  display: table-cell;
+}
+
+.ds-portrait {
+  aspect-ratio: 2 / 3;
+  display: block;
+  width: 16rem;
+}
+
+@media (width <= 576px) {
+  .ds-performer .detail-header-image {
+    float: none;
+  }
+
+  .ds-portrait {
+    width: 190px;
+  }
+}
+
+/* Stash's pager keeps each button its own width, and its tab counts sit a
+   little off their labels */
+.pagination {
+  margin: 0 auto;
+  width: fit-content;
+}
+
+.pagination .btn {
+  flex-grow: 0;
+}
+
+.left-spacing {
+  margin-left: 0.4em;
+}
+
+/* The pagination line Stash prints above a list */
+.paginationIndex {
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+}
+
+/* Copy table */
+.ds-copy {
+  width: 100%;
+}
+
+.ds-copy td,
+.ds-copy th {
+  border-top: 1px solid var(--ukiyo-line);
+  padding: 0.6rem 0.75rem;
+}
+
+.ds-copy th {
+  color: var(--ukiyo-dim);
+  font-family: var(--ukiyo-font-label);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ds-copy td:first-child {
+  color: var(--ukiyo-muted);
+}
+
+.ds-copy td:last-child {
+  color: var(--ukiyo-shu-hi);
+  font-family: var(--ukiyo-font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.ds-footer {
+  color: var(--ukiyo-dim);
+  font-size: 0.85rem;
+  margin: 4rem auto 0;
+  max-width: 1180px;
+  padding: 0 1rem;
+}
+
+/*
+ * Picture stand-ins: soft gradients in place of covers, so each specimen
+ * frames something with a picture's light and shade. They are colour only,
+ * invented for this page.
+ */
+.ph {
+  background-color: #1a1420;
+}
+
+.ph-1 {
+  background:
+    radial-gradient(
+      32% 60% at 44% 56%,
+      #f0c9b4 0,
+      #c98f78 40%,
+      transparent 72%
+    ),
+    radial-gradient(40% 50% at 76% 28%, #6c3a5c 0, transparent 70%),
+    linear-gradient(160deg, #2c2438, #120c18 70%);
+}
+
+.ph-2 {
+  background:
+    radial-gradient(
+      28% 56% at 58% 54%,
+      #e9c2b0 0,
+      #b9806c 42%,
+      transparent 72%
+    ),
+    radial-gradient(46% 70% at 18% 40%, #3e4a66 0, transparent 70%),
+    linear-gradient(200deg, #1d1a2c, #0d0b14 75%);
+}
+
+.ph-3 {
+  background:
+    radial-gradient(
+      30% 52% at 50% 46%,
+      #f2d2c0 0,
+      #c69486 38%,
+      transparent 70%
+    ),
+    radial-gradient(60% 60% at 82% 80%, #c99a3e55 0, transparent 70%),
+    linear-gradient(140deg, #2a2230, #0f0b12 70%);
+}
+
+.ph-4 {
+  background:
+    radial-gradient(
+      34% 62% at 38% 52%,
+      #f5e6dc 0,
+      #d39c92 36%,
+      transparent 70%
+    ),
+    radial-gradient(50% 50% at 78% 40%, #7a2c3c 0, transparent 72%),
+    linear-gradient(180deg, #2e2a36, #140e16 70%);
+}
+
+.ph-5 {
+  background:
+    radial-gradient(
+      40% 54% at 50% 38%,
+      #edcfc0 0,
+      #c08a88 40%,
+      transparent 72%
+    ),
+    radial-gradient(70% 40% at 50% 100%, #24406a 0, transparent 70%),
+    linear-gradient(170deg, #34303e, #14101c 75%);
+}
+
+.ph-6 {
+  background:
+    radial-gradient(
+      34% 56% at 56% 50%,
+      #ecc3ae 0,
+      #a8605c 46%,
+      transparent 74%
+    ),
+    radial-gradient(40% 40% at 20% 24%, #efe4cc44 0, transparent 70%),
+    linear-gradient(150deg, #221a2a, #110c16 70%);
+}
+
+@media (width <= 720px) {
+  .ds-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .ds-hero-art {
+    aspect-ratio: 1;
+    width: 100%;
+  }
+
+  .ds-hero-art .night {
+    left: 8%;
+    width: 92%;
+  }
+
+  .ds-hero-art .bijin {
+    left: 1%;
+  }
+
+  .ds-cartouche {
+    gap: 0.7rem;
+    padding: 0.4rem 0.9rem 0.55rem 1.1rem;
+  }
+
+  .ds-section > h2 {
+    font-size: 2rem;
+  }
+
+  .ds-cards .scene-card,
+  .ds-cards .performer-card,
+  .ds-cards .image-card {
+    width: 100%;
+  }
+
+  .search-result .col-lg-5.d-flex {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .scene-metadata {
+    margin-left: 0;
+    min-width: 0;
+  }
+}

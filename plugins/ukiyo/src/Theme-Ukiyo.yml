@@ -1,0 +1,20 @@
+name: Theme - Ukiyo
+description: An Edo woodblock night print. Indigo washi, cream cartouches and vermilion printed out of register on whatever is chosen. Cherry blossoms for ratings, a red seal for favourites and the oiran's voice.
+version: 0.1.0
+url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/ukiyo
+ui:
+  css:
+    - ukiyo.css
+  javascript:
+    - ukiyo.js
+  assets:
+    /: assets
+settings:
+  calmMode:
+    displayName: Calm mode
+    description: Turn off Ukiyo's animations (card lifts, petal bursts, the seal's stamp, the loader's lantern and petal).
+    type: BOOLEAN
+  plainCopy:
+    displayName: Plain labels
+    description: Keep Stash's own wording instead of the oiran's. Stash's SFW mode always uses plain labels.
+    type: BOOLEAN

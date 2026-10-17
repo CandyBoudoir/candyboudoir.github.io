@@ -1,0 +1,214 @@
+/*
+ * Stash-box screens: the Tagger, the scrape dialogs, StashID links and the
+ * stash-box search lists. Stash paints these slate in its own stylesheet. The
+ * Tagger is a work surface where people clear hundreds of rows, so its rows
+ * are flat and still. The chosen row is printed out of register like every
+ * chosen thing, but it never moves, and the decoration stays on the buttons
+ * that act.
+ */
+
+/* Tagger rows, and the stash-box result lists that reuse .search-item */
+.search-item {
+  background: var(--ukiyo-washi), var(--ukiyo-ai);
+  border: 1px solid var(--ukiyo-line);
+  border-radius: 2px;
+  box-shadow: 0 10px 22px -14px #000;
+}
+
+/* The performer, studio and tag taggers sit inside a card, so raise them */
+.PerformerTagger-performer,
+.StudioTagger-studio,
+.TagTagger-tag,
+.modal .search-item {
+  background: var(--ukiyo-washi), var(--ukiyo-ai-hi);
+  border: 1px solid var(--ukiyo-line);
+  border-radius: 2px;
+  box-shadow: 0 10px 22px -14px #000;
+}
+
+.StudioTagger-studio .studio-card img,
+.TagTagger-tag .tag-card img {
+  background-color: var(--ukiyo-night);
+}
+
+/* Cards inside the Tagger keep still, and their titles stay plain */
+:is(
+    .tagger-container,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag
+  )
+  .grid-card:is(:hover, :focus-within) {
+  box-shadow: 0 14px 26px -18px #000;
+  transform: none;
+}
+
+:is(
+    .tagger-container,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag
+  )
+  .grid-card
+  .card-section-title::before {
+  transition: none;
+}
+
+/* Clickable results in the stash-box search modals */
+.PerformerScrapeModal-list .search-item:hover,
+.StashBoxIDSearchModal-list .search-item:hover {
+  box-shadow:
+    inset 3px 0 0 var(--ukiyo-shu-hi),
+    0 10px 22px -14px #000;
+}
+
+/* Scene Tagger results */
+.search-result {
+  background-color: transparent;
+  border-radius: 1px;
+}
+
+.search-result + .search-result {
+  border-top: 1px solid var(--ukiyo-line);
+}
+
+.search-result:hover {
+  background-color: rgb(239 228 204 / 3%);
+}
+
+/* The chosen row is printed out of register like every chosen thing, but
+   still: a sumi keyline, and a vermilion block 5px right and 4px low */
+.selected-result,
+.selected-result:hover {
+  background:
+    linear-gradient(90deg, rgb(185 56 31 / 18%), rgb(185 56 31 / 4%) 60%),
+    var(--ukiyo-washi), var(--ukiyo-ai);
+  box-shadow:
+    inset 3px 0 0 var(--ukiyo-shu-hi),
+    0 0 0 1.5px var(--ukiyo-sumi),
+    5px 4px 0 0 var(--ukiyo-shu-ink);
+  position: relative;
+  transition: none;
+  z-index: 1;
+}
+
+.search-result h4 {
+  font-family: var(--ukiyo-font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.search-result h5 {
+  color: var(--ukiyo-dim);
+  font-size: 0.76rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+}
+
+.tagger-container .scene-card-preview,
+.search-result .scene-image,
+.search-item .scene-image {
+  border-radius: 1px;
+  box-shadow: 0 0 0 1.5px var(--ukiyo-sumi);
+}
+
+.entity-name {
+  color: var(--ukiyo-muted);
+  font-family: var(--ukiyo-font-label);
+  letter-spacing: 0.04em;
+}
+
+/* Fields left out of a save, or missing from the result */
+li.active .optional-field.missing .optional-field-content,
+li.active .optional-field.excluded .optional-field-content,
+li.active .optional-field.excluded .scene-link {
+  color: var(--ukiyo-dim);
+}
+
+/* StashIDs: a cream cartouche for the endpoint, indigo for the id */
+.stash-id-pill {
+  border: 1px solid var(--ukiyo-sumi);
+  border-radius: 1px;
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 40%);
+  overflow: hidden;
+  padding: 0;
+  vertical-align: middle;
+}
+
+.stash-id-pill span {
+  background: var(--ukiyo-washi), var(--ukiyo-paper);
+  border-radius: 0;
+  color: var(--ukiyo-sumi);
+  font-family: var(--ukiyo-font-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.stash-id-pill a {
+  background: var(--ukiyo-washi), var(--ukiyo-ai-hi);
+  border-left: 1px solid var(--ukiyo-sumi);
+  border-radius: 0;
+  color: var(--ukiyo-kinari);
+  font-family: ui-monospace, monospace;
+  font-weight: 400;
+}
+
+.stash-id-pill a:hover {
+  color: var(--ukiyo-shu-hi);
+}
+
+/*
+ * Scrape dialogs set Stash's current value against the scraped one, and the
+ * toggle in front of each says which wins. The winning side's toggle is
+ * printed in vermilion and its field takes the paper keyline of a chosen
+ * field.
+ */
+.scrape-dialog .column-label,
+.scrape-dialog .col-form-label {
+  color: var(--ukiyo-muted);
+  font-family: var(--ukiyo-font-label);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.scrape-dialog .input-group-prepend .btn:has(.text-success) {
+  --ukiyo-fill: var(--ukiyo-shu-block);
+}
+
+.scrape-dialog .input-group-prepend .btn .text-success {
+  color: var(--ukiyo-on-shu) !important;
+}
+
+.scrape-dialog
+  .input-group:has(> .input-group-prepend .text-success)
+  :is(.form-control, div.react-select__control) {
+  border-color: rgb(239 228 204 / 62%) !important;
+}
+
+/* Icons on indigo buttons keep their meaning */
+.btn-secondary .text-muted {
+  color: var(--ukiyo-muted) !important;
+}
+
+/* The filter bar at the top of the "Scrape with…" menu */
+.scraper-menu .dropdown-menu .scraper-filter-container {
+  background: transparent;
+  border-bottom: 1px solid var(--ukiyo-line);
+}
+
+/* Identify task: the ordered list of sources */
+.scraper-source-list .list-group-item,
+.list-group-item {
+  background: var(--ukiyo-washi), var(--ukiyo-ai);
+  border-color: var(--ukiyo-line);
+  color: var(--ukiyo-kinari);
+}
+
+.identify-source-editor .default-value {
+  color: var(--ukiyo-dim);
+}

@@ -1,0 +1,621 @@
+/*
+ * The page under the taller navbar. Stash spaces the page, the filter sidebar
+ * and its sticky bars by its own 48.75px bar, so each of those moves down by
+ * --ukiyo-nav-height. On a phone held upright the bar is at the bottom.
+ */
+body {
+  padding-top: var(--ukiyo-nav-height);
+}
+
+.sidebar-pane .sidebar {
+  margin-top: var(--ukiyo-nav-height);
+}
+
+.sidebar-toggle-button-container .sidebar-toggle-button {
+  background: var(--ukiyo-washi), var(--ukiyo-ai-hi);
+  border-color: var(--ukiyo-sumi);
+  opacity: 1;
+  top: calc(var(--ukiyo-nav-height) + 0.5rem);
+}
+
+/* The bar Stash pins under the navbar once the header scrolls away */
+.sticky.detail-header {
+  background: var(--ukiyo-washi), var(--ukiyo-ai) !important;
+  border-bottom: 1.5px solid var(--ukiyo-sumi);
+  box-shadow: 0 10px 22px -12px #000;
+  top: var(--ukiyo-nav-height);
+}
+
+.item-list-container .filtered-list-toolbar.has-selection {
+  border: 1px solid var(--ukiyo-line);
+  border-radius: 2px;
+  padding: 0.75rem 1rem;
+  top: var(--ukiyo-nav-height);
+}
+
+/* Under a detail page's sticky header, which is 50px tall */
+.detail-body .filtered-list-toolbar.has-selection {
+  top: calc(var(--ukiyo-nav-height) + 50px);
+}
+
+/* The task queue at the top of Settings > Tasks sticks under the bar */
+#tasks-panel .tasks-panel-queue {
+  background-color: var(--ukiyo-night);
+  top: var(--ukiyo-nav-height);
+}
+
+#queue-viewer .queue-controls {
+  background-color: var(--ukiyo-night);
+}
+
+#queue-viewer .current {
+  background-color: var(--ukiyo-ai-hi);
+}
+
+@media (width <= 575.98px) and (orientation: portrait) {
+  body {
+    padding-bottom: var(--ukiyo-nav-height);
+    padding-top: 0.5rem;
+  }
+
+  .pagination-footer-container {
+    bottom: var(--ukiyo-nav-height);
+  }
+
+  .sidebar-pane .sidebar {
+    margin-top: 0;
+  }
+
+  .detail-body .sidebar {
+    height: calc(100vh - var(--ukiyo-nav-height));
+    max-height: calc(100vh - var(--ukiyo-nav-height));
+  }
+}
+
+@media (width <= 575.98px) {
+  .item-list-container .filtered-list-toolbar.has-selection,
+  .detail-body .filtered-list-toolbar.has-selection {
+    top: 0;
+  }
+}
+
+/* List toolbars: a washi panel with a double keyline ------------------- */
+.filtered-list-toolbar {
+  background: var(--ukiyo-washi), var(--ukiyo-ai);
+  border: 1px solid var(--ukiyo-line);
+  border-radius: 2px;
+  box-shadow:
+    inset 0 0 0 3px var(--ukiyo-ai),
+    inset 0 0 0 4px var(--ukiyo-rule),
+    0 14px 26px -18px #000;
+  gap: 0.6rem 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+}
+
+/* The search field and the filter buttons beside it print as one block */
+.filtered-list-toolbar > .search-term-input + .btn-group {
+  margin-left: -0.75rem;
+}
+
+.filtered-list-toolbar > .search-term-input .clearable-text-field {
+  border-color: #050810;
+  min-height: calc(1.5em + 0.75rem + 3px);
+}
+
+/* The filter sidebar */
+.sidebar-pane .sidebar,
+.sidebar {
+  background: var(--ukiyo-asanoha), var(--ukiyo-washi), var(--ukiyo-ai);
+  border-right: 1px solid var(--ukiyo-sumi);
+  box-shadow:
+    inset -3px 0 0 var(--ukiyo-ai),
+    inset -4px 0 0 var(--ukiyo-rule),
+    8px 0 18px -10px #000;
+}
+
+.sidebar .collapse-button.btn.minimal,
+.sidebar-section .collapse-button {
+  color: var(--ukiyo-kinari);
+  font-family: var(--ukiyo-font-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.sidebar-section + .sidebar-section {
+  border-top: 1px solid var(--ukiyo-line);
+}
+
+/* The count of a list, in the display face, as a print numbers its series */
+.paginationIndex {
+  color: var(--ukiyo-kinari);
+  font-family: var(--ukiyo-font-display);
+  font-size: 1rem;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/*
+ * The pager: blocks with their numbers in the display face. The current page
+ * is the count in the middle, printed in vermilion and out of register.
+ * Stash builds the count and its dropdown as one split button, three classes
+ * deep.
+ */
+.pagination-footer-container .pagination {
+  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 70%));
+}
+
+.pagination-footer .pagination.btn-group {
+  box-shadow: none;
+}
+
+.btn-group.pagination .btn:not(.minimal, .btn-link) {
+  font-family: var(--ukiyo-font-display);
+  font-size: 0.98rem;
+  font-variant-numeric: lining-nums;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.pagination .page-count-container .btn:not(.minimal, .btn-link) {
+  --ukiyo-fill: var(--ukiyo-shu-block);
+
+  color: var(--ukiyo-on-shu) !important;
+}
+
+.pagination .page-count-container .btn:not(.minimal, .btn-link)::before {
+  transform: translate(4px, 3px);
+}
+
+.pagination .page-count-container .btn.page-count {
+  padding-left: 14px;
+  padding-right: 12px;
+}
+
+/* The dropdown carries Stash's own chevron */
+.pagination .page-count-container .btn.page-count-dropdown {
+  --ukiyo-caret: none;
+
+  padding-left: 10px;
+  padding-right: 12px;
+}
+
+.pagination-footer .pagination .btn:disabled {
+  color: var(--ukiyo-muted);
+  filter: none;
+  opacity: 0.45;
+}
+
+/* Bootstrap's pagination, where Stash uses it */
+.page-link {
+  background: var(--ukiyo-washi), var(--ukiyo-ai);
+  border: 1px solid var(--ukiyo-line);
+  color: var(--ukiyo-kinari);
+  font-family: var(--ukiyo-font-display);
+  font-weight: 700;
+  min-width: 2.4rem;
+  text-align: center;
+}
+
+.page-item:first-child .page-link,
+.page-item:last-child .page-link {
+  border-radius: 1px;
+}
+
+.page-link:hover {
+  background: var(--ukiyo-washi), var(--ukiyo-ai-hi);
+  border-color: var(--ukiyo-line);
+  color: var(--ukiyo-shu-hi);
+}
+
+.page-link:focus {
+  box-shadow: 0 0 0 3px rgb(242 105 76 / 35%);
+}
+
+.page-item.active .page-link {
+  background: var(--ukiyo-washi), var(--ukiyo-shu-block);
+  border-color: var(--ukiyo-sumi);
+  color: var(--ukiyo-on-shu);
+  outline: 1px solid rgb(246 238 220 / 45%);
+  outline-offset: -4px;
+}
+
+/* Tabs: the chosen one underlined in vermilion over a breath of blue ----- */
+.nav-tabs {
+  border-bottom: 1px solid var(--ukiyo-line);
+  gap: 0.25rem;
+}
+
+.nav-tabs .nav-link {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  color: var(--ukiyo-muted);
+  font-family: var(--ukiyo-font-label);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.nav-tabs .nav-link:hover,
+.nav-tabs .nav-link:focus {
+  color: var(--ukiyo-kinari);
+}
+
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+  background: linear-gradient(180deg, transparent, rgb(31 79 143 / 30%));
+  box-shadow: inset 0 -3px 0 var(--ukiyo-shu-hi);
+  color: var(--ukiyo-kinari);
+}
+
+/* Counts on tabs: a small indigo block with its number in the display face;
+   the chosen tab's count is printed in vermilion */
+.nav-tabs .nav-link .badge {
+  background: var(--ukiyo-washi), var(--ukiyo-ai-hi);
+  border: 1px solid var(--ukiyo-line-hi);
+  border-radius: 1px;
+  box-shadow: none;
+  color: var(--ukiyo-muted);
+  display: inline-block;
+  font-family: var(--ukiyo-font-display);
+  font-size: 0.8rem;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+  min-width: 1.7em;
+  padding: 0.28em 0.45em 0.3em;
+  text-align: center;
+  text-transform: none;
+  vertical-align: 1px;
+}
+
+.nav-tabs .nav-link.active .badge {
+  background: var(--ukiyo-washi), var(--ukiyo-shu-block);
+  border-color: var(--ukiyo-sumi);
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 45%);
+  color: var(--ukiyo-on-shu);
+}
+
+/* Settings and other pill navs: the chosen one is a vermilion block printed
+   out of register (10-navbar.css) */
+.nav-pills .nav-link {
+  border-radius: 1px;
+  color: var(--ukiyo-muted);
+  font-family: var(--ukiyo-font-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.nav-pills .nav-link:hover {
+  color: var(--ukiyo-kinari);
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+  background: none;
+  color: var(--ukiyo-on-shu);
+}
+
+/* Settings: display-face section titles, the rest on the system font */
+.setting-section > h1 {
+  color: var(--ukiyo-kinari);
+  text-shadow: 0.05em 0.04em 0 rgb(208 70 42 / 55%);
+}
+
+.setting-section .setting h3,
+.setting-section .sub-heading {
+  font-family: var(--ukiyo-font-body);
+}
+
+.setting-section .setting h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/*
+ * Detail pages: a print. A real Stash page has no hero, so the art goes
+ * here. The detail header is a night print: a bokashi sky, dark across the
+ * top as an ichimonji band and Prussian blue through the middle, the moon,
+ * and wave scales at its foot. When Stash's own background-image setting is
+ * on, the blurred picture stays only as a faint tone in that sky, so any
+ * picture works; when it is off Stash leaves the picture out and the sky is
+ * the print alone.
+ */
+.detail-header:not(.sticky) {
+  background:
+    url('assets/icons/moon.svg') right 6% top 24px / 96px 96px no-repeat,
+    radial-gradient(
+      420px 220px at calc(94% - 48px) 72px,
+      rgb(255 240 200 / 13%),
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      #03060c 0,
+      #071228 10%,
+      #0d214a 36%,
+      #102a55 62%,
+      #0d2349 86%,
+      #0b1730 100%
+    );
+  border-bottom: 1.5px solid var(--ukiyo-sumi);
+  box-shadow:
+    inset 0 0 0 1px rgb(239 228 204 / 8%),
+    0 18px 36px -20px #000;
+  padding: 2.2rem 1.75rem 4rem;
+}
+
+/* Stash wraps the picture in <picture>; let it fill the header */
+.detail-header .background-image-container > picture {
+  display: block;
+  height: 100%;
+}
+
+/* At 10% even a white picture keeps secondary text at 4.7:1 on the sky */
+.detail-header .background-image-container {
+  mix-blend-mode: luminosity;
+  opacity: 0.1;
+}
+
+.detail-header .background-image-container .background-image {
+  filter: blur(12px) grayscale(1);
+}
+
+/* Wave scales rising out of the dark at the foot of the print */
+.detail-header:not(.sticky)::after {
+  background: url('assets/icons/seigaiha-ink.svg') 0 100% / 32px 16px repeat;
+  bottom: 0;
+  content: '';
+  height: 72px;
+  left: 0;
+  mask-image: linear-gradient(180deg, transparent, #000 80%);
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  z-index: 0;
+}
+
+/* Her picture on its paper, tilted a degree as a print is laid down, with a
+   hand-cut sumi keyline and a vermilion block out of register behind it */
+.detail-header-image:has(img) {
+  background: var(--ukiyo-washi), var(--ukiyo-paper);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 60%),
+    9px 9px 0 -1px var(--ukiyo-shu-ink),
+    0 30px 44px -20px #000;
+  height: auto;
+  margin: 0.2rem 2.4rem 1.2rem 0.2rem;
+  padding: 11px;
+  position: relative;
+  transform: rotate(-1.2deg);
+}
+
+.detail-header-image:has(img)::after {
+  border: 3px solid transparent;
+  border-image: var(--ukiyo-cut-sumi);
+  content: '';
+  inset: 10px;
+  pointer-events: none;
+  position: absolute;
+}
+
+.detail-header-image > .btn-link {
+  border: 0;
+  padding: 0;
+  text-decoration: none;
+}
+
+.detail-header-image img {
+  display: block;
+}
+
+.detail-header .detail-header-image img {
+  margin: 0;
+}
+
+/* Names on detail pages, in the display face */
+.detail-header :is(.performer-name, .studio-name, .tag-name, .group-name),
+.scene-header {
+  color: var(--ukiyo-kinari);
+  font-family: var(--ukiyo-font-display);
+  font-weight: 800;
+}
+
+.performer-head h2 {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.detail-header :is(.detail-expand-collapse, .name-icons) {
+  margin-left: 0;
+}
+
+/* Her name in the cartouche, as a bijin-ga names its sitter */
+.performer-head .performer-name {
+  background: var(--ukiyo-washi), var(--ukiyo-paper);
+  border: 1.5px solid var(--ukiyo-sumi);
+  box-shadow:
+    6px 6px 0 -1px var(--ukiyo-shu-ink),
+    0 18px 30px -16px #000;
+  color: var(--ukiyo-sumi);
+  font-size: 2.1rem;
+  line-height: 1.1;
+  outline: 1px solid var(--ukiyo-sumi);
+  outline-offset: -6px;
+  padding: 0.42rem 1.1rem 0.52rem;
+}
+
+.performer-head .performer-name .performer-disambiguation {
+  color: #4a4038;
+  font-size: 0.6em;
+  font-weight: 700;
+  opacity: 1;
+}
+
+.detail-header .alias-list {
+  color: var(--ukiyo-kinari);
+  font-family: var(--ukiyo-font-display);
+  font-size: 1.02rem;
+  font-weight: 500;
+}
+
+.detail-header .alias-head {
+  color: var(--ukiyo-muted);
+  font-family: var(--ukiyo-font-label);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  margin-right: 0.4em;
+  text-transform: uppercase;
+}
+
+.quality-group .rating-stars {
+  font-size: 1.9rem;
+}
+
+/* Her details: a ledger of label caps and plain values, ruled in paper */
+.detail-header .detail-group {
+  max-width: 42rem;
+}
+
+.detail-header .detail-item {
+  border-bottom: 1px solid rgb(239 228 204 / 10%);
+  padding-block: 0.4rem;
+}
+
+.detail-item-title {
+  color: var(--ukiyo-muted);
+  font-family: var(--ukiyo-font-label);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.full-width .detail-item .detail-item-title {
+  vertical-align: baseline;
+  width: 10rem;
+}
+
+.detail-item-value {
+  color: var(--ukiyo-kinari);
+}
+
+.details-edit {
+  margin-top: 1.4rem;
+}
+
+.detail-header.collapsed:not(.sticky) {
+  padding-block: 1.6rem 3.2rem;
+}
+
+.sticky.detail-header
+  .sticky.detail-header-group
+  a:is(.performer-name, .studio-name, .tag-name, .group-name) {
+  color: var(--ukiyo-kinari);
+  font-family: var(--ukiyo-font-display);
+}
+
+.detail-body .nav-tabs {
+  margin-bottom: 1.3rem;
+}
+
+/* video.js player */
+.video-js .vjs-control-bar {
+  background-color: transparent;
+  background-image: linear-gradient(
+    0deg,
+    rgb(8 13 24 / 92%),
+    rgb(8 13 24 / 0%)
+  );
+}
+
+.video-js .vjs-play-progress,
+.video-js .vjs-volume-level {
+  background-color: var(--ukiyo-shu-hi);
+}
+
+.video-js .vjs-play-progress::before {
+  color: var(--ukiyo-kinari);
+}
+
+.video-js .vjs-load-progress,
+.video-js .vjs-load-progress div {
+  background: rgb(239 228 204 / 22%);
+}
+
+/*
+ * Tables: a raised indigo header and hairline rows. Modals render outside
+ * #root, so :is(#root, .modal) keeps #root's weight and reaches tables in
+ * dialogs too.
+ */
+:is(#root, .modal) table thead {
+  background-color: var(--ukiyo-ai-hi);
+}
+
+:is(#root, .modal) .table td,
+:is(#root, .modal) .table th {
+  background-color: transparent;
+  color: var(--ukiyo-kinari);
+}
+
+:is(#root, .modal) .table thead th {
+  border-bottom: 1px solid var(--ukiyo-sumi);
+  color: var(--ukiyo-muted);
+  font-family: var(--ukiyo-font-label);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+:is(#root, .modal) .table td {
+  border-top: 1px solid var(--ukiyo-line);
+}
+
+/* The scene edit form's sticky button bar, which Stash paints slate */
+#scene-edit-details .edit-buttons-container {
+  background-color: var(--ukiyo-night);
+}
+
+/* Her page on a phone: a smaller moon clear of the print, a smaller print and
+   cartouche */
+@media (width <= 720px) {
+  .detail-header:not(.sticky) {
+    background-position:
+      right 12px top 16px,
+      right -120px top -60px,
+      0 0;
+    background-size:
+      58px 58px,
+      auto,
+      auto;
+    padding: 1.6rem 1.1rem 3.4rem;
+  }
+
+  .detail-header .detail-header-image img {
+    max-width: 190px;
+  }
+
+  .performer-head .performer-name {
+    font-size: 1.6rem;
+    padding: 0.36rem 0.85rem 0.44rem;
+  }
+
+  .full-width .detail-item .detail-item-title {
+    width: 8.5rem;
+  }
+}
+
+@media (width <= 576px) {
+  .detail-header-image:has(img) {
+    margin: 0.2rem auto 1.4rem;
+    width: fit-content;
+  }
+}

@@ -1,0 +1,243 @@
+/*
+ * Navigation: the ichimonji bokashi band across the top of a print, dark at
+ * its top edge and Prussian blue at its foot, with the lantern row from the
+ * night print at its right end and wave scales (seigaiha) along its foot.
+ * Stash paints the bar and its folded menu with Bootstrap's !important
+ * bg-dark, so these need !important too.
+ */
+.top-nav.navbar {
+  background:
+    url('assets/icons/night-lanterns.webp') right top / auto 52px no-repeat,
+    linear-gradient(180deg, #03060c 0%, #081430 42%, #173a6c 100%) !important;
+  border-bottom: 2px solid var(--ukiyo-sumi);
+  box-shadow: 0 10px 24px -12px #000;
+  min-height: var(--ukiyo-nav-height);
+  padding: 0.4rem 1rem calc(0.4rem + var(--ukiyo-band));
+}
+
+.top-nav .navbar-collapse.bg-dark {
+  background-color: transparent !important;
+}
+
+/* Seigaiha, the overlapping wave scales, along the foot of the band */
+.top-nav.navbar::after {
+  background: var(--ukiyo-seigaiha);
+  border-top: 1px solid var(--ukiyo-sumi);
+  bottom: 0;
+  content: '';
+  height: var(--ukiyo-band);
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
+/* Stash fixes the bar to 48.75px on wide screens */
+@media (width >= 1200px) {
+  .top-nav.navbar {
+    height: var(--ukiyo-nav-height);
+  }
+
+  /* Stash pads its page links for the folded menu's tiles; on the band they
+     sit tight, so the bar keeps its height */
+  .top-nav .navbar-nav .nav-link > .btn.minimal {
+    padding: 0.4rem 0.8rem !important;
+  }
+}
+
+/* Below 1500px the tracked caps would push the utility buttons off the
+   band, so the links sit closer */
+@media (1200px <= width < 1500px) {
+  .top-nav .navbar-nav .nav-link {
+    padding-inline: 0.1rem;
+  }
+
+  .top-nav .navbar-nav .nav-link > .btn.minimal {
+    letter-spacing: 0.1em;
+    padding: 0.4rem 0.5rem !important;
+  }
+}
+
+.top-nav .btn.minimal {
+  background: none;
+  border: 0;
+  border-radius: 1px;
+  color: #ddd3bd;
+  font-family: var(--ukiyo-font-label);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-shadow:
+    0 1px 2px #000,
+    0 0 10px rgb(0 0 0 / 90%);
+  text-transform: uppercase;
+}
+
+.top-nav .btn.minimal:not(:disabled):hover {
+  background: none;
+  box-shadow: inset 0 -2px 0 var(--ukiyo-shu-hi);
+  color: #fff;
+}
+
+/* Icons take the same dark halo as the labels, so they read over the
+   lanterns */
+.top-nav .btn.minimal svg {
+  filter: drop-shadow(0 1px 1px #000) drop-shadow(0 0 5px rgb(0 0 0 / 90%));
+}
+
+/*
+ * The active page is a vermilion block printed out of register: the sumi
+ * keyline stays where the page is, the colour block lands 4px right and 3px
+ * low, so a sliver of the band shows inside the top and left of the keyline
+ * and the vermilion runs past it at the foot. It sits still. The chosen
+ * page of Settings is printed the same way.
+ */
+.top-nav .btn.minimal.active,
+.top-nav .btn.minimal.active:not(:disabled):hover,
+.nav-pills .nav-link.active {
+  background: none;
+  box-shadow: none;
+  color: var(--ukiyo-on-shu);
+  isolation: isolate;
+  position: relative;
+  text-shadow: 0 1px 0 rgb(80 16 6 / 60%);
+}
+
+.top-nav .btn.minimal.active::before,
+.top-nav .btn.minimal.active::after,
+.nav-pills .nav-link.active::before,
+.nav-pills .nav-link.active::after {
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.top-nav .btn.minimal.active::before,
+.nav-pills .nav-link.active::before {
+  background: var(--ukiyo-washi), var(--ukiyo-shu-block);
+  box-shadow: 2px 3px 0 rgb(0 0 0 / 40%);
+  transform: translate(4px, 3px);
+  z-index: -1;
+}
+
+.top-nav .btn.minimal.active::after,
+.nav-pills .nav-link.active::after {
+  border: 1.5px solid var(--ukiyo-sumi);
+  box-shadow:
+    0 0 0 1px rgb(239 228 204 / 22%),
+    inset 0 0 0 1px rgb(239 228 204 / 30%);
+}
+
+/* The wordmark: a cream title cartouche, signed with the 浮世 seal */
+.top-nav .brand-link.btn.minimal {
+  align-items: center;
+  background: var(--ukiyo-washi), var(--ukiyo-paper);
+  border: 1.5px solid var(--ukiyo-sumi);
+  box-shadow: 3px 3px 0 0 var(--ukiyo-shu-ink);
+  color: var(--ukiyo-sumi);
+  display: inline-flex !important;
+  font-family: var(--ukiyo-font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  gap: 0.5rem;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  outline: 1px solid var(--ukiyo-sumi);
+  outline-offset: -5px;
+  padding: 0.38rem 0.6rem 0.42rem 0.85rem;
+  text-shadow: none;
+  text-transform: none;
+  transition: box-shadow var(--ukiyo-medium) var(--ukiyo-ease);
+}
+
+.top-nav .brand-link.btn.minimal::after {
+  background: url('assets/icons/seal-ukiyo.svg') center / contain no-repeat;
+  content: '';
+  flex: none;
+  height: 24px;
+  transform: rotate(3deg);
+  width: 13px;
+}
+
+.top-nav .brand-link.btn.minimal:not(:disabled):hover {
+  background: var(--ukiyo-washi), var(--ukiyo-paper);
+  box-shadow: 5px 4px 0 0 var(--ukiyo-shu-ink);
+  color: var(--ukiyo-sumi);
+}
+
+.top-nav .navbar-brand {
+  padding-block: 0;
+}
+
+/* The menu toggle Stash shows below 1200px: a small indigo block */
+.top-nav .navbar-toggler {
+  background: var(--ukiyo-washi), var(--ukiyo-ai-hi);
+  border: 1.5px solid var(--ukiyo-sumi);
+  border-radius: 1px;
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 45%);
+  color: var(--ukiyo-kinari);
+  padding: 0.3rem 0.55rem;
+}
+
+.top-nav .navbar-toggler:focus-visible {
+  box-shadow: 0 0 0 2px var(--ukiyo-shu-hi);
+  outline: none;
+}
+
+/*
+ * The folded menu: Stash's grid of icon tiles, in caps on the band. The bar
+ * keeps --ukiyo-nav-height while folded, so its row sits a little tighter.
+ */
+@media (width < 1200px) {
+  .top-nav.navbar {
+    padding-block: 0.3rem calc(0.3rem + var(--ukiyo-band));
+  }
+
+  .top-nav .navbar-collapse .btn.minimal {
+    letter-spacing: 0.1em;
+  }
+
+  .top-nav .navbar-collapse .nav-menu-icon {
+    color: var(--ukiyo-muted);
+  }
+
+  .top-nav .navbar-collapse .btn.minimal.active .nav-menu-icon {
+    color: var(--ukiyo-on-shu);
+  }
+}
+
+@media (width <= 720px) {
+  .top-nav .btn.minimal {
+    font-size: 0.74rem;
+    letter-spacing: 0.1em;
+  }
+
+  .top-nav .brand-link.btn.minimal {
+    font-size: 1.1rem;
+  }
+}
+
+/*
+ * On a phone held upright Stash docks the bar at the bottom of the screen, so
+ * the wave scales move to its top edge, the bokashi turns over so the blue
+ * meets the waves, and the lanterns hang from its foot.
+ */
+@media (width <= 575.98px) and (orientation: portrait) {
+  .top-nav.navbar {
+    background:
+      url('assets/icons/night-lanterns.webp') right bottom / auto 44px no-repeat,
+      linear-gradient(0deg, #03060c 0%, #081430 42%, #173a6c 100%) !important;
+    border-bottom: 0;
+    border-top: 2px solid var(--ukiyo-sumi);
+    box-shadow: 0 -10px 24px -12px #000;
+    padding: calc(0.3rem + var(--ukiyo-band)) 2rem 0.3rem;
+  }
+
+  .top-nav.navbar::after {
+    border-bottom: 1px solid var(--ukiyo-sumi);
+    border-top: 0;
+    bottom: auto;
+    top: 0;
+  }
+}
