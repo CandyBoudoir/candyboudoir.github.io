@@ -69,9 +69,9 @@ In a performer bracket, a performer you haven't rated who is in two or more scen
 
 With Apply bracket ratings automatically on, under Settings > Plugins, the champion screen has no Apply button: closing it sets those ratings, and says how many first. While nothing places the champion yet (before its Challenge round, or after a skip with no stars given), the screen says closing would set no ratings. Cherry Pick's page lists each batch with Undo. The switch starts on, and off while Ascension, HotOrNot, Xenith or Restash's mirror writes your ratings, since their rankings would take up every rating without a preview. It follows those plugins until you set it yourself.
 
-| Playing                                                                   | The champion                                                                       |
-| ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| ![Two performers side by side in a bracket](docs/screenshots/bracket.png) | ![The champion with the finalist and semifinalists](docs/screenshots/champion.png) |
+| Playing                                                                   | The champion                                                                                                                     |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| ![Two performers side by side in a bracket](docs/screenshots/bracket.png) | ![A champion who beat your favorites in the Challenge round, with the finalist and semifinalists](docs/screenshots/champion.png) |
 
 ### StashDB
 
