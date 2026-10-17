@@ -1,11 +1,15 @@
 // Tags and publishes a GitHub Release for each plugin whose version on this
 // commit has no <folder>-vX.Y.Z tag yet. Fails if the plugin's CHANGELOG.md
-// has no section for that version, so a version bump always ships with notes.
+// has no section for that version, so a version bump always ships with notes,
+// or when Cherry Pick's section does not name the companion plugin versions
+// its tests ran beside (tests/stash/tested-with.mjs checks the same on pull
+// requests).
 // Run after `pnpm build`, on prod.
 import { execFileSync } from 'node:child_process'
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { listPlugins, root } from './site.mjs'
+import { TESTED_PLUGIN, testedBeside } from '../tests/stash/companions.mjs'
 
 const run = (cmd, ...args) =>
   execFileSync(cmd, args, { cwd: root, encoding: 'utf8' }).trim()
@@ -34,6 +38,10 @@ for (const { name, dir, mod } of await listPlugins()) {
       `plugins/${name}/CHANGELOG.md has no "## ${version}" section`,
     )
   const notes = section.slice(section.indexOf('\n') + 1).trim()
+  if (name === TESTED_PLUGIN && !notes.includes(testedBeside()))
+    throw new Error(
+      `plugins/${name}/CHANGELOG.md's "## ${version}" section does not say: ${testedBeside()}`,
+    )
   const file = join(root, 'dist', `${name}-release-notes.md`)
   await writeFile(
     file,
