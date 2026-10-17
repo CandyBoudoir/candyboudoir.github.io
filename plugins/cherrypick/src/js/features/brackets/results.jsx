@@ -69,14 +69,20 @@ function useMoved(bracketId) {
 }
 
 // What an applied batch left alone: records another plugin ranks or
-// mirrors (at Apply, or since, at Undo), and records whose rating changed
-// since Apply (at Undo): "Left 2 as they are: another plugin rates them.
-// Left 1 as it is: its rating changed since Apply."
+// mirrors (at Apply, or since, at Undo), records whose rating changed
+// before Apply wrote it (at Apply, `stale`) and records whose rating
+// changed since Apply (at Undo): "Left 2 as they are: another plugin rates
+// them. Left 1 as it is: its rating changed since the bracket offered one."
 export function keptText(a) {
   const left = (n, why) =>
     n ? `Left ${n} as ${n === 1 ? 'it is' : 'they are'}: ${why(n === 1)}.` : ''
   const text = [
     left(a.kept || 0, (one) => `another plugin rates ${one ? 'it' : 'them'}`),
+    left(
+      a.stale || 0,
+      (one) =>
+        `${one ? 'its rating' : 'their ratings'} changed since the bracket offered ${one ? 'one' : 'new ones'}`,
+    ),
     left(
       a.changed || 0,
       (one) => `${one ? 'its rating' : 'their ratings'} changed since Apply`,
@@ -578,10 +584,7 @@ export function ApplyDialog({ id }) {
   }
   const apply = async () => {
     setBusy(true)
-    await applyRatingChanges(
-      b,
-      chosen.map(({ id: x, to, provisional }) => ({ id: x, to, provisional })),
-    )
+    await applyRatingChanges(b, chosen.map(BR.proposedChange))
     back()
   }
   return (

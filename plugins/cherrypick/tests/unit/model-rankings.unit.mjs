@@ -431,27 +431,37 @@ test('Apply skips a performer Xenith ranks or Restash mirrored, with the reason'
 })
 
 test('Apply re-checks each record right before writing', () => {
+  // as the preview showed them: unrated, and Ascension's 40
   const changes = [
-    { id: '1', to: 100 },
-    { id: '2', to: 90 },
-    { id: '3', to: 80 },
-    { id: '4', to: 70 },
+    { id: '1', from: null, to: 100 },
+    { id: '2', from: null, to: 90 },
+    { id: '3', from: 40, to: 80 },
+    { id: '4', from: null, to: 70 },
   ]
   const current = new Map([
     ['1', { id: '1', rating100: null, custom_fields: {} }],
-    // ranked since the preview: its rating is Ascension's now
+    // ranked since the preview: its rating is Ascension's now, not a
+    // rating changed by hand
     ['2', { id: '2', rating100: 61, custom_fields: rankedPerformer() }],
     ['3', { id: '3', rating100: 40, custom_fields: { elo_matches: 3 } }],
     // '4' is gone from Stash
   ])
   assert.deepEqual(BR.writableChanges(changes, current), {
-    write: [{ id: '1', to: 100, from: null, fromProvisional: null }],
+    write: [{ id: '1', from: null, to: 100, fromProvisional: null }],
     ranked: ['2', '3'],
+    changed: [],
   })
 })
 
 test('Apply and Undo re-check for Xenith and Restash too', () => {
-  const changes = ['1', '2', '3', '4', '5'].map((id) => ({ id, to: 90 }))
+  const changes = [
+    ['1', null],
+    ['2', null],
+    ['3', null],
+    ['4', 80],
+    ['5', null],
+    ['7', 80],
+  ].map(([id, from]) => ({ id, from, to: 90 }))
   const current = new Map([
     // Xenith ranked it since the preview
     ['1', { id: '1', rating100: 47, custom_fields: xenithRanked() }],
@@ -461,13 +471,16 @@ test('Apply and Undo re-check for Xenith and Restash too', () => {
     // scored, mirror off
     ['4', { id: '4', rating100: 80, custom_fields: restash(66) }],
     ['5', { id: '5', rating100: null, custom_fields: restash(66) }],
+    // scored, mirror off, and rated by hand since the preview
+    ['7', { id: '7', rating100: 70, custom_fields: restash(66) }],
   ])
   assert.deepEqual(BR.writableChanges(changes, current), {
     write: [
-      { id: '4', to: 90, from: 80, fromProvisional: null },
-      { id: '5', to: 90, from: null, fromProvisional: null },
+      { id: '4', from: 80, to: 90, fromProvisional: null },
+      { id: '5', from: null, to: 90, fromProvisional: null },
     ],
     ranked: ['1', '2', '3'],
+    changed: ['7'],
   })
   // Undo after Restash's next run wrote its score over the applied 90
   const undo = [{ id: '6', from: null, to: 90 }]
@@ -477,6 +490,7 @@ test('Apply and Undo re-check for Xenith and Restash too', () => {
   assert.deepEqual(BR.writableChanges(undo, after), {
     write: [],
     ranked: ['6'],
+    changed: [],
   })
   // Restash's score, not a rating changed by hand
   assert.deepEqual(BR.undoableChanges(undo, after), {

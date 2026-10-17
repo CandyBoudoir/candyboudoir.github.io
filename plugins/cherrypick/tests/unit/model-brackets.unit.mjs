@@ -732,14 +732,67 @@ test('the provisional mark on write and on Undo', () => {
   const current = new Map([
     ['1', { id: '1', rating100: 70, custom_fields: { [F]: 70 } }],
   ])
+  const shown = { from: 70, fromProvisional: true }
   assert.deepEqual(
-    BR.writableChanges([{ id: '1', to: 90, provisional: false }], current),
+    BR.writableChanges(
+      [{ id: '1', to: 90, provisional: false, ...shown }],
+      current,
+    ),
     {
       write: [
         { id: '1', to: 90, provisional: false, from: 70, fromProvisional: 70 },
       ],
       ranked: [],
+      changed: [],
     },
+  )
+})
+
+test('Apply leaves alone a rating changed since the preview', () => {
+  const F = BR.PROVISIONAL_FIELD
+  const change = (id, from, fromProvisional = false) =>
+    BR.proposedChange({ id, from, to: 80, provisional: false, fromProvisional })
+  const changes = [
+    change('1', null),
+    change('2', 60, true),
+    change('3', 31),
+    change('4', null),
+    change('5', 60, true),
+    change('6', 60, true),
+    change('7', 50),
+    change('8', null),
+  ]
+  const current = new Map([
+    // as the preview showed them: unrated, provisional (Stash may return
+    // the mark as a string), and primed by Ascension (nothing marks it)
+    ['1', { id: '1', rating100: null, custom_fields: {} }],
+    ['2', { id: '2', rating100: 60, custom_fields: { [F]: '60' } }],
+    ['3', { id: '3', rating100: 31, custom_fields: {} }],
+    // rated by hand since
+    ['4', { id: '4', rating100: 70, custom_fields: {} }],
+    ['5', { id: '5', rating100: 90, custom_fields: { [F]: 60 } }],
+    // its mark taken off: the 60 is the user's now
+    ['6', { id: '6', rating100: 60, custom_fields: {} }],
+    // its rating cleared by hand
+    ['7', { id: '7', rating100: null, custom_fields: {} }],
+    // '8' is gone from Stash
+  ])
+  const { write, ranked, changed } = BR.writableChanges(changes, current)
+  assert.deepEqual(
+    write.map((c) => [c.id, c.from, c.fromProvisional]),
+    [
+      ['1', null, null],
+      ['2', 60, '60'],
+      ['3', 31, null],
+    ],
+  )
+  assert.deepEqual(ranked, [])
+  assert.deepEqual(changed, ['4', '5', '6', '7'])
+  // a change without the preview's rating writes nothing
+  assert.deepEqual(
+    BR.writableChanges([{ id: '1', to: 80, provisional: false }], current)
+      .changed,
+    ['1'],
   )
 })
 

@@ -1,9 +1,10 @@
 // Checks Cherry Pick's brackets in Stash: the Bracket button beside the
 // Performers and Scenes lists, a bracket played to its champion with the
 // keyboard, the custom fields written at the end, no ratings while you pick,
-// Apply's ratings for the unrated only, Undo leaving a rating set by hand
-// since, performers anchored by their scenes' ratings, a bracket of unrated
-// performers and its Challenge round, and pause and resume.
+// Apply's ratings for the unrated only, Apply and Undo leaving a rating set
+// by hand since the preview or since Apply, performers anchored by their
+// scenes' ratings, a bracket of unrated performers and its Challenge round,
+// and pause and resume.
 import { expect, test } from '@playwright/test'
 import {
   DEMO,
@@ -144,7 +145,7 @@ const setSceneRating = (id, rating100) =>
     i: { id, rating100 },
   })
 
-test('performers rated only through their scenes anchor a bracket, and Apply never rates them', async ({
+test('performers rated only through their scenes anchor a bracket, and Apply rates neither them nor one rated by hand while its preview is open', async ({
   page,
 }) => {
   // Every demo performer unrated; their scenes keep their ratings
@@ -234,9 +235,21 @@ test('performers rated only through their scenes anchor a bracket, and Apply nev
         Object.entries(byName).map(([name, r]) => [demo.performers[name], r]),
       )
 
+    // One of them rated by hand while the preview is open, on Stash's own
+    // pages or in another tab: Apply leaves it as it is and says so
+    const [hand] = Object.keys(expected)
+    const handId = demo.performers[hand]
+    const handRating = expected[hand] === 20 ? 30 : 20
+    await setPerformerRating(handId, handRating)
+    delete expected[hand]
+
     await apply.locator('.cherrypick-apply-go').click()
+    await expect(result.locator('.cherrypick-applied')).toContainText(
+      'Left 1 as it is: its rating changed since the bracket offered one.',
+    )
     const measured = Object.keys(byId(expected))
     await expect.poll(() => performerRatings(measured)).toEqual(byId(expected))
+    expect((await performerRatings([handId]))[handId]).toBe(handRating)
     const rated = [...measured, ...stepped.map((name) => demo.performers[name])]
     expect(
       Object.values(await performerRatings(rated)).every((r) => r != null),
@@ -247,11 +260,13 @@ test('performers rated only through their scenes anchor a bracket, and Apply nev
       anchorIds.map(() => null),
     )
 
-    // Undo puts the candidates back to unrated
+    // Undo puts the candidates back to unrated, and the one rated by hand
+    // keeps its rating
     await result.locator('.cherrypick-applied button').click()
     await expect
       .poll(async () => Object.values(await performerRatings(rated)))
       .toEqual(rated.map(() => null))
+    expect((await performerRatings([handId]))[handId]).toBe(handRating)
   } finally {
     for (const [id, r] of Object.entries(before))
       await setPerformerRating(id, r)
