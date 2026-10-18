@@ -2,16 +2,19 @@
 
 Plugins for [Stash](https://github.com/stashapp/stash), the self-hosted media organizer, published as one plugin source. Add the source once and every CandyBoudoir plugin appears under Available Plugins, including ones released later.
 
+<!-- plugins:start -->
+
 | Plugin                             | What it does                                                                                                                                     |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Cherry Pick](plugins/cherrypick/) | Learns what you like from your ratings and plays: a For you row, Your score on unrated scenes, More like this, and performer and scene brackets. |
+| [City Pop](plugins/citypop/)       | An airbrushed 1980s dusk from city pop LPs: record-sleeve cards, striped suns for ratings, cassettes for audio scenes and a late-night FM voice. |
 | [Juicy](plugins/juicy/)            | A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording.                    |
 | [Leather](plugins/leather/)        | A black leather theme: saddle stitching, nickel studs for ratings, a collar for favourites and a strict voice in the wording.                    |
 | [Overclock](plugins/overclock/)    | A hacker's heads-up display in acid yellow: charge chevrons for ratings, a reticle that locks on for favourites and a cold system voice.         |
-| [City Pop](plugins/citypop/)       | An airbrushed 1980s dusk from city pop LPs: record-sleeve cards, striped suns for ratings, cassettes for audio scenes and a late-night FM voice. |
-| [Cherry Pick](plugins/cherrypick/) | Learns what you like from your ratings and plays: a For you row, Your score on unrated scenes, More like this, and performer and scene brackets. |
-| [Tag Candy](plugins/tagcandy/)     | Glossy sticker icons for your tags, matched by StashDB link or name. Your own tag images stay unless you ask.                                    |
 
-Each theme restyles all of Stash, so enable one theme at a time. Cherry Pick and Tag Candy work with any of them, or none.
+<!-- plugins:end -->
+
+Each theme restyles all of Stash, so enable one theme at a time. Cherry Pick works with any of them, or none.
 
 ## Install
 
@@ -46,11 +49,13 @@ pnpm smoke                # after deploy:local cherrypick: a headless check of C
 
 `pnpm smoke` (`plugins/cherrypick/tests/smoke.mjs`) opens that Stash in headless Chromium and checks that the deployed files hash the same as `dist/site/CherryPick` (over `STASH_SSH_HOST`), that the navbar cherries and For you show on the front page, the bracket controls on the Scenes and Performers lists, the plugin page across a reload and the matches switch in Settings › Plugins, and that More like this on five scene pages at 1440 and 390 wide causes no sideways scroll, keeps its arrows on screen and, below 1200 wide, starts below the scene's tabs. It reads the same variables as `deploy:local`, prints statuses and counts only (nothing from the library, so its output is safe to share), and exits non-zero on a failed check or any page error. CI never runs it, since it needs your own Stash and its library.
 
-Each plugin lives in `plugins/<name>/`: a `plugin.mjs` that tells the shared build (`scripts/build.mjs`) what goes into its plugin folder, its `CHANGELOG.md` and README, and its compatibility tests in `tests/`. `tests/stash/` is the Stash test harness the plugins share.
+Each plugin lives in `plugins/<name>/`: a `plugin.mjs` that tells the shared build (`scripts/build.mjs`) what goes into its plugin folder, its `CHANGELOG.md` and README, and its compatibility tests in `tests/`. `plugin.mjs` also exports the plugin's `title` and the `summary` that `scripts/readme.mjs` puts in the table above, and a theme exports `kind = 'theme'`, which runs Cherry Pick's theme spec under it. `tests/stash/` is the Stash test harness the plugins share.
+
+A plugin still being built exports `incubating = true` from its `plugin.mjs`. `pnpm build`, the tests and `deploy:local` treat it like any other plugin, and the Publish workflow leaves it out of the develop channel and the site and never releases it. Removing the line lets it publish.
 
 ### Compatibility tests
 
-The Compatibility workflow installs the plugins on each Stash version listed in `tests/stash-versions.json` and on the latest Stash develop build, every night and on every change. It checks that Stash still renders the elements each plugin depends on and compares screenshots with baselines from the newest listed version. To run it against a local Stash:
+The Compatibility workflow installs the plugins on each Stash version listed in `tests/stash-versions.json` and on the latest Stash develop build, every night and on every change. It checks that Stash still renders the elements each plugin depends on and compares screenshots with baselines from the newest listed version. Each run records its results per plugin and keeps a `gate` artifact (`tests/stash/gate.mjs`) saying which plugins passed on every listed version, so a plugin's release waits only on its own specs, and the issue it opens for a failing channel names the failing plugins. To run it against a local Stash:
 
 ```bash
 pnpm build
@@ -76,8 +81,8 @@ Cherry Pick also has a walk through every feature on a library the size of a rea
 
 `main` is the trunk and feeds the develop channel. `prod` is the release branch. Every push to either publishes the site to GitHub Pages and checks the live files against the build.
 
-Each plugin releases on its own. When `prod` carries a plugin version with no `<name>-vX.Y.Z` tag yet, the Publish workflow tags it and publishes a GitHub Release from that version's section in the plugin's `CHANGELOG.md`. The stable channel builds each plugin from its latest tag, so a plugin's changes reach it only with a version bump. A manual run of the Publish workflow can pin a plugin to an older tag to roll it back. Plugin zips are reproducible, so the release asset and the zip the build makes share one sha256. The stable channel and Juicy's own source point Stash at each plugin's release asset, and the build stops if the asset hashes differently, so each release's download count reads as installs and updates of that version. The develop channel serves its zips from Pages.
+Each plugin releases on its own. When `prod` carries a plugin version with no `<name>-vX.Y.Z` tag yet, the Publish workflow tags it and publishes a GitHub Release from that version's section in the plugin's `CHANGELOG.md`. The stable channel builds each plugin from its latest tag, so a plugin's changes reach it only with a version bump. The bump is the release decision: changes merged to `main` without one reach only the develop channel. A manual run of the Publish workflow can pin a plugin to an older tag to roll it back. Plugin zips are reproducible, so the release asset and the zip the build makes share one sha256. The stable channel and Juicy's own source point Stash at each plugin's release asset, and the build stops if the asset hashes differently, so each release's download count reads as installs and updates of that version. The develop channel serves its zips from Pages.
 
 ## License
 
-MIT, except Cherry Pick, which is AGPL-3.0 (`plugins/cherrypick/LICENSE`). Juicy bundles Fredoka, Leather bundles Grenze Gotisch and Oswald, Overclock bundles Chakra Petch and Share Tech Mono, and City Pop bundles Mr Dafoe, Jost and Zen Maru Gothic, under the SIL Open Font License 1.1 (each plugin's `assets/fonts` folder holds the license).
+MIT, except Cherry Pick, which is AGPL-3.0 (`plugins/cherrypick/LICENSE`). The themes bundle their fonts under the SIL Open Font License 1.1: each theme's README names them, and its `assets/fonts` folder holds the license.

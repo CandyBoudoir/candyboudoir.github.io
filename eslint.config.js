@@ -3,6 +3,13 @@ import js from '@eslint/js'
 import { defineConfig } from 'eslint/config'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
+import { existsSync, readdirSync } from 'node:fs'
+
+// Plugins built from ES modules: the ones whose esbuild entry point,
+// src/js/main.jsx, exists. Every other plugin's src/js holds classic scripts.
+const modulePlugins = readdirSync('plugins').filter((name) =>
+  existsSync(`plugins/${name}/src/js/main.jsx`),
+)
 
 export default defineConfig(
   { ignores: ['node_modules/', 'dist/', 'stash-work/'] },
@@ -14,13 +21,10 @@ export default defineConfig(
   {
     // Plugins built from ES modules (Cherry Pick): JSX compiled by esbuild
     // against PluginApi.React, so React is a global the shim provides.
-    files: ['plugins/*/src/js/**/*.js', 'plugins/*/src/js/**/*.jsx'],
-    ignores: [
-      'plugins/juicy/**',
-      'plugins/leather/**',
-      'plugins/overclock/**',
-      'plugins/citypop/**',
-    ],
+    files: modulePlugins.flatMap((name) => [
+      `plugins/${name}/src/js/**/*.js`,
+      `plugins/${name}/src/js/**/*.jsx`,
+    ]),
     languageOptions: {
       sourceType: 'module',
       globals: globals.browser,

@@ -1,5 +1,6 @@
 // Tags and publishes a GitHub Release for each plugin whose version on this
-// commit has no <folder>-vX.Y.Z tag yet. Fails if the plugin's CHANGELOG.md
+// commit has no <folder>-vX.Y.Z tag yet, except a plugin whose plugin.mjs
+// exports `incubating = true`, which is never released. Fails if the plugin's CHANGELOG.md
 // has no section for that version, so a version bump always ships with notes,
 // or when Cherry Pick's section does not name the companion plugin versions
 // its tests ran beside (tests/stash/tested-with.mjs checks the same on pull
@@ -21,6 +22,10 @@ const { stable } = JSON.parse(
 const tested = stable.map((s) => s.version).join(', ')
 
 for (const { name, dir, mod } of await listPlugins()) {
+  if (mod.incubating) {
+    console.log(`${name} is incubating; nothing to release`)
+    continue
+  }
   const manifest = await readFile(join(site, mod.id, `${mod.id}.yml`), 'utf8')
   const version = manifest.match(/^version: (.+)$/m)[1]
   const tag = `${name}-v${version}`

@@ -11,6 +11,11 @@ const fontPkg = join(root, 'node_modules', '@fontsource-variable', 'fredoka')
 
 export const id = 'Theme-Juicy'
 export const title = 'Juicy'
+// A theme restyles all of Stash, and Cherry Pick's specs run under each one.
+export const kind = 'theme'
+// The line about the plugin in the repo's README (scripts/readme.mjs).
+export const summary =
+  'A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording.'
 // Juicy shipped from its own source at /juicy/index.yml before the shared one
 // existed, and Stash checks for updates only at the source a plugin came from,
 // so the build keeps publishing a source there with Juicy alone.

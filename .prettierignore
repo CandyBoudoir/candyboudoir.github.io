@@ -4,5 +4,6 @@ node_modules/
 stash-work/
 test-results/
 playwright-report/
+pw-results/
 plugins/*/tests/snapshots/
 plugins/tagcandy/data/

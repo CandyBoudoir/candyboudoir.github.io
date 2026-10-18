@@ -11,6 +11,11 @@ const modules = join(root, 'node_modules')
 
 export const id = 'Theme-Leather'
 export const title = 'Leather'
+// A theme restyles all of Stash, and Cherry Pick's specs run under each one.
+export const kind = 'theme'
+// The line about the plugin in the repo's README (scripts/readme.mjs).
+export const summary =
+  'A black leather theme: saddle stitching, nickel studs for ratings, a collar for favourites and a strict voice in the wording.'
 // Paths in this folder whose changes alter the plugin zip. Tests, docs and the
 // design-system page are left out so changing them offers users no update.
 export const inputs = ['src', 'plugin.mjs']
