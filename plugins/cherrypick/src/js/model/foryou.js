@@ -216,7 +216,8 @@ export function context(M, state, opts = {}) {
   }
 }
 
-const allowed = (ctx, s) =>
+// Not marked Not interested, and no tag from "Tags to keep out of my picks"
+export const allowed = (ctx, s) =>
   !ctx.hidden.has(s.id) && !s.tags.some((t) => ctx.excluded.has(t.id))
 const lastPlay = (ctx, s) => {
   const ps = ctx.plays.get(s.id) || []
@@ -529,13 +530,25 @@ function scoreScene(ctx, s, signals) {
   return { scene: s, t, m, f, base: t.value + m.value + f.value }
 }
 
-// signals: the visit's (visitSignals). Every candidate is a scene you own.
-export function computeForYou(ctx, signals) {
-  const { db, M } = ctx
-  const owned = db.owned.filter((s) => allowed(ctx, s))
-  const scored = owned
+// For you's own order, before variety and exploration: taste, momentum and
+// freshness over every scene you own that the row allows and `keep` lets
+// through, highest first. Watch This plays the first (model/watch.js).
+export function rankedScenes(ctx, signals, keep = () => true) {
+  return ctx.db.owned
+    .filter((s) => allowed(ctx, s) && keep(s))
     .map((s) => scoreScene(ctx, s, signals))
     .sort((a, b) => b.base - a.base)
+}
+
+// The reason For you gives one scene of rankedScenes on a card of its own:
+// its best, with no other card to share the row's reasons with.
+export const reasonFor = (ctx, x) =>
+  reasonOptions(ctx, { ...x, kind: 'main' })[0].text
+
+// signals: the visit's (visitSignals). Every candidate is a scene you own.
+export function computeForYou(ctx, signals) {
+  const { M } = ctx
+  const scored = rankedScenes(ctx, signals)
 
   const loved = (x) =>
     (M.rating(x.scene) ?? 0) >= 90 ||
@@ -736,10 +749,12 @@ function followReason(ctx, x) {
 // what's new in the library, with StashDB popularity mixed in when there's a
 // key. Needs no model. (The mockup always had one, since its build was
 // simulated; here, while the fit runs, build the context from withoutModel.)
-export function newInLibrary(ctx) {
+// keep and size: the scenes it may show and how many (Watch This takes the
+// ones with video, all of them).
+export function newInLibrary(ctx, { keep = () => true, size = FY.size } = {}) {
   const { db } = ctx
   const list = db.owned
-    .filter((s) => allowed(ctx, s) && (ctx.M.rating(s) ?? 60) >= 60)
+    .filter((s) => allowed(ctx, s) && keep(s) && (ctx.M.rating(s) ?? 60) >= 60)
     .filter((s) => {
       const last = lastPlay(ctx, s)
       return !last || (ctx.now - last) / DAY > 14
@@ -758,7 +773,7 @@ export function newInLibrary(ctx) {
   })
   return scored
     .sort((a, b) => b.score - a.score)
-    .slice(0, FY.size)
+    .slice(0, size)
     .map(({ s, pop }) => {
       const added = timeAgo(s.local.created_at, ctx.now)
       const line = pop ? popularityLine(pop) : null

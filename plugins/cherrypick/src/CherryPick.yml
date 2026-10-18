@@ -15,6 +15,10 @@ ui:
 # Stash shows a setting nobody has touched as off, so Cherry Pick writes the
 # defaults (src/js/storage/settings.js) the first time it loads.
 settings:
+  watchThis:
+    displayName: Watch This
+    description: Replaces Cherry Pick's front-page rows with one scene, ready to play.
+    type: BOOLEAN
   showForYou:
     displayName: For you row
     description: The first row on the front page.

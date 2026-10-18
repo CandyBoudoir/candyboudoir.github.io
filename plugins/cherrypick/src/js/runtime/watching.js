@@ -2,10 +2,12 @@
 // piece on the page steps out until the user leaves the page, so nothing
 // appears while someone watches or finishes a scene. Media events do not
 // bubble, so this listens in the capture phase, and only to the scene
-// player (cards' hover previews are videos too).
+// player and Watch This's player on the front page (cards' hover previews
+// are videos too). Watch This keeps its player on the page while watching
+// is set and drops only the line under it (features/watchThis.jsx).
 import { store } from './app.js'
 
-const PLAYER = '.scene-player-container'
+const PLAYER = '.scene-player-container, .cherrypick-watch-player'
 
 export function watchPlayback() {
   document.addEventListener(
