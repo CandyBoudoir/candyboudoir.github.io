@@ -1,5 +1,4 @@
-// Popularity, from StashDB (needs the user's key). The phase 2 community
-// score will join it here.
+// Popularity, from StashDB (needs the user's key).
 
 import { approx, pronoun } from './util.js'
 
