@@ -488,7 +488,9 @@ test.describe('beside Performers Toolkit', () => {
 })
 
 // Each restyle setting shows in Settings > Plugins only while its plugin
-// is on, since it has nothing to restyle otherwise
+// is on, since it has nothing to restyle otherwise. Leather hides its row
+// with display: none; the row's section may be collapsed (Stash develop
+// starts plugin settings closed), so the test reads the row's display.
 test('each restyle setting shows only while its plugin is on', async ({
   page,
 }) => {
@@ -496,17 +498,14 @@ test('each restyle setting shows only while its plugin is on', async ({
     page.locator('.setting', {
       has: page.locator(`[id="plugin-${PLUGIN_ID}-${setting}"]`),
     })
-  // Each row's own display, since a Stash develop build folds a plugin's
-  // settings away until its heading is opened
-  const shows = (setting, on) =>
-    on
-      ? expect(row(setting)).not.toHaveCSS('display', 'none')
-      : expect(row(setting)).toHaveCSS('display', 'none')
+  const shown = (setting) =>
+    row(setting).evaluate((el) => getComputedStyle(el).display !== 'none')
   const rows = async (insights, toolkit) => {
     await page.goto('/settings?tab=plugins')
     await row('calmMode').waitFor({ state: 'attached' })
-    await shows('restyleInsights', insights)
-    await shows('restylePerformersToolkit', toolkit)
+    await expect.poll(() => shown('calmMode')).toBe(true)
+    await expect.poll(() => shown('restyleInsights')).toBe(insights)
+    await expect.poll(() => shown('restylePerformersToolkit')).toBe(toolkit)
   }
   try {
     await rows(false, false)
