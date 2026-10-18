@@ -52,6 +52,33 @@ test('For you comes first on the front page, before Stash rows', async ({
   expect(errors).toEqual([])
 })
 
+// Stash stretches every card in a row to the tallest one, with the popover
+// row at its foot, whatever each card's description holds.
+test("the cards in Cherry Pick's rows end at the same height, as in Stash's rows", async ({
+  page,
+}) => {
+  // One card's details grow taller, as a reason that wraps to two lines does
+  const check = async (row) => {
+    await page.addStyleTag({
+      content: `${row} .slick-slide[data-index="1"] .scene-card__details { padding-bottom: 3rem; }`,
+    })
+    const heights = await page
+      .locator(`${row} .slick-slide:not(.slick-cloned) .scene-card`)
+      .evaluateAll((cards) => [
+        ...new Set(cards.map((c) => c.getBoundingClientRect().height)),
+      ])
+    expect(heights, row).toHaveLength(1)
+  }
+  await page.goto('/')
+  await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
+  await check('.cherrypick-for-you')
+  await page.goto(`/scenes/${demoScene(demo, { rated: false, played: true })}`)
+  await expect(
+    page.locator('.cherrypick-mlt-owned .scene-card').first(),
+  ).toBeVisible({ timeout: 20_000 })
+  await check('.cherrypick-mlt-owned')
+})
+
 // Each page of the library takes a second and a half to arrive, as on a
 // library of tens of thousands of scenes, so the first build lasts long
 // enough to watch.
