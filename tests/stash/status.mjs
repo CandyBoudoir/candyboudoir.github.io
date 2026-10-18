@@ -2,7 +2,7 @@
 // the outcome of each step, the outcome of each test step for each plugin
 // folder (from the Playwright JSON reports in pw-results/, results.mjs), and
 // the classes each plugin styles that newly matched nothing
-// (test-results/<folder>-newly-missing-classes.txt, written by the contract
+// (pw-results/<folder>-newly-missing-classes.txt, written by the contract
 // tests). Step outcomes arrive as env vars.
 import { existsSync } from 'node:fs'
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
@@ -17,10 +17,10 @@ const read = (file) =>
 const leg = process.env.LEG
 const SUFFIX = '-newly-missing-classes.txt'
 const missing = []
-for (const file of (await readdir('test-results').catch(() => []))
+for (const file of (await readdir('pw-results').catch(() => []))
   .filter((f) => f.endsWith(SUFFIX))
   .sort()) {
-  const classes = await read(join('test-results', file))
+  const classes = await read(join('pw-results', file))
   if (classes) missing.push(`${file.slice(0, -SUFFIX.length)}:\n${classes}`)
 }
 const folders = (await readdir('plugins', { withFileTypes: true }))
