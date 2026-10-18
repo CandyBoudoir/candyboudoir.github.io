@@ -1,7 +1,10 @@
 // Watch This: with the setting on, Cherry Pick's front-page rows give way to
 // one scene in Stash's own ScenePlayer at the content area's full width, with
-// one line under it (title, performers, the reason). Stash's rows and its
-// Customise button stay below. The pick is model/watch.js's.
+// one line under it (title, performers, the reason, Skip, and Back after a
+// skip). Stash's rows and its Customise button stay below. The pick is
+// model/watch.js's; the visit, Skip and Back are runtime/watchThis.js's.
+// During playback Skip and Back are the player's own next and previous
+// buttons, and the media keys press them.
 //
 // Stash's player does everything it does on the scene page: it records the
 // play, the play duration and the resume time (subject to Stash's activity
@@ -21,8 +24,7 @@ import {
   React,
   ReactRouterDOM,
 } from '../runtime/api.js'
-import { context, visitSignals } from '../model/foryou.js'
-import { watchOrder } from '../model/watch.js'
+import { back, skip, visitState, watchSnapshot } from '../runtime/watchThis.js'
 import { BuildingLine } from '../ui/BuildingLine.jsx'
 import { useAppState } from '../ui/hooks.js'
 
@@ -35,24 +37,6 @@ const PLAYER = [loadableComponents.ScenePlayer]
 // ends, and no timestamp to set from outside. One function, so the player's
 // effects that depend on them never run again.
 const ignore = () => {}
-
-// ------------------------------------------------------------ the visit's pick
-
-let snap = null
-
-// Every scene Watch This could play this visit, best first: worked out when
-// the front page opens with a model, and held for the visit, so the pick
-// never changes on screen. It reads For you's signals for the visit and
-// stores nothing back.
-function snapshot(s) {
-  if (!s.M) return null
-  const key = [s.visit, JSON.stringify(s.settings)].join('|')
-  if (snap?.key === key) return snap
-  const skip = new Set(s.dontLearn.map((d) => d.sceneId))
-  const order = watchOrder(context(s.M, s), visitSignals(s.signals, skip))
-  snap = { key, order }
-  return snap
-}
 
 // ------------------------------------------------------------ pieces
 
@@ -109,8 +93,8 @@ function Skeleton() {
 const basename = (path) => String(path || '').replace(/^.*[\\/]/, '')
 
 // The line under the player: the scene's title, linking to its page, its
-// performers and why Cherry Pick picked it.
-function Line({ scene, reason }) {
+// performers, why Cherry Pick picked it, Back after a skip, and Skip.
+function Line({ scene, reason, canBack }) {
   const title = scene.title || basename(scene.files?.[0]?.path)
   return (
     <div className="cherrypick-watch-line cherrypick-ui">
@@ -132,14 +116,33 @@ function Line({ scene, reason }) {
           <span className="cherrypick-watch-reason text-muted">{reason}</span>
         ) : null}
       </span>
+      <span className="cherrypick-watch-buttons">
+        {canBack ? (
+          <button
+            type="button"
+            className="btn btn-secondary cherrypick-watch-back"
+            onClick={back}
+          >
+            Back
+          </button>
+        ) : null}
+        <button
+          type="button"
+          className="btn btn-secondary cherrypick-watch-skip"
+          onClick={skip}
+        >
+          Skip
+        </button>
+      </span>
     </div>
   )
 }
 
-function Pick({ item, watching }) {
+function Pick({ item, canBack, watching }) {
   const loading = hooks.useLoadComponents(PLAYER)
   // Stash's own query for the scene page's record, the SceneDataFragment
-  // the player takes. Its last answer stays up while the next one loads.
+  // the player takes. Its last answer stays up while the next pick loads,
+  // so Skip and Back keep the player and swap its scene.
   const { data, previousData } = GQL.useFindSceneQuery({
     variables: { id: item.scene.id },
   })
@@ -150,6 +153,10 @@ function Pick({ item, watching }) {
     () => !(config?.configuration?.interface?.showScrubber ?? true),
   )
   const reason = useMemo(() => item.reason(), [item])
+  // The line goes with the scene in the player: until the next pick's
+  // record arrives, the last one's line stays.
+  const shown = useRef(null)
+  if (scene?.id === item.scene.id) shown.current = { scene, reason }
   const { ScenePlayer } = components
   if (loading || !scene || !ScenePlayer) return <Skeleton />
   return (
@@ -161,19 +168,26 @@ function Pick({ item, watching }) {
           initialTimestamp={0}
           sendSetTimestamp={ignore}
           onComplete={ignore}
+          onNext={skip}
+          onPrevious={canBack ? back : undefined}
         />
       </div>
-      {watching ? null : <Line scene={scene} reason={reason} />}
+      {watching || !shown.current ? null : (
+        <Line {...shown.current} canBack={canBack} />
+      )}
     </Box>
   )
 }
 
 export function WatchThis() {
   const s = useAppState((x) => x)
-  const v = snapshot(s)
+  const v = watchSnapshot(s)
   if (!v) return <Skeleton />
+  const cur = visitState(s, v)
   // A library with no scene that has video: Stash's rows alone
-  const item = v.order[0]
+  const item = cur.current ? v.byId.get(cur.current) : null
   if (!item) return null
-  return <Pick item={item} watching={s.watching} />
+  return (
+    <Pick item={item} canBack={cur.skips.length > 0} watching={s.watching} />
+  )
 }

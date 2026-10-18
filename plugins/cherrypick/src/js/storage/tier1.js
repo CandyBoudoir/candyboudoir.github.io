@@ -2,8 +2,8 @@
 // configurePlugin and the same in every browser. It holds the settings, the
 // remembered bracket choice, Not interested, Don't learn, the bracket in
 // progress, the Hall of Fame, applied-rating batches, consent, the answer
-// to the offer beside Stash Curator and the auto-apply default last
-// written: a few KB.
+// to the offer beside Stash Curator, the auto-apply default last written
+// and Watch This's snoozes: a few KB, the snoozes at most 300 entries.
 //
 // Two Stash behaviours shape it:
 //   - configurePlugin replaces the plugin's whole map, so every write is
@@ -32,6 +32,7 @@ export const DATA_KEYS = [
   'consent',
   'curatorOffer',
   'autoApplyDefault',
+  'snoozes',
 ]
 export const ALL_KEYS = [...SETTING_KEYS, ...DATA_KEYS]
 
@@ -67,6 +68,8 @@ export function fromConfig(map) {
     curatorOffer: decode(m.curatorOffer),
     // the autoApply value Cherry Pick last wrote (autoApplyToWrite)
     autoApplyDefault: decode(m.autoApplyDefault),
+    // Watch This's skipped and ignored scenes (model/watch.js Snooze)
+    snoozes: decode(m.snoozes) || [],
   }
 }
 
@@ -83,6 +86,7 @@ export function toConfig(s) {
     consent: encode(s.consent),
     curatorOffer: encode(s.curatorOffer),
     autoApplyDefault: encode(s.autoApplyDefault),
+    snoozes: encode(s.snoozes),
   }
 }
 
@@ -95,6 +99,7 @@ export const STATE_TO_CONFIG = {
   applied: ['applied'],
   consent: ['consent'],
   curatorOffer: ['curatorOffer'],
+  snoozes: ['snoozes'],
 }
 
 // The map Stash's Settings page saves when the Curator offer is answered

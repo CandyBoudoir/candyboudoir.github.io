@@ -73,6 +73,13 @@
   font-weight: 600;
 }
 
+.cherrypick-watch-buttons {
+  display: flex;
+  flex: none;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
 @media (width >= 768px) {
   .cherrypick-watch-line {
     flex-wrap: nowrap;

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { buildDb } from '../../src/js/model/db.js'
 import { createEngine } from '../../src/js/model/index.js'
 import * as FY from '../../src/js/model/foryou.js'
+import * as W from '../../src/js/model/watch.js'
 import { playable, watchOrder } from '../../src/js/model/watch.js'
 import { syntheticLibrary } from './fixtures/synthetic.mjs'
 
@@ -125,4 +126,148 @@ test('a library with no scene that has video has nothing to play', () => {
   const db = buildDb({ ...small, scenes: small.scenes.map(noFile) })
   const ctxs = FY.context(createEngine(db).compute({}), STATE)
   assert.deepEqual(watchOrder(ctxs, FY.EMPTY_SIGNALS), [])
+})
+
+// ---------------------------------------------------------------- snoozes
+
+const HOUR = 3600000
+const T0 = Date.parse('2026-10-18T23:50:00Z')
+
+// A tiny order of scenes, each with its performers
+const scene = (id, ...performers) => ({
+  scene: { id, performers: performers.map((p) => ({ id: p })) },
+  reason: () => '',
+})
+// db.scenes as settle reads it: Stash's plays by scene
+const played = (entries) =>
+  new Map(
+    Object.entries(entries).map(([id, times]) => [
+      id,
+      { local: { play_history: times.map((t) => new Date(t).toISOString()) } },
+    ]),
+  )
+
+test('each skip climbs one step: 48 hours, a week, then 30 days', () => {
+  let snoozes = []
+  const lengths = []
+  let now = T0
+  for (let i = 0; i < 5; i++) {
+    ;({ snoozes } = W.skipScene(snoozes, 'a', now))
+    const e = snoozes.find((x) => x.id === 'a')
+    assert.equal(e.step, i + 1)
+    lengths.push((e.until - now) / HOUR)
+    now = e.until + HOUR
+  }
+  assert.deepEqual(lengths, [48, 168, 720, 720, 720])
+  // counted in hours from the skip: a skip at 11:50 pm lasts two full days
+  const { snoozes: late } = W.skipScene([], 'a', T0)
+  assert.equal(late[0].until, T0 + 48 * HOUR)
+})
+
+test('a play recorded after the skip starts the ladder again; the look before the skip does not', () => {
+  let { snoozes } = W.skipScene([], 'a', T0)
+  ;({ snoozes } = W.skipScene(snoozes, 'a', T0 + 50 * HOUR))
+  const at = T0 + 50 * HOUR
+  // the look before the skip: played before it, or recorded as it lands
+  assert.equal(
+    W.settle(snoozes, played({ a: [at - 30 * 1000, at + 5 * 1000] })),
+    snoozes,
+  )
+  // a play of its own, later
+  assert.deepEqual(W.settle(snoozes, played({ a: [at + 3 * HOUR] })), [])
+  // the next skip starts again at the first step
+  const { snoozes: again } = W.skipScene([], 'a', at + 4 * HOUR)
+  assert.equal(again[0].step, 1)
+  // a scene the library no longer has keeps its entry
+  assert.equal(W.settle(snoozes, new Map()), snoozes)
+})
+
+test('Back puts the step and the snooze end back as they were', () => {
+  const first = W.skipScene([], 'a', T0).snoozes
+  const before = first.find((e) => e.id === 'a')
+  const now = T0 + 60 * HOUR
+  const { snoozes, prev } = W.skipScene(first, 'a', now)
+  assert.equal(snoozes.find((e) => e.id === 'a').step, 2)
+  const back = W.unskipScene(snoozes, 'a', prev, now + 1000)
+  const e = back.find((x) => x.id === 'a')
+  assert.equal(e.step, before.step)
+  assert.equal(e.until, before.until)
+  // its clock restarts: the look before the skip resets nothing
+  assert.deepEqual(W.settle(back, played({ a: [now + 2000] })), back)
+  // a scene with no entry before its skip has none after Back
+  const once = W.skipScene([], 'b', T0)
+  assert.deepEqual(W.unskipScene(once.snoozes, 'b', once.prev, T0 + 1), [])
+})
+
+test('Skip, Back and Skip on the same scene moves it one step', () => {
+  const s1 = W.skipScene([], 'a', T0)
+  const b = W.unskipScene(s1.snoozes, 'a', s1.prev, T0 + 1000)
+  const s2 = W.skipScene(b, 'a', T0 + 2000)
+  assert.equal(s2.snoozes.length, 1)
+  assert.equal(s2.snoozes[0].step, 1)
+  assert.equal(s2.snoozes[0].until, T0 + 2000 + 48 * HOUR)
+})
+
+test("the next pick shares no performer with the visit's skipped scenes, until none is left", () => {
+  const order = [
+    scene('a', 'p1', 'p2'),
+    scene('b', 'p2'),
+    scene('c', 'p3'),
+    scene('d', 'p1', 'p4'),
+  ]
+  const { snoozes } = W.skipScene([], 'a', T0)
+  assert.equal(W.nextPick(order, [], [], T0).scene.id, 'a')
+  // b shares p2 with a, so c comes first
+  assert.equal(W.nextPick(order, snoozes, [order[0].scene], T0).scene.id, 'c')
+  // c skipped too: b and d share a performer with a; the rule lifts
+  const both = W.skipScene(snoozes, 'c', T0).snoozes
+  assert.equal(
+    W.nextPick(order, both, [order[0].scene, order[2].scene], T0).scene.id,
+    'b',
+  )
+})
+
+test('when every scene is snoozed, the one whose snooze ends soonest plays', () => {
+  const order = [scene('a', 'p1'), scene('b', 'p2'), scene('c', 'p3')]
+  let snoozes = W.skipScene([], 'a', T0).snoozes
+  snoozes = W.skipScene(snoozes, 'a', T0 + 1).snoozes // a week
+  snoozes = W.skipScene(snoozes, 'b', T0 + 2).snoozes // 48 hours
+  snoozes = W.skipScene(snoozes, 'c', T0 + 3).snoozes // 48 hours, later
+  const skipped = order.map((it) => it.scene)
+  assert.equal(W.nextPick(order, snoozes, skipped, T0 + 10).scene.id, 'b')
+  // once b's snooze ends it is free again
+  assert.equal(W.nextPick(order, snoozes, [], T0 + 2 + 48 * HOUR).scene.id, 'b')
+  assert.equal(W.nextPick([], snoozes, [], T0), null)
+})
+
+test('an ignored pick counts once a day and steps up on the third day', () => {
+  const day = (n) => `2026-10-${18 + n}`
+  let snoozes = W.ignoreScene([], 'a', T0, day(0))
+  assert.deepEqual(
+    snoozes.map(({ step, ignored, until }) => ({ step, ignored, until })),
+    [{ step: 0, ignored: 1, until: 0 }],
+  )
+  // the same day again counts nothing
+  assert.equal(W.ignoreScene(snoozes, 'a', T0 + HOUR, day(0)), snoozes)
+  snoozes = W.ignoreScene(snoozes, 'a', T0 + 24 * HOUR, day(1))
+  assert.equal(snoozes[0].ignored, 2)
+  assert.equal(snoozes[0].until, 0, 'not snoozed yet')
+  const now = T0 + 48 * HOUR
+  snoozes = W.ignoreScene(snoozes, 'a', now, day(2))
+  assert.equal(snoozes[0].step, 1)
+  assert.equal(snoozes[0].until, now + 48 * HOUR)
+  assert.equal(snoozes[0].ignored, 0, 'the count starts again')
+  // a play clears the ignored days with the ladder
+  const counted = W.ignoreScene([], 'b', T0, day(0))
+  assert.deepEqual(W.settle(counted, played({ b: [T0 + 5 * HOUR] })), [])
+})
+
+test('past 300 entries, the ones whose snooze ended longest ago go', () => {
+  let snoozes = []
+  for (let i = 0; i < 305; i++)
+    snoozes = W.skipScene(snoozes, `s${i}`, T0 + i * HOUR).snoozes
+  assert.equal(snoozes.length, W.MAX_SNOOZES)
+  const ids = new Set(snoozes.map((e) => e.id))
+  for (let i = 0; i < 5; i++) assert.ok(!ids.has(`s${i}`), `s${i} dropped`)
+  assert.ok(ids.has('s5') && ids.has('s304'))
 })
