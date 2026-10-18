@@ -6,12 +6,18 @@ import {
   EMPTY_LIST,
   FLOWS,
   PAGES,
+  PLUGIN_ID,
   demoIds,
   demoPath,
   onlyJuicy,
+  openInsights,
+  openPerformerStats,
+  openPerformersToolkit,
   setPlugin,
   setSfw,
   unmatchedClasses,
+  unmatchedRestyledClasses,
+  usePlugins,
   visit,
 } from './stash.mjs'
 
@@ -160,6 +166,184 @@ test('SFW mode drops the cheek', async ({ page }) => {
   } finally {
     await setSfw(false)
   }
+})
+
+// Insights, another author's stats dashboard on the Stats page (RESTYLED in
+// tests/stash/companions.mjs), keeps its own look until Restyle Insights and
+// Performers Toolkit is on, and then takes Juicy's palette, stickers and
+// type. Its sidebar clears Juicy's pink rule either way.
+test.describe('beside Insights', () => {
+  test.beforeAll(async () => {
+    await usePlugins(PLUGIN_ID, 'Insights')
+  })
+  test.afterAll(async () => {
+    await setPlugin({})
+    await onlyJuicy()
+  })
+
+  test('Insights keeps its own look until the restyle is on', async ({
+    page,
+  }) => {
+    await setPlugin({})
+    await openInsights(page)
+    await expect(page.locator('html')).not.toHaveClass(/\bjuicy-restyle\b/)
+    await expect(page.locator('#insights')).toHaveCSS(
+      'background-color',
+      'rgb(16, 15, 15)',
+    )
+  })
+
+  test('the restyle puts Insights in the candy', async ({ page }) => {
+    try {
+      await setPlugin({ restylePlugins: true })
+      await openInsights(page, 'library')
+      await expect(page.locator('html')).toHaveClass(/\bjuicy-restyle\b/)
+      const root = page.locator('#insights')
+      await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      // Insights' own rules still paint from the palette Juicy gives it
+      expect(
+        await root.evaluate((el) =>
+          getComputedStyle(el).getPropertyValue('--ui').trim(),
+        ),
+      ).toBe('#22123f')
+      await expect(root.locator('.ins-sub').first()).toHaveCSS(
+        'color',
+        'rgb(149, 124, 176)',
+      )
+      await expect(root.locator('.ins-card').first()).toHaveCSS(
+        'border-radius',
+        '20px',
+      )
+      await expect(root.locator('.ins-title')).toHaveCSS(
+        'font-family',
+        /Juicy Fredoka/,
+      )
+      await root
+        .locator('.ins-bar[data-tip]')
+        .filter({ visible: true })
+        .first()
+        .hover()
+      const tip = page.locator('#ins-tip')
+      await expect(tip).toBeVisible()
+      await expect(tip).toHaveCSS('background-color', 'rgb(1, 2, 36)')
+      await expect(tip).toHaveCSS('color', 'rgb(215, 250, 84)')
+    } finally {
+      await setPlugin({})
+    }
+  })
+
+  test('the restyle takes effect on the next page', async ({ page }) => {
+    try {
+      await setPlugin({})
+      await page.goto(EMPTY_LIST)
+      await page.locator('.paginationIndex').waitFor()
+      await expect(page.locator('html')).not.toHaveClass(/\bjuicy-restyle\b/)
+      await setPlugin({ restylePlugins: true })
+      await page
+        .locator('a[href="/stats"]')
+        .filter({ visible: true })
+        .first()
+        .click()
+      await expect(page.locator('html')).toHaveClass(/\bjuicy-restyle\b/)
+      // Kept for the next visit, so Stats never opens in Insights' colours
+      expect(
+        await page.evaluate(() => localStorage.getItem('juicy.restylePlugins')),
+      ).toBe('1')
+    } finally {
+      await setPlugin({})
+    }
+  })
+
+  test("the What works sidebar clears Juicy's pink rule", async ({ page }) => {
+    await setPlugin({})
+    await openInsights(page, 'you')
+    await expect(page.locator('#insights .ins-side')).toHaveCSS('top', '63px')
+  })
+
+  // The Insights classes in juicy.css that no tab renders on the demo
+  // library, against the ones that matched nothing on the pinned Insights
+  // (plugins/juicy/tests/insights-unmatched-baseline.txt). A class that newly
+  // matches nothing is one an Insights release renamed or removed.
+  test('every Insights class Juicy styles still renders', async ({ page }) => {
+    expect(
+      await unmatchedRestyledClasses(page, {
+        css: 'dist/site/Theme-Juicy/juicy.css',
+        folder: 'juicy',
+        plugin: 'insights',
+      }),
+    ).toEqual([])
+  })
+})
+
+// Performers Toolkit, from the same author and in the same look as
+// Insights, follows the same setting: its page, the Stats tab it adds to a
+// performer's page and its toast take Juicy's palette, stickers and type.
+test.describe('beside Performers Toolkit', () => {
+  test.beforeAll(async () => {
+    await usePlugins(PLUGIN_ID, 'PerformersToolkit')
+  })
+  test.afterAll(async () => {
+    await setPlugin({})
+    await onlyJuicy()
+  })
+
+  test('Performers Toolkit keeps its own look until the restyle is on', async ({
+    page,
+  }) => {
+    await setPlugin({})
+    await openPerformersToolkit(page)
+    await expect(page.locator('html')).not.toHaveClass(/\bjuicy-restyle\b/)
+    await expect(page.locator('.pt').first()).toHaveCSS(
+      'background-color',
+      'rgb(16, 15, 15)',
+    )
+  })
+
+  test('the restyle puts Performers Toolkit in the candy', async ({ page }) => {
+    try {
+      await setPlugin({ restylePlugins: true })
+      await openPerformersToolkit(page)
+      await expect(page.locator('html')).toHaveClass(/\bjuicy-restyle\b/)
+      const root = page.locator('.pt').first()
+      await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      await expect(root.locator('.pt-title')).toHaveCSS(
+        'font-family',
+        /Juicy Fredoka/,
+      )
+      await expect(root.locator('.pt-card').first()).toHaveCSS(
+        'border-radius',
+        '20px',
+      )
+      await openPerformerStats(page, ids.performer)
+      const stats = page.locator('.ptc').first()
+      // Its own rules still paint from the palette Juicy gives it
+      expect(
+        await stats.evaluate((el) =>
+          getComputedStyle(el).getPropertyValue('--ui').trim(),
+        ),
+      ).toBe('#22123f')
+      await expect(stats.locator('.pt-sec').first()).toHaveCSS(
+        'background-color',
+        'rgb(34, 18, 63)',
+      )
+    } finally {
+      await setPlugin({})
+    }
+  })
+
+  // As for Insights, against
+  // plugins/juicy/tests/performerstoolkit-unmatched-baseline.txt
+  test('every Performers Toolkit class Juicy styles still renders', async ({
+    page,
+  }) => {
+    expect(
+      await unmatchedRestyledClasses(page, {
+        css: 'dist/site/Theme-Juicy/juicy.css',
+        folder: 'juicy',
+        plugin: 'performerstoolkit',
+      }),
+    ).toEqual([])
+  })
 })
 
 // Not a pass/fail check: lists the Stash classes in juicy.css that no visited

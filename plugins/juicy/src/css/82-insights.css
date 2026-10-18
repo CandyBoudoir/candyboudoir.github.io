@@ -1,0 +1,505 @@
+/*
+ * Insights, the stats dashboard another author's plugin draws on Stash's
+ * Stats page (gitlab.com/allisless0/stash-plugins), in Juicy's candy.
+ *
+ * Insights paints itself in the Flexoki palette from custom properties it
+ * sets on #insights, and adds its stylesheet to the page the first time Stats
+ * opens, after this one. The rules here therefore start at `#root #insights`,
+ * which outranks its own. Everything but the sidebar offset waits for the
+ * Restyle Insights and Performers Toolkit setting: juicy.js puts
+ * .juicy-restyle on <html> when it is on. Off, both keep the look they share
+ * with their sibling plugins, for anyone who prefers it.
+ *
+ * Its heatmaps, codec and resolution colours and the colours of other
+ * plugins' cards come from its JavaScript as inline colours, so they keep
+ * Insights' own tones; only their empty cells and the charts' grey lines
+ * and labels move to the plum.
+ */
+
+/* The "What works for you" sidebar sticks under the navbar at Stash's
+   48.75px. Juicy's bar is as tall but draws its 3px pink rule below it, so
+   the sidebar moves down past the rule, whether the setting is on or not. */
+#root #insights .ins-side {
+  top: 63px;
+}
+
+/* Insights' palette in Juicy's: plum cards in deep plum wells, Juicy's text
+   tones, and a candy colour for each tab. You is pink, Actions coral, Library
+   tangerine, Files cyan, Metadata health gold, Collection lime and Movies
+   purple. O's are bubblegum, as on the O counter. */
+.juicy-restyle #root #insights {
+  --bg: var(--juicy-bg);
+  --bg2: var(--juicy-bg-deep);
+  --ui: var(--juicy-card);
+  --ui2: var(--juicy-card-raised);
+  --ui3: var(--juicy-line);
+  --tx3: var(--juicy-text-faint);
+  --tx2b: var(--juicy-text-dim);
+  --tx2: var(--juicy-text-dim);
+  --tx1b: var(--juicy-text-muted);
+  --tx: var(--juicy-text);
+  --hi: #fff;
+  --re: var(--juicy-danger);
+  --or: var(--juicy-tangerine);
+  --ye: var(--juicy-gold);
+  --gr: var(--juicy-lime);
+  --cy: var(--juicy-cyan);
+  --bl: var(--juicy-blueberry);
+  --pu: var(--juicy-purple);
+  --ma: var(--juicy-pink);
+  --up: var(--juicy-lime);
+  --down: var(--juicy-danger);
+  --o: var(--juicy-bubblegum);
+  --otx: var(--juicy-bubblegum);
+
+  /* No slab of its own: the cards sit on the polka dots like Stash's own
+     pages */
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* The head: the name in Fredoka on an ink drop, and the tabs as candy pills
+   on a plum tray, the open one filled with its own colour */
+.juicy-restyle #root #insights .ins-title {
+  color: var(--juicy-text);
+  font-family: var(--juicy-font-display);
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-shadow: 0 3px 0 var(--juicy-ink);
+}
+
+.juicy-restyle #root #insights .ins-title .ins-ic {
+  color: var(--juicy-pink);
+  filter: drop-shadow(0 2px 0 var(--juicy-ink));
+  height: 24px;
+  width: 24px;
+}
+
+.juicy-restyle #root #insights .ins-tabs {
+  background: var(--juicy-card);
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  border-radius: var(--juicy-radius-pill);
+  box-shadow: var(--juicy-drop);
+  padding: 4px;
+}
+
+/* On phones Insights sets its tabs out in rows, so the tray takes a card's
+   corners */
+@media (width <= 576px) {
+  .juicy-restyle #root #insights .ins-tabs {
+    border-radius: var(--juicy-radius-lg);
+  }
+}
+
+.juicy-restyle #root #insights .ins-tab {
+  border: 0;
+  border-radius: var(--juicy-radius-pill);
+  color: var(--juicy-text-muted);
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+  transition:
+    background-color var(--juicy-fast),
+    color var(--juicy-fast),
+    transform var(--juicy-medium) var(--juicy-ease-bounce);
+}
+
+.juicy-restyle #root #insights .ins-tab:hover {
+  background: var(--juicy-pink-soft);
+  color: var(--juicy-bubblegum);
+}
+
+.juicy-restyle #root #insights .ins-tab.on {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--tc), #fff 30%) 0%,
+    var(--tc) 55%,
+    color-mix(in srgb, var(--tc), #000 10%) 100%
+  );
+  box-shadow: var(--juicy-shine);
+  color: var(--juicy-ink);
+}
+
+.juicy-restyle #root #insights .ins-tab.on .ins-ic {
+  color: var(--juicy-ink);
+}
+
+/* Cards are plum stickers on a hard ink drop. They never tilt: a dashboard
+   is read, not handled. Clickable ones take the lime halo on hover. */
+.juicy-restyle #root #insights .ins-card {
+  background: var(--juicy-card);
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  border-radius: var(--juicy-radius-lg);
+  box-shadow: var(--juicy-drop-lg);
+}
+
+.juicy-restyle #root #insights :is(.ins-tile.click, .ins-pull):hover {
+  border-color: var(--juicy-ink);
+  box-shadow:
+    0 0 0 3px var(--juicy-lime),
+    var(--juicy-drop-lg);
+}
+
+.juicy-restyle #root #insights .ins-ch b {
+  font-family: var(--juicy-font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+/* A card's icon is a small candy sticker in its colour */
+.juicy-restyle #root #insights .ins-badge {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--c, var(--acc)), #fff 30%) 0%,
+    var(--c, var(--acc)) 55%,
+    color-mix(in srgb, var(--c, var(--acc)), #000 10%) 100%
+  );
+  border: 2px solid var(--juicy-ink);
+  border-radius: 10px;
+  box-shadow:
+    0 2px 0 var(--juicy-ink),
+    var(--juicy-shine);
+  color: var(--juicy-ink);
+}
+
+.juicy-restyle #root #insights .ins-sq {
+  border-radius: 10px;
+}
+
+/* A tile's colour edge is a flat candy stripe, without a glow */
+.juicy-restyle #root #insights .ins-tile::before {
+  box-shadow: none;
+  width: 6px;
+}
+
+/* Numbers and small caps in Fredoka */
+.juicy-restyle
+  #root
+  #insights
+  :is(
+    .ins-hero .big,
+    .ins-tile .v,
+    .ins-stats b,
+    .ins-nb .v,
+    .ins-hubt b,
+    .ins-ring .mid b,
+    .ins-hkn
+  ) {
+  font-family: var(--juicy-font-display);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.juicy-restyle
+  #root
+  #insights
+  :is(
+    .ins-hero .k,
+    .ins-nb .l,
+    .ins-pull .k,
+    .ins-dims .g,
+    .ins-side .h,
+    .ins-strip span,
+    .ins-sum em
+  ) {
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Data wells are deep plum with a plum line, like Stash's fields in Juicy;
+   chips and switches are pills */
+.juicy-restyle #root #insights :is(.ins-well, .ins-hubqueue) {
+  background: var(--juicy-bg-deep);
+  border: 2px solid var(--juicy-line);
+  border-radius: var(--juicy-radius);
+  box-shadow: none;
+}
+
+.juicy-restyle
+  #root
+  #insights
+  :is(.ins-chip, .ins-nav, .ins-pill, .ins-seg, .ins-hchip) {
+  background: var(--juicy-bg-deep);
+  border: 2px solid var(--juicy-line);
+  border-radius: var(--juicy-radius-pill);
+  box-shadow: none;
+}
+
+.juicy-restyle #root #insights :is(.ins-chip, .ins-seg button) {
+  font-family: var(--juicy-font-display);
+  font-weight: 500;
+}
+
+.juicy-restyle
+  #root
+  #insights
+  :is(.ins-chip:hover, .ins-pill:hover, .ins-seg button:hover) {
+  color: var(--juicy-bubblegum);
+}
+
+.juicy-restyle #root #insights .ins-seg button {
+  border-radius: var(--juicy-radius-pill);
+}
+
+/* The chosen chip of a row is pink candy, like Stash's active pills */
+.juicy-restyle #root #insights :is(.ins-chip.on, .ins-seg button.on) {
+  background: var(--juicy-gloss-pink);
+  border-color: var(--juicy-ink);
+  box-shadow: var(--juicy-shine);
+  color: var(--juicy-ink);
+  font-weight: 600;
+}
+
+.juicy-restyle #root #insights .ins-hchip.on {
+  background: color-mix(in srgb, var(--c) 22%, var(--juicy-card-raised));
+  border-color: color-mix(in srgb, var(--c) 55%, transparent);
+}
+
+/* The dimensions of What works are a pill list, like Stash's settings
+   sidebar: pink candy for the open one */
+.juicy-restyle #root #insights .ins-side-b {
+  border-radius: var(--juicy-radius-pill);
+}
+
+.juicy-restyle #root #insights .ins-side-b:hover {
+  background: var(--juicy-pink-soft);
+  color: var(--juicy-bubblegum);
+}
+
+.juicy-restyle #root #insights .ins-side-b.on {
+  background: var(--juicy-gloss-pink);
+  box-shadow: var(--juicy-shine);
+  color: var(--juicy-ink);
+  font-weight: 600;
+}
+
+/* Buttons are glossy candy pills on a hard ink drop: plum, pink for the one
+   that goes ahead, coral for the one that deletes. They lift on hover and
+   squish when pressed. */
+.juicy-restyle #root #insights .ins-btn {
+  background: var(--juicy-gloss-plum);
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  border-radius: var(--juicy-radius-pill);
+  box-shadow: var(--juicy-drop), var(--juicy-shine);
+  color: var(--juicy-text);
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+  transition:
+    transform var(--juicy-medium) var(--juicy-ease-bounce),
+    box-shadow var(--juicy-fast),
+    filter var(--juicy-fast),
+    color var(--juicy-fast);
+}
+
+.juicy-restyle #root #insights .ins-btn:not(:disabled):hover {
+  box-shadow: var(--juicy-drop-lg), var(--juicy-shine);
+  color: var(--juicy-bubblegum);
+  transform: translateY(-2px);
+}
+
+.juicy-restyle #root #insights .ins-btn:not(:disabled):active {
+  box-shadow:
+    0 1px 0 var(--juicy-ink),
+    var(--juicy-shine);
+  transform: translateY(2px) scale(0.97);
+}
+
+.juicy-restyle #root #insights .ins-btn.ins-pri,
+.juicy-restyle #root #insights .ins-btn.ins-pri:not(:disabled):hover {
+  background: var(--juicy-gloss-pink);
+  color: var(--juicy-ink);
+}
+
+.juicy-restyle #root #insights .ins-btn.danger,
+.juicy-restyle #root #insights .ins-btn.danger:not(:disabled):hover {
+  background: linear-gradient(180deg, #ff8a7f 0%, var(--juicy-danger) 60%);
+  color: var(--juicy-ink);
+}
+
+.juicy-restyle #root #insights :is(.ins-btn.ins-pri, .ins-btn.danger):hover {
+  filter: brightness(1.07);
+}
+
+.juicy-restyle #root #insights .ins-btn.danger.armed {
+  box-shadow:
+    0 0 0 3px var(--juicy-lime),
+    var(--juicy-drop),
+    var(--juicy-shine);
+}
+
+.juicy-restyle #root #insights .ins-btn:disabled {
+  background: var(--juicy-card-raised);
+  border-color: var(--juicy-line);
+  box-shadow: none;
+  color: var(--juicy-text-dim);
+  filter: none;
+  opacity: 0.6;
+}
+
+/* Links read in cyan and turn bubblegum, as everywhere in Juicy */
+.juicy-restyle #root #insights :is(.ins-go, .ins-hlink) {
+  color: var(--juicy-cyan);
+}
+
+.juicy-restyle
+  #root
+  #insights
+  :is(.ins-go:hover, .ins-hlink:hover:not(:disabled)) {
+  color: var(--juicy-bubblegum);
+}
+
+/* Rules between rows */
+.juicy-restyle
+  #root
+  #insights
+  :is(
+    .ins-li + .ins-li,
+    .ins-chk + .ins-chk,
+    .ins-dg + .ins-dg,
+    .ins-hki + .ins-hki,
+    .ins-hkc + .ins-hki
+  ) {
+  border-top-color: var(--juicy-line);
+}
+
+.juicy-restyle #root #insights .ins-con tr + tr td {
+  border-top-color: var(--juicy-line);
+}
+
+.juicy-restyle #root #insights .ins-hkc {
+  border: 2px solid var(--juicy-line);
+  border-radius: var(--juicy-radius);
+}
+
+/* Up and down, keep and delete: their status colours on the plum */
+.juicy-restyle #root #insights :is(.ins-lift, .ins-k) {
+  border-radius: var(--juicy-radius-pill);
+  font-family: var(--juicy-font-display);
+}
+
+.juicy-restyle #root #insights :is(.ins-lift.up, .ins-k.keep) {
+  background: color-mix(in srgb, var(--juicy-lime) 16%, var(--juicy-card));
+}
+
+.juicy-restyle #root #insights :is(.ins-lift.down, .ins-k.del) {
+  background: color-mix(in srgb, var(--juicy-danger) 18%, var(--juicy-card));
+}
+
+.juicy-restyle #root #insights .ins-k.look {
+  background: color-mix(in srgb, var(--juicy-gold) 16%, var(--juicy-card));
+}
+
+.juicy-restyle #root #insights .ins-error {
+  background: color-mix(in srgb, var(--juicy-danger) 14%, var(--juicy-card));
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  border-left: 8px solid var(--juicy-danger);
+  border-radius: var(--juicy-radius);
+  box-shadow: var(--juicy-drop);
+  color: var(--juicy-text);
+}
+
+/* Ticked copies are pink candy with an ink tick, like Stash's checkboxes
+   in Juicy; switches are a pink track with an ink knob */
+.juicy-restyle #root #insights .ins-bx {
+  border: 2px solid var(--juicy-line);
+  border-radius: 6px;
+}
+
+.juicy-restyle #root #insights .ins-bx.on {
+  background: var(--juicy-gloss-pink);
+  border-color: var(--juicy-ink);
+}
+
+.juicy-restyle #root #insights .ins-bx.on::after {
+  border-color: var(--juicy-ink);
+  left: 3px;
+  top: 0;
+}
+
+.juicy-restyle #root #insights .ins-tog i {
+  background: var(--juicy-bg-deep);
+  box-shadow: inset 0 0 0 2px var(--juicy-line);
+}
+
+.juicy-restyle #root #insights .ins-tog i::after {
+  background: var(--juicy-text-dim);
+}
+
+.juicy-restyle #root #insights .ins-tog.on i {
+  background: var(--juicy-gloss-pink);
+  box-shadow: inset 0 0 0 1.5px var(--juicy-ink);
+}
+
+.juicy-restyle #root #insights .ins-tog.on i::after {
+  background: var(--juicy-ink);
+}
+
+/* Treemap type, the calendar's hover ring and the thumbnails' corners */
+.juicy-restyle #root #insights .ins-tm div {
+  color: var(--juicy-ink);
+}
+
+.juicy-restyle #root #insights .ins-cal i:hover:not(.f) {
+  outline-color: var(--juicy-lime);
+}
+
+.juicy-restyle #root #insights :is(.ins-th, .ins-poster) {
+  border-radius: 6px;
+}
+
+/* Empty heatmap cells and the charts' grey lines and labels, which Insights
+   writes as inline colours */
+.juicy-restyle
+  #root
+  #insights
+  :is(.ins-cal, .ins-hm, .ins-legend)
+  i[style*='#282726' i] {
+  background: var(--juicy-bg-deep) !important;
+}
+
+/* The tag picked in Top tags, a lighter green than the tab's: a lighter
+   lime here. Insights sets it as the row's --c. */
+.juicy-restyle #root #insights .ins-row[style*='#A9BA5A' i] {
+  --c: color-mix(in srgb, var(--juicy-lime), #fff 50%) !important;
+}
+
+.juicy-restyle #root #insights .ins-ring circle[stroke='#282726' i] {
+  stroke: var(--juicy-bg-deep);
+}
+
+.juicy-restyle #root #insights svg line[stroke='#282726' i] {
+  stroke: var(--juicy-line);
+}
+
+.juicy-restyle #root #insights svg line[stroke='#575653' i] {
+  stroke: var(--juicy-text-faint);
+}
+
+.juicy-restyle #root #insights svg text[fill='#878580' i] {
+  fill: var(--juicy-text-dim);
+}
+
+.juicy-restyle #root #insights svg path[stroke='#A9BA5A' i] {
+  stroke: var(--juicy-lime);
+}
+
+.juicy-restyle #root #insights svg stop[stop-color='#879A39' i] {
+  stop-color: var(--juicy-lime);
+}
+
+/* Its tooltip is ink with lime text, like Stash's in Juicy. It sits on
+   <body>, outside #insights. */
+.juicy-restyle #ins-tip {
+  background: var(--juicy-ink);
+  border: 2px solid var(--juicy-lime);
+  border-radius: var(--juicy-radius-sm);
+  box-shadow: var(--juicy-drop);
+  color: var(--juicy-lime);
+  font-family: var(--juicy-font-display);
+  font-weight: 500;
+}

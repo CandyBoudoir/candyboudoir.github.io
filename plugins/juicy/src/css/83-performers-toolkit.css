@@ -1,0 +1,537 @@
+/*
+ * Performers Toolkit, another author's plugin from the same suite as
+ * Insights (gitlab.com/allisless0/stash-plugins), in Juicy's candy: its page
+ * at /performerstoolkit (.pt), the Stats and Catalog tabs it adds to a
+ * performer's page (.ptc), the strip under the performer's name
+ * (#pt-strip), its button on the Performers list (.pt-entry, a Stash button
+ * Juicy already dresses) and its toast (#pt-toast, on <body>).
+ *
+ * It paints them in the same Flexoki palette as Insights, from custom
+ * properties it sets on those five roots, in a stylesheet it adds after this
+ * one. These rules start at `#root`, or at the toast's id, so they outrank
+ * its own, and all of them wait for the Restyle Insights and Performers
+ * Toolkit setting (.juicy-restyle on <html>, from juicy.js). It places its
+ * toast and its review bar on a phone from Stash's navbar, so it needs no
+ * offset for Juicy's.
+ */
+
+/* Its palette in Juicy's, as for Insights. Each tab's accent follows:
+   blueberry for Find, pink for Performers, purple for History, lime for
+   Sources and tangerine for Clean-up. */
+.juicy-restyle #root :is(.pt, .ptc, .pt-strip, .pt-entry),
+.juicy-restyle #pt-toast {
+  --bg: var(--juicy-bg);
+  --bg2: var(--juicy-bg-deep);
+  --ui: var(--juicy-card);
+  --ui2: var(--juicy-card-raised);
+  --ui3: var(--juicy-line);
+  --tx3: var(--juicy-text-faint);
+  --tx2: var(--juicy-text-dim);
+  --tx1b: var(--juicy-text-muted);
+  --tx: var(--juicy-text);
+  --hi: #fff;
+  --re: var(--juicy-danger);
+  --or: var(--juicy-tangerine);
+  --ye: var(--juicy-gold);
+  --gr: var(--juicy-lime);
+  --cy: var(--juicy-cyan);
+  --bl: var(--juicy-blueberry);
+  --pu: var(--juicy-purple);
+  --ma: var(--juicy-pink);
+}
+
+/* The page has no slab of its own: its cards sit on the polka dots */
+.juicy-restyle #root .pt {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* The head: the name in Fredoka on an ink drop, and the tabs as candy pills
+   on a plum tray, the open one filled with its own colour */
+.juicy-restyle #root .pt-title {
+  color: var(--juicy-text);
+  font-family: var(--juicy-font-display);
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-shadow: 0 3px 0 var(--juicy-ink);
+}
+
+.juicy-restyle #root .pt-title .pt-ic {
+  color: var(--juicy-pink);
+  filter: drop-shadow(0 2px 0 var(--juicy-ink));
+  height: 24px;
+  width: 24px;
+}
+
+.juicy-restyle #root .pt-tabs {
+  background: var(--juicy-card);
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  border-radius: var(--juicy-radius-pill);
+  box-shadow: var(--juicy-drop);
+  padding: 4px;
+}
+
+/* On phones the tabs sit in rows, so the tray takes a card's corners */
+@media (width <= 575.98px) {
+  .juicy-restyle #root .pt-tabs {
+    border-radius: var(--juicy-radius-lg);
+  }
+}
+
+.juicy-restyle #root .pt-tab {
+  border: 0;
+  border-radius: var(--juicy-radius-pill);
+  color: var(--juicy-text-muted);
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+  transition:
+    background-color var(--juicy-fast),
+    color var(--juicy-fast);
+}
+
+.juicy-restyle #root .pt-tab:hover {
+  background: var(--juicy-pink-soft);
+  color: var(--juicy-bubblegum);
+}
+
+.juicy-restyle #root .pt-tab.on {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--tc), #fff 30%) 0%,
+    var(--tc) 55%,
+    color-mix(in srgb, var(--tc), #000 10%) 100%
+  );
+  box-shadow: var(--juicy-shine);
+  color: var(--juicy-ink);
+}
+
+.juicy-restyle #root .pt-tab.on .pt-ic {
+  color: var(--juicy-ink);
+}
+
+/* Cards, the review bar and the catalog's cards are plum stickers on a hard
+   ink drop. A card's coloured top edge, which says what it is, becomes a
+   candy lip inside the outline. */
+.juicy-restyle #root :is(.pt-card, .pt-mcard, .pt-ccard, .pt-rvbar) {
+  background: var(--juicy-card);
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  border-radius: var(--juicy-radius-lg);
+  box-shadow: var(--juicy-drop-lg);
+}
+
+.juicy-restyle #root .pt-card.pt-err {
+  box-shadow:
+    inset 0 4px 0 var(--juicy-danger),
+    var(--juicy-drop-lg);
+}
+
+.juicy-restyle #root :is(.pt-card.pt-msg, .pt-card.pt-runend, .pt-mcard.ex) {
+  box-shadow:
+    inset 0 4px 0 var(--juicy-lime),
+    var(--juicy-drop-lg);
+}
+
+.juicy-restyle #root :is(.pt-card.pt-busy, .pt-card.pt-run) {
+  box-shadow:
+    inset 0 4px 0 var(--juicy-cyan),
+    var(--juicy-drop-lg);
+}
+
+.juicy-restyle #root .pt-card.pt-flow {
+  box-shadow:
+    inset 0 4px 0 var(--juicy-blueberry),
+    var(--juicy-drop-lg);
+}
+
+/* On a phone the review bar is fixed to the bottom of the screen, so only
+   its top corners round */
+@media (width <= 575.98px) {
+  .juicy-restyle #root .pt-rvbar {
+    border-bottom: 0;
+    border-radius: var(--juicy-radius-lg) var(--juicy-radius-lg) 0 0;
+  }
+}
+
+/* Its sheets are dialogs, like Stash's modals in Juicy: a plum sticker with
+   a pink ring, over a blurred veil */
+.juicy-restyle #root .pt-veil {
+  backdrop-filter: blur(3px);
+  background: rgb(13 5 32 / 80%);
+}
+
+.juicy-restyle #root .pt-sheet {
+  background: var(--juicy-card);
+  border: 3px solid var(--juicy-ink);
+  border-radius: var(--juicy-radius-lg);
+  box-shadow:
+    0 0 0 3px var(--juicy-pink),
+    0 10px 0 var(--juicy-ink);
+}
+
+/* Card titles, small caps and numbers in Fredoka */
+.juicy-restyle #root :is(.pt-ch b, .pt-flowt, .pt-herot b) {
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+}
+
+.juicy-restyle #root :is(.pt-sh, .pt-tk) {
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.juicy-restyle
+  #root
+  :is(.pt-tile b, .pt-cnt b, .pt-ring b, .pt-pnum, .pt-dmid b, .pt-rvdone b) {
+  font-family: var(--juicy-font-display);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* Wells, fields, chips and the cards inside a panel are deep plum with a
+   plum line, like Stash's fields in Juicy; chips are pills */
+.juicy-restyle
+  #root
+  :is(
+    .pt-chip,
+    .pt-pill,
+    .pt-tog,
+    .pt-input,
+    .pt-sel,
+    .pt-acct select,
+    .pt-seg select,
+    .pt-step,
+    .pt-frow,
+    .pt-way,
+    .pt-src1,
+    .pt-boxr,
+    .pt-tile,
+    .pt-cnt,
+    .pt-rc,
+    .pt-edit,
+    .pt-none,
+    .pt-ct,
+    .pt-sc,
+    .pt-scard,
+    .pt-cand,
+    .pt-dcard,
+    .pt-prow,
+    .pt-box,
+    .pt-banner,
+    .pt-wait,
+    .pt-fbr,
+    .pt-rec,
+    .pt-dup
+  ) {
+  border-color: var(--juicy-line);
+  border-radius: var(--juicy-radius);
+  box-shadow: none;
+}
+
+/* Switches keep a field's corners, since their labels can wrap */
+.juicy-restyle #root :is(.pt-chip, .pt-pill, .pt-step, .pt-rc, .pt-cnt) {
+  border-radius: var(--juicy-radius-pill);
+}
+
+.juicy-restyle #root .pt-box {
+  border-radius: 6px;
+}
+
+.juicy-restyle #root :is(.pt-chip, .pt-step, .pt-tog) {
+  font-family: var(--juicy-font-display);
+  font-weight: 500;
+}
+
+.juicy-restyle #root :is(.pt-input, .pt-sel, .pt-acct select) {
+  border-width: 2px;
+}
+
+.juicy-restyle #root :is(.pt-input, .pt-sel, .pt-acct select):focus {
+  border-color: var(--juicy-pink);
+  box-shadow: 0 0 0 3px var(--juicy-pink-soft);
+  outline: none;
+}
+
+.juicy-restyle #root :is(.pt-shot, .pt-pbig, .pt-gcell, .pt-pc) {
+  border-color: var(--juicy-line);
+  border-radius: var(--juicy-radius-sm);
+}
+
+.juicy-restyle #root :is(.pt-shot, .pt-pbig) {
+  border-radius: var(--juicy-radius);
+}
+
+.juicy-restyle #root .pt kbd {
+  border-color: var(--juicy-line);
+}
+
+.juicy-restyle #root :is(a.pt-chip:hover, .pt-chip:hover) {
+  border-color: var(--juicy-line);
+  color: var(--juicy-bubblegum);
+}
+
+/* The chosen chip or step is pink candy, like Stash's active pills in
+   Juicy. A card in a list takes the lime selection edge on hover and when
+   chosen, like the Tagger's picked match. */
+.juicy-restyle #root :is(.pt-chip.on, .pt-step.on) {
+  background: var(--juicy-gloss-pink);
+  border-color: var(--juicy-ink);
+  box-shadow: var(--juicy-shine);
+  color: var(--juicy-ink);
+  font-weight: 600;
+}
+
+.juicy-restyle #root .pt-step.on b {
+  background: var(--juicy-ink);
+  color: var(--juicy-pink);
+}
+
+.juicy-restyle
+  #root
+  :is(.pt-sc, .pt-cand, .pt-scard, .pt-dcard, .pt-prow):hover {
+  border-color: var(--juicy-lime);
+}
+
+.juicy-restyle
+  #root
+  :is(.pt-sc.on, .pt-cand.on, .pt-scard.on, .pt-dcard.on, .pt-prow.on) {
+  background: var(--juicy-card-raised);
+  border-color: var(--juicy-lime);
+  box-shadow: inset 0 0 0 1px var(--juicy-lime);
+}
+
+/* Buttons are glossy candy pills on a hard ink drop: plum, pink for the one
+   that goes ahead, coral for the one that deletes. They lift on hover and
+   squish when pressed. */
+.juicy-restyle #root .pt-btn {
+  background: var(--juicy-gloss-plum);
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  border-radius: var(--juicy-radius-pill);
+  box-shadow: var(--juicy-drop), var(--juicy-shine);
+  color: var(--juicy-text);
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+  transition:
+    transform var(--juicy-medium) var(--juicy-ease-bounce),
+    box-shadow var(--juicy-fast),
+    filter var(--juicy-fast),
+    color var(--juicy-fast);
+}
+
+.juicy-restyle #root .pt-btn:not(:disabled):hover {
+  box-shadow: var(--juicy-drop-lg), var(--juicy-shine);
+  color: var(--juicy-bubblegum);
+  transform: translateY(-2px);
+}
+
+.juicy-restyle #root .pt-btn:not(:disabled):active {
+  box-shadow:
+    0 1px 0 var(--juicy-ink),
+    var(--juicy-shine);
+  transform: translateY(2px) scale(0.97);
+}
+
+.juicy-restyle #root .pt-btn.pt-pri,
+.juicy-restyle #root .pt-btn.pt-pri:not(:disabled):hover {
+  background: var(--juicy-gloss-pink);
+  color: var(--juicy-ink);
+}
+
+.juicy-restyle #root .pt-btn.pt-pri kbd {
+  background: rgb(255 255 255 / 25%);
+  border-color: rgb(1 2 36 / 35%);
+  color: var(--juicy-ink);
+}
+
+.juicy-restyle #root .pt-btn.pt-danger,
+.juicy-restyle #root .pt-btn.pt-danger:not(:disabled):hover {
+  background: linear-gradient(180deg, #ff8a7f 0%, var(--juicy-danger) 60%);
+  color: var(--juicy-ink);
+}
+
+.juicy-restyle #root :is(.pt-btn.pt-pri, .pt-btn.pt-danger):hover {
+  filter: brightness(1.07);
+}
+
+.juicy-restyle #root .pt-btn.pt-dangerl {
+  color: var(--juicy-danger);
+}
+
+.juicy-restyle #root .pt-btn.pt-dangerl:not(:disabled):hover {
+  color: #ff8a7f;
+}
+
+.juicy-restyle #root .pt-btn:disabled {
+  background: var(--juicy-card-raised);
+  border-color: var(--juicy-line);
+  box-shadow: none;
+  color: var(--juicy-text-dim);
+  filter: none;
+  opacity: 0.6;
+}
+
+/* Switches are a pink track with an ink knob, like Stash's in Juicy */
+.juicy-restyle #root .pt-tog i {
+  background: var(--juicy-bg-deep);
+  box-shadow: inset 0 0 0 2px var(--juicy-line);
+}
+
+.juicy-restyle #root .pt-tog i::after {
+  background: var(--juicy-text-dim);
+}
+
+.juicy-restyle #root .pt-tog.on i {
+  background: var(--juicy-gloss-pink);
+  box-shadow: inset 0 0 0 1.5px var(--juicy-ink);
+}
+
+.juicy-restyle #root .pt-tog.on i::after {
+  background: var(--juicy-ink);
+}
+
+/* Links read in cyan and turn bubblegum, as everywhere in Juicy */
+.juicy-restyle #root :is(.pt-link, button.pt-spmore, a.pt-pill),
+.juicy-restyle #root button.pt-spmore .pt-ic,
+.juicy-restyle #pt-toast .pt-link {
+  color: var(--juicy-cyan);
+}
+
+.juicy-restyle
+  #root
+  :is(
+    .pt-link:hover,
+    button.pt-spmore:hover,
+    a.pt-pill:hover,
+    a.pt-fname:hover,
+    .pt-mtitle a:hover,
+    .pt-sctitle:hover,
+    .pt-cctt:hover,
+    .pt-sct:hover .pt-sctt,
+    .pt-cop:hover .pt-cn
+  ),
+.juicy-restyle #pt-toast .pt-link:hover {
+  color: var(--juicy-bubblegum);
+}
+
+.juicy-restyle #root .pt-c-bl {
+  color: var(--juicy-cyan);
+}
+
+/* O's are bubblegum, as on Juicy's O counter and in Insights */
+.juicy-restyle #root :is(.pt-sp-o, .pt-sp-o .pt-ic) {
+  color: var(--juicy-bubblegum);
+}
+
+.juicy-restyle #root :is(.pt-bb, .pt-kb) {
+  background: var(--juicy-bubblegum);
+}
+
+/* Good and bad in Juicy's lime and coral */
+.juicy-restyle
+  #root
+  :is(
+    .pt-c-gr,
+    .pt-pill.pt-good,
+    .pt-why .ok,
+    .pt-delkeep,
+    .pt-fwc b,
+    .pt-banner.pt-b-gr,
+    .pt-frow b.pt-c-gr
+  ) {
+  color: var(--juicy-lime);
+}
+
+.juicy-restyle
+  #root
+  :is(.pt-err, .pt-c-re, .pt-why .no, .pt-rvstat.pt-s-error) {
+  color: var(--juicy-danger);
+}
+
+/* Ink on the filled badges and tags, which are candy pills */
+.juicy-restyle
+  #root
+  :is(
+    .pt-badge,
+    .pt-covtag,
+    .pt-sctag,
+    .pt-cpick,
+    .pt-dcard.on .pt-dtag,
+    .pt-scard.on .pt-scpick
+  ) {
+  border-radius: var(--juicy-radius-pill);
+  color: var(--juicy-ink);
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+}
+
+/* Labels laid over pictures sit on ink */
+.juicy-restyle
+  #root
+  :is(
+    .pt-shothint,
+    .pt-sccov kbd,
+    .pt-scpick,
+    .pt-ccpill,
+    .pt-poor,
+    .pt-ckey kbd,
+    .pt-pcsz
+  ) {
+  background: rgb(1 2 36 / 80%);
+}
+
+.juicy-restyle #root .pt-scard.on .pt-scpick {
+  background: var(--juicy-cyan);
+}
+
+/* Status edges in the review bar: cyan for news, as for Juicy's links */
+.juicy-restyle #root .pt-rvstat {
+  --sk: var(--juicy-cyan);
+}
+
+.juicy-restyle #root .pt-rvstat.pt-s-done {
+  --sk: var(--juicy-lime);
+}
+
+.juicy-restyle #root .pt-rvstat.pt-s-warn {
+  --sk: var(--juicy-gold);
+}
+
+.juicy-restyle #root .pt-rvstat.pt-s-error {
+  --sk: var(--juicy-danger);
+}
+
+.juicy-restyle #root .pt-zoom input {
+  accent-color: var(--juicy-pink);
+}
+
+.juicy-restyle #root :is(.pt-sheet, .pt-fbl, .pt-strip, .pt-hitems) {
+  scrollbar-color: var(--juicy-pink) transparent;
+}
+
+/* Its toast is a raised plum sticker with its kind on a thick left edge,
+   like Stash's toasts in Juicy */
+.juicy-restyle #pt-toast {
+  --tk: var(--juicy-pink);
+
+  background: var(--juicy-card-raised);
+  border: var(--juicy-outline) solid var(--juicy-ink);
+  border-left: 8px solid var(--tk);
+  border-radius: var(--juicy-radius);
+  box-shadow: var(--juicy-drop-lg);
+  color: var(--juicy-text);
+}
+
+.juicy-restyle #pt-toast.pt-t-done {
+  --tk: var(--juicy-lime);
+}
+
+.juicy-restyle #pt-toast.pt-t-warn {
+  --tk: var(--juicy-gold);
+}
+
+.juicy-restyle #pt-toast.pt-t-error {
+  --tk: var(--juicy-danger);
+}

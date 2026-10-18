@@ -31,12 +31,30 @@
   const state = {
     calm: false,
     cheeky: true,
+    restyle: false,
+  }
+
+  // The Restyle Insights and Performers Toolkit setting, kept from the last
+  // visit, so a page those plugins draw on never shows them in their own
+  // colours while the settings load
+  const RESTYLE_KEY = 'juicy.restylePlugins'
+
+  function keptRestyle() {
+    try {
+      return localStorage.getItem(RESTYLE_KEY) === '1'
+    } catch {
+      return false
+    }
   }
 
   const originals = new WeakMap()
 
   function sfwMode() {
     return document.querySelector('.sfw-content-mode') !== null
+  }
+
+  function wantCheeky() {
+    return state.cheeky && !sfwMode()
   }
 
   function reducedMotion() {
@@ -87,11 +105,10 @@
   // Without the cheek (Plain labels or SFW mode) the empty list keeps a heart
   // and no line.
   function markEmptyLists() {
-    const wantCheeky = state.cheeky && !sfwMode()
     for (const index of document.querySelectorAll('.paginationIndex')) {
       const empty = /^0-0 of 0\b/.test(index.textContent.trim())
       if (empty) {
-        index.dataset.juicyEmpty = wantCheeky ? EMPTY_LIST_LINE : ''
+        index.dataset.juicyEmpty = wantCheeky() ? EMPTY_LIST_LINE : ''
       } else {
         delete index.dataset.juicyEmpty
       }
@@ -99,8 +116,7 @@
   }
 
   function applyCopy(start) {
-    const wantCheeky = state.cheeky && !sfwMode()
-    walkText(start, wantCheeky ? rewriteTextNode : restoreTextNode)
+    walkText(start, wantCheeky() ? rewriteTextNode : restoreTextNode)
     markEmptyLists()
   }
 
@@ -116,8 +132,7 @@
     for (const node of nodes) {
       if (!node.isConnected) continue
       if (node.nodeType === Node.TEXT_NODE) {
-        const wantCheeky = state.cheeky && !sfwMode()
-        if (wantCheeky) rewriteTextNode(node)
+        if (wantCheeky()) rewriteTextNode(node)
       } else if (node.nodeType === Node.ELEMENT_NODE) {
         applyCopy(node)
       }
@@ -167,10 +182,26 @@
 
   // Settings ----------------------------------------------------------------
 
+  // The cheek the whole page was last walked with. apply walks it again only
+  // when that changes, by Plain labels or SFW mode (on the design-system page
+  // too); the observer keeps up with the page in between.
+  let walkedCheeky
+
   function apply(next) {
     Object.assign(state, next)
     root.classList.toggle('juicy-calm', state.calm)
-    if (document.body) applyCopy(document.body)
+    root.classList.toggle('juicy-restyle', state.restyle)
+    if ('restyle' in next) {
+      try {
+        localStorage.setItem(RESTYLE_KEY, state.restyle ? '1' : '0')
+      } catch {
+        // A browser without storage loads the setting each visit.
+      }
+    }
+    if (document.body && wantCheeky() !== walkedCheeky) {
+      walkedCheeky = wantCheeky()
+      applyCopy(document.body)
+    }
   }
 
   async function loadSettings() {
@@ -186,6 +217,7 @@
       apply({
         calm: settings.calmMode === true,
         cheeky: settings.plainCopy !== true,
+        restyle: settings.restylePlugins === true,
       })
     } catch {
       // Not running inside Stash; keep the defaults.
@@ -200,8 +232,13 @@
       characterData: true,
       subtree: true,
     })
-    apply({})
-    if (window.PluginApi) loadSettings()
+    apply({ restyle: keptRestyle() })
+    if (window.PluginApi) {
+      loadSettings()
+      // The settings are read again on every page Stash opens, so changing
+      // one takes effect on the next page, with no reload
+      window.PluginApi.Event?.addEventListener('stash:location', loadSettings)
+    }
   }
 
   window.Juicy = { apply, burst, copy: CHEEKY_COPY }
