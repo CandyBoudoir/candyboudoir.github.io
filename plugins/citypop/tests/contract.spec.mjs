@@ -14,9 +14,13 @@ import {
   demoIds,
   demoPath,
   onlyCityPop,
+  openInsights,
+  openPerformerStats,
+  openPerformersToolkit,
   setPlugin,
   setSfw,
   unmatchedClasses,
+  unmatchedRestyledClasses,
   usePlugins,
   visit,
 } from './stash.mjs'
@@ -402,6 +406,270 @@ test('SFW mode drops the voice and the pool drops', async ({ page }) => {
     expect(kinds).not.toContain('is-drop')
   } finally {
     await setSfw(false)
+  }
+})
+
+// Insights, another author's stats dashboard on the Stats page (RESTYLED in
+// tests/stash/companions.mjs), keeps its own look until Restyle Insights and
+// Performers Toolkit is on, and then takes City Pop's palette, panels and
+// type. Its sidebar clears
+// City Pop's taller navbar either way.
+test.describe('beside Insights', () => {
+  test.beforeAll(async () => {
+    await usePlugins(PLUGIN_ID, 'Insights')
+  })
+  test.afterAll(async () => {
+    await setPlugin({})
+    await onlyCityPop()
+  })
+
+  test('Insights keeps its own look until the restyle is on', async ({
+    page,
+  }) => {
+    await setPlugin({})
+    await openInsights(page)
+    await expect(page.locator('html')).not.toHaveClass(
+      /\bcitypop-restyle-insights\b/,
+    )
+    await expect(page.locator('#insights')).toHaveCSS(
+      'background-color',
+      'rgb(16, 15, 15)',
+    )
+  })
+
+  test('Restyle Insights puts Insights in the dusk', async ({ page }) => {
+    try {
+      await setPlugin({ restyleInsights: true })
+      await openInsights(page, 'library')
+      await expect(page.locator('html')).toHaveClass(
+        /\bcitypop-restyle-insights\b/,
+      )
+      const root = page.locator('#insights')
+      await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      // Insights' own rules still paint from the palette City Pop gives it
+      expect(
+        await root.evaluate((el) =>
+          getComputedStyle(el).getPropertyValue('--ui').trim(),
+        ),
+      ).toBe('#1a1848')
+      await expect(root.locator('.ins-sub').first()).toHaveCSS(
+        'color',
+        'rgb(163, 155, 211)',
+      )
+      await expect(root.locator('.ins-card').first()).toHaveCSS(
+        'border-radius',
+        '4px',
+      )
+      await expect(root.locator('.ins-title')).toHaveCSS(
+        'font-family',
+        /CityPop Dafoe/,
+      )
+      await root
+        .locator('.ins-bar[data-tip]')
+        .filter({ visible: true })
+        .first()
+        .hover()
+      const tip = page.locator('#ins-tip')
+      await expect(tip).toBeVisible()
+      await expect(tip).toHaveCSS('background-color', 'rgb(255, 246, 234)')
+      await expect(tip).toHaveCSS('color', 'rgb(27, 17, 69)')
+    } finally {
+      await setPlugin({})
+    }
+  })
+
+  test('Restyle Insights takes effect on the next page', async ({ page }) => {
+    try {
+      await setPlugin({})
+      await page.goto(EMPTY_LIST)
+      await page.locator('.paginationIndex').waitFor()
+      await expect(page.locator('html')).not.toHaveClass(
+        /\bcitypop-restyle-insights\b/,
+      )
+      await setPlugin({ restyleInsights: true })
+      await page
+        .locator('a[href="/stats"]')
+        .filter({ visible: true })
+        .first()
+        .click()
+      await expect(page.locator('html')).toHaveClass(
+        /\bcitypop-restyle-insights\b/,
+      )
+      // Kept for the next visit, so Stats never opens in Insights' colours
+      expect(
+        await page.evaluate(
+          () => JSON.parse(localStorage.getItem('citypop.restyle')).insights,
+        ),
+      ).toBe(true)
+    } finally {
+      await setPlugin({})
+    }
+  })
+
+  test("the What works sidebar clears City Pop's navbar", async ({ page }) => {
+    await setPlugin({})
+    await openInsights(page, 'you')
+    await expect(page.locator('#insights .ins-side')).toHaveCSS(
+      'top',
+      '71.25px',
+    )
+  })
+
+  // The Insights classes in citypop.css that no tab renders on the demo
+  // library, against the ones that matched nothing on the pinned Insights
+  // (plugins/citypop/tests/insights-unmatched-baseline.txt). A class that
+  // newly matches nothing is one an Insights release renamed or removed.
+  test('every Insights class City Pop styles still renders', async ({
+    page,
+  }) => {
+    expect(
+      await unmatchedRestyledClasses(page, {
+        css: 'dist/site/Theme-CityPop/citypop.css',
+        folder: 'citypop',
+        plugin: 'insights',
+      }),
+    ).toEqual([])
+  })
+})
+
+// Performers Toolkit, from the same author and in the same look as
+// Insights, follows the same setting: its page, the Stats tab it adds to a
+// performer's page and its toast take City Pop's palette, panels and type.
+test.describe('beside Performers Toolkit', () => {
+  test.beforeAll(async () => {
+    await usePlugins(PLUGIN_ID, 'PerformersToolkit')
+  })
+  test.afterAll(async () => {
+    await setPlugin({})
+    await onlyCityPop()
+  })
+
+  test('Performers Toolkit keeps its own look until the restyle is on', async ({
+    page,
+  }) => {
+    await setPlugin({})
+    await openPerformersToolkit(page)
+    await expect(page.locator('html')).not.toHaveClass(
+      /\bcitypop-restyle-toolkit\b/,
+    )
+    await expect(page.locator('.pt').first()).toHaveCSS(
+      'background-color',
+      'rgb(16, 15, 15)',
+    )
+  })
+
+  test('the restyle puts Performers Toolkit in the dusk', async ({ page }) => {
+    try {
+      await setPlugin({ restylePerformersToolkit: true })
+      await openPerformersToolkit(page)
+      await expect(page.locator('html')).toHaveClass(
+        /\bcitypop-restyle-toolkit\b/,
+      )
+      const root = page.locator('.pt').first()
+      await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      await expect(root.locator('.pt-title')).toHaveCSS(
+        'font-family',
+        /CityPop Dafoe/,
+      )
+      await expect(root.locator('.pt-card').first()).toHaveCSS(
+        'border-radius',
+        '4px',
+      )
+      await openPerformerStats(page, ids.performer)
+      const stats = page.locator('.ptc').first()
+      // Its own rules still paint from the palette City Pop gives it
+      expect(
+        await stats.evaluate((el) =>
+          getComputedStyle(el).getPropertyValue('--ui').trim(),
+        ),
+      ).toBe('#1a1848')
+      await expect(stats.locator('.pt-sec').first()).toHaveCSS(
+        'background-image',
+        /rgb\(31, 28, 85\)/,
+      )
+    } finally {
+      await setPlugin({})
+    }
+  })
+
+  // The Catalog tab's count is a Stash badge in a Stash tab, which also
+  // carries Performers Toolkit's badge class, with its own navy type. It
+  // shows once a stash-box has answered, which the mock stash-box does not,
+  // so the test shows it. City Pop's tab colours win with the restyle on
+  // and off.
+  for (const restyle of [false, true]) {
+    test(`the Catalog tab's count reads, closed and open, restyle ${restyle ? 'on' : 'off'}`, async ({
+      page,
+    }) => {
+      try {
+        await setPlugin(restyle ? { restylePerformersToolkit: true } : {})
+        await openPerformerStats(page, ids.performer)
+        const tab = page.locator('.pt-tablink[data-pt-tab="catalog"]')
+        const badge = tab.locator('.badge')
+        const show = () =>
+          badge.evaluate((el) => {
+            el.hidden = false
+            el.textContent = '12'
+          })
+        await show()
+        const { color, background } = await badge.evaluate((el) => {
+          const style = getComputedStyle(el)
+          return { color: style.color, background: style.backgroundColor }
+        })
+        expect(contrast(color, background)).toBeGreaterThanOrEqual(4.5)
+        await tab.click()
+        await expect(tab).toHaveClass(/\bactive\b/)
+        await show()
+        await expect(badge).toHaveCSS('color', 'rgb(27, 17, 69)')
+      } finally {
+        await setPlugin({})
+      }
+    })
+  }
+
+  // As for Insights, against
+  // plugins/citypop/tests/performerstoolkit-unmatched-baseline.txt
+  test('every Performers Toolkit class City Pop styles still renders', async ({
+    page,
+  }) => {
+    expect(
+      await unmatchedRestyledClasses(page, {
+        css: 'dist/site/Theme-CityPop/citypop.css',
+        folder: 'citypop',
+        plugin: 'performerstoolkit',
+      }),
+    ).toEqual([])
+  })
+})
+
+// Each restyle setting shows in Settings > Plugins only while its plugin
+// is on, since it has nothing to restyle otherwise. City Pop hides its row
+// with display: none; the row's section may be collapsed (Stash develop
+// starts plugin settings closed), so the test reads the row's display.
+test('each restyle setting shows only while its plugin is on', async ({
+  page,
+}) => {
+  const row = (setting) =>
+    page.locator('.setting', {
+      has: page.locator(`[id="plugin-${PLUGIN_ID}-${setting}"]`),
+    })
+  const shown = (setting) =>
+    row(setting).evaluate((el) => getComputedStyle(el).display !== 'none')
+  const rows = async (insights, toolkit) => {
+    await page.goto('/settings?tab=plugins')
+    await row('calmMode').waitFor({ state: 'attached' })
+    await expect.poll(() => shown('calmMode')).toBe(true)
+    await expect.poll(() => shown('restyleInsights')).toBe(insights)
+    await expect.poll(() => shown('restylePerformersToolkit')).toBe(toolkit)
+  }
+  try {
+    await rows(false, false)
+    await usePlugins(PLUGIN_ID, 'Insights')
+    await rows(true, false)
+    await usePlugins(PLUGIN_ID, 'PerformersToolkit')
+    await rows(false, true)
+  } finally {
+    await onlyCityPop()
   }
 })
 

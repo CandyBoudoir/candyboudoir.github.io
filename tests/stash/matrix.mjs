@@ -7,9 +7,11 @@
 // leg runs Cherry Pick's contract specs on a Stash whose server is at UTC-7
 // all year: Stash compares its timestamp filters with the server's local
 // time, which a server in UTC never shows. A companion leg's `zips` keys the
-// cache of its pinned zip (companion-zips.mjs) on the pin's sha256.
+// cache of its pinned zip (companion-zips.mjs) on the pin's sha256. Every leg
+// also installs the plugins the themes restyle (RESTYLED), whose pinned
+// files `restyled` keys on their commits, in a cache of their own.
 import { readFile } from 'node:fs/promises'
-import { COMPANIONS } from './companions.mjs'
+import { COMPANIONS, RESTYLED } from './companions.mjs'
 
 const versions = JSON.parse(
   await readFile(new URL('../stash-versions.json', import.meta.url), 'utf8'),
@@ -79,6 +81,11 @@ if (versions.develop) {
     baseline: false,
   })
 }
+
+const restyled = Object.values(RESTYLED)
+  .map((r) => r.commit)
+  .join('-')
+for (const leg of legs) leg.restyled = restyled
 
 console.log(`legs=${JSON.stringify(legs)}`)
 console.log(`new_stable=${newStable}`)

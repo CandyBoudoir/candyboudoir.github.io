@@ -24,18 +24,24 @@ Stash lists new versions under Settings > Plugins > Installed Plugins when you c
 
 ## Settings
 
-City Pop's settings sit with the plugin under Settings > Plugins. Both start off.
+City Pop's settings sit with the plugin under Settings > Plugins. All of them start off, and each restyle setting shows only while its plugin is installed and on.
 
-| Setting      | Effect                                                                    |
-| ------------ | ------------------------------------------------------------------------- |
-| Calm mode    | Turns off card lifts, the sunset sweep, the turning reels and the bursts. |
-| Plain labels | Keeps Stash's own wording instead of the FM host's lines.                 |
+| Setting                    | Effect                                                                                    |
+| -------------------------- | ----------------------------------------------------------------------------------------- |
+| Calm mode                  | Turns off card lifts, the sunset sweep, the turning reels and the bursts.                 |
+| Plain labels               | Keeps Stash's own wording instead of the FM host's lines.                                 |
+| Restyle Insights           | Puts the Insights plugin's dashboard on the Stats page in City Pop's dusk too.            |
+| Restyle Performers Toolkit | Puts the Performers Toolkit plugin's page and performer-page tabs in City Pop's dusk too. |
 
-![City Pop's two settings under Settings > Plugins](docs/screenshots/settings.png)
+![City Pop's settings under Settings > Plugins](docs/screenshots/settings.png)
 
 City Pop also follows your system's reduced-motion setting. In Stash's SFW content mode City Pop keeps the dusk, the suns and the cassettes, drops the FM host's lines and the pool drops from the bursts, and draws the O counter as a cocktail.
 
-To find audio-only scenes, City Pop asks your Stash once for each new batch of scene cards on screen which of them have no video stream and no cover of their own, and keeps the answers until you reload the page. It makes no other requests and none beyond your own Stash server. Its fonts, Mr Dafoe, Jost and a subset of Zen Maru Gothic holding only the 16 Japanese characters the theme draws, ship inside the plugin. The plugin is about 320 KB.
+### Insights and Performers Toolkit
+
+[Insights](https://gitlab.com/allisless0/stash-plugins) (a stats dashboard on Stash's Stats page) and Performers Toolkit (a page at `/performerstoolkit`, and a strip and Stats and Catalog tabs on each performer's page) come from another author's suite of plugins, which share their own Flexoki look. With Restyle Insights or Restyle Performers Toolkit on, City Pop gives that plugin the dusk: navy panels on the hard shadow, their names in the brush script, Stash's tabs with the sunset under the open one, sunset and enamel buttons, night-blue fields and chips, pool-water switches, coral links, and cream tooltips and navy toasts under the stripe band, with each tab's colour taken from City Pop's palette. Turn both on to keep the two alike. Insights' heatmaps and its codec, resolution and chart colours keep Insights' own tones. Each setting takes effect on the next page you open. Off, each keeps its own look, and the only change is that Insights' sidebar clears City Pop's taller navbar. City Pop is tested with Insights 2.11.0 and Performers Toolkit 0.4.2.
+
+To find audio-only scenes, City Pop asks your Stash once for each new batch of scene cards on screen which of them have no video stream and no cover of their own, and keeps the answers until you reload the page. It also reads its own settings from your Stash on each page, and keeps the two restyle settings in your browser so those pages never open in the wrong colours. It makes no other requests and none beyond your own Stash server. Its fonts, Mr Dafoe, Jost and a subset of Zen Maru Gothic holding only the 16 Japanese characters the theme draws, ship inside the plugin. The plugin is about 320 KB.
 
 ## Screenshots
 

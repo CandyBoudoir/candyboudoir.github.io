@@ -138,6 +138,71 @@ export const COMPANIONS = {
   },
 }
 
+// Other authors' plugins that themes here restyle. prepare.mjs puts each of
+// these into every test Stash, switched off, and the specs of the themes
+// that restyle it switch it on (usePlugins) to check and shoot the theme's
+// look for it; each such theme keeps tests/<key>-unmatched-baseline.txt. Each is pinned to the files of one release at its commit in
+// the author's repository, by sha256: an author's Pages source keeps only
+// its newest zip, and a test Stash that cannot get the pinned files fails
+// every plugin's specs, not one leg's. tested-with.mjs --issues opens an
+// issue when a newer release is out.
+const INSIGHTS_COMMIT = '97171c133f1c7f5214a6d2950c51364b9a72787c'
+const PERFORMERS_TOOLKIT_COMMIT = 'e357be13a5ccc771b9b5b9d7ff4596d16aeaa31f'
+export const RESTYLED = {
+  // Insights 2.11.0, a stats dashboard on Stash's Stats page, from
+  // https://gitlab.com/allisless0/stash-plugins (MIT): its plugin folder at
+  // the 2.11.0 commit, the same four files as the zip its GitLab Pages
+  // source served for that release.
+  insights: {
+    id: 'Insights',
+    name: 'Insights',
+    version: '2.11.0',
+    commit: INSIGHTS_COMMIT,
+    base: `https://gitlab.com/allisless0/stash-plugins/-/raw/${INSIGHTS_COMMIT}/plugins/Insights`,
+    files: {
+      'Insights.css':
+        '959eab447780ef03db2c99cbf41e9fd0d86e424744e54715da493b93b9eabc6d',
+      'Insights.js':
+        'ac1218f967c8549009b074ea99c2465cb03b49de0f7023de4b43b76bbc1d5b76',
+      'Insights.yml':
+        '1684c6204f019144c308400d99bb464573327937cf3151a2067a3ac2019607f5',
+      'README.md':
+        '3c85d7bac6f1bc7314da60695a0e587de4da122431b1b68421bb6c5bccb330af',
+    },
+    latest: {
+      index: 'https://allisless0.gitlab.io/stash-plugins/main/index.yml',
+    },
+  },
+  // Performers Toolkit 0.4.2, a toolkit page at /performerstoolkit and a
+  // strip and two tabs on performer pages, from the same repository and
+  // in the same Flexoki look as Insights. Its scans and saves run in a
+  // Python backend (standard library only), which the specs never start.
+  performerstoolkit: {
+    id: 'PerformersToolkit',
+    name: 'Performers Toolkit',
+    version: '0.4.2',
+    commit: PERFORMERS_TOOLKIT_COMMIT,
+    base: `https://gitlab.com/allisless0/stash-plugins/-/raw/${PERFORMERS_TOOLKIT_COMMIT}/plugins/PerformersToolkit`,
+    files: {
+      'PerformersToolkit.js':
+        '28c305412ad4f8e5e22a00b3eb3e8db091034543e293d1f78449e632abaaa955',
+      'PerformersToolkit.py':
+        'b1346251b90392c8aadd95cbf5d0ff64f4faf9a01822fc791a86d6c9325ef930',
+      'PerformersToolkit.yml':
+        '8703d360e16a9f5464d0fd02f180952fef3f25b4fc1dd76dde6aee1fab72ff53',
+      'README.md':
+        '97fe8edec0bdbda3107e541d3144e534f13488ff5919681dc9ddcc0b85c720c4',
+    },
+    latest: {
+      index: 'https://allisless0.gitlab.io/stash-plugins/main/index.yml',
+    },
+  },
+}
+
+// The restyled plugins, keyed like the companions
+export const restyled = () =>
+  Object.entries(RESTYLED).map(([key, r]) => ({ key, ...r }))
+
 export function companions() {
   return (process.env.COMPANIONS || '')
     .split(',')

@@ -10,14 +10,20 @@
 // separated, default every plugin in SITE's index.yml), COMPANIONS (other
 // authors' plugins to install beside them, companions.mjs, from the copies of
 // their zips in COMPANION_ZIPS, companion-zips.mjs), PW_CHANNEL (optional
-// Playwright channel).
+// Playwright channel). The plugins the themes restyle (RESTYLED in
+// companions.mjs) are always installed, and left switched off.
 import { createReadStream } from 'node:fs'
-import { readFile, stat } from 'node:fs/promises'
+import { cp, readFile, stat } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { extname, join, resolve } from 'node:path'
 import { BOX_NAME, ENDPOINT, LINKS } from './stashbox-data.mjs'
-import { fetchCompanionZips, zipFile } from './companion-zips.mjs'
-import { companionIndex, companions } from './companions.mjs'
+import {
+  fetchCompanionZips,
+  fetchRestyledFiles,
+  restyledDir,
+  zipFile,
+} from './companion-zips.mjs'
+import { companionIndex, companions, restyled } from './companions.mjs'
 import { renderStickers } from './stickers.mjs'
 
 const STASH = process.env.STASH_URL ?? 'http://127.0.0.1:9999'
@@ -324,8 +330,36 @@ async function install() {
     )
 }
 
+// The plugins the themes restyle: their pinned files go straight into
+// Stash's plugins folder, since they come from the author's repository and
+// not from a plugin source, and stay switched off until a theme's specs
+// switch one on
+async function installRestyled() {
+  const list = restyled()
+  if (!list.length) return
+  const { configuration } = await gql(
+    '{ configuration { general { pluginsPath } } }',
+  )
+  for (const r of list)
+    await cp(restyledDir(r), join(configuration.general.pluginsPath, r.id), {
+      recursive: true,
+    })
+  await gql('mutation { reloadPlugins }')
+  await gql('mutation ($m: BoolMap!) { setPluginsEnabled(enabledMap: $m) }', {
+    m: Object.fromEntries(list.map((r) => [r.id, false])),
+  })
+  const { plugins } = await gql('{ plugins { id version } }')
+  for (const r of list) {
+    const p = plugins.find((p) => p.id === r.id)
+    if (!p) throw new Error(`${r.name} did not load from its pinned files`)
+    console.log(`Installed ${p.id} ${p.version} from ${r.base}`)
+  }
+}
+
 await fetchCompanionZips()
+await fetchRestyledFiles()
 await setup()
 await seed()
 await stashBox()
 await install()
+await installRestyled()

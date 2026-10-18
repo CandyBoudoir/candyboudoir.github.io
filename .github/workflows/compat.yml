@@ -10,9 +10,11 @@
 # (tests/stash/companions.mjs) install another author's plugin beside these
 # and run Cherry Pick's contract specs with it enabled; they never fail the
 # workflow, and neither do the browser legs or the tz leg (Stash's server at
-# UTC-7). Each companion's pinned zip is fetched from its author once per pin
-# and cached on its sha256 (tests/stash/companion-zips.mjs), so these runs add
-# nothing to the download counts on the author's releases.
+# UTC-7). Every leg also installs the plugins the themes restyle (RESTYLED in
+# companions.mjs), switched off until a theme's specs switch one on. Each
+# pinned zip or set of files is fetched from its author once per pin and
+# cached (tests/stash/companion-zips.mjs), so these runs add nothing to the
+# download counts on the author's releases.
 name: Compatibility
 
 on:
@@ -97,8 +99,14 @@ jobs:
         with:
           path: ${{ env.COMPANION_ZIPS }}
           key: companion-zips-${{ matrix.leg.zips }}
+      - name: Restore restyled plugin zips
+        id: restyled
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.COMPANION_ZIPS }}
+          key: companion-zips-${{ matrix.leg.restyled }}
       - name: Fetch companion zips
-        if: matrix.leg.companions && steps.zips.outputs.cache-hit != 'true'
+        if: (matrix.leg.companions && steps.zips.outputs.cache-hit != 'true') || steps.restyled.outputs.cache-hit != 'true'
         run: node tests/stash/companion-zips.mjs
       - name: Save companion zips
         if: matrix.leg.companions && steps.zips.outputs.cache-hit != 'true'
@@ -106,6 +114,15 @@ jobs:
         with:
           path: ${{ env.COMPANION_ZIPS }}
           key: companion-zips-${{ matrix.leg.zips }}
+      # Every leg misses on a new pin at once and races to save the same key;
+      # the first one wins and the others carry on
+      - name: Save restyled plugin zips
+        if: steps.restyled.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.COMPANION_ZIPS }}
+          key: companion-zips-${{ matrix.leg.restyled }}
       - name: Start Stash ${{ matrix.leg.name }}
         id: prepare
         run: |

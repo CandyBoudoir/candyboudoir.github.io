@@ -8,14 +8,21 @@
 // every pin is its author's latest release.
 // With --issues (the nightly Compatibility run): instead of failing, keeps one
 // open "Test Cherry Pick beside <plugin> <version>" issue per companion with a
-// newer release, and closes it once the pin catches up. Needs GH_TOKEN.
+// newer release, and one "Restyle <plugin> <version>" issue per plugin the
+// themes restyle (RESTYLED), and closes each once its pin catches up. Needs
+// GH_TOKEN.
 //
 // Reads the latest releases over the network, for a release and --issues
 // only; GITHUB_TOKEN raises GitHub's rate limit.
 import { execFileSync } from 'node:child_process'
-import { readFile } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { COMPANIONS, TESTED_PLUGIN, testedBeside } from './companions.mjs'
+import {
+  COMPANIONS,
+  RESTYLED,
+  TESTED_PLUGIN,
+  testedBeside,
+} from './companions.mjs'
 
 const root = join(import.meta.dirname, '..', '..')
 const dir = join(root, 'plugins', TESTED_PLUGIN)
@@ -57,6 +64,18 @@ async function latest({ package: pkg, latest: where }) {
   return { version: current ? pkg.version : version, current }
 }
 
+// The latest release of a plugin the themes restyle, from its source index,
+// and whether the pin is it
+async function latestRestyled(r) {
+  const index = await (await get(r.latest.index)).text()
+  const entry = index
+    .split(/^- /m)
+    .find((e) => field(e, 'id') === r.id && /^id:/.test(e))
+  if (!entry) throw new Error(`${r.latest.index} lists no plugin ${r.id}`)
+  const version = field(entry, 'version')
+  return { version, current: version === r.version }
+}
+
 // Every companion with its latest release, read only when needed, so an
 // author's site being down fails a release or the nightly run, not every
 // change
@@ -90,7 +109,7 @@ if (issues) {
     '--color',
     '1d76db',
     '--description',
-    'A plugin Cherry Pick is tested beside has a newer release',
+    'A plugin the tests pin to one release has a newer one',
     '--force',
   )
   const open = JSON.parse(
@@ -135,6 +154,59 @@ if (issues) {
           `${c.package.name} ${c.version} is out, and Cherry Pick's companion leg still tests ${c.package.version}.`,
           '',
           `Pin the new release in \`tests/stash/companions.mjs\`, read its changes against \`plugins/cherrypick/docs/stash-seams.md\`, run the leg (\`COMPANIONS=${c.key}\`), and update the Tested with table in \`plugins/cherrypick/README.md\`. Cherry Pick cannot release until the pin catches up.`,
+        ].join('\n'),
+      )
+  }
+  for (const [key, r] of Object.entries(RESTYLED)) {
+    const { version, current } = await latestRestyled(r)
+    // The themes that restyle it keep its unmatched-class baseline
+    const themes = []
+    for (const folder of await readdir(join(root, 'plugins')))
+      if (
+        await readFile(
+          join(
+            root,
+            'plugins',
+            folder,
+            'tests',
+            `${key}-unmatched-baseline.txt`,
+          ),
+        ).then(
+          () => true,
+          () => false,
+        )
+      )
+        themes.push(folder)
+    console.log(
+      `${r.name}: restyled ${r.version}, latest ${version}${current ? '' : ' (newer)'}`,
+    )
+    const prefix = `Restyle ${r.name} `
+    const title = `${prefix}${version}`
+    for (const i of open.filter(
+      (i) => i.title.startsWith(prefix) && (current || i.title !== title),
+    ))
+      gh(
+        'issue',
+        'close',
+        String(i.number),
+        '--comment',
+        current
+          ? `The ${r.name} pin is its latest release, ${r.version}.`
+          : `Superseded: ${r.name} ${version} is out.`,
+      )
+    if (!current && !open.some((i) => i.title === title))
+      gh(
+        'issue',
+        'create',
+        '--label',
+        LABEL,
+        '--title',
+        title,
+        '--body',
+        [
+          `${r.name} ${version} is out, and the themes that restyle it (${themes.join(', ')}) are still tested against ${r.version}.`,
+          '',
+          `Pin its files at the release commit in \`tests/stash/companions.mjs\` (RESTYLED.${key}), run those themes' contract and visual specs, fix any class the release renamed (each theme's check against \`tests/${key}-unmatched-baseline.txt\` names them), refresh their baselines, and update the version their README names.`,
         ].join('\n'),
       )
   }

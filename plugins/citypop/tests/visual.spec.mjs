@@ -6,9 +6,15 @@ import {
   SHOTS,
   demoIds,
   demoPath,
+  PLUGIN_ID,
   masks,
   onlyCityPop,
+  openInsights,
+  openPerformerStats,
+  openPerformersToolkit,
+  setPlugin,
   settle,
+  usePlugins,
   visit,
 } from './stash.mjs'
 
@@ -36,6 +42,64 @@ for (const entry of SHOTS) {
     }
   })
 }
+
+// Insights in the dusk, with Restyle Insights on. Its Library and Files tabs
+// only; the others count from today (O's this week, growth by month), so
+// their pictures would change by the day.
+test.describe('Insights', () => {
+  test.beforeAll(async () => {
+    await usePlugins(PLUGIN_ID, 'Insights')
+    await setPlugin({ restyleInsights: true })
+  })
+  test.afterAll(async () => {
+    await setPlugin({})
+    await onlyCityPop()
+  })
+  for (const tab of ['library', 'files']) {
+    test(`Insights' ${tab} tab looks the same`, async ({ page }) => {
+      await openInsights(page, tab)
+      await settle(page)
+      await expect(page).toHaveScreenshot(`insights-${tab}.png`, {
+        mask: [
+          page.locator('#insights .ins-meta'),
+          page
+            .locator('#insights .ins-nb')
+            .filter({ hasText: 'Newest addition' }),
+        ],
+      })
+    })
+  }
+})
+
+// Performers Toolkit in the dusk: its page, and a performer's page open on
+// its Stats tab (whose charts count back from today, so they are masked)
+test.describe('Performers Toolkit', () => {
+  test.beforeAll(async () => {
+    await usePlugins(PLUGIN_ID, 'PerformersToolkit')
+    await setPlugin({ restylePerformersToolkit: true })
+  })
+  test.afterAll(async () => {
+    await setPlugin({})
+    await onlyCityPop()
+  })
+
+  test("Performers Toolkit's page looks the same", async ({ page }) => {
+    await openPerformersToolkit(page, 'find')
+    await settle(page)
+    await expect(page).toHaveScreenshot('performers-toolkit.png', {
+      mask: [page.locator('.pt-read')],
+    })
+  })
+
+  test("a performer's Stats tab looks the same", async ({ page }) => {
+    await openPerformerStats(page, ids.performer)
+    await page.evaluate(() => window.scrollTo(0, 0))
+    await settle(page)
+    await expect(page).toHaveScreenshot('performer-stats.png', {
+      mask: [page.locator('.ptc .pt-bars')],
+    })
+  })
+})
 
 test.describe('phone', () => {
   test.use({
