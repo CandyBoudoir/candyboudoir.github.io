@@ -2,9 +2,14 @@
 
 ## Unreleased
 
+- Your score, For you, More like this and a bracket's cards leave out the tags Advanced Rating and Binge keep for their own use: Advanced Rating's score tags, such as "Production Quality ★: 4", which Binge's stars also write when Advanced Rating is installed, and Binge's collections, such as "Watch Later 📁". Score tags sit only on rated scenes and spell out the rating, so Your score learned a rated scene's rating from them and gave the scene's other tags less weight. Two scenes in the same collection counted as sharing a tag in More like this. Advanced Rating's "Favourite ★" still counts, as your own verdict on a scene.
+
+## 0.1.7
+
 - A scene you don't have links to where to get it on many more cards: its page on the clip store or tube StashDB lists it on (Clips4Sale, iWantClips, ManyVids, Pornhub and the like), with the store's name on the button. Cherry Pick took only the links StashDB files under Studio, which holds paysites; StashDB files a store's link under the store's own name, so about three in four clip-store scenes showed StashDB alone. A store's page comes before the studio's, and a Wayback Machine copy never counts. A scene already in the StashDB cache shows its studio link once more while Cherry Pick asks StashDB about it again in the background, and its store link from then on.
 - Pages you have visited before show their StashDB scenes straight away, also after a week. Cherry Pick asked StashDB again for an answer over 7 days old before showing it, so More like this's scenes you don't have could take five seconds to appear. It now shows the answer it has and asks again in the background once the page's own lookups are done, within the same limits (one request a second, six per page). The new answer is kept and shows the next time Stash loads or another page asks for it, so nothing on the page changes while you look at it. Answers are kept for 30 days; an older one is asked for again before it shows.
-- Your score, For you, More like this and a bracket's cards leave out the tags Advanced Rating and Binge keep for their own use: Advanced Rating's score tags, such as "Production Quality ★: 4", which Binge's stars also write when Advanced Rating is installed, and Binge's collections, such as "Watch Later 📁". Score tags sit only on rated scenes and spell out the rating, so Your score learned a rated scene's rating from them and gave the scene's other tags less weight. Two scenes in the same collection counted as sharing a tag in More like this. Advanced Rating's "Favourite ★" still counts, as your own verdict on a scene.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.40.4, Xenith 3.2.0 and Restash 0.3.0-55c1cb2.
 
 ## 0.1.6
 

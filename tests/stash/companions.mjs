@@ -10,15 +10,15 @@
 // latest release: `latest` says where to look, and tested-with.mjs holds
 // back a Cherry Pick release while a newer one is out.
 const CURATOR_RELEASE =
-  'https://github.com/mrx-31415/stash-curator/releases/download/v0.40.1'
+  'https://github.com/mrx-31415/stash-curator/releases/download/v0.40.4'
 const CURATOR_ZIPS = {
   'linux-x64': [
     'stash-curator-linux-amd64.zip',
-    'c21fc76e2d6d879747f54664a4e03a7b55a3ba074e82e2c7e72533b672923aaa',
+    'c6e110972cd1145a39d42c0063d21db47d0afd8b1235b9f4c836f0d0c426e2b3',
   ],
   'darwin-arm64': [
     'stash-curator-darwin-arm64.zip',
-    '9ce764484153d656fa6bae24ec256cedb10d7e8edf34086955e0a248a4bf3ef5',
+    '7d88f3af696a06127f41fbb4fb068af42c6bbafd3367eacc50c8e71eb2c0cdf8',
   ],
 }
 // Stash Curator's zip for the machine Stash runs on, linux-amd64 by default
@@ -75,11 +75,11 @@ export const COMPANIONS = {
     disable: [],
     latest: { index: 'https://lowgrade12.github.io/hot-or-not/main/index.yml' },
   },
-  // Stash Curator 0.40.1, local recommendations that score scenes and
+  // Stash Curator 0.40.4, local recommendations that score scenes and
   // performers on Stash's own cards, from
   // https://github.com/mrx-31415/stash-curator (AGPL-3.0). Its zip carries a
   // compiled backend, one zip per platform: linux-amd64 in CI, darwin-arm64
-  // for a local run on a Mac. Both are the builds attached to the v0.40.1
+  // for a local run on a Mac. Both are the builds attached to the v0.40.4
   // release, which later releases leave in place; its GitHub Pages index
   // serves only the newest. Its manifest runs `python` (a launcher for the
   // backend), so Stash needs one on its PATH: where there is only python3,
@@ -88,8 +88,8 @@ export const COMPANIONS = {
     package: {
       id: 'stash-curator',
       name: 'Stash Curator',
-      version: '0.40.1',
-      date: '2026-10-17 22:07:52',
+      version: '0.40.4',
+      date: '2026-10-18 10:53:26',
       ...curatorZip(),
     },
     enable: ['stash-curator'],
