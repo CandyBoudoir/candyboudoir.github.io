@@ -13,6 +13,9 @@ const src = join(here, 'src')
 
 export const id = 'CherryPick'
 export const title = 'Cherry Pick'
+// The line about the plugin in the repo's README (scripts/readme.mjs).
+export const summary =
+  'Learns what you like from your ratings and plays: a For you row, Your score on unrated scenes, More like this, and performer and scene brackets.'
 // Paths in this folder whose changes alter the plugin zip. Tests and docs are
 // left out so changing them offers users no update.
 export const inputs = ['src', 'plugin.mjs', 'LICENSE']

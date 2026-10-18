@@ -2,13 +2,17 @@
 
 Plugins for [Stash](https://github.com/stashapp/stash), the self-hosted media organizer, published as one plugin source. Add the source once and every CandyBoudoir plugin appears under Available Plugins, including ones released later.
 
+<!-- plugins:start -->
+
 | Plugin                             | What it does                                                                                                                                     |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Cherry Pick](plugins/cherrypick/) | Learns what you like from your ratings and plays: a For you row, Your score on unrated scenes, More like this, and performer and scene brackets. |
+| [City Pop](plugins/citypop/)       | An airbrushed 1980s dusk from city pop LPs: record-sleeve cards, striped suns for ratings, cassettes for audio scenes and a late-night FM voice. |
 | [Juicy](plugins/juicy/)            | A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording.                    |
 | [Leather](plugins/leather/)        | A black leather theme: saddle stitching, nickel studs for ratings, a collar for favourites and a strict voice in the wording.                    |
 | [Overclock](plugins/overclock/)    | A hacker's heads-up display in acid yellow: charge chevrons for ratings, a reticle that locks on for favourites and a cold system voice.         |
-| [City Pop](plugins/citypop/)       | An airbrushed 1980s dusk from city pop LPs: record-sleeve cards, striped suns for ratings, cassettes for audio scenes and a late-night FM voice. |
-| [Cherry Pick](plugins/cherrypick/) | Learns what you like from your ratings and plays: a For you row, Your score on unrated scenes, More like this, and performer and scene brackets. |
+
+<!-- plugins:end -->
 
 Each theme restyles all of Stash, so enable one theme at a time. Cherry Pick works with any of them, or none.
 
@@ -45,7 +49,7 @@ pnpm smoke                # after deploy:local cherrypick: a headless check of C
 
 `pnpm smoke` (`plugins/cherrypick/tests/smoke.mjs`) opens that Stash in headless Chromium and checks that the deployed files hash the same as `dist/site/CherryPick` (over `STASH_SSH_HOST`), that the navbar cherries and For you show on the front page, the bracket controls on the Scenes and Performers lists, the plugin page across a reload and the matches switch in Settings › Plugins, and that More like this on five scene pages at 1440 and 390 wide causes no sideways scroll, keeps its arrows on screen and, below 1200 wide, starts below the scene's tabs. It reads the same variables as `deploy:local`, prints statuses and counts only (nothing from the library, so its output is safe to share), and exits non-zero on a failed check or any page error. CI never runs it, since it needs your own Stash and its library.
 
-Each plugin lives in `plugins/<name>/`: a `plugin.mjs` that tells the shared build (`scripts/build.mjs`) what goes into its plugin folder, its `CHANGELOG.md` and README, and its compatibility tests in `tests/`. `tests/stash/` is the Stash test harness the plugins share.
+Each plugin lives in `plugins/<name>/`: a `plugin.mjs` that tells the shared build (`scripts/build.mjs`) what goes into its plugin folder, its `CHANGELOG.md` and README, and its compatibility tests in `tests/`. `plugin.mjs` also exports the plugin's `title` and the `summary` that `scripts/readme.mjs` puts in the table above, and a theme exports `kind = 'theme'`, which runs Cherry Pick's theme spec under it. `tests/stash/` is the Stash test harness the plugins share.
 
 A plugin still being built exports `incubating = true` from its `plugin.mjs`. `pnpm build`, the tests and `deploy:local` treat it like any other plugin, and the Publish workflow leaves it out of the develop channel and the site and never releases it. Removing the line lets it publish.
 
@@ -79,4 +83,4 @@ Each plugin releases on its own. When `prod` carries a plugin version with no `<
 
 ## License
 
-MIT, except Cherry Pick, which is AGPL-3.0 (`plugins/cherrypick/LICENSE`). Juicy bundles Fredoka, Leather bundles Grenze Gotisch and Oswald, Overclock bundles Chakra Petch and Share Tech Mono, and City Pop bundles Mr Dafoe, Jost and Zen Maru Gothic, under the SIL Open Font License 1.1 (each plugin's `assets/fonts` folder holds the license).
+MIT, except Cherry Pick, which is AGPL-3.0 (`plugins/cherrypick/LICENSE`). The themes bundle their fonts under the SIL Open Font License 1.1: each theme's README names them, and its `assets/fonts` folder holds the license.
