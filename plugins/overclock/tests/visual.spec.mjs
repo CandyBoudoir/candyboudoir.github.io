@@ -3,12 +3,18 @@
 // runner, so these run in CI only unless VISUAL=1.
 import { expect, test } from '@playwright/test'
 import {
+  PLUGIN_ID,
   SHOTS,
   demoIds,
   demoPath,
   masks,
   onlyOverclock,
+  openInsights,
+  openPerformerStats,
+  openPerformersToolkit,
+  setPlugin,
   settle,
+  usePlugins,
   visit,
 } from './stash.mjs'
 
@@ -36,6 +42,53 @@ for (const entry of SHOTS) {
     }
   })
 }
+
+// Insights and Performers Toolkit on the display, with Restyle Insights and
+// Performers Toolkit on. Insights' Library and Files tabs only; the others
+// count from today (O's this week, growth by month), so their pictures would
+// change by the day. The toolkit's Find tab, and a performer's Stats tab
+// without its charts, which count back from today.
+test.describe('Insights and Performers Toolkit', () => {
+  test.beforeAll(async () => {
+    await usePlugins(PLUGIN_ID, 'Insights', 'PerformersToolkit')
+    await setPlugin({ restylePlugins: true })
+  })
+  test.afterAll(async () => {
+    await setPlugin({})
+    await onlyOverclock()
+  })
+  for (const tab of ['library', 'files']) {
+    test(`Insights' ${tab} tab looks the same`, async ({ page }) => {
+      await openInsights(page, tab)
+      await settle(page)
+      await expect(page).toHaveScreenshot(`insights-${tab}.png`, {
+        mask: [
+          page.locator('#insights .ins-meta'),
+          page
+            .locator('#insights .ins-nb')
+            .filter({ hasText: 'Newest addition' }),
+        ],
+      })
+    })
+  }
+
+  test("Performers Toolkit's find tab looks the same", async ({ page }) => {
+    await openPerformersToolkit(page, 'find')
+    await settle(page)
+    await expect(page).toHaveScreenshot('performerstoolkit-find.png', {
+      mask: [page.locator('.pt-read')],
+    })
+  })
+
+  test("a performer's Stats tab looks the same", async ({ page }) => {
+    await openPerformerStats(page, ids.performer)
+    await settle(page)
+    await expect(page.locator('.ptc')).toHaveScreenshot(
+      'performerstoolkit-stats.png',
+      { mask: [page.locator('.ptc .pt-bars')] },
+    )
+  })
+})
 
 test.describe('phone', () => {
   test.use({

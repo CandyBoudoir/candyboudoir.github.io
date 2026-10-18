@@ -24,18 +24,23 @@ Stash lists new versions under Settings > Plugins > Installed Plugins when you c
 
 ## Settings
 
-Overclock's settings sit with the plugin under Settings > Plugins. Both start off.
+Overclock's settings sit with the plugin under Settings > Plugins. All three start off.
 
-| Setting      | Effect                                                                           |
-| ------------ | -------------------------------------------------------------------------------- |
-| Calm mode    | Turns off the hover glitches, the scan lines, the bursts and the ticking loader. |
-| Plain labels | Keeps Stash's own wording instead of Overclock's system voice.                   |
+| Setting                                 | Effect                                                                           |
+| --------------------------------------- | -------------------------------------------------------------------------------- |
+| Calm mode                               | Turns off the hover glitches, the scan lines, the bursts and the ticking loader. |
+| Plain labels                            | Keeps Stash's own wording instead of Overclock's system voice.                   |
+| Restyle Insights and Performers Toolkit | Puts the Insights and Performers Toolkit plugins on Overclock's display too.     |
 
-![Overclock's two settings under Settings > Plugins](docs/screenshots/settings.png)
+![Overclock's settings under Settings > Plugins](docs/screenshots/settings.png)
 
 Overclock also follows your system's reduced-motion setting. In Stash's SFW content mode it keeps the display, drops the system voice and the red from the bursts, and shows the dead scope without a line on an empty list.
 
-Overclock makes no network requests beyond your own Stash server. Its fonts, Chakra Petch and Share Tech Mono, ship inside the plugin, which is about 100 KB.
+### Insights and Performers Toolkit
+
+Insights and Performers Toolkit are two [plugins by another author](https://gitlab.com/allisless0/stash-plugins). Insights is a stats dashboard on Stash's Stats page. Performers Toolkit adds a page at `/performerstoolkit`, a strip of figures under each performer's name and Stats and Catalog tabs on the performer's page. Both draw themselves in the Flexoki palette their sibling plugins share. With Restyle Insights and Performers Toolkit on, Overclock puts both on its display: chamfered teal-black panels with frame lines and corner brackets, the names in Chakra Petch, Stash's tabs with a yellow underline under the open one, clipped buttons, cyan links, segmented bars, numbers and labels in Share Tech Mono and a yellow tooltip. Each tab keeps a colour of its own, taken from Overclock's yellow, cyan, red and magenta and four more signals in orange, green, blue and violet. Insights' heatmaps and its codec, resolution and chart colours keep Insights' own tones. The setting takes effect on the next page you open. Off, both keep their own look, and the only change is that Insights' sidebar clears Overclock's taller navbar. Overclock is tested with Insights 2.11.0 and Performers Toolkit 0.4.2.
+
+Overclock makes no network requests beyond your own Stash server. It reads its own settings from your Stash, and keeps Restyle Insights and Performers Toolkit in your browser so those plugins' pages never open in the wrong colours. Its fonts, Chakra Petch and Share Tech Mono, ship inside the plugin, which is about 100 KB.
 
 ## Screenshots
 

@@ -14,6 +14,10 @@ Every rule in `src/css` reads these custom properties, because Stash compiles it
 | `--overclock-cyan`    | `#00E5FF` | Readouts, info, links, the scan line, matches |
 | `--overclock-red`     | `#FF1F4B` | Danger, misses, the glitch's left fringe      |
 | `--overclock-magenta` | `#FF2FD0` | Glitch fringe only                            |
+| `--overclock-orange`  | `#FF8A1F` | Tabs and charts in the restyled plugins       |
+| `--overclock-green`   | `#4DFF6A` | Tabs and charts in the restyled plugins       |
+| `--overclock-blue`    | `#4A8DFF` | Tabs, charts and O's in the restyled plugins  |
+| `--overclock-violet`  | `#A66BFF` | Tabs and charts in the restyled plugins       |
 | `--overclock-panel`   | `#0D1416` | Cards, panels, menus                          |
 | `--overclock-raised`  | `#122024` | Raised panels                                 |
 | `--overclock-line`    | `#3B5A60` | Frame lines, brackets, ticks                  |
@@ -22,7 +26,7 @@ Every rule in `src/css` reads these custom properties, because Stash compiles it
 | `--overclock-muted`   | `#A8BAB9` | Secondary text, 9.2:1 on panels               |
 | `--overclock-dim`     | `#86999A` | Captions and labels, 6.2:1 on panels          |
 
-Yellow marks what the system wants from the viewer. Cyan carries information. Red is kept for danger and misses, and yellow-and-black hazard stripes (`--overclock-hazard`) mark danger and locked states and nothing else.
+Yellow marks what the system wants from the viewer. Cyan carries information. Red is kept for danger and misses, and yellow-and-black hazard stripes (`--overclock-hazard`) mark danger and locked states and nothing else. Orange, green, blue and violet appear only in the two plugins Overclock restyles (see Insights and Performers Toolkit).
 
 ## Type
 
@@ -63,14 +67,36 @@ The system voice swaps a short list of Stash's own messages for short, cold line
 
 Stash's SFW content mode keeps the display and drops the voice: the copy is off, bursts lose their red, and an empty list shows the scope with no line. Stash's own SFW icon for the O counter (a thumbs-up) is left alone.
 
+## Insights and Performers Toolkit
+
+Insights and Performers Toolkit are another author's plugins from one suite (gitlab.com/allisless0/stash-plugins). Insights is a stats dashboard on Stash's Stats page. Performers Toolkit has a page at `/performerstoolkit` (`.pt`), a strip under each performer's name (`#pt-strip`) and Stats and Catalog tabs on the performer's page (`.ptc`). Both paint themselves in the Flexoki palette through custom properties they set on their own roots (`--bg`, `--bg2`, `--ui` to `--ui3`, `--tx3` to `--hi`, eight accents from `--re` to `--ma`, and in Insights `--up`, `--down` and `--o`), from stylesheets they add after Overclock's. `82-insights.css` therefore starts its rules at `#root #insights` and `83-performers-toolkit.css` at `#root`, which outrank the plugins' own. Insights' tooltip (`#ins-tip`) and the toolkit's toast (`#pt-toast`) sit on `<body>`, so their rules start at their ids.
+
+With the Restyle Insights and Performers Toolkit setting on, `overclock.js` puts `.overclock-restyle` on `<html>`, and both take the display:
+
+- **Their palette** becomes Overclock's: teal-black panels, black fields, Overclock's text tones and eight signals that stay apart on a panel. Overclock has four signals of its own and the two plugins colour up to eight things side by side, so `01-tokens.css` adds orange, green, blue and violet for them. Insights' tabs are You magenta, Actions red, Library orange, Files cyan, Metadata health yellow, Collection green and Movies violet, and the toolkit's are Find blue, Performers magenta, History violet and Sources green. Up and good read cyan and down and bad red, the Tagger's colours for a match and a miss. O's keep the suite's blue, which Insights' O heatmap draws in. The plugins' own rules keep painting from these properties, so their bars and rings follow.
+- **Their slabs go**, and their cards sit on the dot grid like Stash's own pages. Cards are chamfered panels with a frame line, both cuts drawn and a cyan bracket in the bottom-left corner. The toolkit's dialog, its review bar and its toast also take an overlay's yellow left rule; the toast's rule turns cyan when something is done and red on an error.
+- **Their heads** set the names in Chakra Petch caps over a frame line with ticks, and their tabs read as Stash's tabs, the open one yellow on a heavy underline.
+- **Wells** are dark fields in a rule. Insights' chart wells add a form field's corner ticks, and the toolkit's search fields are Overclock's form fields. Chips are clipped mono tags, and the chosen chip of a row is a cyan readout. The step you are on in the toolkit's Find flow is yellow, and a card you pick in its review takes a yellow edge, as the chosen result does in the Tagger. A switch's label stays on the system font, as a setting's does.
+- **Buttons** are Overclock's: a control panel that turns yellow under the pointer, solid yellow for the one that goes ahead, red behind hazard stripes for the one that deletes and a dashed frame over faint stripes when disabled. Ticked boxes and switches are square and yellow. Links are cyan and turn yellow under the pointer.
+- **Numbers and small caps** are readouts in Share Tech Mono, as are Insights' Files tab, which already reads as a console, and the strip under a performer's name. Bars are segmented like Overclock's progress bars, and Insights' tooltip is a yellow tag like Stash's.
+
+Insights writes some colours from its JavaScript as inline styles and SVG attributes. Its heatmaps, its codec and resolution colours, the colours of the toolkit plugins' cards and the segments of its splits keep Insights' tones. The empty heatmap cells, the charts' grey grid lines and labels, the growth line and the tag picked in Top tags are matched by their exact inline colour and moved to the display. Performers Toolkit writes its good, bad and link-hover colours, the ink on its filled tags, its toast's and review status's rules, its zoom slider and its scrollbars as hex in its own stylesheet, so Overclock overrides those rules by name. A release of either plugin that changes one of those values puts that one piece back in its own colour.
+
+The setting starts off because the two plugins share Flexoki with their sibling plugins, which Overclock leaves alone, so someone who runs several of them keeps one look until they choose otherwise. `overclock.js` keeps the setting in the browser (`localStorage`, `overclock.restylePlugins`), so a page those plugins draw on never opens in Flexoki first. It reads the settings again on every page Stash opens, so changing one needs no reload.
+
+One rule applies with the setting off too: Insights' What works sidebar sticks under the navbar at Stash's height, so Overclock moves it below its own 58px bar. Performers Toolkit measures the navbar for its toast and its phone review bar, so it needs no such rule.
+
+The design-system page shows neither plugin.
+
 ## Settings
 
-| Setting      | Key         | Effect                           |
-| ------------ | ----------- | -------------------------------- |
-| Calm mode    | `calmMode`  | Turns off Overclock's animations |
-| Plain labels | `plainCopy` | Keeps Stash's own wording        |
+| Setting                                 | Key              | Effect                                       |
+| --------------------------------------- | ---------------- | -------------------------------------------- |
+| Calm mode                               | `calmMode`       | Turns off Overclock's animations             |
+| Plain labels                            | `plainCopy`      | Keeps Stash's own wording                    |
+| Restyle Insights and Performers Toolkit | `restylePlugins` | Puts both plugins on Overclock's display too |
 
-Both default to off, so a fresh install gets the full theme.
+All three default to off, so a fresh install gets the full theme and leaves the two plugins as their author drew them.
 
 ## Coupling to Stash
 
@@ -84,3 +110,4 @@ Some couplings are specific to Overclock:
 - Some Stash rules outrank a plain class (`div.dropdown-menu`, `div.react-select__control`, favourites, range sliders, the image zoom button), and modals render outside `#root`, so Overclock's rules for those use matching selectors, `#root`, or `:is(#root, .modal)`.
 - A toast's whole message sits in `.toast-header`, so the `STASH` band and message number are pseudo-elements.
 - Stash fades its loader in with an animation, so Calm mode, which stops every animation, sets the loader visible itself.
+- The Insights and Performers Toolkit rules target Insights 2.11.0 and Performers Toolkit 0.4.2: their custom properties, their `ins-*` and `pt-*` classes and a few of their inline and hex colours (see Insights and Performers Toolkit). The tests install those releases' files in every test Stash (`RESTYLED` in `tests/stash/companions.mjs`), and a contract test fails when a class Overclock styles for either stops rendering, against `tests/insights-unmatched-baseline.txt` and `tests/performerstoolkit-unmatched-baseline.txt`, the classes the demo library never shows (the toolkits' hub, duplicates and movies in Insights, and the toolkit's scan results, review screens and dialogs). The nightly run opens a "Restyle <plugin>" issue when a newer release is out.
