@@ -14,10 +14,32 @@ import {
   settle,
   skipScene,
   unskipScene,
+  watchedEnough,
   watchOrder,
 } from '../model/watch.js'
 
 let snap = null
+
+// The pick on screen's play time, in ms: the time the player spent
+// playing it, as Stash's own play tracking counts it, seeks and buffering
+// aside (runtime/watching.js reports the player's events). It starts again
+// with each pick.
+let playedMs = 0
+let playingSince = null
+
+export function pickPlaying(on) {
+  if (on) playingSince ??= Date.now()
+  else if (playingSince != null) {
+    playedMs += Date.now() - playingSince
+    playingSince = null
+  }
+}
+const playedSeconds = () =>
+  (playedMs + (playingSince != null ? Date.now() - playingSince : 0)) / 1000
+function newPick() {
+  playedMs = 0
+  playingSince = null
+}
 
 const keyOf = (s) => [s.visit, JSON.stringify(s.settings)].join('|')
 
@@ -33,6 +55,7 @@ export function watchSnapshot(s) {
   const order = watchOrder(context(s.M, s), visitSignals(s.signals, skip))
   const { scenes } = s.M.db
   const snoozes = settle(s.snoozes, scenes)
+  newPick()
   snap = {
     key,
     order,
@@ -58,16 +81,24 @@ export function visitState(s, v = snap?.key === keyOf(s) ? snap : null) {
   return { key: v.key, current: v.first, skips: [], started: false }
 }
 
-// Skip: the pick on screen one step up its ladder, and the next pick: the
-// best scene not snoozed that shares no performer with the visit's skipped
-// scenes (model/watch.js nextPick).
+// Skip: the pick on screen one step up its ladder, or back to its first
+// step when it played for a tenth of its length or more (watchedEnough),
+// and the next pick: the best scene not snoozed that shares no performer
+// with the visit's skipped scenes (model/watch.js nextPick).
 export function skip() {
   const s = store.get()
   const v = watchSnapshot(s)
   const cur = visitState(s, v)
   if (!cur?.current) return
   const now = Date.now()
-  const { snoozes, prev } = skipScene(s.snoozes, cur.current, now)
+  const watched = watchedEnough(
+    playedSeconds(),
+    v.byId.get(cur.current)?.scene.duration,
+  )
+  newPick()
+  const { snoozes, prev } = skipScene(s.snoozes, cur.current, now, {
+    watched,
+  })
   const skips = [...cur.skips, { id: cur.current, prev }]
   const skipped = skips.map((k) => v.byId.get(k.id)?.scene).filter(Boolean)
   const next = nextPick(v.order, snoozes, skipped, now)
@@ -89,6 +120,7 @@ export function back() {
   const cur = visitState(s)
   const last = cur?.skips[cur.skips.length - 1]
   if (!last) return
+  newPick()
   store.set({
     snoozes: unskipScene(s.snoozes, last.id, last.prev, Date.now()),
     watchVisit: {

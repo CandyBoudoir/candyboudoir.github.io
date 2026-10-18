@@ -271,3 +271,50 @@ test('past 300 entries, the ones whose snooze ended longest ago go', () => {
   for (let i = 0; i < 5; i++) assert.ok(!ids.has(`s${i}`), `s${i} dropped`)
   assert.ok(ids.has('s5') && ids.has('s304'))
 })
+
+test('a skip after playing a tenth of the scene or more starts the ladder again at 48 hours', () => {
+  // an 8-minute scene: a tenth is 48 seconds of play
+  assert.equal(W.watchedEnough(47.9, 480), false)
+  assert.equal(W.watchedEnough(48, 480), true)
+  assert.equal(W.watchedEnough(300, 480), true)
+  assert.equal(W.watchedEnough(30, null), false, 'no length, no watch')
+
+  // a scene two steps up, with an ignored day
+  let snoozes = W.skipScene([], 'a', T0).snoozes
+  snoozes = W.skipScene(snoozes, 'a', T0 + 50 * HOUR).snoozes
+  snoozes = W.ignoreScene(snoozes, 'a', T0 + 300 * HOUR, '2026-10-30')
+  const now = T0 + 400 * HOUR
+  // just under a tenth: a look, one step up to 30 days
+  const look = W.skipScene(snoozes, 'a', now, {
+    watched: W.watchedEnough(47.9, 480),
+  }).snoozes[0]
+  assert.equal(look.step, 3)
+  assert.equal(look.until, now + 720 * HOUR)
+  assert.equal(look.ignored, 1)
+  // a tenth or more: watched, a plain first step
+  const watched = W.skipScene(snoozes, 'a', now, {
+    watched: W.watchedEnough(48, 480),
+  }).snoozes[0]
+  assert.equal(watched.step, 1)
+  assert.equal(watched.until, now + 48 * HOUR)
+  assert.equal(watched.ignored, 0)
+  assert.equal(watched.ignoredDay, null)
+  // a watched scene with no entry gets the same first step
+  const fresh = W.skipScene([], 'b', now, { watched: true }).snoozes[0]
+  assert.equal(fresh.step, 1)
+  assert.equal(fresh.until, now + 48 * HOUR)
+})
+
+test('Back after a long watch and Skip puts the ladder back as it was', () => {
+  let snoozes = W.skipScene([], 'a', T0).snoozes
+  snoozes = W.skipScene(snoozes, 'a', T0 + 50 * HOUR).snoozes
+  const before = snoozes.find((e) => e.id === 'a')
+  assert.equal(before.step, 2)
+  const now = T0 + 300 * HOUR
+  const skipped = W.skipScene(snoozes, 'a', now, { watched: true })
+  assert.equal(skipped.snoozes.find((e) => e.id === 'a').step, 1)
+  const back = W.unskipScene(skipped.snoozes, 'a', skipped.prev, now + 1000)
+  const e = back.find((x) => x.id === 'a')
+  assert.equal(e.step, before.step)
+  assert.equal(e.until, before.until)
+})
