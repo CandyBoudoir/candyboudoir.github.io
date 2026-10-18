@@ -9,11 +9,19 @@
  * It paints them in the same Flexoki palette as Insights, from custom
  * properties it sets on those five roots, in a stylesheet it adds after this
  * one. These rules start at `#root`, or at the toast's id, so they outrank
- * its own, and all of them wait for the Restyle Insights and Performers
- * Toolkit setting (.juicy-restyle on <html>, from juicy.js). It places its
- * toast and its review bar on a phone from Stash's navbar, so it needs no
- * offset for Juicy's.
+ * its own, and all but the Catalog tab's count wait for the Restyle Insights
+ * and Performers Toolkit setting (.juicy-restyle on <html>, from juicy.js).
+ * It places its toast and its review bar on a phone from Stash's navbar, so
+ * it needs no offset for Juicy's.
  */
+
+/* The count on the Catalog tab is a Stash badge, a purple tag chip in
+   Juicy, that also carries Performers Toolkit's .pt-badge, whose ink type
+   comes after Juicy's white and reads at 3.9:1 on the purple. It keeps the
+   white of the other tabs' counts, whether the setting is on or not. */
+#root .pt-tablink .badge.pt-badge {
+  color: #fff;
+}
 
 /* Its palette in Juicy's, as for Insights. Each tab's accent follows:
    blueberry for Find, pink for Performers, purple for History, lime for
@@ -450,11 +458,13 @@
   color: var(--juicy-danger);
 }
 
-/* Ink on the filled badges and tags, which are candy pills */
+/* Ink on the filled badges and tags, which are candy pills. The count on
+   the Catalog tab is also a .pt-badge, but a Stash .badge in a Stash tab,
+   which keeps Juicy's purple tag chip. */
 .juicy-restyle
   #root
   :is(
-    .pt-badge,
+    .pt-badge:not(.badge),
     .pt-covtag,
     .pt-sctag,
     .pt-cpick,

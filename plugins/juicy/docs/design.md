@@ -86,7 +86,7 @@ Insights writes some colours from its JavaScript as inline styles and SVG attrib
 
 The setting starts off because the two share their look with their sibling plugins (Movies Toolkit, Scenes Toolkit and others), which Juicy leaves alone, so someone who runs several of them keeps one look until they choose otherwise; one setting covers both so they never split. `juicy.js` keeps it in the browser (`localStorage`, `juicy.restylePlugins`), so a page they draw on never opens in Flexoki first, and reads the settings again on every page Stash opens, so changing it needs no reload.
 
-One rule applies with the setting off too: Insights' What works sidebar sticks 60px from the top, 11.25px under Stash's 48.75px navbar. Juicy's bar is as tall but draws its 3px pink rule below it, so the sidebar moves to 63px. Performers Toolkit measures Stash's navbar for its toast and its review bar on a phone, so it needs nothing.
+Two rules apply with the setting off too. Insights' What works sidebar sticks 60px from the top, 11.25px under Stash's 48.75px navbar; Juicy's bar is as tall but draws its 3px pink rule below it, so the sidebar moves to 63px. Performers Toolkit's count on the Catalog tab is a Stash badge, a purple tag chip in Juicy, that also carries its `.pt-badge` class, whose ink type comes after Juicy's white and reads at 3.9:1 on the purple, so the count keeps the white of the other tabs' counts. Performers Toolkit measures Stash's navbar for its toast and its review bar on a phone, so it needs no offset.
 
 The design-system page shows neither.
 
