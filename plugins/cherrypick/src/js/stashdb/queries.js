@@ -221,9 +221,9 @@ export function storeLink(urls) {
 }
 
 // Where to get a fetched scene: { url, site }, or null. A scene cached
-// before store links carries only its studio link, studioUrl; the cache
-// keeps it until its 7 days run out or Clear StashDB cache on Cherry Pick's
-// page, so an update never sends every page's lookups again at once.
+// before store links carries only its studio link, studioUrl, until its
+// answer is 7 days old: an update never sends every page's lookups again
+// at once, and Clear StashDB cache would drop every answer, not only links.
 export const storeOf = (scene) =>
   scene?.store ||
   (scene?.studioUrl ? { url: scene.studioUrl, site: 'Studio' } : null)
