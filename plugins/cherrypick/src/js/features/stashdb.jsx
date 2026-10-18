@@ -309,7 +309,7 @@ function StashdbSection() {
             count
               ? `${count} lookup${count === 1 ? '' : 's'}, the oldest from ${age(stats.oldest)}.`
               : 'Nothing looked up yet.'
-          } Lookups are cached in this browser for 7 days.`}
+          } Lookups are kept in this browser for 30 days, and asked for again in the background after 7.`}
         >
           <Button
             variant="secondary"

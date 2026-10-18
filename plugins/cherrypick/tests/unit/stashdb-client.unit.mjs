@@ -1,9 +1,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
+  CACHE_FORMAT,
   CACHE_PREFIX,
   createStashdbClient,
   GAP_MS,
+  MAX_AGE_MS,
   TTL_MS,
 } from '../../src/js/stashdb/client.js'
 
@@ -139,24 +141,132 @@ test('a refused key stops lookups for the session', async () => {
   assert.equal(calls.length, 1)
 })
 
-test('lookups are cached for 7 days, keyed by lookup', async () => {
+test('lookups are cached, keyed by lookup; under 7 days nothing is sent', async () => {
   const { client, calls, store, advance } = rig()
   const load = async () => (await client.request('q', {}))?.n
   const first = await client.cached('performer-scenes:p1', load)
   assert.equal(first.data, 1)
-  assert.ok(store.has(CACHE_PREFIX + 'performer-scenes:p1'))
+  assert.equal(store.get(CACHE_PREFIX + 'performer-scenes:p1').v, CACHE_FORMAT)
+  advance(TTL_MS - 1)
+  client.newView()
   const again = await client.cached('performer-scenes:p1', load)
   assert.equal(again.data, 1)
   assert.equal(again.at, first.at)
+  assert.equal(again.stale, false)
+  await client.revalidate()
   assert.equal(calls.length, 1, 'the second visit sends nothing')
   // another lookup is its own entry
   await client.cached('performer-scenes:p2', load)
   assert.equal(calls.length, 2)
+})
+
+test('after 7 days the answer shows, and is asked for again afterwards', async () => {
+  const { client, calls, store, advance } = rig()
+  const load = async () => (await client.request('q', {}))?.n
+  await client.cached('performer-scenes:p1', load)
   advance(TTL_MS + 1)
   client.newView()
-  const later = await client.cached('performer-scenes:p1', load)
-  assert.equal(later.data, 3, 'older than 7 days: asked again')
-  assert.equal(calls.length, 3)
+  const stale = await client.cached('performer-scenes:p1', load)
+  assert.equal(stale.data, 1, 'the answer it has, at once')
+  assert.equal(stale.stale, true)
+  assert.equal(calls.length, 1, 'nothing sent before the page has it')
+  await client.revalidate()
+  assert.equal(calls.length, 2)
+  assert.equal(
+    store.get(CACHE_PREFIX + 'performer-scenes:p1').data,
+    2,
+    'the new answer, kept',
+  )
+  client.newView()
+  const next = await client.cached('performer-scenes:p1', load)
+  assert.equal(next.data, 2, 'and shown the next time')
+  assert.equal(next.stale, false)
+  await client.revalidate()
+  assert.equal(calls.length, 2)
+})
+
+test('after 30 days the answer is asked for again before it shows', async () => {
+  const { client, calls, advance } = rig()
+  const load = async () => (await client.request('q', {}))?.n
+  await client.cached('studio-scenes:s1', load)
+  advance(MAX_AGE_MS)
+  client.newView()
+  const entry = await client.cached('studio-scenes:s1', load)
+  assert.equal(entry.data, 2)
+  assert.equal(calls.length, 2)
+})
+
+test('an answer kept in an older format shows, and is asked for again', async () => {
+  const { client, calls, store, now } = rig()
+  // as 0.1.6 kept it: no format
+  store.set(CACHE_PREFIX + 'performer-scenes:p1', { at: now(), data: 'old' })
+  const load = async () => (await client.request('q', {}))?.n
+  const entry = await client.cached('performer-scenes:p1', load)
+  assert.equal(entry.data, 'old')
+  assert.equal(entry.stale, true)
+  await client.revalidate()
+  assert.equal(calls.length, 1)
+  assert.deepEqual(store.get(CACHE_PREFIX + 'performer-scenes:p1'), {
+    at: now(),
+    v: CACHE_FORMAT,
+    data: 1,
+  })
+})
+
+test('one refresh per lookup; a failed one keeps the answer for next time', async () => {
+  const { client, calls, store, advance } = rig({
+    reply: (n) =>
+      n === 2
+        ? { status: 500, body: {} }
+        : { status: 200, body: { data: { n } } },
+  })
+  const load = async () => (await client.request('q', {}))?.n
+  await client.cached('performer-scenes:p1', load)
+  advance(TTL_MS + 1)
+  client.newView()
+  await Promise.all([
+    client.cached('performer-scenes:p1', load),
+    client.cached('performer-scenes:p1', load),
+  ])
+  await Promise.all([client.revalidate(), client.revalidate()])
+  assert.equal(calls.length, 2, 'asked for again once')
+  assert.equal(store.get(CACHE_PREFIX + 'performer-scenes:p1').data, 1)
+  advance(10 * 60_000 + 1) // the server error rested the client
+  client.newView()
+  const entry = await client.cached('performer-scenes:p1', load)
+  assert.equal(entry.stale, true, 'still the stale answer')
+  await client.revalidate()
+  assert.equal(store.get(CACHE_PREFIX + 'performer-scenes:p1').data, 3)
+})
+
+test('refreshes for a page the user left are dropped', async () => {
+  const { client, calls, advance } = rig()
+  const load = async () => (await client.request('q', {}))?.n
+  await client.cached('performer-scenes:p1', load)
+  await client.cached('performer-scenes:p2', load)
+  advance(TTL_MS + 1)
+  client.newView()
+  await client.cached('performer-scenes:p1', load)
+  await client.cached('performer-scenes:p2', load)
+  client.newView() // the user left the page
+  await client.revalidate()
+  assert.equal(calls.length, 2, 'nothing sent for the page left behind')
+})
+
+test('refreshes share the page view budget', async () => {
+  const { client, calls, advance } = rig({ perView: 3 })
+  const load = async () => (await client.request('q', {}))?.n
+  for (const k of ['a', 'b', 'c']) {
+    client.newView()
+    await client.cached('performer-scenes:' + k, load)
+  }
+  advance(TTL_MS + 1)
+  client.newView()
+  for (const k of ['a', 'b', 'c', 'd'])
+    await client.cached('performer-scenes:' + k, load)
+  assert.equal(calls.length, 4, 'the miss goes first')
+  await client.revalidate()
+  assert.equal(calls.length, 6, 'two of the three refreshes fit')
 })
 
 test('a failed lookup is not cached; "not on StashDB" is', async () => {

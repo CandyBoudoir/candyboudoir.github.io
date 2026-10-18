@@ -48,6 +48,9 @@ is-ring
 is-spark
 missing
 modal-title
+page-count
+page-count-container
+page-count-dropdown
 page-item
 page-link
 pagination
@@ -61,6 +64,7 @@ progress-indicator
 react-select__control--is-focused
 react-select__indicator-separator
 react-select__menu
+react-select__menu-list
 react-select__option
 react-select__option--is-focused
 react-select__option--is-selected

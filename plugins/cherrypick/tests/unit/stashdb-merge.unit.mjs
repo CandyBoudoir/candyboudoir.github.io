@@ -13,7 +13,9 @@ import {
   sceneFromApi,
   stashdbIdOf,
   stashdbPage,
-  studioLink,
+  STORE_CATEGORY,
+  storeLink,
+  storeOf,
   withStashdbKey,
 } from '../../src/js/stashdb/queries.js'
 import { buildDb } from '../../src/js/model/db.js'
@@ -113,12 +115,12 @@ function fakeStashdb() {
     wait: async () => {},
     perView: 50,
   })
-  return { client, sent }
+  return { client, sent, cache }
 }
 
 // ---------------------------------------------------------------- answers
 
-test('a StashDB scene in buildDb shape, with its studio link cleaned', () => {
+test('a StashDB scene in buildDb shape, with its store link cleaned', () => {
   const s = sceneFromApi(withPrints(CATALOGUE[1]))
   assert.equal(s.id, 's2')
   assert.equal(s.date, '2025-01-02')
@@ -128,12 +130,17 @@ test('a StashDB scene in buildDb shape, with its studio link cleaned', () => {
     ['p-anna', 'p-bea'],
   )
   assert.equal(s.heldBy, 900, 'OSHASH submissions')
-  assert.equal(
-    s.studioUrl,
-    'https://studio.example/s2?id=2',
+  assert.deepEqual(
+    s.store,
+    { url: 'https://studio.example/s2?id=2', site: 'Studio' },
     'no affiliate code',
   )
   assert.equal('heldBy' in sceneFromApi(strip(CATALOGUE[1])), false)
+  assert.equal(
+    'store' in sceneFromApi({ ...CATALOGUE[1], urls: [] }),
+    false,
+    'no link: nothing to overwrite one fetched earlier',
+  )
 })
 
 test('held by: OSHASH submissions, else the largest algorithm', () => {
@@ -150,19 +157,100 @@ test('held by: OSHASH submissions, else the largest algorithm', () => {
   assert.equal(heldByOf([{ algorithm: 'OSHASH', submissions: 0 }]), null)
 })
 
-test('studio links: http(s) only, tracking parameters dropped', () => {
-  const link = (url) => studioLink([{ url, site: { name: 'Studio' } }])
+const STUDIO = { name: 'Studio', category: { name: 'Primary sources' } }
+const site = (name) => ({ name, category: { name: STORE_CATEGORY } })
+
+test('store links: http(s) only, tracking parameters dropped', () => {
+  const link = (url) => storeLink([{ url, site: STUDIO }])?.url ?? null
   assert.equal(
     link('https://a.example/v/1?utm_source=x&ats=y&aff_id=3&page=2#t'),
     'https://a.example/v/1?page=2',
   )
   assert.equal(link('javascript:alert(1)'), null)
+  assert.equal(storeLink([]), null)
   assert.equal(
-    studioLink([{ url: 'https://a.example', type: 'STUDIO' }]),
-    'https://a.example/',
+    storeLink([{ url: 'https://a.example', site: { name: 'Twitter' } }]),
+    null,
+    'a site that neither sells nor shows the scene',
+  )
+})
+
+test('store links: a store before the studio, named for the store', () => {
+  assert.deepEqual(
+    storeLink([
+      { url: 'https://studio.example/v/1', site: STUDIO },
+      {
+        url: 'https://www.clips4sale.com/studio/1/2/x',
+        site: site('Clips4Sale'),
+      },
+      { url: 'https://www.manyvids.com/Video/3/x', site: site('ManyVids') },
+    ]),
+    { url: 'https://www.clips4sale.com/studio/1/2/x', site: 'Clips4Sale' },
+    'the first store StashDB lists',
+  )
+  assert.deepEqual(
+    storeLink([
+      { url: 'https://www.iafd.com/title.rme/id=1', site: { name: 'IAFD' } },
+      { url: 'https://studio.example/v/1', site: STUDIO },
+    ]),
+    { url: 'https://studio.example/v/1', site: 'Studio' },
+  )
+  assert.deepEqual(
+    storeLink([
+      {
+        url: 'https://www.pornhub.com/view_video.php?viewkey=ab12',
+        site: site('Pornhub'),
+      },
+    ]),
+    {
+      url: 'https://www.pornhub.com/view_video.php?viewkey=ab12',
+      site: 'Pornhub',
+    },
+    'a tube counts: it is where to get the scene',
+  )
+  assert.deepEqual(
+    storeLink([
+      { url: 'https://studio.example/v/1', site: { name: 'Studio' } },
+    ]),
+    { url: 'https://studio.example/v/1', site: 'Studio' },
+    'an answer cached before categories were asked for',
+  )
+})
+
+test('a scene cached before store links keeps its studio link', () => {
+  assert.deepEqual(storeOf({ studioUrl: 'https://studio.example/v/1' }), {
+    url: 'https://studio.example/v/1',
+    site: 'Studio',
+  })
+  const store = { url: 'https://clips.example/1', site: 'Clips4Sale' }
+  assert.equal(
+    storeOf({ store, studioUrl: 'https://studio.example/v/1' }),
+    store,
+  )
+  assert.equal(storeOf({ id: 's1' }), null)
+  assert.equal(storeOf(null), null)
+})
+
+test('store links: an archive copy never counts', () => {
+  const live = 'https://www.manyvids.com/Video/3/x'
+  assert.deepEqual(
+    storeLink([
+      {
+        url: `https://web.archive.org/web/2021/${live}/`,
+        site: site('ManyVids'),
+      },
+      { url: live, site: site('ManyVids') },
+    ]),
+    { url: live, site: 'ManyVids' },
   )
   assert.equal(
-    studioLink([{ url: 'https://a.example', site: { name: 'Twitter' } }]),
+    storeLink([
+      {
+        url: `https://web.archive.org/web/2021/${live}`,
+        site: site('ManyVids'),
+      },
+      { url: 'https://archive.ph/abc', site: STUDIO },
+    ]),
     null,
   )
 })
@@ -219,6 +307,43 @@ test('scenes by id: one request, cached per scene', async () => {
     sent.length,
     1,
     'both answered from the cache, the missing one too',
+  )
+})
+
+test('scenes by id: stale ones show, then go again together after the misses', async () => {
+  const { client, sent, cache } = fakeStashdb()
+  // two scenes as 0.1.6 kept them: a studio link and no cache format
+  for (const id of ['s1', 's3'])
+    cache.set('stashdb:scene:' + id, {
+      at: Date.now(),
+      data: {
+        ...sceneFromApi(CATALOGUE[+id[1] - 1]),
+        store: undefined,
+        studioUrl: 'https://studio.example/old',
+      },
+    })
+  const r = await scenesById(client, ['s1', 's2', 's3'])
+  assert.deepEqual(
+    r.part.scenes.map((s) => s.id),
+    ['s1', 's3', 's2'],
+  )
+  assert.equal(r.complete, true)
+  assert.equal(sent.length, 1, 'only the miss before the page has them')
+  assert.match(sent[0], /s0: findScene/)
+  assert.doesNotMatch(sent[0], /s1: findScene/)
+  await client.revalidate()
+  assert.equal(sent.length, 2, 'the stale ones in one request')
+  assert.match(sent[1], /s1: findScene/)
+  assert.deepEqual(cache.get('stashdb:scene:s3').data.store, {
+    url: 'https://studio.example/s3?id=3',
+    site: 'Studio',
+  })
+  const again = await scenesById(client, ['s1', 's2', 's3'])
+  await client.revalidate()
+  assert.equal(sent.length, 2, 'all fresh now')
+  assert.equal(
+    again.part.scenes.find((s) => s.id === 's1').studioUrl,
+    undefined,
   )
 })
 

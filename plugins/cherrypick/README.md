@@ -2,7 +2,7 @@
 
 A [Stash](https://github.com/stashapp/stash) plugin that learns what you like from your own ratings and plays, and shows it inside Stash's pages: a For you row on the front page, Your score on scenes you haven't rated, More like this on scene pages, and performer and scene brackets that sharpen what it learns. It needs no account and no setup. A StashDB key, if you have one in Stash, adds popularity and the scenes you don't have.
 
-Cherry Pick 0.1.6 is built and tested on Stash v0.31.1.
+Cherry Pick 0.1.8 is built and tested on Stash v0.31.1.
 
 ![The front page with Cherry Pick: For you first, each card saying why it is there, then a row of one performer's scenes](docs/screenshots/front.png)
 
@@ -83,6 +83,8 @@ With Apply bracket ratings automatically on, under Settings > Plugins, the champ
 
 With a StashDB key in Settings > Metadata Providers, Cherry Pick uses it straight away and also shows how widely a scene is held, a scene's rank among a performer's scenes, and the scenes you don't have. Without one, where those would show, a Connect StashDB button walks you through getting a key and adds it to Stash's settings for you. Cherry Pick's page can stop the lookups without removing the key.
 
+Each scene you don't have links to where to get it, as StashDB lists it: its page on a clip store or tube (Clips4Sale, iWantClips, ManyVids, Pornhub and the like), named on the button, or else on its studio's site, with tracking codes removed, beside its StashDB page.
+
 ![A performer's StashDB scenes that are not in the library, most popular first](docs/screenshots/not-in-library.png)
 
 ### With Ascension, HotOrNot, Xenith or Restash
@@ -108,7 +110,7 @@ Cherry Pick's tests run on these Stash versions and on Stash's latest develop bu
 | Stash         | v0.31.1       |
 | Ascension     | 1.4.1         |
 | HotOrNot      | 1.0.0-c4106bf |
-| Stash Curator | 0.40.1        |
+| Stash Curator | 0.40.4        |
 | Xenith        | 3.2.0         |
 | Restash       | 0.3.0-55c1cb2 |
 
@@ -147,7 +149,7 @@ Your browser keeps only what Cherry Pick can do without: a copy of your library 
 ### Network requests
 
 - **Your Stash server**, through Stash's own GraphQL API: your library, the plugin configuration, and the custom fields and ratings above. In a scene bracket, also the sprite sheets and preview clips Stash generated for the scenes on screen and the next match's.
-- **StashDB** (`https://stashdb.org/graphql`), only when Stash has a StashDB key, and never after you choose Stop using StashDB on Cherry Pick's page: the StashDB ids of the performers, scenes and studios on the pages you open, sent with your key in StashDB's `ApiKey` header, at most six requests per page, one a second. Answers are cached in your browser for 7 days. The covers of scenes you don't have load from StashDB's image server.
+- **StashDB** (`https://stashdb.org/graphql`), only when Stash has a StashDB key, and never after you choose Stop using StashDB on Cherry Pick's page: the StashDB ids of the performers, scenes and studios on the pages you open, sent with your key in StashDB's `ApiKey` header, at most six requests per page, one a second. Answers are kept in your browser for 30 days. After 7 days a page shows the answer it has and asks StashDB again in the background, within the same limits, and the new answer shows the next time Stash loads or another page asks for it. The covers of scenes you don't have load from StashDB's image server.
 
 Cherry Pick sends nothing to CandyBoudoir or anyone else.
 

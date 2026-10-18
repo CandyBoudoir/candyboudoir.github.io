@@ -25,6 +25,8 @@ bs-tooltip-top
 btn-info
 btn-warning
 card-drag-handle
+cherrypick-score-banner
+cherrypick-star
 criterion-list
 current
 custom-checkbox
@@ -63,6 +65,7 @@ page-item
 page-link
 pagination
 pagination-footer-container
+performer-card__age
 popover
 popover-body
 popover-header
