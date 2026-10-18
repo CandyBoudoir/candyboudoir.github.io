@@ -24,16 +24,31 @@
   --leather-warning: #e6ad69;
   --leather-danger: #f0596c;
 
+  /*
+   * Dyes for data: the charts and tabs of the plugins Leather restyles
+   * (82-insights.css, 83-performers-toolkit.css) need eight colours that
+   * tell apart on black leather. Blood, nickel and the status tones give
+   * five; these add a cognac hide, steel, a verdigris patina and a plum dye.
+   */
+  --leather-cognac: #cc6f34;
+  --leather-steel: #8ea9c9;
+  --leather-verdigris: #6db5ac;
+  --leather-plum: #a982bf;
+
   /* Surfaces, black leather from back to front */
   --leather-bg: #0c0a0b;
   --leather-surface: #151113;
   --leather-raised: #221b1e;
   --leather-line: #2f2629;
 
+  /* A well debossed into a panel, where a chart sits */
+  --leather-well: #0a0809;
+
   /* Text */
   --leather-text: #ece6e3;
   --leather-text-muted: #a99f9b;
   --leather-text-dim: #948a8b;
+  --leather-text-faint: #6e6366;
 
   /*
    * Materials. The pebble grain is a seamless tile: periodic noise and wrapped

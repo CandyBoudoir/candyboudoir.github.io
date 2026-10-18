@@ -18,3 +18,11 @@ settings:
     displayName: Plain labels
     description: Keep Stash's own wording instead of Leather's strict copy. Stash's SFW mode always uses plain labels.
     type: BOOLEAN
+  restyleInsights:
+    displayName: Restyle Insights
+    description: "Off: the Insights plugin keeps its own Flexoki look on the Stats page. On: it takes Leather's black leather, stitching, studs and blackletter. Shows while Insights is on; takes effect on the next page you open."
+    type: BOOLEAN
+  restylePerformersToolkit:
+    displayName: Restyle Performers Toolkit
+    description: "Off: the Performers Toolkit plugin keeps its own Flexoki look on its page and on performer pages. On: it takes Leather's black leather, stitching, studs and blackletter. Shows while Performers Toolkit is on; takes effect on the next page you open."
+    type: BOOLEAN
