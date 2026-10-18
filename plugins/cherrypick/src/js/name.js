@@ -16,7 +16,3 @@ export const FIELD_PREFIX = slug + '_'
 export const STORAGE_PREFIX = slug + ':'
 // "Cherry Pick's", for sentences
 export const NAME_S = PLUGIN_NAME + (PLUGIN_NAME.endsWith('s') ? "'" : "'s")
-
-// ClipRated is the later community-scores service; inside the plugin it only
-// names the crowd score.
-export const COMMUNITY_NAME = 'ClipRated'
