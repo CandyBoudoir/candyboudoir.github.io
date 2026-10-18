@@ -15,7 +15,7 @@
 // Reads the latest releases over the network, for a release and --issues
 // only; GITHUB_TOKEN raises GitHub's rate limit.
 import { execFileSync } from 'node:child_process'
-import { readFile } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import {
   COMPANIONS,
@@ -159,6 +159,24 @@ if (issues) {
   }
   for (const [key, r] of Object.entries(RESTYLED)) {
     const { version, current } = await latestRestyled(r)
+    // The themes that restyle it keep its unmatched-class baseline
+    const themes = []
+    for (const folder of await readdir(join(root, 'plugins')))
+      if (
+        await readFile(
+          join(
+            root,
+            'plugins',
+            folder,
+            'tests',
+            `${key}-unmatched-baseline.txt`,
+          ),
+        ).then(
+          () => true,
+          () => false,
+        )
+      )
+        themes.push(folder)
     console.log(
       `${r.name}: restyled ${r.version}, latest ${version}${current ? '' : ' (newer)'}`,
     )
@@ -186,9 +204,9 @@ if (issues) {
         title,
         '--body',
         [
-          `${r.name} ${version} is out, and the themes that restyle it (${r.themes.join(', ')}) are still tested against ${r.version}.`,
+          `${r.name} ${version} is out, and the themes that restyle it (${themes.join(', ')}) are still tested against ${r.version}.`,
           '',
-          `Pin its files at the release commit in \`tests/stash/companions.mjs\` (RESTYLED.${key}), run those themes' contract and visual specs, fix any class the release renamed (each theme's \`tests/insights-unmatched-baseline.txt\` check names them), refresh their baselines, and update the version their README names.`,
+          `Pin its files at the release commit in \`tests/stash/companions.mjs\` (RESTYLED.${key}), run those themes' contract and visual specs, fix any class the release renamed (each theme's check against \`tests/${key}-unmatched-baseline.txt\` names them), refresh their baselines, and update the version their README names.`,
         ].join('\n'),
       )
   }

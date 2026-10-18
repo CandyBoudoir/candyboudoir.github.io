@@ -140,13 +140,14 @@ export const COMPANIONS = {
 
 // Other authors' plugins that themes here restyle. prepare.mjs puts each of
 // these into every test Stash, switched off, and the specs of the themes
-// named in `themes` switch it on (usePlugins) to check and shoot the theme's
-// look for it. Each is pinned to the files of one release at its commit in
+// that restyle it switch it on (usePlugins) to check and shoot the theme's
+// look for it; each such theme keeps tests/<key>-unmatched-baseline.txt. Each is pinned to the files of one release at its commit in
 // the author's repository, by sha256: an author's Pages source keeps only
 // its newest zip, and a test Stash that cannot get the pinned files fails
 // every plugin's specs, not one leg's. tested-with.mjs --issues opens an
 // issue when a newer release is out.
 const INSIGHTS_COMMIT = '97171c133f1c7f5214a6d2950c51364b9a72787c'
+const PERFORMERS_TOOLKIT_COMMIT = 'e357be13a5ccc771b9b5b9d7ff4596d16aeaa31f'
 export const RESTYLED = {
   // Insights 2.11.0, a stats dashboard on Stash's Stats page, from
   // https://gitlab.com/allisless0/stash-plugins (MIT): its plugin folder at
@@ -171,7 +172,30 @@ export const RESTYLED = {
     latest: {
       index: 'https://allisless0.gitlab.io/stash-plugins/main/index.yml',
     },
-    themes: ['citypop'],
+  },
+  // Performers Toolkit 0.4.2, a toolkit page at /performerstoolkit and a
+  // strip and two tabs on performer pages, from the same repository and
+  // in the same Flexoki look as Insights. Its scans and saves run in a
+  // Python backend (standard library only), which the specs never start.
+  performerstoolkit: {
+    id: 'PerformersToolkit',
+    name: 'Performers Toolkit',
+    version: '0.4.2',
+    commit: PERFORMERS_TOOLKIT_COMMIT,
+    base: `https://gitlab.com/allisless0/stash-plugins/-/raw/${PERFORMERS_TOOLKIT_COMMIT}/plugins/PerformersToolkit`,
+    files: {
+      'PerformersToolkit.js':
+        '28c305412ad4f8e5e22a00b3eb3e8db091034543e293d1f78449e632abaaa955',
+      'PerformersToolkit.py':
+        'b1346251b90392c8aadd95cbf5d0ff64f4faf9a01822fc791a86d6c9325ef930',
+      'PerformersToolkit.yml':
+        '8703d360e16a9f5464d0fd02f180952fef3f25b4fc1dd76dde6aee1fab72ff53',
+      'README.md':
+        '97fe8edec0bdbda3107e541d3144e534f13488ff5919681dc9ddcc0b85c720c4',
+    },
+    latest: {
+      index: 'https://allisless0.gitlab.io/stash-plugins/main/index.yml',
+    },
   },
 }
 

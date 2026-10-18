@@ -369,15 +369,18 @@ export const SHOTS = [
 ]
 
 // The class names a built stylesheet's selectors name: those of its rules
-// for Insights (#insights, #ins-tip) with `insights`, those of its other
-// rules without
-async function stylesheetClasses(css, { insights = false } = {}) {
+// for the named restyled plugin (RESTYLED_CLASSES) with `plugin`, those of
+// its rules for none of them without
+async function stylesheetClasses(css, { plugin } = {}) {
   const source = (await readFile(css, 'utf8'))
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/url\([^)]*\)/g, '')
   const names = new Set()
   for (const [, selector] of source.matchAll(/([^{}]+)\{/g)) {
-    if (/#ins(ights|-tip)\b/.test(selector) !== insights) continue
+    const keep = plugin
+      ? RESTYLED_CLASSES[plugin].rules.test(selector)
+      : !Object.values(RESTYLED_CLASSES).some((r) => r.rules.test(selector))
+    if (!keep) continue
     for (const m of selector.matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) names.add(m[1])
   }
   return [...names]
@@ -413,8 +416,8 @@ async function newlyMissing(unmatched, folder, name) {
 // renders, and which of them still rendered on the baseline Stash version
 // (the plugin's tests/unmatched-baseline.txt). Those newly missing classes
 // point at what a Stash change removed; the rest only appear in dialogs,
-// menus or on hover. Rules for Insights are left to
-// unmatchedInsightsClasses. Returns the newly missing ones.
+// menus or on hover. Rules for the restyled plugins are left to
+// unmatchedRestyledClasses. Returns the newly missing ones.
 export async function unmatchedClasses(page, { css, prefix, folder }) {
   const classes = (await stylesheetClasses(css)).filter(
     (c) => !c.startsWith(prefix),
@@ -445,8 +448,11 @@ export async function unmatchedClasses(page, { css, prefix, folder }) {
   )
 }
 
-// Insights (RESTYLED in companions.mjs) draws its dashboard on the Stats
-// page, one tab at a time.
+// The plugins the themes restyle (RESTYLED in companions.mjs). A theme's
+// specs switch one on with usePlugins, open it with these and check that the
+// classes it styles still render with unmatchedRestyledClasses.
+
+// Insights draws its dashboard on the Stats page, one tab at a time.
 export const INSIGHTS_TABS = [
   'you',
   'actions',
@@ -471,30 +477,92 @@ export async function openInsights(page, tab = 'you') {
   await root.locator('.ins-upd:not(.busy)').waitFor({ timeout: 30_000 })
 }
 
-// Lists the Insights classes (ins-*) in a theme's built stylesheet that no
-// tab of Insights renders on the demo library, and which of them rendered on
-// the pinned Insights before (the theme's tests/insights-unmatched-baseline.txt).
-// The pin only moves with an Insights release, so a newly missing class is
-// one that release renamed or removed. Returns the newly missing ones.
-export async function unmatchedInsightsClasses(page, { css, folder }) {
-  const classes = (await stylesheetClasses(css, { insights: true })).filter(
-    (c) => c.startsWith('ins-'),
+// Performers Toolkit has its own page at /performerstoolkit, in tabs, a
+// button on the Performers list, and on each performer's page a strip under
+// the name and Stats and Catalog tabs. Its Catalog asks the stash-boxes from
+// its Python backend, so the tour leaves it out.
+export const PERFORMERS_TOOLKIT_TABS = [
+  'find',
+  'performers',
+  'history',
+  'sources',
+]
+
+// Opens the toolkit page on the named tab, once it has read the library
+export async function openPerformersToolkit(page, tab = 'find') {
+  await page.goto('/performerstoolkit')
+  const root = page.locator('.pt.pt-page, .pt').first()
+  await root.locator('.pt-tabs').waitFor({ timeout: 60_000 })
+  await page.locator('.pt .pt-load').waitFor({ state: 'detached' })
+  await root.locator(`.pt-tab[data-tab="${tab}"]`).click()
+  await page.locator(`.pt[data-tab="${tab}"]`).waitFor()
+  await page.locator('.pt .pt-load').waitFor({ state: 'detached' })
+}
+
+// Opens a performer's page on Performers Toolkit's Stats tab
+export async function openPerformerStats(page, performer) {
+  await page.goto(`/performers/${performer}`)
+  await page.locator('#pt-strip').waitFor({ timeout: 30_000 })
+  await page.locator('.pt-tablink[data-pt-tab="stats"]').click()
+  await page.locator('.ptc .pt-stats').waitFor({ timeout: 30_000 })
+}
+
+// How each restyled plugin's rules and classes are told apart in a theme's
+// stylesheet, and the tour that renders as many of its classes as the demo
+// library can
+export const RESTYLED_CLASSES = {
+  insights: {
+    rules: /#ins(ights|-tip)\b|\.ins-/,
+    names: /^ins-/,
+    async tour(page, visit) {
+      await openInsights(page, INSIGHTS_TABS[0])
+      for (const tab of INSIGHTS_TABS) {
+        await page.locator(`#insights .ins-tab[data-tab="${tab}"]`).click()
+        await page.locator(`#insights[data-tab="${tab}"]`).waitFor()
+        await visit()
+      }
+    },
+  },
+  performerstoolkit: {
+    rules: /\.ptc?\b|#pt-/,
+    names: /^ptc?$|^pt-/,
+    async tour(page, visit) {
+      for (const tab of PERFORMERS_TOOLKIT_TABS) {
+        await openPerformersToolkit(page, tab)
+        await visit()
+      }
+      await page.goto('/performers')
+      await page.locator('.pt-entry').waitFor({ timeout: 30_000 })
+      await visit()
+      await openPerformerStats(page, (await demoIds()).performer)
+      await visit()
+    },
+  },
+}
+
+// Lists the classes of a restyled plugin (RESTYLED_CLASSES) in a theme's
+// built stylesheet that its tour never renders on the demo library, and which
+// of them rendered on the pinned release before (the theme's
+// tests/<plugin>-unmatched-baseline.txt). The pin only moves with a new
+// release of the plugin, so a newly missing class is one that release
+// renamed or removed. Returns the newly missing ones.
+export async function unmatchedRestyledClasses(page, { css, folder, plugin }) {
+  const { names, tour } = RESTYLED_CLASSES[plugin]
+  const classes = (await stylesheetClasses(css, { plugin })).filter((c) =>
+    names.test(c),
   )
   const seen = new Set()
-  await openInsights(page, INSIGHTS_TABS[0])
-  for (const tab of INSIGHTS_TABS) {
-    await page.locator(`#insights .ins-tab[data-tab="${tab}"]`).click()
-    await page.locator(`#insights[data-tab="${tab}"]`).waitFor()
+  await tour(page, async () => {
     for (const c of await page.evaluate(
       (list) => list.filter((c) => document.getElementsByClassName(c).length),
       classes,
     )) {
       seen.add(c)
     }
-  }
+  })
   return newlyMissing(
     classes.filter((c) => !seen.has(c)).sort(),
     folder,
-    'insights-unmatched',
+    `${plugin}-unmatched`,
   )
 }
