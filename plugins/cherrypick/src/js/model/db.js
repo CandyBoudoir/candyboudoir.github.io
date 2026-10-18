@@ -162,6 +162,8 @@ import { markRatingSources } from './rankings.js'
  * @property {number|null} [width]  the owned file's width in pixels
  * @property {number|null} [height]
  * @property {boolean} [audioOnly]  an owned file with no video stream
+ * @property {boolean} [hasVideo]  an owned scene whose first file has a
+ *   picture: not audio-only, and not a scene with no file at all
  * @property {string|null} image
  * @property {{ id: string, name: string, parent: { id: string, name: string }|null }|null} studio
  * @property {{ id: string, name: string, gender: string|null }[]} performers
@@ -313,6 +315,10 @@ export function buildDb(input) {
       width: row.files?.[0]?.width || null,
       height: row.files?.[0]?.height || null,
       audioOnly: row.files?.[0]?.video_codec === '',
+      hasVideo:
+        !!row.files?.[0] &&
+        row.files[0].video_codec !== '' &&
+        row.files[0].width !== 0,
       image: row.paths?.screenshot || null,
       studio: st
         ? {

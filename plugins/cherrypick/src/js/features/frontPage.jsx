@@ -2,7 +2,9 @@
 // for libraries under 30 scenes, New in your library), 0 to 2 rows that
 // follow recent watching, then the Hall of Fame. Stash's FrontPage is kept
 // whole: the rows are added before its .recommendations-container, so its
-// rows, its Customise button and other plugins' patches stay.
+// rows, its Customise button and other plugins' patches stay. With Watch
+// This on, one scene in Stash's player takes the rows' place
+// (watchThis.jsx), and the rows' switches keep their values.
 //
 // The rows are computed once per visit to the front page and then hold
 // still: Not interested turns a card into an Undo card in place, and nothing
@@ -19,6 +21,7 @@ import {
   tooSmall,
   visitSignals,
 } from '../model/foryou.js'
+import { BuildingLine } from '../ui/BuildingLine.jsx'
 import { CardRow, HiddenCard } from '../ui/Row.jsx'
 import { RowSceneCard } from '../ui/rowCards.jsx'
 import { Safe } from '../ui/Safe.jsx'
@@ -29,6 +32,8 @@ import { quickStartPerformers, resumeBracket } from './brackets/actions.js'
 import { rateMore } from '../model/index.js'
 import { toRateUrl } from '../data/listFilter.js'
 import { useFallbackLookups } from '../stashdb/layer.js'
+import { KEYS, local } from '../storage/tier3.js'
+import { WatchThis } from './watchThis.jsx'
 
 // ------------------------------------------------------------ the visit's rows
 
@@ -120,25 +125,6 @@ function SceneRow({ id, title, items, className, onOpen, extra }) {
 
 const { Link } = ReactRouterDOM
 
-const count = (n) => n.toLocaleString('en-US')
-
-// One line in For you's header during its first build in a browser: the
-// library read page by page, then the model fitting, which takes several
-// seconds on a library of tens of thousands of scenes. Later visits start
-// from the browser's copy and show the skeleton row alone.
-function BuildingLine() {
-  const progress = useAppState((s) => s.loadProgress)
-  const library = useAppState((s) => s.library)
-  if (!progress) return null
-  return (
-    <span className="text-muted small cherrypick-building">
-      {library
-        ? `Learning your taste from ${count(library.scenes.length)} scenes…`
-        : `Reading your library: ${count(progress.n)} of ${count(progress.of)} ${progress.kind}…`}
-    </span>
-  )
-}
-
 // One line in For you's header while Your score has too few ratings to
 // check itself: the two quickest ways to sharpen the row, each one click.
 // The ratings link opens your unrated scenes, most played first; a bracket
@@ -222,6 +208,26 @@ function CherryPickRows() {
   )
 }
 
+// Watch This, until the plugin's configuration arrives: the value this
+// browser last saw, so the front page starts with the right skeleton.
+const mirroredWatchThis = local.get(KEYS.mirror)?.watchThis === true
+
+// Cherry Pick's rows, or with Watch This on, one scene in their place.
+function FrontPiece() {
+  const watchThis = useAppState((s) =>
+    s.configLoaded ? s.settings.watchThis === true : mirroredWatchThis,
+  )
+  return watchThis ? (
+    <Safe name="Watch This">
+      <WatchThis />
+    </Safe>
+  ) : (
+    <Safe name="front page rows">
+      <CherryPickRows />
+    </Safe>
+  )
+}
+
 // Stash's FrontPage renders a loading indicator, the Customise editor or the
 // rows' .recommendations-container; Cherry Pick's rows join only the last.
 const isRows = (el) =>
@@ -231,9 +237,7 @@ export function registerFrontPage() {
   patchAfter('FrontPage', (props, result) =>
     isRows(result) ? (
       <>
-        <Safe name="front page rows">
-          <CherryPickRows />
-        </Safe>
+        <FrontPiece />
         {result}
       </>
     ) : (

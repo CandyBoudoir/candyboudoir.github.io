@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Watch This, a new setting in Cherry Pick's settings, off until you turn it on, puts one scene on the front page in place of Cherry Pick's rows: the one Cherry Pick expects you most want to watch now, in Stash's own player at the page's full width. Stash's own rows stay below it. The player works as on the scene page: Stash records the play and where you stopped, Stash's Auto-start video setting decides whether the scene starts by itself, and Space plays it with no click first. A line under the player gives the scene's title, its performers and why Cherry Pick picked it, and steps out once the scene plays. Nothing happens when the scene ends. For you, the rows that follow your watching and the Hall of Fame row keep their switches for when you turn Watch This off; the Hall of Fame stays on Cherry Pick's page.
+
 ## 0.1.8
 
 - Your score, For you, More like this and a bracket's cards leave out the tags Advanced Rating and Binge keep for their own use: Advanced Rating's score tags, such as "Production Quality ★: 4", which Binge's stars also write when Advanced Rating is installed, and Binge's collections, such as "Watch Later 📁". Score tags sit only on rated scenes and spell out the rating, so Your score learned a rated scene's rating from them and gave the scene's other tags less weight. Two scenes in the same collection counted as sharing a tag in More like this. Advanced Rating's "Favourite ★" still counts, as your own verdict on a scene.
