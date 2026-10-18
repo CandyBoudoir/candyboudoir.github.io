@@ -239,6 +239,19 @@ test('placeholder and release tags stay out of the model', () => {
   )
 })
 
+test("other plugins' score and collection tags stay out of the model", () => {
+  for (const name of [
+    'Production Quality ★: 4', // Advanced Rating's, and Binge's stars
+    'Chemistry ★: 0',
+    'Energy & Presence ★: 5',
+    'Watch Later 📁', // Binge's collections
+    'Road Trip 📁',
+  ])
+    assert.ok(isPlaceholderTag({ name }), name)
+  for (const name of ['Favourite ★', 'Watch Later', 'Road Trip'])
+    assert.equal(isPlaceholderTag({ name }), false, name)
+})
+
 test('without a StashDB part every scene is owned', () => {
   const { stashdb, ...input } = smallInput()
   assert.ok(stashdb)

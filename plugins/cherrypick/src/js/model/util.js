@@ -23,6 +23,11 @@ export function isPlaceholderTag(tag) {
     /^[[_(#!.~-]|^(todo|tbd|unsorted|unorganized|placeholder)/i.test(tag.name)
   )
     return true
+  // Other plugins' bookkeeping: Advanced Rating's score tags ("Production
+  // Quality ★: 4", which Binge's stars write too) sit only on rated scenes
+  // and spell out the rating; Binge's collections end in " 📁" ("Watch
+  // Later 📁"). Advanced Rating's "Favourite ★" stays: it's the user's verdict.
+  if (/ ★\s*:\s*[0-5]$/.test(tag.name) || tag.name.endsWith(' 📁')) return true
   return false
 }
 

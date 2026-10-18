@@ -410,6 +410,27 @@ export function syntheticLibrary(opts = {}) {
   return { input: { asOf, scenes, performers }, taste }
 }
 
+/**
+ * The library as Advanced Rating and Binge leave it: score tags matching the
+ * rating on every rated scene (Binge's stars write the same ones) and Binge's
+ * Watch Later on every third unrated one.
+ * @param {ReturnType<typeof syntheticLibrary>['input']} input
+ */
+export function withBookkeepingTags(input) {
+  const scenes = input.scenes.map((s, i) => {
+    const extra = []
+    if (s.rating100 != null) {
+      const n = Math.round(s.rating100 / 20)
+      extra.push(
+        { id: 'ar-pq-' + n, name: `Production Quality ★: ${n}` },
+        { id: 'ar-ch-' + n, name: `Chemistry ★: ${n}` },
+      )
+    } else if (i % 3 === 0) extra.push({ id: 'bg-wl', name: 'Watch Later 📁' })
+    return { ...s, tags: [...s.tags, ...extra] }
+  })
+  return { ...input, scenes }
+}
+
 // ---------------------------------------------------------------- StashDB
 
 /**

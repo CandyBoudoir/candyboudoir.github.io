@@ -20,7 +20,7 @@ import {
   setGenderResolver,
   timeAgo,
 } from '../../src/js/model/util.js'
-import { syntheticLibrary } from './fixtures/synthetic.mjs'
+import { syntheticLibrary, withBookkeepingTags } from './fixtures/synthetic.mjs'
 
 const { input, taste } = syntheticLibrary()
 const db = buildDb(input)
@@ -265,6 +265,18 @@ test('features: performers, studio and network, and tags shared out by count', (
   )
   for (const [k, x] of f)
     assert.equal(x, k[0] === 't' ? 2 / Math.sqrt(content.length) : 1)
+})
+
+test("other plugins' score and collection tags leave Your score as it was", () => {
+  const marked = withBookkeepingTags(input)
+  const s = marked.scenes.find((x) => x.rating100 != null)
+  assert.deepEqual(
+    sceneFeatures(s),
+    sceneFeatures(input.scenes.find((x) => x.id === s.id)),
+    'content tags keep their full share',
+  )
+  const Mm = createEngine(buildDb(marked)).compute({})
+  for (const x of db.owned) close(Mm.estimate(x.id), M.estimate(x.id), x.id)
 })
 
 test('a surprise moves the scores more than an expected pick', () => {
