@@ -1,0 +1,60 @@
+/* Tags: night-violet pills with a striped sun for a dot */
+.tag-item.badge,
+.badge-secondary {
+  align-items: center;
+  background: linear-gradient(180deg, #2a2566, #211d56);
+  border: 1px solid var(--citypop-key);
+  border-radius: 999px;
+  box-shadow: 2px 2px 0 rgb(4 3 22 / 60%);
+  color: #f1ebff;
+  display: inline-flex;
+  font-family: var(--citypop-font-label);
+  font-size: 0.72rem;
+  font-weight: 500;
+  gap: 0.45em;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  padding: 0.5em 0.95em 0.5em 0.65em;
+  text-transform: uppercase;
+}
+
+.tag-item.badge::before {
+  background: var(--citypop-sunset);
+  content: '';
+  flex: none;
+  height: 1.05em;
+  mask: url('assets/icons/glyph-sun.svg') center / contain no-repeat;
+  width: 1.05em;
+}
+
+.tag-item.badge a {
+  color: inherit;
+}
+
+.tag-item.badge:hover,
+.tag-item.badge a:hover {
+  border-color: var(--citypop-coral);
+  color: #fff;
+  text-decoration: none;
+}
+
+.badge-primary {
+  background: var(--citypop-gloss), var(--citypop-sunset-btn);
+  border-radius: 999px;
+  box-shadow: 2px 2px 0 rgb(4 3 22 / 60%);
+  color: var(--citypop-ink);
+  font-family: var(--citypop-font-label);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.badge-info {
+  background: var(--citypop-gloss), var(--citypop-pool-grad);
+  border-radius: 999px;
+  box-shadow: 2px 2px 0 rgb(4 3 22 / 60%);
+  color: var(--citypop-ink);
+  font-family: var(--citypop-font-label);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}

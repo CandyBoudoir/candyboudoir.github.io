@@ -1,0 +1,215 @@
+/*
+ * Stash-box screens: the Tagger, the scrape dialogs, StashID links and the
+ * stash-box search lists. Stash paints these slate in its own stylesheet. The
+ * Tagger is a work surface where people clear hundreds of rows, so its rows
+ * are flat navy panels that never lift or sweep; the chosen row takes a
+ * sunset edge, and the gloss stays on the buttons that act.
+ */
+
+/* Tagger rows, and the stash-box result lists that reuse .search-item */
+.search-item {
+  background: var(--citypop-panel);
+  border: 1px solid var(--citypop-edge);
+  border-radius: 5px;
+  box-shadow: var(--citypop-hard-sm);
+}
+
+/* The performer, studio and tag taggers sit inside a card, so raise them */
+.PerformerTagger-performer,
+.StudioTagger-studio,
+.TagTagger-tag,
+.modal .search-item {
+  background: var(--citypop-raised);
+  border: 1px solid var(--citypop-key);
+  border-radius: 5px;
+  box-shadow: var(--citypop-hard-sm);
+}
+
+.StudioTagger-studio .studio-card img,
+.TagTagger-tag .tag-card img {
+  background-color: var(--citypop-night);
+}
+
+/* Cards inside the Tagger keep still, without the sweep or the glint */
+:is(
+    .tagger-container,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag
+  )
+  .grid-card:hover {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 8%),
+    var(--citypop-hard);
+  transform: none;
+}
+
+:is(
+    .tagger-container,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag
+  )
+  .grid-card:hover
+  .thumbnail-section::before,
+:is(
+    .tagger-container,
+    .PerformerTagger-performer,
+    .StudioTagger-studio,
+    .TagTagger-tag
+  )
+  .grid-card:hover
+  .thumbnail-section::after {
+  animation: none;
+}
+
+/* Clickable results in the stash-box search modals */
+.PerformerScrapeModal-list .search-item:hover,
+.StashBoxIDSearchModal-list .search-item:hover {
+  box-shadow:
+    inset 3px 0 0 var(--citypop-sun),
+    var(--citypop-hard-sm);
+}
+
+/* Scene Tagger results: the picked one takes a sunset edge */
+.search-result {
+  background-color: transparent;
+  border-radius: 3px;
+}
+
+.search-result + .search-result {
+  border-top: 1px solid var(--citypop-line);
+}
+
+.search-result:hover {
+  background-color: rgb(255 255 255 / 3%);
+}
+
+.selected-result,
+.selected-result:hover {
+  background: linear-gradient(90deg, rgb(255 122 107 / 14%), transparent 60%);
+  box-shadow: inset 3px 0 0 var(--citypop-sun);
+}
+
+.search-result h4 {
+  font-family: var(--citypop-font-label);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.search-result h5 {
+  color: var(--citypop-dim);
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+}
+
+/* Pictures in the Tagger keep the sleeve's printed keyline */
+.tagger-container .scene-card-preview,
+.search-result .scene-image,
+.search-item .scene-image {
+  border-radius: 3px;
+  outline: 1px solid rgb(255 250 244 / 60%);
+  outline-offset: -4px;
+}
+
+.entity-name {
+  color: var(--citypop-muted);
+  font-family: var(--citypop-font-label);
+  letter-spacing: 0.04em;
+}
+
+/* Fields left out of a save, or missing from the result */
+li.active .optional-field.missing .optional-field-content,
+li.active .optional-field.excluded .optional-field-content,
+li.active .optional-field.excluded .scene-link {
+  color: var(--citypop-dim);
+}
+
+/* StashID links: a pool-blue tab with the box name, the ID on night violet */
+.stash-id-pill {
+  border-radius: 999px;
+  box-shadow: 2px 2px 0 rgb(4 3 22 / 60%);
+  overflow: hidden;
+  padding: 0;
+  vertical-align: middle;
+}
+
+.stash-id-pill span {
+  background: var(--citypop-gloss), var(--citypop-pool-grad);
+  border-radius: 0;
+  color: var(--citypop-ink);
+  font-family: var(--citypop-font-label);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.stash-id-pill a {
+  background: var(--citypop-raised);
+  border-radius: 0;
+  color: var(--citypop-text);
+  font-family: ui-monospace, monospace;
+  font-weight: 400;
+}
+
+.stash-id-pill a:hover {
+  color: var(--citypop-coral);
+}
+
+/*
+ * Scrape dialogs set Stash's current value against the scraped one, and the
+ * toggle in front of each says which wins. The winning side's toggle is the
+ * pool, and its field takes the turquoise ring.
+ */
+.scrape-dialog .column-label,
+.scrape-dialog .col-form-label {
+  color: var(--citypop-muted);
+  font-family: var(--citypop-font-label);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.scrape-dialog .input-group-prepend .btn:has(.text-success) {
+  background: var(--citypop-gloss), var(--citypop-pool-grad);
+}
+
+.scrape-dialog .input-group-prepend .btn .text-success {
+  color: var(--citypop-ink) !important;
+}
+
+.scrape-dialog
+  .input-group:has(> .input-group-prepend .text-success)
+  :is(.form-control, div.react-select__control) {
+  border-color: var(--citypop-pool) !important;
+  box-shadow:
+    inset 0 2px 0 rgb(0 0 0 / 30%),
+    0 0 0 3px rgb(79 227 218 / 22%);
+}
+
+/* Icons on night buttons keep their meaning */
+.btn-secondary .text-muted {
+  color: var(--citypop-muted) !important;
+}
+
+/* The filter bar at the top of the "Scrape with…" menu */
+.scraper-menu .dropdown-menu .scraper-filter-container {
+  background: transparent;
+  border-bottom: 1px solid var(--citypop-line);
+}
+
+/* Identify task: the ordered list of sources */
+.scraper-source-list .list-group-item,
+.list-group-item {
+  background: var(--citypop-panel);
+  border-color: var(--citypop-line);
+  color: var(--citypop-text);
+}
+
+.identify-source-editor .default-value {
+  color: var(--citypop-dim);
+}

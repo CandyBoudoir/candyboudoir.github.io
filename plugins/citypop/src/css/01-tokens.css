@@ -1,0 +1,162 @@
+/*
+ * City Pop design tokens. Stash compiles its colours from SCSS and exposes no
+ * custom properties, so every rule in this theme reads from these instead.
+ * Every url() here resolves against citypop.css.
+ */
+:root {
+  color-scheme: dark;
+  accent-color: var(--citypop-sun);
+
+  /* The dusk: night blue overhead, violet low down */
+  --citypop-night: #0c0e30;
+  --citypop-panel: #1a1848;
+  --citypop-raised: #252262;
+  --citypop-line: #3a3678;
+  --citypop-edge: #332f72;
+  --citypop-key: #4a4596;
+  --citypop-well: #0e0f33;
+
+  /* The sunset, from the sun's top to its foot */
+  --citypop-gold: #ffe08a;
+  --citypop-apricot: #ffb36b;
+  --citypop-sun: #ff7a6b;
+  --citypop-coral: #ff8a7a;
+  --citypop-pink: #f5508a;
+  --citypop-magenta: #c23a8e;
+  --citypop-violet: #6a3fb0;
+  --citypop-lilac: #b9a6f0;
+
+  /* Pool water, the second accent */
+  --citypop-pool: #4fe3da;
+  --citypop-pool-hi: #6ff0e6;
+  --citypop-pool-deep: #1596b0;
+
+  /* Type and paper */
+  --citypop-ink: #1b1145;
+  --citypop-cream: #fff6ea;
+  --citypop-paper: #fbf6ef;
+  --citypop-text: #fff4ec;
+  --citypop-muted: #cbc3ec;
+  --citypop-dim: #a39bd3;
+  --citypop-unlit: #8f87c9;
+
+  /* Status text keeps its meaning in the dusk's own tones */
+  --citypop-success: #6ff0e6;
+  --citypop-warning: #ffc27a;
+  --citypop-danger: #ff7d92;
+
+  /* The hard airbrush shadow: crisp, offset, violet-black */
+  --citypop-drop: rgb(4 3 22 / 62%);
+  --citypop-hard: 6px 6px 0 var(--citypop-drop);
+  --citypop-hard-sm: 3px 3px 0 rgb(4 3 22 / 70%);
+
+  /* Panels: deep navy-violet, lit a touch from the top */
+  --citypop-panel-grad: linear-gradient(180deg, #1f1c55 0%, #181546 100%);
+
+  /* The sunset gradient, and its button cut, which stops short of deep
+     magenta so navy type stays 5:1 or better on it */
+  --citypop-sunset: linear-gradient(
+    180deg,
+    #ffe08a 0%,
+    #ffb36b 28%,
+    #ff7a6b 55%,
+    #f5508a 80%,
+    #c23a8e 100%
+  );
+  --citypop-sunset-x: linear-gradient(90deg, #ffb36b, #ff7a6b 45%, #f5508a);
+  --citypop-sunset-btn: linear-gradient(
+    180deg,
+    #ffc98a 0%,
+    #ff9a6e 38%,
+    #ff7a6b 62%,
+    #f5608a 100%
+  );
+  --citypop-night-btn: linear-gradient(180deg, #312d78, #232060);
+  --citypop-pool-grad: linear-gradient(
+    180deg,
+    #7ff3ea 0%,
+    #4fe3da 45%,
+    #2fc4cc 75%,
+    #1fa6bd 100%
+  );
+
+  /* The cel gloss: a crisp white highlight over the top of anything glossy */
+  --citypop-gloss: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 30%) 0 44%,
+    rgb(255 255 255 / 0%) 44%
+  );
+  --citypop-gloss-soft: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 9%) 0 44%,
+    transparent 44%
+  );
+
+  /* The J-card stripe band: apricot, coral, pink, violet */
+  --citypop-stripes: linear-gradient(
+    180deg,
+    #ffb36b 0 2px,
+    transparent 2px 3.5px,
+    #ff7a6b 3.5px 5.5px,
+    transparent 5.5px 7px,
+    #f5508a 7px 8.5px,
+    transparent 8.5px 10px,
+    #8a5ad8 10px 11px,
+    transparent 11px
+  );
+
+  /* The chrome on the wordmark: pink sky over a hard horizon */
+  --citypop-chrome: linear-gradient(
+    180deg,
+    #fff 0%,
+    #fff0fb 20%,
+    #ffc4e1 40%,
+    #ff8fb8 51%,
+    #fff 51.6%,
+    #fff 52.6%,
+    #341a73 53%,
+    #5b3aa8 64%,
+    #a98cf0 82%,
+    #f4e9ff 100%
+  );
+
+  /*
+   * Light on pool water, a seamless tile. Each screen density gets its own
+   * lossless file at its own pixels, and the tile is always drawn at its
+   * native size, since resampling the edges would show the seam.
+   */
+  --citypop-caustic: image-set(
+      url('assets/icons/caustic-1x.webp') 1x,
+      url('assets/icons/caustic-2x.webp') 2x,
+      url('assets/icons/caustic-3x.webp') 3x
+    )
+    0 0 / 200px 200px;
+  --citypop-glint: url('assets/icons/glint.svg');
+
+  /* Shape */
+  --citypop-radius: 4px;
+  --citypop-band: 11px;
+
+  /*
+   * The navbar carries the stripe band along its foot, so it is taller than
+   * Stash's own 48.75px bar. Stash spaces the page, the sidebar and its sticky
+   * headers by that height, so 80-pages.css moves them with this.
+   */
+  --citypop-nav-height: 60px;
+
+  /* Type: the brush script for titles, Jost for the rest, her lines in
+     Jost's light italic (the thin Futura oblique of 80s liner notes) */
+  --citypop-font-display: 'CityPop Dafoe', 'Brush Script MT', cursive;
+  --citypop-font-label:
+    'CityPop Jost', 'CityPop Zen Maru', futura, 'Century Gothic', sans-serif;
+  --citypop-font-ja:
+    'CityPop Zen Maru', 'Hiragino Maru Gothic ProN', sans-serif;
+  --citypop-font-body:
+    system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial,
+    sans-serif;
+
+  /* Motion */
+  --citypop-ease: cubic-bezier(0.2, 0.8, 0.25, 1);
+  --citypop-fast: 140ms;
+  --citypop-medium: 240ms;
+}
