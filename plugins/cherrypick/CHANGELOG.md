@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.1.8
 
 - Your score, For you, More like this and a bracket's cards leave out the tags Advanced Rating and Binge keep for their own use: Advanced Rating's score tags, such as "Production Quality ★: 4", which Binge's stars also write when Advanced Rating is installed, and Binge's collections, such as "Watch Later 📁". Score tags sit only on rated scenes and spell out the rating, so Your score learned a rated scene's rating from them and gave the scene's other tags less weight. Two scenes in the same collection counted as sharing a tag in More like this. Advanced Rating's "Favourite ★" still counts, as your own verdict on a scene.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.40.4, Xenith 3.2.0 and Restash 0.3.0-55c1cb2.
 
 ## 0.1.7
 
