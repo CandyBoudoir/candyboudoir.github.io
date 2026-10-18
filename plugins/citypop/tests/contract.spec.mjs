@@ -2,9 +2,14 @@
 // Pop's CSS, JavaScript and settings take effect.
 import { expect, test } from '@playwright/test'
 import {
+  setUpCherryPick,
+  tearDownCherryPick,
+} from '../../cherrypick/tests/stash.mjs'
+import {
   EMPTY_LIST,
   FLOWS,
   PAGES,
+  PLUGIN_ID,
   VOICE_EMPTY_LINE,
   demoIds,
   demoPath,
@@ -12,6 +17,7 @@ import {
   setPlugin,
   setSfw,
   unmatchedClasses,
+  usePlugins,
   visit,
 } from './stash.mjs'
 
@@ -290,6 +296,56 @@ test.describe('on a touch screen', () => {
     await expect(spine).toHaveCSS('writing-mode', 'horizontal-tb')
     expect(box.y).toBeGreaterThanOrEqual(cover.y + cover.height - 1)
     expect(box.x + box.width).toBeLessThanOrEqual(390)
+  })
+})
+
+// WCAG contrast between two computed colours, which must be opaque.
+function contrast(a, b) {
+  const luminance = (rgb) => {
+    const [r, g, bl] = rgb
+      .match(/[\d.]+/g)
+      .slice(0, 3)
+      .map(Number)
+    const linear = (c) =>
+      c / 255 <= 0.03928 ? c / 255 / 12.92 : ((c / 255 + 0.055) / 1.055) ** 2.4
+    return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(bl)
+  }
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x)
+  return (hi + 0.05) / (lo + 0.05)
+}
+
+const alpha = (rgb) => Number(rgb.match(/[\d.]+/g)[3] ?? 1)
+
+// Cherry Pick's Your score sits where the rating sticker does, on scenes you
+// haven't rated. City Pop draws it as a blank sticker: an opaque night panel
+// with a dashed edge, whose type reads over any cover.
+test.describe('beside Cherry Pick', () => {
+  test.beforeAll(async () => {
+    await setUpCherryPick()
+    await usePlugins('CherryPick', PLUGIN_ID)
+  })
+  test.afterAll(async () => {
+    await tearDownCherryPick()
+    await onlyCityPop()
+  })
+
+  test("Your score's banner reads over any cover", async ({ page }) => {
+    await page.goto('/scenes?sortby=title&perPage=120')
+    const card = page
+      .locator('.scene-card:has(.cherrypick-score-banner)')
+      .first()
+    const banner = card.locator('.cherrypick-score-banner')
+    await expect(banner).toBeVisible({ timeout: 20_000 })
+    const { color, background } = await banner.evaluate((el) => {
+      const style = getComputedStyle(el)
+      return { color: style.color, background: style.backgroundColor }
+    })
+    expect(alpha(background), 'an opaque panel').toBe(1)
+    expect(contrast(color, background)).toBeGreaterThanOrEqual(4.5)
+    await expect(banner).toHaveCSS('outline-style', 'dashed')
+    await card.hover()
+    await expect(banner).toHaveCSS('opacity', '1')
+    await stickerClearsCheckbox(card)
   })
 })
 

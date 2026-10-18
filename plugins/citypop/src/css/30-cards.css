@@ -307,6 +307,27 @@ body {
   left: calc(6px + 0.5rem + 3.75rem);
 }
 
+/*
+ * A guessed rating, such as Cherry Pick's Your score, is the same sticker
+ * left blank: night blue with cream type and a dashed pool edge, so it reads
+ * over any cover and never passes for a rating of Stash's. Cherry Pick sets
+ * its own dim, outline and case at two classes, so this names the card too
+ * and wins in either stylesheet order; its hidden width line stays.
+ */
+.grid-card .rating-banner.cherrypick-score-banner {
+  background: linear-gradient(180deg, #1f1c55, var(--citypop-well))
+    var(--citypop-panel);
+  box-shadow: 2px 2px 0 rgb(4 3 22 / 55%);
+  color: var(--citypop-cream);
+  outline: 1px dashed rgb(79 227 218 / 85%);
+  outline-offset: -3px;
+  text-transform: uppercase;
+}
+
+.grid-card .rating-banner.cherrypick-score-banner .cherrypick-star {
+  color: var(--citypop-pool-hi);
+}
+
 /* Progress is an FM dial: ticks along the band, a sunset to the needle */
 .grid-card .progress-bar {
   background:
