@@ -1,5 +1,5 @@
-// Leather's JavaScript extras: stud bursts on rating, strict copy and the
-// calm switch. Everything here is optional decoration: the theme is complete
+// Leather's JavaScript extras: stud bursts on rating, strict copy, the calm
+// switch and the restyle of Insights and Performers Toolkit. Everything here is optional decoration: the theme is complete
 // in CSS, and this file degrades to nothing when PluginApi or GraphQL are
 // missing (as on the design-system page).
 ;(function () {
@@ -35,6 +35,20 @@
   const state = {
     calm: false,
     strict: true,
+    restyle: false,
+  }
+
+  // The Restyle Insights and Performers Toolkit setting, kept from the last
+  // visit, so a page those plugins draw on never shows them in their own
+  // colours while the settings load
+  const RESTYLE_KEY = 'leather.restylePlugins'
+
+  function keptRestyle() {
+    try {
+      return localStorage.getItem(RESTYLE_KEY) === '1'
+    } catch {
+      return false
+    }
   }
 
   const originals = new WeakMap()
@@ -174,9 +188,20 @@
   // Settings ----------------------------------------------------------------
 
   function apply(next) {
+    const strict = wantStrict()
     Object.assign(state, next)
     root.classList.toggle('leather-calm', state.calm)
-    if (document.body) applyCopy(document.body)
+    root.classList.toggle('leather-restyle', state.restyle)
+    if ('restyle' in next) {
+      try {
+        localStorage.setItem(RESTYLE_KEY, state.restyle ? '1' : '0')
+      } catch {
+        // A browser without storage loads the setting each visit.
+      }
+    }
+    // The copy changes only when the voice does; the observer keeps up with
+    // the page in between
+    if (document.body && wantStrict() !== strict) applyCopy(document.body)
   }
 
   async function loadSettings() {
@@ -192,6 +217,7 @@
       apply({
         calm: settings.calmMode === true,
         strict: settings.plainCopy !== true,
+        restyle: settings.restylePlugins === true,
       })
     } catch {
       // Not running inside Stash; keep the defaults.
@@ -206,8 +232,14 @@
       characterData: true,
       subtree: true,
     })
-    apply({})
-    if (window.PluginApi) loadSettings()
+    apply({ restyle: keptRestyle() })
+    applyCopy(document.body)
+    if (window.PluginApi) {
+      loadSettings()
+      // The settings are read again on every page Stash opens, so changing
+      // one takes effect on the next page, with no reload
+      window.PluginApi.Event?.addEventListener('stash:location', loadSettings)
+    }
   }
 
   window.Leather = {
