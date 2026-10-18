@@ -63,11 +63,20 @@ div.react-select__control--is-focused {
   letter-spacing: 0.06em;
 }
 
-/* The clear button inside Stash's search fields */
-.clearable-text-field-clear,
-.clearable-text-field-clear:is(:hover, :focus, :active) {
-  background-color: transparent !important;
+/* The clear button inside Stash's search fields: a secondary button by
+   class, but part of the well, so it drops the enamel and its shadow */
+.btn-secondary.clearable-text-field-clear:not(.minimal),
+.btn-secondary.clearable-text-field-clear:not(.minimal):is(
+    :hover,
+    :focus,
+    :active
+  ) {
+  --citypop-btn-shadow: none;
+
+  background: transparent !important;
   color: var(--citypop-dim);
+  filter: none;
+  transform: none;
 }
 
 .clearable-text-field-clear:hover {
