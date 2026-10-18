@@ -6,6 +6,7 @@ badge-info
 badge-primary
 btn-info
 btn-warning
+card-drag-handle
 custom-checkbox
 custom-select
 default-value
