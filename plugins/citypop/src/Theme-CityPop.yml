@@ -1,0 +1,20 @@
+name: Theme - City Pop
+description: Airbrushed 1980s dusk from Japanese city pop album covers. Record-sleeve cards, striped sunset suns for ratings, cassettes for audio-only scenes and a late-night FM host's voice.
+version: 0.1.0
+url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/citypop
+ui:
+  css:
+    - citypop.css
+  javascript:
+    - citypop.js
+  assets:
+    /: assets
+settings:
+  calmMode:
+    displayName: Calm mode
+    description: Turn off City Pop's animations (card lifts, the sunset sweep, turning reels, bursts).
+    type: BOOLEAN
+  plainCopy:
+    displayName: Plain labels
+    description: Keep Stash's own wording instead of the FM host's lines. Stash's SFW mode always uses plain labels.
+    type: BOOLEAN

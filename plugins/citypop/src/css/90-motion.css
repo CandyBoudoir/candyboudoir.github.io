@@ -1,0 +1,143 @@
+/*
+ * The sun rises only where the horizon is free. Every Stash page that shows
+ * a list, a detail page's header or body, the front page's rows or the player
+ * or picture of a scene or image page has full-width content across the
+ * horizon from its top to its bottom, so the sun stays down there and never
+ * sits behind cards or text. It rises in Settings, and fades as you move
+ * between them. It starts down, so it never shows while a page loads.
+ */
+body::after {
+  transition: opacity 700ms var(--citypop-ease);
+}
+
+:root:has(.setting-section):not(
+    :has(
+      .item-list-container,
+      .detail-header,
+      .detail-body,
+      .recommendations-container,
+      .scene-player-container,
+      .image-container
+    )
+  )
+  body::after {
+  opacity: 0.5;
+}
+
+@keyframes citypop-sweep {
+  from {
+    background-position: 82% 0;
+  }
+
+  to {
+    background-position: 9% 0;
+  }
+}
+
+@keyframes citypop-glint {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-60deg);
+  }
+
+  35% {
+    opacity: 1;
+    transform: scale(1.25) rotate(0deg);
+  }
+
+  65% {
+    opacity: 1;
+    transform: scale(1) rotate(15deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.2) rotate(45deg);
+  }
+}
+
+@keyframes citypop-spin {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes citypop-fly {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+
+  65% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy)))
+      rotate(var(--spin)) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(
+        calc(-50% + var(--dx) * 1.1),
+        calc(-50% + var(--dy) + 14px)
+      )
+      rotate(calc(var(--spin) * 2)) scale(0.8);
+  }
+}
+
+/* Bursts: glints, little striped suns and pool drops */
+.citypop-burst {
+  animation: citypop-fly 760ms cubic-bezier(0.15, 0.8, 0.3, 1) forwards;
+  background: var(--citypop-glint) center / contain no-repeat;
+  height: 16px;
+  pointer-events: none;
+  position: fixed;
+  width: 16px;
+  z-index: 2000;
+}
+
+.citypop-burst.is-sun {
+  background: var(--citypop-sunset);
+  filter: drop-shadow(1px 1px 0 rgb(4 3 22 / 70%));
+  height: 12px;
+  mask: url('assets/icons/glyph-sun.svg') center / contain no-repeat;
+  width: 12px;
+}
+
+.citypop-burst.is-drop {
+  background:
+    radial-gradient(circle at 34% 30%, #fff 0 18%, transparent 24%),
+    var(--citypop-pool-grad);
+  border-radius: 0 50% 50%;
+  height: 9px;
+  rotate: 45deg;
+  width: 9px;
+}
+
+/* Calm mode and reduced motion: everything holds still */
+.citypop-calm *,
+.citypop-calm *::before,
+.citypop-calm *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+.citypop-calm .grid-card:hover {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .grid-card:hover {
+    transform: none;
+  }
+
+  .citypop-burst {
+    display: none;
+  }
+}
