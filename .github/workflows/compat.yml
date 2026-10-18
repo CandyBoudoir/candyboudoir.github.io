@@ -1,6 +1,9 @@
 # Installs every plugin on each Stash version they support and on the latest
 # develop build, then checks that Stash still renders the elements each plugin
 # depends on and compares screenshots. Runs nightly, on pushes to main and on pull requests.
+# Each leg records its outcome per plugin, and the report job uploads a gate
+# artifact saying which plugins passed on every supported stable version, so a
+# plugin's release waits only on its own specs.
 # The report job keeps one issue per failing channel and opens a "Support
 # Stash vX.Y.Z" issue when Stash ships a stable release, and one "Test Cherry
 # Pick beside <plugin> <version>" issue per companion release. Companion legs
@@ -113,11 +116,15 @@ jobs:
         id: contract
         if: steps.prepare.outcome == 'success'
         run: pnpm exec playwright test ${{ (matrix.leg.companions || matrix.leg.browser || matrix.leg.tz) && 'plugins/cherrypick/tests/.*contract' || 'contract' }}
+        env:
+          PW_STEP: contract
       - name: Screenshots
         id: visual
         if: always() && steps.prepare.outcome == 'success' && !matrix.leg.companions && !matrix.leg.browser && !matrix.leg.tz
         continue-on-error: ${{ matrix.leg.channel != 'stable' }}
         run: pnpm exec playwright test visual ${{ inputs.update_snapshots && matrix.leg.baseline && '--update-snapshots=all' || '' }}
+        env:
+          PW_STEP: visual
       - name: Record result
         if: always()
         run: node tests/stash/status.mjs
@@ -164,6 +171,16 @@ jobs:
           pattern: status-*
           path: status
           merge-multiple: true
+      # Whether each plugin passed on every supported stable version, which
+      # decides that plugin's release on its own
+      - run: node tests/stash/gate.mjs status > gate.json
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: gate
+          path: gate.json
+          retention-days: 14
       - run: node tests/stash/report.mjs status
         env:
           GH_TOKEN: ${{ github.token }}
