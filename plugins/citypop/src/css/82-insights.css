@@ -6,9 +6,9 @@
  * sets on #insights, and adds its stylesheet to the page the first time Stats
  * opens, after this one. The rules here therefore start at `#root #insights`,
  * which outranks its own. Everything but the sidebar offset waits for the
- * Restyle Insights setting: citypop.js puts .citypop-insights on <html> when
- * it is on, so Insights keeps its own look for anyone who prefers it, or who
- * runs its sibling plugins, which share that look.
+ * Restyle Insights and Performers Toolkit setting: citypop.js puts
+ * .citypop-restyle on <html> when it is on. Off, both keep the look they
+ * share with their sibling plugins, for anyone who prefers it.
  *
  * Its heatmaps, codec and resolution colours and the colours of other
  * plugins' cards come from its JavaScript as inline colours, so they keep
@@ -26,7 +26,7 @@
    sunset for the You tab, apricot for Library, gold for Health, pool water
    for Collection and for O's, sky for Files, pink for Actions and lilac for
    Movies */
-.citypop-insights #root #insights {
+.citypop-restyle #root #insights {
   --bg: var(--citypop-night);
   --bg2: var(--citypop-well);
   --ui: var(--citypop-panel);
@@ -61,12 +61,12 @@
 
 /* The head: the name in the brush script, and the tabs as Stash's tabs,
    with one sunset bar under the open one */
-.citypop-insights #root #insights .ins-head {
+.citypop-restyle #root #insights .ins-head {
   border-bottom: 1px solid var(--citypop-line);
   margin-bottom: 20px;
 }
 
-.citypop-insights #root #insights .ins-title {
+.citypop-restyle #root #insights .ins-title {
   color: var(--citypop-text);
   font-family: var(--citypop-font-display);
   font-size: 2.4rem;
@@ -78,12 +78,12 @@
     4px 5px 0 rgb(4 3 22 / 55%);
 }
 
-.citypop-insights #root #insights .ins-title .ins-ic {
+.citypop-restyle #root #insights .ins-title .ins-ic {
   color: var(--citypop-sun);
   filter: drop-shadow(2px 2px 0 rgb(4 3 22 / 55%));
 }
 
-.citypop-insights #root #insights .ins-tabs {
+.citypop-restyle #root #insights .ins-tabs {
   align-self: flex-end;
   background: none;
   border: 0;
@@ -93,7 +93,7 @@
   padding: 0;
 }
 
-.citypop-insights #root #insights .ins-tab {
+.citypop-restyle #root #insights .ins-tab {
   background: none;
   border: 0;
   border-radius: 0;
@@ -107,18 +107,18 @@
   text-transform: uppercase;
 }
 
-.citypop-insights #root #insights .ins-tab:hover {
+.citypop-restyle #root #insights .ins-tab:hover {
   background: none;
   color: #fff;
 }
 
-.citypop-insights #root #insights .ins-tab.on {
+.citypop-restyle #root #insights .ins-tab.on {
   background: var(--citypop-sunset-x) 0 100% / 100% 3px no-repeat;
   color: #fff;
 }
 
 /* Cards are navy panels on the hard airbrush shadow */
-.citypop-insights #root #insights .ins-card {
+.citypop-restyle #root #insights .ins-card {
   background: var(--citypop-panel-grad);
   border: 1px solid var(--citypop-edge);
   border-radius: var(--citypop-radius);
@@ -127,24 +127,24 @@
     var(--citypop-hard);
 }
 
-.citypop-insights #root #insights .ins-ch b {
+.citypop-restyle #root #insights .ins-ch b {
   font-family: var(--citypop-font-label);
   font-size: 1rem;
   font-weight: 500;
   letter-spacing: 0.02em;
 }
 
-.citypop-insights #root #insights :is(.ins-badge, .ins-sq) {
+.citypop-restyle #root #insights :is(.ins-badge, .ins-sq) {
   border-radius: var(--citypop-radius);
 }
 
 /* A tile's colour edge is a printed stripe, without a glow */
-.citypop-insights #root #insights .ins-tile::before {
+.citypop-restyle #root #insights .ins-tile::before {
   box-shadow: none;
 }
 
 /* Numbers and small caps in Jost, the liner notes' Futura */
-.citypop-insights
+.citypop-restyle
   #root
   #insights
   :is(
@@ -162,7 +162,7 @@
   letter-spacing: 0;
 }
 
-.citypop-insights
+.citypop-restyle
   #root
   #insights
   :is(
@@ -182,7 +182,7 @@
 
 /* Data wells, chips and switches are sunk into the panel like Stash's
    fields */
-.citypop-insights
+.citypop-restyle
   #root
   #insights
   :is(
@@ -203,7 +203,7 @@
 }
 
 /* The chosen chip of a row is the sunset, as in Stash's button groups */
-.citypop-insights #root #insights :is(.ins-chip.on, .ins-seg button.on) {
+.citypop-restyle #root #insights :is(.ins-chip.on, .ins-seg button.on) {
   background: var(--citypop-gloss), var(--citypop-sunset-btn);
   border-color: transparent;
   box-shadow: 2px 2px 0 rgb(4 3 22 / 70%);
@@ -211,14 +211,14 @@
   font-weight: 600;
 }
 
-.citypop-insights #root #insights .ins-hchip.on {
+.citypop-restyle #root #insights .ins-hchip.on {
   background: color-mix(in srgb, var(--c) 22%, var(--citypop-raised));
   border-color: color-mix(in srgb, var(--c) 55%, transparent);
 }
 
 /* Buttons are glossy enamel on a hard shadow: night violet, the sunset for
    the one that goes ahead, hot coral for the one that deletes */
-.citypop-insights #root #insights .ins-btn {
+.citypop-restyle #root #insights .ins-btn {
   background: var(--citypop-gloss-soft), var(--citypop-night-btn);
   border: 0;
   border-radius: 5px;
@@ -237,19 +237,19 @@
     filter var(--citypop-fast) var(--citypop-ease);
 }
 
-.citypop-insights #root #insights .ins-btn:not(:disabled):hover {
+.citypop-restyle #root #insights .ins-btn:not(:disabled):hover {
   color: #fff;
   filter: brightness(1.15);
 }
 
-.citypop-insights #root #insights .ins-btn:not(:disabled):active {
+.citypop-restyle #root #insights .ins-btn:not(:disabled):active {
   box-shadow:
     inset 0 2px 3px rgb(0 0 0 / 25%),
     1px 1px 0 rgb(4 3 22 / 70%);
   transform: translate(2px, 2px);
 }
 
-.citypop-insights #root #insights .ins-btn.ins-pri {
+.citypop-restyle #root #insights .ins-btn.ins-pri {
   background: var(--citypop-gloss), var(--citypop-sunset-btn);
   color: var(--citypop-ink);
   font-weight: 600;
@@ -257,7 +257,7 @@
 }
 
 /* The glint on the sunset button's corner */
-.citypop-insights #root #insights .ins-btn.ins-pri::after {
+.citypop-restyle #root #insights .ins-btn.ins-pri::after {
   background: var(--citypop-glint) center / contain no-repeat;
   content: '';
   height: 16px;
@@ -269,8 +269,8 @@
   width: 16px;
 }
 
-.citypop-insights #root #insights .ins-btn.danger,
-.citypop-insights #root #insights .ins-btn.danger:hover {
+.citypop-restyle #root #insights .ins-btn.danger,
+.citypop-restyle #root #insights .ins-btn.danger:hover {
   background:
     linear-gradient(180deg, rgb(255 255 255 / 22%) 0 44%, transparent 44%),
     linear-gradient(180deg, #f0365a, #d62452 55%, #b81846);
@@ -278,25 +278,25 @@
   font-weight: 600;
 }
 
-.citypop-insights #root #insights .ins-btn.danger.armed {
+.citypop-restyle #root #insights .ins-btn.danger.armed {
   box-shadow:
     0 0 0 2px var(--citypop-night),
     0 0 0 4px var(--citypop-danger),
     3px 3px 0 rgb(4 3 22 / 70%);
 }
 
-.citypop-insights #root #insights .ins-btn:disabled {
+.citypop-restyle #root #insights .ins-btn:disabled {
   box-shadow: none;
   filter: saturate(0.3) brightness(0.8);
   opacity: 0.45;
 }
 
 /* Links read in coral, as everywhere in City Pop */
-.citypop-insights #root #insights :is(.ins-go, .ins-hlink) {
+.citypop-restyle #root #insights :is(.ins-go, .ins-hlink) {
   color: var(--citypop-coral);
 }
 
-.citypop-insights
+.citypop-restyle
   #root
   #insights
   :is(.ins-go:hover, .ins-hlink:hover:not(:disabled)) {
@@ -304,7 +304,7 @@
 }
 
 /* Rules between rows */
-.citypop-insights
+.citypop-restyle
   #root
   #insights
   :is(
@@ -317,16 +317,16 @@
   border-top-color: var(--citypop-edge);
 }
 
-.citypop-insights #root #insights .ins-con tr + tr td {
+.citypop-restyle #root #insights .ins-con tr + tr td {
   border-top-color: var(--citypop-edge);
 }
 
-.citypop-insights #root #insights .ins-hkc {
+.citypop-restyle #root #insights .ins-hkc {
   border-color: var(--citypop-edge);
 }
 
 /* Up and down, keep and delete: their status colours on the panel */
-.citypop-insights #root #insights :is(.ins-lift.up, .ins-k.keep) {
+.citypop-restyle #root #insights :is(.ins-lift.up, .ins-k.keep) {
   background: color-mix(
     in srgb,
     var(--citypop-success) 16%,
@@ -334,7 +334,7 @@
   );
 }
 
-.citypop-insights #root #insights :is(.ins-lift.down, .ins-k.del) {
+.citypop-restyle #root #insights :is(.ins-lift.down, .ins-k.del) {
   background: color-mix(
     in srgb,
     var(--citypop-danger) 16%,
@@ -342,11 +342,11 @@
   );
 }
 
-.citypop-insights #root #insights .ins-k.look {
+.citypop-restyle #root #insights .ins-k.look {
   background: color-mix(in srgb, var(--citypop-gold) 16%, var(--citypop-panel));
 }
 
-.citypop-insights #root #insights .ins-error {
+.citypop-restyle #root #insights .ins-error {
   background: color-mix(
     in srgb,
     var(--citypop-danger) 12%,
@@ -359,27 +359,27 @@
 
 /* Ticked copies fill with pool water; switches are a pool lane with a
    pearl float */
-.citypop-insights #root #insights .ins-bx.on {
+.citypop-restyle #root #insights .ins-bx.on {
   background: var(--citypop-gloss), var(--citypop-pool-grad);
   border-color: #7ff3ea;
 }
 
-.citypop-insights #root #insights .ins-bx.on::after {
+.citypop-restyle #root #insights .ins-bx.on::after {
   border-color: var(--citypop-ink);
 }
 
-.citypop-insights #root #insights .ins-tog i {
+.citypop-restyle #root #insights .ins-tog i {
   background: var(--citypop-well);
   box-shadow:
     inset 0 0 0 1px var(--citypop-line),
     inset 0 2px 0 rgb(0 0 0 / 30%);
 }
 
-.citypop-insights #root #insights .ins-tog.on i {
+.citypop-restyle #root #insights .ins-tog.on i {
   background: var(--citypop-caustic), var(--citypop-pool-grad);
 }
 
-.citypop-insights #root #insights .ins-tog i::after {
+.citypop-restyle #root #insights .ins-tog i::after {
   background: radial-gradient(
     circle at 34% 30%,
     #fff 0 22%,
@@ -389,21 +389,21 @@
 }
 
 /* Treemap type and the calendar's hover ring */
-.citypop-insights #root #insights .ins-tm div {
+.citypop-restyle #root #insights .ins-tm div {
   color: var(--citypop-ink);
 }
 
-.citypop-insights #root #insights .ins-cal i:hover:not(.f) {
+.citypop-restyle #root #insights .ins-cal i:hover:not(.f) {
   outline-color: var(--citypop-pool);
 }
 
-.citypop-insights #root #insights :is(.ins-th, .ins-poster) {
+.citypop-restyle #root #insights :is(.ins-th, .ins-poster) {
   border-radius: 3px;
 }
 
 /* Empty heatmap cells and the charts' grey lines and labels, which Insights
    writes as inline colours */
-.citypop-insights
+.citypop-restyle
   #root
   #insights
   :is(.ins-cal, .ins-hm, .ins-legend)
@@ -412,37 +412,37 @@
 }
 
 /* The tag picked in Top tags */
-.citypop-insights #root #insights .ins-trk i[style*='#A9BA5A' i] {
+.citypop-restyle #root #insights .ins-trk i[style*='#A9BA5A' i] {
   background: var(--citypop-success) !important;
 }
 
-.citypop-insights #root #insights .ins-ring circle[stroke='#282726' i] {
+.citypop-restyle #root #insights .ins-ring circle[stroke='#282726' i] {
   stroke: var(--citypop-well);
 }
 
-.citypop-insights #root #insights svg line[stroke='#282726' i] {
+.citypop-restyle #root #insights svg line[stroke='#282726' i] {
   stroke: var(--citypop-edge);
 }
 
-.citypop-insights #root #insights svg line[stroke='#575653' i] {
+.citypop-restyle #root #insights svg line[stroke='#575653' i] {
   stroke: var(--citypop-key);
 }
 
-.citypop-insights #root #insights svg text[fill='#878580' i] {
+.citypop-restyle #root #insights svg text[fill='#878580' i] {
   fill: var(--citypop-dim);
 }
 
-.citypop-insights #root #insights svg path[stroke='#A9BA5A' i] {
+.citypop-restyle #root #insights svg path[stroke='#A9BA5A' i] {
   stroke: var(--citypop-pool);
 }
 
-.citypop-insights #root #insights svg stop[stop-color='#879A39' i] {
+.citypop-restyle #root #insights svg stop[stop-color='#879A39' i] {
   stop-color: var(--citypop-pool);
 }
 
 /* Its tooltip is a cream cassette label, like Stash's in City Pop. It sits
    on <body>, outside #insights. */
-.citypop-insights #ins-tip {
+.citypop-restyle #ins-tip {
   background:
     linear-gradient(
       180deg,

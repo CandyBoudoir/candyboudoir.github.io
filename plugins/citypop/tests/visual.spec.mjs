@@ -41,13 +41,13 @@ for (const entry of SHOTS) {
   })
 }
 
-// Insights in the dusk, with Restyle Insights on. Its Library and Files tabs
+// Insights in the dusk, with Restyle Insights and Performers Toolkit on. Its Library and Files tabs
 // only; the others count from today (O's this week, growth by month), so
 // their pictures would change by the day.
 test.describe('Insights', () => {
   test.beforeAll(async () => {
     await usePlugins(PLUGIN_ID, 'Insights')
-    await setPlugin({ restyleInsights: true })
+    await setPlugin({ restylePlugins: true })
   })
   test.afterAll(async () => {
     await setPlugin({})

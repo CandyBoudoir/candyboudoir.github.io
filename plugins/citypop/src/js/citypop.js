@@ -39,17 +39,17 @@
   const state = {
     calm: false,
     voice: true,
-    insights: false,
+    restyle: false,
   }
 
-  // The Restyle Insights setting, kept from the last visit, so a page that
-  // opens on Stats never shows Insights in its own colours while the
-  // settings load
-  const INSIGHTS_KEY = 'citypop.restyleInsights'
+  // The Restyle Insights and Performers Toolkit setting, kept from the last
+  // visit, so a page those plugins draw on never shows them in their own
+  // colours while the settings load
+  const RESTYLE_KEY = 'citypop.restylePlugins'
 
-  function keptInsights() {
+  function keptRestyle() {
     try {
-      return localStorage.getItem(INSIGHTS_KEY) === '1'
+      return localStorage.getItem(RESTYLE_KEY) === '1'
     } catch {
       return false
     }
@@ -313,17 +313,20 @@
   // Settings ---------------------------------------------------------------
 
   function apply(next) {
+    const voice = wantVoice()
     Object.assign(state, next)
     root.classList.toggle('citypop-calm', state.calm)
-    root.classList.toggle('citypop-insights', state.insights)
-    if ('insights' in next) {
+    root.classList.toggle('citypop-restyle', state.restyle)
+    if ('restyle' in next) {
       try {
-        localStorage.setItem(INSIGHTS_KEY, state.insights ? '1' : '0')
+        localStorage.setItem(RESTYLE_KEY, state.restyle ? '1' : '0')
       } catch {
         // A browser without storage loads the setting each visit.
       }
     }
-    if (document.body) applyCopy(document.body)
+    // Her lines change only when the voice does; the observer keeps up
+    // with the page in between
+    if (document.body && wantVoice() !== voice) applyCopy(document.body)
   }
 
   async function loadSettings() {
@@ -339,7 +342,7 @@
       apply({
         calm: settings.calmMode === true,
         voice: settings.plainCopy !== true,
-        insights: settings.restyleInsights === true,
+        restyle: settings.restylePlugins === true,
       })
     } catch {
       // Not running inside Stash; keep the defaults.
@@ -354,16 +357,14 @@
       characterData: true,
       subtree: true,
     })
-    apply({ insights: keptInsights() })
+    apply({ restyle: keptRestyle() })
+    applyCopy(document.body)
     if (window.PluginApi) {
       loadSettings()
       markAudio()
-      // Insights reads its own settings each time Stats opens; Restyle
-      // Insights follows suit, so changing it needs no reload
-      window.PluginApi.Event?.addEventListener('stash:location', (event) => {
-        const path = event.detail?.data?.location?.pathname ?? ''
-        if (/^\/stats\/?$/.test(path)) loadSettings()
-      })
+      // The settings are read again on every page Stash opens, so changing
+      // one takes effect on the next page, with no reload
+      window.PluginApi.Event?.addEventListener('stash:location', loadSettings)
     }
   }
 

@@ -18,7 +18,7 @@ import {
   setPlugin,
   setSfw,
   unmatchedClasses,
-  unmatchedInsightsClasses,
+  unmatchedRestyledClasses,
   usePlugins,
   visit,
 } from './stash.mjs'
@@ -408,8 +408,9 @@ test('SFW mode drops the voice and the pool drops', async ({ page }) => {
 })
 
 // Insights, another author's stats dashboard on the Stats page (RESTYLED in
-// tests/stash/companions.mjs), keeps its own look until Restyle Insights is
-// on, and then takes City Pop's palette, panels and type. Its sidebar clears
+// tests/stash/companions.mjs), keeps its own look until Restyle Insights and
+// Performers Toolkit is on, and then takes City Pop's palette, panels and
+// type. Its sidebar clears
 // City Pop's taller navbar either way.
 test.describe('beside Insights', () => {
   test.beforeAll(async () => {
@@ -420,12 +421,12 @@ test.describe('beside Insights', () => {
     await onlyCityPop()
   })
 
-  test('Insights keeps its own look until Restyle Insights is on', async ({
+  test('Insights keeps its own look until the restyle is on', async ({
     page,
   }) => {
     await setPlugin({})
     await openInsights(page)
-    await expect(page.locator('html')).not.toHaveClass(/\bcitypop-insights\b/)
+    await expect(page.locator('html')).not.toHaveClass(/\bcitypop-restyle\b/)
     await expect(page.locator('#insights')).toHaveCSS(
       'background-color',
       'rgb(16, 15, 15)',
@@ -434,9 +435,9 @@ test.describe('beside Insights', () => {
 
   test('Restyle Insights puts Insights in the dusk', async ({ page }) => {
     try {
-      await setPlugin({ restyleInsights: true })
+      await setPlugin({ restylePlugins: true })
       await openInsights(page, 'library')
-      await expect(page.locator('html')).toHaveClass(/\bcitypop-insights\b/)
+      await expect(page.locator('html')).toHaveClass(/\bcitypop-restyle\b/)
       const root = page.locator('#insights')
       await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       // Insights' own rules still paint from the palette City Pop gives it
@@ -471,25 +472,23 @@ test.describe('beside Insights', () => {
     }
   })
 
-  test('Restyle Insights takes effect when Stats next opens', async ({
-    page,
-  }) => {
+  test('Restyle Insights takes effect on the next page', async ({ page }) => {
     try {
       await setPlugin({})
       await page.goto(EMPTY_LIST)
       await page.locator('.paginationIndex').waitFor()
-      await expect(page.locator('html')).not.toHaveClass(/\bcitypop-insights\b/)
-      await setPlugin({ restyleInsights: true })
+      await expect(page.locator('html')).not.toHaveClass(/\bcitypop-restyle\b/)
+      await setPlugin({ restylePlugins: true })
       await page
         .locator('a[href="/stats"]')
         .filter({ visible: true })
         .first()
         .click()
-      await expect(page.locator('html')).toHaveClass(/\bcitypop-insights\b/)
+      await expect(page.locator('html')).toHaveClass(/\bcitypop-restyle\b/)
       // Kept for the next visit, so Stats never opens in Insights' colours
       expect(
         await page.evaluate(() =>
-          localStorage.getItem('citypop.restyleInsights'),
+          localStorage.getItem('citypop.restylePlugins'),
         ),
       ).toBe('1')
     } finally {
@@ -514,9 +513,10 @@ test.describe('beside Insights', () => {
     page,
   }) => {
     expect(
-      await unmatchedInsightsClasses(page, {
+      await unmatchedRestyledClasses(page, {
         css: 'dist/site/Theme-CityPop/citypop.css',
         folder: 'citypop',
+        plugin: 'insights',
       }),
     ).toEqual([])
   })
