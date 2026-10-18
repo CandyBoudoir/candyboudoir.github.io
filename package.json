@@ -15,7 +15,7 @@
     "deploy:local": "pnpm build && scripts/deploy-local.sh",
     "smoke": "node plugins/cherrypick/tests/smoke.mjs",
     "test:compat": "playwright test",
-    "test:unit": "node --test \"plugins/*/tests/unit/*.unit.mjs\" \"tests/stash/*.unit.mjs\""
+    "test:unit": "node --test \"plugins/*/tests/unit/*.unit.mjs\" \"tests/stash/*.unit.mjs\" \"scripts/*.unit.mjs\""
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

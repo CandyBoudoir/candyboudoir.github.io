@@ -5,12 +5,21 @@
 // plugin's latest tag, to roll it back. Each entry's path is the zip attached
 // to its tag's GitHub Release, which must hash to the same sha256 as the build;
 // the zips are also copied next to the index, for indexes read before a switch.
+// A plugin from another CandyBoudoir repo (plugins.external.json, see
+// external.mjs) is built the same way from a clone of that repo at its own
+// latest tag, and its path is the zip on that repo's release.
 // Usage: node scripts/stable.mjs <out> [--tags "juicy-v0.3.2 remix-v0.1.0"]
 import { execFileSync } from 'node:child_process'
-import { cp, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
-import { existsSync } from 'node:fs'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
+import {
+  buildIn,
+  clone,
+  copyBuilt,
+  latestTag,
+  listExternal,
+} from './external.mjs'
 import { assetDigest, assetURL } from './release-assets.mjs'
 import { indexYml, listPlugins, root, writeSource } from './site.mjs'
 
@@ -23,61 +32,72 @@ const pins = process.argv.includes('--tags')
 const git = (...args) =>
   execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim()
 
-// Plugin folder -> tag to build it from.
+// Plugin folder -> tag to build it from, for this repo's plugins and for each
+// listed one in another repo, cloned once.
 const tags = new Map()
-for (const { name } of await listPlugins()) {
-  const pinned = pins.find((t) => t.startsWith(`${name}-v`))
-  const latest = git(
-    'tag',
-    '--merged',
-    'HEAD',
-    '--list',
-    `${name}-v*`,
-    '--sort=-version:refname',
-  ).split('\n')[0]
-  const tag = pinned ?? latest
-  if (tag) tags.set(name, tag)
-  else console.log(`${name}: no release tag yet, left out of stable`)
+const external = new Map()
+const trees = []
+for (const { name } of await listPlugins())
+  tags.set(name, latestTag(root, name, pins))
+for (const { repo, folder } of await listExternal()) {
+  const tree = await clone(repo)
+  trees.push(tree)
+  external.set(folder, { repo, tree })
+  tags.set(folder, latestTag(tree, folder, pins))
 }
+for (const [name, tag] of tags)
+  if (!tag) {
+    console.log(`${name}: no release tag yet, left out of stable`)
+    tags.delete(name)
+  }
 for (const t of pins)
   if (![...tags.values()].includes(t)) throw new Error(`No plugin for tag ${t}`)
 // A run that starts before prod's release job has tagged anything must fail
 // rather than publish a stable channel with no plugins in it.
 if (!tags.size) throw new Error('No plugin has a release tag yet')
 
+// Builds plugins in a checkout at their tag and adds them to the channel,
+// each pointing at its zip on that tag's release in repo.
+async function add(tree, names, tag, repo) {
+  for (const e of await buildIn(tree, names)) {
+    await copyBuilt(join(tree, 'dist', 'site'), out, e)
+    e.path = assetURL(tag, `${e.id}.zip`, repo)
+    const digest = await assetDigest(e.path)
+    if (digest !== e.sha256)
+      throw new Error(
+        `${tag}: the release's ${e.id}.zip hashes to ${digest}, the build to ${e.sha256}`,
+      )
+    if (e.legacy)
+      await writeFile(join(out, e.folder, 'index.yml'), indexYml([e]))
+    entries.push(repo ? { ...e, repo } : e)
+    console.log(
+      `${e.folder}: ${e.version} from ${repo ? `${repo} ` : ''}${tag}`,
+    )
+  }
+}
+
 await rm(out, { recursive: true, force: true })
 const entries = []
-for (const tag of new Set(tags.values())) {
-  const names = [...tags].filter(([, t]) => t === tag).map(([n]) => n)
-  const tree = await mkdtemp(join(tmpdir(), `${tag}-`))
-  git('worktree', 'add', '--detach', tree, tag)
-  try {
-    const run = (cmd, ...args) =>
-      execFileSync(cmd, args, { cwd: tree, stdio: 'inherit' })
-    run('pnpm', 'install', '--frozen-lockfile')
-    run('node', 'scripts/build.mjs', '--only', names.join(','))
-    const built = JSON.parse(
-      await readFile(join(tree, 'dist', 'entries.json'), 'utf8'),
-    )
-    for (const e of built) {
-      const site = join(tree, 'dist', 'site')
-      await cp(join(site, e.id), join(out, e.id), { recursive: true })
-      await cp(join(site, `${e.id}.zip`), join(out, `${e.id}.zip`))
-      if (existsSync(join(site, e.folder)))
-        await cp(join(site, e.folder), join(out, e.folder), { recursive: true })
-      e.path = assetURL(tag, `${e.id}.zip`)
-      const digest = await assetDigest(e.path)
-      if (digest !== e.sha256)
-        throw new Error(
-          `${tag}: the release's ${e.id}.zip hashes to ${digest}, the build to ${e.sha256}`,
-        )
-      if (e.legacy)
-        await writeFile(join(out, e.folder, 'index.yml'), indexYml([e]))
-      entries.push(e)
-      console.log(`${e.folder}: ${e.version} from ${tag}`)
+try {
+  const own = [...tags].filter(([n]) => !external.has(n))
+  for (const tag of new Set(own.map(([, t]) => t))) {
+    const names = own.filter(([, t]) => t === tag).map(([n]) => n)
+    const tree = await mkdtemp(join(tmpdir(), `${tag}-`))
+    git('worktree', 'add', '--detach', tree, tag)
+    try {
+      await add(tree, names, tag)
+    } finally {
+      git('worktree', 'remove', '--force', tree)
     }
-  } finally {
-    git('worktree', 'remove', '--force', tree)
   }
+  for (const [folder, { repo, tree }] of external) {
+    if (!tags.has(folder)) continue
+    execFileSync('git', ['checkout', '--quiet', '--detach', tags.get(folder)], {
+      cwd: tree,
+    })
+    await add(tree, [folder], tags.get(folder), repo)
+  }
+} finally {
+  for (const tree of trees) await rm(tree, { recursive: true, force: true })
 }
 await writeSource(out, entries)

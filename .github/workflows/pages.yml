@@ -11,6 +11,10 @@
 #                        before the shared one existed, its zip served from
 #                        the release like the stable channel's (and
 #                        /juicy/develop/, served like the develop channel's)
+# Plugins from other CandyBoudoir repos (plugins.external.json) join both
+# channels: stable from each one's latest release tag in its own repo, develop
+# from its main. A daily run picks up their releases, since a release there
+# pushes nothing here.
 # On prod, the release job first tags and releases each plugin whose version
 # has no tag yet, so a version bump reaches the stable channel in the same run.
 # A manual run can publish older tags as the stable channel to roll back.
@@ -20,6 +24,8 @@ name: Publish
 on:
   push:
     branches: [main, prod]
+  schedule:
+    - cron: '30 4 * * *'
   workflow_dispatch:
     inputs:
       stable_tags:
@@ -91,7 +97,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Build the develop channel
         working-directory: develop
-        run: pnpm install --frozen-lockfile && pnpm check && node scripts/build.mjs --publish
+        run: pnpm install --frozen-lockfile && pnpm check && node scripts/build.mjs --publish && node scripts/external.mjs develop
       - name: Assemble the site
         run: node stable/scripts/assemble.mjs stable-site develop/dist site
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0

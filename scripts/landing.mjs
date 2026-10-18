@@ -16,7 +16,7 @@ const card = (e) => `
         <h2>${esc(e.title)} <span class="version">${esc(e.version.split('-')[0])}</span></h2>
         <p>${esc(e.description)}</p>
         <p class="links">
-          <a href="${REPO}/tree/main/plugins/${esc(e.folder)}">README</a>${
+          <a href="${e.repo ? `https://github.com/${esc(e.repo)}` : REPO}/tree/main/plugins/${esc(e.folder)}">README</a>${
             e.pages
               ? `\n          <a href="${esc(e.folder)}/">Live preview</a>`
               : ''
