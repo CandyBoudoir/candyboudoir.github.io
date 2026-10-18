@@ -1,3 +1,4 @@
+pt-acct
 pt-b-gr
 pt-banner
 pt-box
@@ -24,6 +25,7 @@ pt-dtag
 pt-edit
 pt-err
 pt-fbl
+pt-fbr
 pt-fname
 pt-frow
 pt-fwc
@@ -38,6 +40,7 @@ pt-none
 pt-pbig
 pt-pc
 pt-rc
+pt-rec
 pt-run
 pt-runend
 pt-rvbar
@@ -61,6 +64,7 @@ pt-t-error
 pt-t-warn
 pt-tc
 pt-thumb
+pt-wait
 pt-way
 pt-why
 pt-zoom

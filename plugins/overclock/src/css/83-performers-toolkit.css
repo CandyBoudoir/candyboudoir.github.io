@@ -257,7 +257,9 @@
 
 /* Fields are dark, with a bottom rule and corner ticks, and turn yellow
    when focused, as Overclock's form fields */
-.overclock-restyle #root :is(.pt-input, .pt-sel) {
+.overclock-restyle
+  #root
+  :is(.pt-input, .pt-sel, .pt-acct select, .pt-seg select) {
   --overclock-tick: var(--overclock-line);
 
   background:
@@ -280,14 +282,16 @@
   letter-spacing: 0.04em;
 }
 
-.overclock-restyle #root :is(.pt-input, .pt-sel):focus {
+.overclock-restyle
+  #root
+  :is(.pt-input, .pt-sel, .pt-acct select, .pt-seg select):focus {
   --overclock-tick: var(--overclock-yellow);
 
   border-bottom-color: var(--overclock-yellow);
   box-shadow: 0 0 0 1px rgb(243 230 0 / 70%);
 }
 
-.overclock-restyle #root .pt-sel {
+.overclock-restyle #root :is(.pt-sel, .pt-acct select, .pt-seg select) {
   font-family: var(--overclock-font-label);
 }
 
@@ -410,7 +414,10 @@
     .pt-cand,
     .pt-dcard,
     .pt-prow,
-    .pt-box
+    .pt-box,
+    .pt-fbr,
+    .pt-rec,
+    .pt-wait
   ) {
   background: var(--overclock-field);
   border: 1px solid var(--overclock-rule);
