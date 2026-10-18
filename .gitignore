@@ -5,6 +5,7 @@ stash-work/
 test-results/
 playwright-report/
 status/
+pw-results/
 .DS_Store
 # Local, per-machine files: agent settings, direnv and local agent notes.
 .claude/

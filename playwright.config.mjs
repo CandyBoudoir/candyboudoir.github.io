@@ -19,7 +19,16 @@ export default defineConfig({
     toHaveScreenshot: { maxDiffPixelRatio: 0.01, animations: 'disabled' },
   },
   snapshotPathTemplate: '{testDir}/{testFileDir}/snapshots/{arg}{ext}',
-  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
+  // PW_STEP (contract, visual) also writes a JSON report to
+  // pw-results/<step>.json, which tests/stash/status.mjs reads to tell one
+  // plugin's results from another's.
+  reporter: [
+    ['list'],
+    ...(process.env.CI ? [['html', { open: 'never' }]] : []),
+    ...(process.env.PW_STEP
+      ? [['json', { outputFile: `pw-results/${process.env.PW_STEP}.json` }]]
+      : []),
+  ],
   use: {
     baseURL: process.env.STASH_URL ?? 'http://127.0.0.1:9999',
     viewport: { width: 1440, height: 900 },

@@ -51,7 +51,7 @@ A plugin still being built exports `incubating = true` from its `plugin.mjs`. `p
 
 ### Compatibility tests
 
-The Compatibility workflow installs the plugins on each Stash version listed in `tests/stash-versions.json` and on the latest Stash develop build, every night and on every change. It checks that Stash still renders the elements each plugin depends on and compares screenshots with baselines from the newest listed version. To run it against a local Stash:
+The Compatibility workflow installs the plugins on each Stash version listed in `tests/stash-versions.json` and on the latest Stash develop build, every night and on every change. It checks that Stash still renders the elements each plugin depends on and compares screenshots with baselines from the newest listed version. Each run records its results per plugin and keeps a `gate` artifact (`tests/stash/gate.mjs`) saying which plugins passed on every listed version, so a plugin's release waits only on its own specs, and the issue it opens for a failing channel names the failing plugins. To run it against a local Stash:
 
 ```bash
 pnpm build

@@ -5,8 +5,7 @@
 // files the test jobs upload. Needs GH_TOKEN, GITHUB_REPOSITORY, RUN_URL and
 // NEW_STABLE.
 import { execFileSync } from 'node:child_process'
-import { readdir, readFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { pluginPasses, readStatuses } from './results.mjs'
 
 const dir = process.argv[2] ?? 'status'
 const runUrl = process.env.RUN_URL
@@ -61,10 +60,12 @@ for (const [name, [color, description]] of Object.entries(LABELS)) {
   )
 }
 
-const statuses = []
-for (const f of (await readdir(dir)).filter((f) => f.endsWith('.json'))) {
-  statuses.push(JSON.parse(await readFile(join(dir, f), 'utf8')))
-}
+const statuses = await readStatuses(dir)
+// The plugin folders that failed on a leg; every one when setup failed
+const failingPlugins = (s) =>
+  s.prepare === 'success'
+    ? Object.keys(s.plugins ?? {}).filter((f) => !pluginPasses(s, f))
+    : ['every plugin']
 
 for (const channel of ['stable', 'candidate', 'develop']) {
   const legs = statuses.filter((s) => s.channel === channel)
@@ -91,11 +92,11 @@ for (const channel of ['stable', 'candidate', 'develop']) {
   const body = [
     `The latest compatibility run found problems on the ${channel} channel: ${runUrl}`,
     '',
-    '| Stash | Build | Setup and install | Elements the plugins depend on | Screenshots |',
-    '| --- | --- | --- | --- | --- |',
+    '| Stash | Build | Plugins failing | Setup and install | Elements the plugins depend on | Screenshots |',
+    '| --- | --- | --- | --- | --- | --- |',
     ...failing.map(
       (s) =>
-        `| ${s.leg} | \`${s.version}\` | ${s.prepare} | ${s.contract} | ${s.visual} |`,
+        `| ${s.leg} | \`${s.version}\` | ${failingPlugins(s).join(', ') || 'none named'} | ${s.prepare} | ${s.contract} | ${s.visual} |`,
     ),
     '',
     ...failing
@@ -107,7 +108,8 @@ for (const channel of ['stable', 'candidate', 'develop']) {
     '',
     'The workflow run has the Playwright report and screenshot diffs as an artifact.',
   ].join('\n')
-  const title = `Compatibility: failing on Stash ${channel === 'develop' ? 'develop' : failing.map((s) => s.leg).join(', ')}`
+  const plugins = [...new Set(failing.flatMap(failingPlugins))].sort()
+  const title = `Compatibility: ${plugins.join(', ') || 'plugins'} failing on Stash ${channel === 'develop' ? 'develop' : failing.map((s) => s.leg).join(', ')}`
   if (!existing) {
     gh('issue', 'create', '--title', title, '--label', label, '--body', body)
   } else if (existing.body !== body) {
