@@ -257,7 +257,9 @@ test.describe('beside Insights', () => {
   }) => {
     await setPlugin({})
     await openInsights(page)
-    await expect(page.locator('html')).not.toHaveClass(/\boverclock-restyle\b/)
+    await expect(page.locator('html')).not.toHaveClass(
+      /\boverclock-restyle-insights\b/,
+    )
     await expect(page.locator('#insights')).toHaveCSS(
       'background-color',
       'rgb(16, 15, 15)',
@@ -266,9 +268,11 @@ test.describe('beside Insights', () => {
 
   test('the restyle puts Insights on the display', async ({ page }) => {
     try {
-      await setPlugin({ restylePlugins: true })
+      await setPlugin({ restyleInsights: true })
       await openInsights(page, 'library')
-      await expect(page.locator('html')).toHaveClass(/\boverclock-restyle\b/)
+      await expect(page.locator('html')).toHaveClass(
+        /\boverclock-restyle-insights\b/,
+      )
       const root = page.locator('#insights')
       await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       // Insights' own rules still paint from the palette Overclock gives it
@@ -309,21 +313,23 @@ test.describe('beside Insights', () => {
       await page.goto(EMPTY_LIST)
       await page.locator('.paginationIndex').waitFor()
       await expect(page.locator('html')).not.toHaveClass(
-        /\boverclock-restyle\b/,
+        /\boverclock-restyle-insights\b/,
       )
-      await setPlugin({ restylePlugins: true })
+      await setPlugin({ restyleInsights: true })
       await page
         .locator('a[href="/stats"]')
         .filter({ visible: true })
         .first()
         .click()
-      await expect(page.locator('html')).toHaveClass(/\boverclock-restyle\b/)
+      await expect(page.locator('html')).toHaveClass(
+        /\boverclock-restyle-insights\b/,
+      )
       // Kept for the next visit, so Stats never opens in Insights' colours
       expect(
-        await page.evaluate(() =>
-          localStorage.getItem('overclock.restylePlugins'),
+        await page.evaluate(
+          () => JSON.parse(localStorage.getItem('overclock.restyle')).insights,
         ),
-      ).toBe('1')
+      ).toBe(true)
     } finally {
       await setPlugin({})
     }
@@ -369,7 +375,9 @@ test.describe('beside Performers Toolkit', () => {
   }) => {
     await setPlugin({})
     await openPerformersToolkit(page)
-    await expect(page.locator('html')).not.toHaveClass(/\boverclock-restyle\b/)
+    await expect(page.locator('html')).not.toHaveClass(
+      /\boverclock-restyle-toolkit\b/,
+    )
     await expect(page.locator('.pt')).toHaveCSS(
       'background-color',
       'rgb(16, 15, 15)',
@@ -380,9 +388,11 @@ test.describe('beside Performers Toolkit', () => {
     page,
   }) => {
     try {
-      await setPlugin({ restylePlugins: true })
+      await setPlugin({ restylePerformersToolkit: true })
       await openPerformersToolkit(page, 'find')
-      await expect(page.locator('html')).toHaveClass(/\boverclock-restyle\b/)
+      await expect(page.locator('html')).toHaveClass(
+        /\boverclock-restyle-toolkit\b/,
+      )
       const root = page.locator('.pt')
       await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       // The toolkit's own rules still paint from the palette Overclock
@@ -421,12 +431,12 @@ test.describe('beside Performers Toolkit', () => {
   // carries Performers Toolkit's badge class and its near-black type. It
   // shows once a stash-box has answered, which the mock stash-box does not,
   // so the test shows it, with the restyle off and on.
-  for (const restylePlugins of [false, true]) {
-    test(`the Catalog tab's count reads, closed and open, with the restyle ${restylePlugins ? 'on' : 'off'}`, async ({
+  for (const restylePerformersToolkit of [false, true]) {
+    test(`the Catalog tab's count reads, closed and open, with the restyle ${restylePerformersToolkit ? 'on' : 'off'}`, async ({
       page,
     }) => {
       try {
-        await setPlugin({ restylePlugins })
+        await setPlugin({ restylePerformersToolkit })
         await openPerformerStats(page, (await demoIds()).performer)
         const tab = page.locator('.pt-tablink[data-pt-tab="catalog"]')
         const badge = tab.locator('.badge')
@@ -466,6 +476,34 @@ test.describe('beside Performers Toolkit', () => {
       }),
     ).toEqual([])
   })
+})
+
+// Each restyle setting shows in Settings > Plugins only while its plugin
+// is on, since it has nothing to restyle otherwise
+test('each restyle setting shows only while its plugin is on', async ({
+  page,
+}) => {
+  const row = (setting) =>
+    page.locator('.setting', {
+      has: page.locator(`[id="plugin-${PLUGIN_ID}-${setting}"]`),
+    })
+  const rows = async (insights, toolkit) => {
+    await page.goto('/settings?tab=plugins')
+    await row('calmMode').waitFor()
+    await expect(row('restyleInsights')).toBeVisible({ visible: insights })
+    await expect(row('restylePerformersToolkit')).toBeVisible({
+      visible: toolkit,
+    })
+  }
+  try {
+    await rows(false, false)
+    await usePlugins(PLUGIN_ID, 'Insights')
+    await rows(true, false)
+    await usePlugins(PLUGIN_ID, 'PerformersToolkit')
+    await rows(false, true)
+  } finally {
+    await onlyOverclock()
+  }
 })
 
 // Not a pass/fail check: lists the Stash classes in overclock.css that no

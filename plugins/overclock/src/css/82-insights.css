@@ -5,16 +5,25 @@
  * Insights paints itself in the Flexoki palette from custom properties it
  * sets on #insights, and adds its stylesheet to the page the first time Stats
  * opens, after this one. The rules here therefore start at `#root #insights`,
- * which outranks its own. Everything but the sidebar offset waits for the
- * Restyle Insights and Performers Toolkit setting: overclock.js puts
- * .overclock-restyle on <html> when it is on. Off, both keep the look they
- * share with their sibling plugins, for anyone who prefers it.
+ * which outranks its own. Everything but the sidebar offset and the rule
+ * that hides the setting waits for the Restyle Insights setting:
+ * overclock.js puts .overclock-restyle-insights on <html> when it is on.
+ * Off, Insights keeps the look it shares with its sibling plugins, for
+ * anyone who prefers it.
  *
  * Its heatmaps, codec and resolution colours and the colours of other
  * plugins' cards come from its JavaScript as inline colours, so they keep
  * Insights' own tones; only their empty cells and the charts' grey lines
  * and labels move to the display.
  */
+
+/* The Restyle Insights setting shows only while Insights is on. Stash puts
+   a script tag for each enabled plugin into the page's head, and gives the
+   setting's switch the id plugin-<plugin>-<setting>. */
+:root:not(:has(script[src*='/plugin/Insights/']))
+  .setting:has([id='plugin-Theme-Overclock-restyleInsights']) {
+  display: none;
+}
 
 /* The "What works for you" sidebar sticks under the navbar, which Overclock
    makes taller than Stash's 48.75px, whether the setting is on or not */
@@ -29,7 +38,7 @@
    orange for Library, phosphor green for Collection, arc blue and violet.
    Up reads cyan like a match and down red like a miss. O's keep the blue
    they have across Insights' suite, which its O heatmap draws in. */
-.overclock-restyle #root #insights {
+.overclock-restyle-insights #root #insights {
   --bg: var(--overclock-bg);
   --bg2: var(--overclock-field);
   --ui: var(--overclock-panel);
@@ -64,7 +73,7 @@
 
 /* The head: the name in Chakra Petch over a frame line with ticks, and the
    tabs as Stash's tabs, the open one yellow on a heavy underline */
-.overclock-restyle #root #insights .ins-head {
+.overclock-restyle-insights #root #insights .ins-head {
   background: repeating-linear-gradient(
       90deg,
       var(--overclock-line) 0 1px,
@@ -75,7 +84,7 @@
   margin-bottom: 20px;
 }
 
-.overclock-restyle #root #insights .ins-title {
+.overclock-restyle-insights #root #insights .ins-title {
   color: var(--overclock-text);
   font-family: var(--overclock-font-display);
   font-size: 1.6rem;
@@ -84,17 +93,17 @@
   text-transform: uppercase;
 }
 
-.overclock-restyle #root #insights .ins-title .ins-ic {
+.overclock-restyle-insights #root #insights .ins-title .ins-ic {
   color: var(--overclock-yellow);
 }
 
-.overclock-restyle #root #insights .ins-meta {
+.overclock-restyle-insights #root #insights .ins-meta {
   color: var(--overclock-dim);
   font-family: var(--overclock-font-label);
   letter-spacing: 0.04em;
 }
 
-.overclock-restyle #root #insights .ins-tabs {
+.overclock-restyle-insights #root #insights .ins-tabs {
   align-self: flex-end;
   background: none;
   border: 0;
@@ -104,7 +113,7 @@
   padding: 0;
 }
 
-.overclock-restyle #root #insights .ins-tab {
+.overclock-restyle-insights #root #insights .ins-tab {
   background: none;
   border: 0;
   border-radius: 0;
@@ -125,12 +134,12 @@
   text-transform: uppercase;
 }
 
-.overclock-restyle #root #insights .ins-tab:hover {
+.overclock-restyle-insights #root #insights .ins-tab:hover {
   background: none;
   color: var(--overclock-yellow);
 }
 
-.overclock-restyle #root #insights .ins-tab.on {
+.overclock-restyle-insights #root #insights .ins-tab.on {
   background: rgb(243 230 0 / 8%);
   box-shadow: inset 0 -3px 0 var(--overclock-yellow);
   color: var(--overclock-yellow);
@@ -138,7 +147,7 @@
 
 /* Cards are chamfered panels with a frame line, both cuts drawn, and a
    cyan bracket in the bottom-left corner, as Stash's cards in Overclock */
-.overclock-restyle #root #insights .ins-card {
+.overclock-restyle-insights #root #insights .ins-card {
   --overclock-cut: 12px;
   --overclock-edge: var(--overclock-line);
 
@@ -169,7 +178,7 @@
   );
 }
 
-.overclock-restyle #root #insights .ins-card::after {
+.overclock-restyle-insights #root #insights .ins-card::after {
   background:
     linear-gradient(var(--overclock-cyan) 0 0) 0 100% / 10px 2px no-repeat,
     linear-gradient(var(--overclock-cyan) 0 0) 0 100% / 2px 10px no-repeat;
@@ -183,11 +192,14 @@
   width: 10px;
 }
 
-.overclock-restyle #root #insights :is(.ins-tile.click, .ins-pull):hover {
+.overclock-restyle-insights
+  #root
+  #insights
+  :is(.ins-tile.click, .ins-pull):hover {
   --overclock-edge: var(--overclock-yellow);
 }
 
-.overclock-restyle #root #insights .ins-ch b {
+.overclock-restyle-insights #root #insights .ins-ch b {
   font-family: var(--overclock-font-display);
   font-size: 0.95rem;
   font-weight: 600;
@@ -195,7 +207,7 @@
   text-transform: uppercase;
 }
 
-.overclock-restyle #root #insights :is(.ins-badge, .ins-sq) {
+.overclock-restyle-insights #root #insights :is(.ins-badge, .ins-sq) {
   --overclock-cut: 6px;
 
   border-radius: 0;
@@ -210,13 +222,13 @@
 }
 
 /* A tile's colour edge is a flat signal bar, without a glow */
-.overclock-restyle #root #insights .ins-tile::before {
+.overclock-restyle-insights #root #insights .ins-tile::before {
   box-shadow: none;
   width: 3px;
 }
 
 /* Numbers and small caps are readouts in Share Tech Mono */
-.overclock-restyle
+.overclock-restyle-insights
   #root
   #insights
   :is(
@@ -237,7 +249,7 @@
   letter-spacing: 0;
 }
 
-.overclock-restyle
+.overclock-restyle-insights
   #root
   #insights
   :is(
@@ -258,13 +270,13 @@
 }
 
 /* The Files tab already reads as a console: Overclock's own mono */
-.overclock-restyle #root #insights .ins-con {
+.overclock-restyle-insights #root #insights .ins-con {
   font-family: var(--overclock-font-label);
 }
 
 /* Data wells are dark fields with a frame line and corner ticks, like
    Overclock's form fields */
-.overclock-restyle #root #insights :is(.ins-well, .ins-hubqueue) {
+.overclock-restyle-insights #root #insights :is(.ins-well, .ins-hubqueue) {
   background:
     linear-gradient(var(--overclock-line) 0 0) 0 0 / 1px 7px no-repeat,
     linear-gradient(var(--overclock-line) 0 0) 0 0 / 7px 1px no-repeat,
@@ -277,7 +289,7 @@
 }
 
 /* Chips are clipped mono tags on a control panel */
-.overclock-restyle
+.overclock-restyle-insights
   #root
   #insights
   :is(.ins-chip, .ins-nav, .ins-pill, .ins-hchip) {
@@ -306,27 +318,30 @@
   letter-spacing: 0.06em;
 }
 
-.overclock-restyle #root #insights :is(.ins-chip, .ins-pill):hover {
+.overclock-restyle-insights #root #insights :is(.ins-chip, .ins-pill):hover {
   --overclock-edge: var(--overclock-yellow);
 
   color: var(--overclock-yellow);
 }
 
-.overclock-restyle #root #insights .ins-seg {
+.overclock-restyle-insights #root #insights .ins-seg {
   background: var(--overclock-field);
   border: 1px solid var(--overclock-rule);
   border-radius: 0;
   box-shadow: none;
 }
 
-.overclock-restyle #root #insights .ins-seg button {
+.overclock-restyle-insights #root #insights .ins-seg button {
   border-radius: 0;
   font-family: var(--overclock-font-label);
   letter-spacing: 0.06em;
 }
 
 /* The chosen chip of a row is a cyan readout, as in Stash's button groups */
-.overclock-restyle #root #insights :is(.ins-chip.on, .ins-seg button.on) {
+.overclock-restyle-insights
+  #root
+  #insights
+  :is(.ins-chip.on, .ins-seg button.on) {
   --overclock-edge: var(--overclock-cyan);
 
   background-color: rgb(0 229 255 / 14%);
@@ -334,7 +349,7 @@
   color: var(--overclock-cyan);
 }
 
-.overclock-restyle #root #insights .ins-hchip.on {
+.overclock-restyle-insights #root #insights .ins-hchip.on {
   --overclock-edge: color-mix(in srgb, var(--c) 60%, transparent);
 
   background-color: color-mix(in srgb, var(--c) 18%, var(--overclock-chip));
@@ -343,7 +358,7 @@
 /* Buttons are flat panels with the bottom-right corner clipped: a control
    panel that turns yellow under the pointer, solid yellow for the one that
    goes ahead, and red behind hazard stripes for the one that deletes */
-.overclock-restyle #root #insights .ins-btn {
+.overclock-restyle-insights #root #insights .ins-btn {
   --overclock-fill: var(--overclock-control);
   --overclock-edge: var(--overclock-line);
   --overclock-ink: var(--overclock-text);
@@ -375,24 +390,27 @@
   text-transform: uppercase;
 }
 
-.overclock-restyle #root #insights .ins-btn:not(:disabled):hover {
+.overclock-restyle-insights #root #insights .ins-btn:not(:disabled):hover {
   --overclock-edge: var(--overclock-yellow);
   --overclock-ink: var(--overclock-yellow);
 }
 
-.overclock-restyle #root #insights .ins-btn.ins-pri {
+.overclock-restyle-insights #root #insights .ins-btn.ins-pri {
   --overclock-fill: var(--overclock-yellow);
   --overclock-edge: var(--overclock-yellow);
   --overclock-ink: var(--overclock-black);
 }
 
-.overclock-restyle #root #insights .ins-btn.ins-pri:not(:disabled):hover {
+.overclock-restyle-insights
+  #root
+  #insights
+  .ins-btn.ins-pri:not(:disabled):hover {
   --overclock-fill: var(--overclock-yellow-hi);
   --overclock-edge: var(--overclock-yellow-hi);
   --overclock-ink: var(--overclock-black);
 }
 
-.overclock-restyle #root #insights .ins-btn.danger:not(:disabled) {
+.overclock-restyle-insights #root #insights .ins-btn.danger:not(:disabled) {
   --overclock-fill: var(--overclock-red);
   --overclock-edge: var(--overclock-red);
   --overclock-ink: var(--overclock-black);
@@ -422,21 +440,24 @@
   padding-left: calc(11px + 15px);
 }
 
-.overclock-restyle #root #insights .ins-btn.danger:not(:disabled):hover {
+.overclock-restyle-insights
+  #root
+  #insights
+  .ins-btn.danger:not(:disabled):hover {
   --overclock-fill: var(--overclock-red-hi);
   --overclock-edge: var(--overclock-red-hi);
   --overclock-ink: var(--overclock-black);
 }
 
 /* Armed, a second press deletes: the panel takes a yellow underline */
-.overclock-restyle #root #insights .ins-btn.danger.armed {
+.overclock-restyle-insights #root #insights .ins-btn.danger.armed {
   --overclock-fill: var(--overclock-red-hi);
 
   box-shadow: inset 0 -3px 0 var(--overclock-yellow);
 }
 
 /* Disabled is locked: a dashed frame behind faint hazard stripes */
-.overclock-restyle #root #insights .ins-btn:disabled {
+.overclock-restyle-insights #root #insights .ins-btn:disabled {
   --overclock-fill: transparent;
   --overclock-edge: var(--overclock-line);
   --overclock-ink: var(--overclock-dim);
@@ -449,11 +470,11 @@
 
 /* Links read in cyan and turn yellow under the pointer, as everywhere in
    Overclock */
-.overclock-restyle #root #insights :is(.ins-go, .ins-hlink) {
+.overclock-restyle-insights #root #insights :is(.ins-go, .ins-hlink) {
   color: var(--overclock-cyan);
 }
 
-.overclock-restyle
+.overclock-restyle-insights
   #root
   #insights
   :is(.ins-go:hover, .ins-hlink:hover:not(:disabled)) {
@@ -461,7 +482,7 @@
 }
 
 /* Rules between rows are dashed, like Overclock's dividers */
-.overclock-restyle
+.overclock-restyle-insights
   #root
   #insights
   :is(
@@ -471,24 +492,24 @@
     .ins-hki + .ins-hki,
     .ins-hkc + .ins-hki
   ),
-.overclock-restyle #root #insights .ins-con tr + tr td {
+.overclock-restyle-insights #root #insights .ins-con tr + tr td {
   border-top: 1px dashed var(--overclock-rule);
 }
 
-.overclock-restyle #root #insights .ins-hkc {
+.overclock-restyle-insights #root #insights .ins-hkc {
   border: 1px solid var(--overclock-rule);
   border-left: 3px solid var(--overclock-yellow);
   border-radius: 0;
 }
 
 /* Up and down, keep and delete: their status colours on the panel */
-.overclock-restyle #root #insights :is(.ins-lift, .ins-k) {
+.overclock-restyle-insights #root #insights :is(.ins-lift, .ins-k) {
   border-radius: 0;
   font-family: var(--overclock-font-label);
   font-weight: 400;
 }
 
-.overclock-restyle #root #insights :is(.ins-lift.up, .ins-k.keep) {
+.overclock-restyle-insights #root #insights :is(.ins-lift.up, .ins-k.keep) {
   background: color-mix(
     in srgb,
     var(--overclock-cyan) 14%,
@@ -496,7 +517,7 @@
   );
 }
 
-.overclock-restyle #root #insights :is(.ins-lift.down, .ins-k.del) {
+.overclock-restyle-insights #root #insights :is(.ins-lift.down, .ins-k.del) {
   background: color-mix(
     in srgb,
     var(--overclock-red) 16%,
@@ -504,7 +525,7 @@
   );
 }
 
-.overclock-restyle #root #insights .ins-k.look {
+.overclock-restyle-insights #root #insights .ins-k.look {
   background: color-mix(
     in srgb,
     var(--overclock-yellow) 12%,
@@ -512,7 +533,7 @@
   );
 }
 
-.overclock-restyle #root #insights .ins-error {
+.overclock-restyle-insights #root #insights .ins-error {
   background: color-mix(
     in srgb,
     var(--overclock-red) 12%,
@@ -526,7 +547,7 @@
 
 /* Bars are segmented, like Overclock's progress bars, and every bar, track
    and cell is square. The colours stay Insights' own. */
-.overclock-restyle
+.overclock-restyle-insights
   #root
   #insights
   :is(
@@ -550,65 +571,65 @@
   border-radius: 0;
 }
 
-.overclock-restyle #root #insights :is(.ins-bar i, .ins-week i) {
+.overclock-restyle-insights #root #insights :is(.ins-bar i, .ins-week i) {
   box-shadow: none;
   mask: repeating-linear-gradient(0deg, #000 0 5px, transparent 5px 7px);
 }
 
-.overclock-restyle #root #insights .ins-trk i {
+.overclock-restyle-insights #root #insights .ins-trk i {
   box-shadow: none;
   mask: repeating-linear-gradient(90deg, #000 0 8px, transparent 8px 10px);
 }
 
 /* Ticked copies and switches are square and yellow when on */
-.overclock-restyle #root #insights .ins-bx {
+.overclock-restyle-insights #root #insights .ins-bx {
   background: var(--overclock-field);
   border-color: var(--overclock-line);
   border-radius: 0;
   box-shadow: none;
 }
 
-.overclock-restyle #root #insights .ins-bx.on {
+.overclock-restyle-insights #root #insights .ins-bx.on {
   background: var(--overclock-yellow);
   border-color: var(--overclock-yellow);
 }
 
-.overclock-restyle #root #insights .ins-bx.on::after {
+.overclock-restyle-insights #root #insights .ins-bx.on::after {
   border-color: var(--overclock-black);
 }
 
-.overclock-restyle #root #insights .ins-tog i {
+.overclock-restyle-insights #root #insights .ins-tog i {
   background: var(--overclock-field);
   border-radius: 0;
   box-shadow: inset 0 0 0 1px var(--overclock-line);
 }
 
-.overclock-restyle #root #insights .ins-tog i::after {
+.overclock-restyle-insights #root #insights .ins-tog i::after {
   background: var(--overclock-line);
   border-radius: 0;
 }
 
-.overclock-restyle #root #insights .ins-tog.on i {
+.overclock-restyle-insights #root #insights .ins-tog.on i {
   background: var(--overclock-yellow);
   box-shadow: none;
 }
 
-.overclock-restyle #root #insights .ins-tog.on i::after {
+.overclock-restyle-insights #root #insights .ins-tog.on i::after {
   background: var(--overclock-black);
 }
 
 /* Treemap type and the calendar's hover frame */
-.overclock-restyle #root #insights .ins-tm div {
+.overclock-restyle-insights #root #insights .ins-tm div {
   color: var(--overclock-black);
 }
 
-.overclock-restyle #root #insights .ins-cal i:hover:not(.f) {
+.overclock-restyle-insights #root #insights .ins-cal i:hover:not(.f) {
   outline-color: var(--overclock-yellow);
 }
 
 /* Empty heatmap cells and the charts' grey lines and labels, which Insights
    writes as inline colours */
-.overclock-restyle
+.overclock-restyle-insights
   #root
   #insights
   :is(.ins-cal, .ins-hm, .ins-legend)
@@ -617,38 +638,47 @@
 }
 
 /* The tag picked in Top tags, whose row carries the colour inline as --c */
-.overclock-restyle #root #insights .ins-row[style*='#A9BA5A' i] .ins-trk i {
+.overclock-restyle-insights
+  #root
+  #insights
+  .ins-row[style*='#A9BA5A' i]
+  .ins-trk
+  i {
   background: var(--overclock-yellow);
 }
 
-.overclock-restyle #root #insights .ins-ring circle[stroke='#282726' i] {
+.overclock-restyle-insights
+  #root
+  #insights
+  .ins-ring
+  circle[stroke='#282726' i] {
   stroke: var(--overclock-field);
 }
 
-.overclock-restyle #root #insights svg line[stroke='#282726' i] {
+.overclock-restyle-insights #root #insights svg line[stroke='#282726' i] {
   stroke: var(--overclock-rule);
 }
 
-.overclock-restyle #root #insights svg line[stroke='#575653' i] {
+.overclock-restyle-insights #root #insights svg line[stroke='#575653' i] {
   stroke: var(--overclock-line);
 }
 
-.overclock-restyle #root #insights svg text[fill='#878580' i] {
+.overclock-restyle-insights #root #insights svg text[fill='#878580' i] {
   fill: var(--overclock-dim);
   font-family: var(--overclock-font-label);
 }
 
-.overclock-restyle #root #insights svg path[stroke='#A9BA5A' i] {
+.overclock-restyle-insights #root #insights svg path[stroke='#A9BA5A' i] {
   stroke: var(--overclock-cyan);
 }
 
-.overclock-restyle #root #insights svg stop[stop-color='#879A39' i] {
+.overclock-restyle-insights #root #insights svg stop[stop-color='#879A39' i] {
   stop-color: var(--overclock-cyan);
 }
 
 /* Its tooltip is a yellow tag, like Stash's in Overclock. It sits on
    <body>, outside #insights. */
-.overclock-restyle #ins-tip {
+.overclock-restyle-insights #ins-tip {
   --overclock-cut: 6px;
 
   background: var(--overclock-yellow);

@@ -71,7 +71,7 @@ Stash's SFW content mode keeps the display and drops the voice: the copy is off,
 
 Insights and Performers Toolkit are another author's plugins from one suite (gitlab.com/allisless0/stash-plugins). Insights is a stats dashboard on Stash's Stats page. Performers Toolkit has a page at `/performerstoolkit` (`.pt`), a strip under each performer's name (`#pt-strip`) and Stats and Catalog tabs on the performer's page (`.ptc`). Both paint themselves in the Flexoki palette through custom properties they set on their own roots (`--bg`, `--bg2`, `--ui` to `--ui3`, `--tx3` to `--hi`, eight accents from `--re` to `--ma`, and in Insights `--up`, `--down` and `--o`), from stylesheets they add after Overclock's. `82-insights.css` therefore starts its rules at `#root #insights` and `83-performers-toolkit.css` at `#root`, which outrank the plugins' own. Insights' tooltip (`#ins-tip`) and the toolkit's toast (`#pt-toast`) sit on `<body>`, so their rules start at their ids.
 
-With the Restyle Insights and Performers Toolkit setting on, `overclock.js` puts `.overclock-restyle` on `<html>`, and both take the display:
+Each plugin has its own setting. With Restyle Insights on, `overclock.js` puts `.overclock-restyle-insights` on `<html>`, which every rule in `82-insights.css` waits for; with Restyle Performers Toolkit on, it puts `.overclock-restyle-toolkit` there for `83-performers-toolkit.css`. A plugin whose setting is on takes the display:
 
 - **Their palette** becomes Overclock's: teal-black panels, black fields, Overclock's text tones and eight signals that stay apart on a panel. Overclock has four signals of its own and the two plugins colour up to eight things side by side, so `01-tokens.css` adds orange, green, blue and violet for them. Insights' tabs are You magenta, Actions red, Library orange, Files cyan, Metadata health yellow, Collection green and Movies violet, and the toolkit's are Find blue, Performers magenta, History violet and Sources green. Up and good read cyan and down and bad red, the Tagger's colours for a match and a miss. O's keep the suite's blue, which Insights' O heatmap draws in. The plugins' own rules keep painting from these properties, so their bars and rings follow.
 - **Their slabs go**, and their cards sit on the dot grid like Stash's own pages. Cards are chamfered panels with a frame line, both cuts drawn and a cyan bracket in the bottom-left corner. The toolkit's dialog, its review bar and its toast also take an overlay's yellow left rule; the toast's rule turns cyan when something is done and red on an error.
@@ -82,21 +82,24 @@ With the Restyle Insights and Performers Toolkit setting on, `overclock.js` puts
 
 Insights writes some colours from its JavaScript as inline styles and SVG attributes. Its heatmaps, its codec and resolution colours, the colours of the toolkit plugins' cards and the segments of its splits keep Insights' tones. The empty heatmap cells, the charts' grey grid lines and labels, the growth line and the tag picked in Top tags are matched by their exact inline colour and moved to the display. Performers Toolkit writes its good, bad and link-hover colours, the ink on its filled tags, its toast's and review status's rules, its zoom slider and its scrollbars as hex in its own stylesheet, so Overclock overrides those rules by name. A release of either plugin that changes one of those values puts that one piece back in its own colour.
 
-The setting starts off because the two plugins share Flexoki with their sibling plugins, which Overclock leaves alone, so someone who runs several of them keeps one look until they choose otherwise. `overclock.js` keeps the setting in the browser (`localStorage`, `overclock.restylePlugins`), so a page those plugins draw on never opens in Flexoki first. It reads the settings again on every page Stash opens, so changing one needs no reload.
+Both settings start off because the two plugins share Flexoki with their sibling plugins, which Overclock leaves alone, so someone who runs several of them keeps one look until they choose otherwise; turning both on keeps the two plugins alike. `overclock.js` keeps both in the browser (`localStorage`, `overclock.restyle`, as `{ insights, toolkit }`), so a page those plugins draw on never opens in Flexoki first. It reads the settings again on every page Stash opens, so changing one needs no reload.
 
-Two rules apply with the setting off too. Insights' What works sidebar sticks under the navbar at Stash's height, so Overclock moves it below its own 58px bar; Performers Toolkit measures the navbar for its toast and its phone review bar, so it needs no such rule. The count on the toolkit's Catalog tab is a Stash badge that also carries `.pt-badge`, whose near-black type the toolkit sets for its own filled badges, so Overclock gives that count its own badge type, which reads on its dark badge.
+Each setting's row in Settings > Plugins shows only while its plugin is on, since it has nothing to restyle otherwise. Stash puts a script tag for each enabled plugin in the page's head (`/plugin/Insights/…`, `/plugin/PerformersToolkit/…`) and gives a setting's switch the id `plugin-<plugin>-<setting>`, so one CSS rule per setting, in its plugin's file, hides the row while that script tag is missing. It needs no request and never flashes. The rule matches the id with an attribute selector, since stylelint's id pattern rejects the camelCase id.
+
+Two rules besides the hiding apply with the settings off too. Insights' What works sidebar sticks under the navbar at Stash's height, so Overclock moves it below its own 58px bar; Performers Toolkit measures the navbar for its toast and its phone review bar, so it needs no such rule. The count on the toolkit's Catalog tab is a Stash badge that also carries `.pt-badge`, whose near-black type the toolkit sets for its own filled badges, so Overclock gives that count its own badge type, which reads on its dark badge.
 
 The design-system page shows neither plugin.
 
 ## Settings
 
-| Setting                                 | Key              | Effect                                       |
-| --------------------------------------- | ---------------- | -------------------------------------------- |
-| Calm mode                               | `calmMode`       | Turns off Overclock's animations             |
-| Plain labels                            | `plainCopy`      | Keeps Stash's own wording                    |
-| Restyle Insights and Performers Toolkit | `restylePlugins` | Puts both plugins on Overclock's display too |
+| Setting                    | Key                        | Effect                                             |
+| -------------------------- | -------------------------- | -------------------------------------------------- |
+| Calm mode                  | `calmMode`                 | Turns off Overclock's animations                   |
+| Plain labels               | `plainCopy`                | Keeps Stash's own wording                          |
+| Restyle Insights           | `restyleInsights`          | Puts Insights on Overclock's display too           |
+| Restyle Performers Toolkit | `restylePerformersToolkit` | Puts Performers Toolkit on Overclock's display too |
 
-All three default to off, so a fresh install gets the full theme and leaves the two plugins as their author drew them.
+All of them default to off, so a fresh install gets the full theme and leaves the two plugins as their author drew them. The two restyle settings show only while their plugins are on.
 
 ## Coupling to Stash
 

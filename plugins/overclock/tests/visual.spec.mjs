@@ -43,13 +43,13 @@ for (const entry of SHOTS) {
   })
 }
 
-// Insights on the display, with Restyle Insights and Performers Toolkit on.
-// Its Library and Files tabs only; the others count from today (O's this
-// week, growth by month), so their pictures would change by the day.
+// Insights on the display, with Restyle Insights on. Its Library and Files
+// tabs only; the others count from today (O's this week, growth by month),
+// so their pictures would change by the day.
 test.describe('Insights', () => {
   test.beforeAll(async () => {
     await usePlugins(PLUGIN_ID, 'Insights')
-    await setPlugin({ restylePlugins: true })
+    await setPlugin({ restyleInsights: true })
   })
   test.afterAll(async () => {
     await setPlugin({})
@@ -76,7 +76,7 @@ test.describe('Insights', () => {
 test.describe('Performers Toolkit', () => {
   test.beforeAll(async () => {
     await usePlugins(PLUGIN_ID, 'PerformersToolkit')
-    await setPlugin({ restylePlugins: true })
+    await setPlugin({ restylePerformersToolkit: true })
   })
   test.afterAll(async () => {
     await setPlugin({})

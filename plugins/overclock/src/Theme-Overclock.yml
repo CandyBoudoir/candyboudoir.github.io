@@ -18,7 +18,11 @@ settings:
     displayName: Plain labels
     description: Keep Stash's own wording instead of Overclock's system voice. Stash's SFW mode always uses plain labels.
     type: BOOLEAN
-  restylePlugins:
-    displayName: Restyle Insights and Performers Toolkit
-    description: "Off: the Insights and Performers Toolkit plugins keep their own Flexoki look. On: they take Overclock's teal-black panels, clipped buttons and mono readouts. Takes effect on the next page you open."
+  restyleInsights:
+    displayName: Restyle Insights
+    description: "Off: the Insights plugin keeps its own Flexoki look on the Stats page. On: it takes Overclock's teal-black panels, clipped buttons and mono readouts. Shows while Insights is on; takes effect on the next page you open."
+    type: BOOLEAN
+  restylePerformersToolkit:
+    displayName: Restyle Performers Toolkit
+    description: "Off: the Performers Toolkit plugin keeps its own Flexoki look on its page and on performer pages. On: it takes Overclock's teal-black panels, clipped buttons and mono readouts. Shows while Performers Toolkit is on; takes effect on the next page you open."
     type: BOOLEAN
