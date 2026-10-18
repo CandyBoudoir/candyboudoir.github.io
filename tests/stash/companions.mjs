@@ -1,3 +1,5 @@
+import { access } from 'node:fs/promises'
+
 // Other authors' plugins the compatibility tests can install next to these,
 // to check that both keep working side by side. COMPANIONS names them
 // (comma separated, such as COMPANIONS=ascension): prepare.mjs installs
@@ -144,8 +146,9 @@ export const COMPANIONS = {
 // look for it; each such theme keeps tests/<key>-unmatched-baseline.txt. Each is pinned to the files of one release at its commit in
 // the author's repository, by sha256: an author's Pages source keeps only
 // its newest zip, and a test Stash that cannot get the pinned files fails
-// every plugin's specs, not one leg's. tested-with.mjs --issues opens an
-// issue when a newer release is out.
+// every plugin's specs, not one leg's. tested-with.mjs holds back a release
+// of a theme that restyles one while a newer release of it is out, and with
+// --issues opens an issue for it.
 const INSIGHTS_COMMIT = '97171c133f1c7f5214a6d2950c51364b9a72787c'
 const PERFORMERS_TOOLKIT_COMMIT = 'e357be13a5ccc771b9b5b9d7ff4596d16aeaa31f'
 export const RESTYLED = {
@@ -202,6 +205,37 @@ export const RESTYLED = {
 // The restyled plugins, keyed like the companions
 export const restyled = () =>
   Object.entries(RESTYLED).map(([key, r]) => ({ key, ...r }))
+
+// The restyled plugins a plugin of ours restyles: those it keeps an
+// unmatched-class baseline for (plugins/<folder>/tests/<key>-unmatched-baseline.txt)
+export async function restyledBy(folder) {
+  const found = []
+  for (const r of restyled()) {
+    const baseline = new URL(
+      `../../plugins/${folder}/tests/${r.key}-unmatched-baseline.txt`,
+      import.meta.url,
+    )
+    if (
+      await access(baseline).then(
+        () => true,
+        () => false,
+      )
+    )
+      found.push(r)
+  }
+  return found
+}
+
+// The sentence each release of a theme that restyles them carries in its
+// CHANGELOG section, naming the versions its specs ran beside
+export function restyledBeside(list) {
+  const names = list.map((r) => `${r.name} ${r.version}`)
+  const named =
+    names.length > 1
+      ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`
+      : names[0]
+  return `Tested beside ${named}.`
+}
 
 export function companions() {
   return (process.env.COMPANIONS || '')

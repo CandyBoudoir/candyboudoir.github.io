@@ -1,11 +1,15 @@
 // Keeps Cherry Pick tested beside the latest release of each companion plugin
-// (companions.mjs), and saying so.
+// (companions.mjs), and each theme beside the latest release of each plugin
+// it restyles (RESTYLED), and saying so.
 //
 // Always: the Tested with table in Cherry Pick's README names the Stash
-// versions in stash-versions.json and the pinned companion versions.
-// While Cherry Pick's version has no cherrypick-vX.Y.Z tag yet (a release on
-// its way): that version's CHANGELOG section carries testedBeside(), and
-// every pin is its author's latest release.
+// versions in stash-versions.json and the pinned companion versions, and a
+// restyling theme's README names the pinned version of each plugin it
+// restyles.
+// While a plugin's version has no <folder>-vX.Y.Z tag yet (a release on its
+// way): that version's CHANGELOG section carries testedBeside() (Cherry Pick)
+// or restyledBeside() (a restyling theme), and every pin it names is its
+// author's latest release.
 // With --issues (the nightly Compatibility run): instead of failing, keeps one
 // open "Test Cherry Pick beside <plugin> <version>" issue per companion with a
 // newer release, and one "Restyle <plugin> <version>" issue per plugin the
@@ -21,6 +25,9 @@ import {
   COMPANIONS,
   RESTYLED,
   TESTED_PLUGIN,
+  restyled,
+  restyledBeside,
+  restyledBy,
   testedBeside,
 } from './companions.mjs'
 
@@ -265,6 +272,59 @@ if (!tagged) {
     )
 }
 
+// The themes that restyle another author's plugin: the README names the
+// pinned version of each, and a release on its way says what it was tested
+// beside, which must be the latest release of each
+const restyling = []
+let latestRestyles
+for (const folder of (await readdir(join(root, 'plugins'))).sort()) {
+  const list = await restyledBy(folder)
+  if (!list.length) continue
+  const themeDir = join(root, 'plugins', folder)
+  const themeReadme = await readFile(join(themeDir, 'README.md'), 'utf8')
+  for (const r of list)
+    if (!themeReadme.includes(`${r.name} ${r.version}`))
+      problems.push(
+        `plugins/${folder}/README.md should name ${r.name} ${r.version}, the release its specs restyle`,
+      )
+  const yml = (await readdir(join(themeDir, 'src'))).find((f) =>
+    f.endsWith('.yml'),
+  )
+  const themeVersion = (
+    await readFile(join(themeDir, 'src', yml), 'utf8')
+  ).match(/^version: (.+)$/m)[1]
+  const themeTag = `${folder}-v${themeVersion}`
+  const released = execFileSync('git', ['tag', '--list', themeTag], {
+    cwd: root,
+    encoding: 'utf8',
+  }).trim()
+  restyling.push({ themeTag, released, list })
+  if (released) continue
+  const sentence = restyledBeside(list)
+  const section = (await readFile(join(themeDir, 'CHANGELOG.md'), 'utf8'))
+    .split(/^## /m)
+    .find(
+      (s) =>
+        s.startsWith(`${themeVersion}\n`) || s.startsWith(`${themeVersion} `),
+    )
+  if (!section?.includes(sentence))
+    problems.push(
+      `plugins/${folder}/CHANGELOG.md's "## ${themeVersion}" section should say:\n  ${sentence}`,
+    )
+  latestRestyles ??= Object.fromEntries(
+    await Promise.all(
+      restyled().map(async (r) => [r.key, await latestRestyled(r)]),
+    ),
+  )
+  for (const r of list) {
+    const latest = latestRestyles[r.key]
+    if (!latest.current)
+      problems.push(
+        `${themeTag} would ship tested beside ${r.name} ${r.version}, but ${latest.version} is out: pin its files in tests/stash/companions.mjs (RESTYLED.${r.key}) and run the theme's specs`,
+      )
+  }
+}
+
 if (problems.length) {
   console.error(`\n${problems.join('\n\n')}`)
   process.exit(1)
@@ -274,3 +334,9 @@ console.log(
     ? `\n${tag} is released; the README's Tested with table matches the pins`
     : `\n${tag} is tested beside the latest release of every companion and says so`,
 )
+for (const { themeTag, released, list } of restyling)
+  console.log(
+    released
+      ? `${themeTag} is released; its README names ${list.map((r) => `${r.name} ${r.version}`).join(' and ')}`
+      : `${themeTag} is tested beside the latest ${list.map((r) => r.name).join(' and ')} and says so`,
+  )
