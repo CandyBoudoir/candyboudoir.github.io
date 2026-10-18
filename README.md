@@ -11,6 +11,7 @@ Plugins for [Stash](https://github.com/stashapp/stash), the self-hosted media or
 | [Juicy](plugins/juicy/)            | A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording.                    |
 | [Leather](plugins/leather/)        | A black leather theme: saddle stitching, nickel studs for ratings, a collar for favourites and a strict voice in the wording.                    |
 | [Overclock](plugins/overclock/)    | A hacker's heads-up display in acid yellow: charge chevrons for ratings, a reticle that locks on for favourites and a cold system voice.         |
+| [Tag Candy](plugins/tagcandy/)     | Glossy sticker icons for your tags, matched by StashDB link or name. Your own tag images stay unless you ask.                                    |
 
 <!-- plugins:end -->
 

@@ -17,9 +17,6 @@ export const title = 'Tag Candy'
 // The line about the plugin in the repo's README (scripts/readme.mjs).
 export const summary =
   'Glossy sticker icons for your tags, matched by StashDB link or name. Your own tag images stay unless you ask.'
-// Held back from the develop channel, the site and releases until the owner
-// says it may publish (README, Development). Removing this line publishes it.
-export const incubating = true
 // Paths in this folder whose changes alter the plugin zip. The icons are
 // published on the site, not zipped, and tests and docs are left out, so
 // changing them offers users no update.
