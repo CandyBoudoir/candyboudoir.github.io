@@ -148,14 +148,15 @@ export const COMPANIONS = {
 // its newest zip, and a test Stash that cannot get the pinned files fails
 // every plugin's specs, not one leg's. tested-with.mjs holds back a release
 // of a theme that restyles one while a newer release of it is out, and with
-// --issues opens an issue for it.
+// --issues opens an issue for it; pin-restyled.mjs moves a pin to the latest
+// release.
 const INSIGHTS_COMMIT = '97171c133f1c7f5214a6d2950c51364b9a72787c'
 const PERFORMERS_TOOLKIT_COMMIT = 'e357be13a5ccc771b9b5b9d7ff4596d16aeaa31f'
 export const RESTYLED = {
   // Insights 2.11.0, a stats dashboard on Stash's Stats page, from
   // https://gitlab.com/allisless0/stash-plugins (MIT): its plugin folder at
-  // the 2.11.0 commit, the same four files as the zip its GitLab Pages
-  // source served for that release.
+  // the 2.11.0 commit, the same files as the zip its GitLab Pages source
+  // served for that release.
   insights: {
     id: 'Insights',
     name: 'Insights',
