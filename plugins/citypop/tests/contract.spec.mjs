@@ -14,9 +14,11 @@ import {
   demoIds,
   demoPath,
   onlyCityPop,
+  openInsights,
   setPlugin,
   setSfw,
   unmatchedClasses,
+  unmatchedInsightsClasses,
   usePlugins,
   visit,
 } from './stash.mjs'
@@ -403,6 +405,121 @@ test('SFW mode drops the voice and the pool drops', async ({ page }) => {
   } finally {
     await setSfw(false)
   }
+})
+
+// Insights, another author's stats dashboard on the Stats page (RESTYLED in
+// tests/stash/companions.mjs), keeps its own look until Restyle Insights is
+// on, and then takes City Pop's palette, panels and type. Its sidebar clears
+// City Pop's taller navbar either way.
+test.describe('beside Insights', () => {
+  test.beforeAll(async () => {
+    await usePlugins(PLUGIN_ID, 'Insights')
+  })
+  test.afterAll(async () => {
+    await setPlugin({})
+    await onlyCityPop()
+  })
+
+  test('Insights keeps its own look until Restyle Insights is on', async ({
+    page,
+  }) => {
+    await setPlugin({})
+    await openInsights(page)
+    await expect(page.locator('html')).not.toHaveClass(/\bcitypop-insights\b/)
+    await expect(page.locator('#insights')).toHaveCSS(
+      'background-color',
+      'rgb(16, 15, 15)',
+    )
+  })
+
+  test('Restyle Insights puts Insights in the dusk', async ({ page }) => {
+    try {
+      await setPlugin({ restyleInsights: true })
+      await openInsights(page, 'library')
+      await expect(page.locator('html')).toHaveClass(/\bcitypop-insights\b/)
+      const root = page.locator('#insights')
+      await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      // Insights' own rules still paint from the palette City Pop gives it
+      expect(
+        await root.evaluate((el) =>
+          getComputedStyle(el).getPropertyValue('--ui').trim(),
+        ),
+      ).toBe('#1a1848')
+      await expect(root.locator('.ins-sub').first()).toHaveCSS(
+        'color',
+        'rgb(163, 155, 211)',
+      )
+      await expect(root.locator('.ins-card').first()).toHaveCSS(
+        'border-radius',
+        '4px',
+      )
+      await expect(root.locator('.ins-title')).toHaveCSS(
+        'font-family',
+        /CityPop Dafoe/,
+      )
+      await root
+        .locator('.ins-bar[data-tip]')
+        .filter({ visible: true })
+        .first()
+        .hover()
+      const tip = page.locator('#ins-tip')
+      await expect(tip).toBeVisible()
+      await expect(tip).toHaveCSS('background-color', 'rgb(255, 246, 234)')
+      await expect(tip).toHaveCSS('color', 'rgb(27, 17, 69)')
+    } finally {
+      await setPlugin({})
+    }
+  })
+
+  test('Restyle Insights takes effect when Stats next opens', async ({
+    page,
+  }) => {
+    try {
+      await setPlugin({})
+      await page.goto(EMPTY_LIST)
+      await page.locator('.paginationIndex').waitFor()
+      await expect(page.locator('html')).not.toHaveClass(/\bcitypop-insights\b/)
+      await setPlugin({ restyleInsights: true })
+      await page
+        .locator('a[href="/stats"]')
+        .filter({ visible: true })
+        .first()
+        .click()
+      await expect(page.locator('html')).toHaveClass(/\bcitypop-insights\b/)
+      // Kept for the next visit, so Stats never opens in Insights' colours
+      expect(
+        await page.evaluate(() =>
+          localStorage.getItem('citypop.restyleInsights'),
+        ),
+      ).toBe('1')
+    } finally {
+      await setPlugin({})
+    }
+  })
+
+  test("the What works sidebar clears City Pop's navbar", async ({ page }) => {
+    await setPlugin({})
+    await openInsights(page, 'you')
+    await expect(page.locator('#insights .ins-side')).toHaveCSS(
+      'top',
+      '71.25px',
+    )
+  })
+
+  // The Insights classes in citypop.css that no tab renders on the demo
+  // library, against the ones that matched nothing on the pinned Insights
+  // (plugins/citypop/tests/insights-unmatched-baseline.txt). A class that
+  // newly matches nothing is one an Insights release renamed or removed.
+  test('every Insights class City Pop styles still renders', async ({
+    page,
+  }) => {
+    expect(
+      await unmatchedInsightsClasses(page, {
+        css: 'dist/site/Theme-CityPop/citypop.css',
+        folder: 'citypop',
+      }),
+    ).toEqual([])
+  })
 })
 
 // Not a pass/fail check: lists the Stash classes in citypop.css that no

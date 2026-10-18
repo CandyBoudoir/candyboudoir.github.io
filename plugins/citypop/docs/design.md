@@ -15,6 +15,7 @@ Every rule in `src/css` reads these custom properties, because Stash compiles it
 | `--citypop-apricot` | `#FFB36B` | Glow, warning, the sun's top                |
 | `--citypop-magenta` | `#C23A8E` | Deep sunset, the shadow under script titles |
 | `--citypop-pool`    | `#4FE3DA` | Focus, switches, success                    |
+| `--citypop-sky`     | `#A3BBFF` | Info, and Insights' Files tab               |
 | `--citypop-night`   | `#0C0E30` | Page, the sky overhead                      |
 | `--citypop-panel`   | `#1A1848` | Navbar, cards, panels, menus                |
 | `--citypop-raised`  | `#252262` | Secondary buttons, tabs, scrape fields      |
@@ -100,14 +101,35 @@ The culture is in the voice as homage: real customs of Japanese late-night radio
 
 Stash's SFW content mode keeps the dusk, the suns, the hearts and the cassettes. The FM host's lines are off, bursts lose their pool drops, and the O counter is a cocktail wherever Stash still draws its own ripple glyph. Stash's own SFW icon for the O counter (a thumbs-up) is left alone. The plugin ships no figure illustration; the pin-up on the design-system page hides in SFW mode.
 
+## Insights
+
+[Insights](https://gitlab.com/allisless0/stash-plugins) is another author's plugin, a stats dashboard on Stash's Stats page. It paints itself in the Flexoki palette through custom properties it sets on `#insights` (`--bg`, `--bg2`, `--ui` to `--ui3`, `--tx3` to `--hi`, eight accents from `--re` to `--ma`, `--up`, `--down` and `--o`), from a stylesheet it adds to the page the first time Stats opens, after City Pop's. `82-insights.css` therefore starts its rules at `#root #insights`, which outranks Insights' own.
+
+With the Restyle Insights setting on, `citypop.js` puts `.citypop-insights` on `<html>`, and Insights takes the dusk:
+
+- **Its palette** becomes City Pop's: navy panels and night-blue wells, City Pop's text tones, and each tab's colour from the sunset and the pool. You is the sunset, Actions pink, Library apricot, Files sky, Metadata health gold, Collection pool turquoise and Movies lilac. O's are pool water, as on the O counter. Insights' own rules keep painting from these properties, so everything it colours through them follows.
+- **Its panel goes**, and its cards sit on the dusk like Stash's own pages, where the sun stays down. Cards are navy panels on the hard shadow, with no glow on a tile's colour edge.
+- **Its head** sets the name in the brush script, and its tabs read as Stash's tabs: Jost caps, with one sunset bar under the open tab.
+- **Chips and switches** are night-blue wells, and the chosen chip of a row is the sunset. Buttons are enamel: night violet, the sunset with a glint for the one that goes ahead, hot coral for the one that deletes. Ticked boxes and switches are pool water. Links are coral.
+- **Numbers and small caps** are in Jost, and its tooltip, which sits on `<body>` outside `#insights`, is a cream cassette label.
+
+Insights writes some colours from its JavaScript as inline styles and SVG attributes. Its heatmaps, its codec and resolution colours, the colours of the toolkit plugins' cards and the segments of its splits keep Insights' tones. The empty heatmap cells, the charts' grey grid lines and labels, the growth line and the tag picked in Top tags are matched by their exact inline colour and moved to the dusk; an Insights release that changes one of those values puts that one piece back in its own colour.
+
+The setting starts off because Insights shares Flexoki with its sibling plugins (Movies Toolkit, Performers Toolkit and others), which City Pop leaves alone, so someone who runs several of them keeps one look until they choose otherwise. `citypop.js` keeps the setting in the browser (`localStorage`, `citypop.restyleInsights`), so a page that opens on Stats is never in Flexoki first, and reads it again each time Stats opens, as Insights does its own settings, so changing it needs no reload.
+
+One rule applies with the setting off too: Insights' What works sidebar sticks under the navbar at Stash's height, so City Pop moves it below its own 60px bar.
+
+The design-system page does not show Insights.
+
 ## Settings
 
-| Setting      | Key         | Effect                          |
-| ------------ | ----------- | ------------------------------- |
-| Calm mode    | `calmMode`  | Turns off City Pop's animations |
-| Plain labels | `plainCopy` | Keeps Stash's own wording       |
+| Setting          | Key               | Effect                           |
+| ---------------- | ----------------- | -------------------------------- |
+| Calm mode        | `calmMode`        | Turns off City Pop's animations  |
+| Plain labels     | `plainCopy`       | Keeps Stash's own wording        |
+| Restyle Insights | `restyleInsights` | Puts Insights in City Pop's dusk |
 
-Both default to off, so a fresh install gets the full theme.
+All three default to off, so a fresh install gets the full theme and leaves Insights as its author drew it.
 
 ## Coupling to Stash
 
@@ -122,6 +144,7 @@ Some couplings are specific to City Pop:
 - Some menus and their items carry Bootstrap's `bg-secondary`, which sets their colour with `!important`, so the menu rules override it with `!important` too.
 - Some Stash rules outrank a plain class (`div.dropdown-menu`, `div.react-select__control`, favourites, range sliders, the image zoom button), and modals render outside `#root`, so City Pop's rules for those use matching selectors, `#root`, or `:is(#root, .modal)`.
 - A `url()` inside a custom property resolves against the stylesheet that uses it, so every rule that uses `--citypop-caustic` or `--citypop-glint` lives in `citypop.css`. The design-system page keeps its own copies of those tokens in `ds/ds.css`.
+- The Insights rules target Insights 2.11.0: its custom properties, its `ins-*` classes and a few of its inline colours (see Insights). The tests install that release's files in every test Stash (`RESTYLED` in `tests/stash/companions.mjs`), and a contract test fails when a class City Pop styles stops rendering on any Insights tab, against `tests/insights-unmatched-baseline.txt`, the classes the demo library never shows (the toolkits' hub, duplicates, movies). The nightly run opens a "Restyle Insights" issue when a newer release is out.
 
 ## Tools
 

@@ -24,18 +24,23 @@ Stash lists new versions under Settings > Plugins > Installed Plugins when you c
 
 ## Settings
 
-City Pop's settings sit with the plugin under Settings > Plugins. Both start off.
+City Pop's settings sit with the plugin under Settings > Plugins. All three start off.
 
-| Setting      | Effect                                                                    |
-| ------------ | ------------------------------------------------------------------------- |
-| Calm mode    | Turns off card lifts, the sunset sweep, the turning reels and the bursts. |
-| Plain labels | Keeps Stash's own wording instead of the FM host's lines.                 |
+| Setting          | Effect                                                                         |
+| ---------------- | ------------------------------------------------------------------------------ |
+| Calm mode        | Turns off card lifts, the sunset sweep, the turning reels and the bursts.      |
+| Plain labels     | Keeps Stash's own wording instead of the FM host's lines.                      |
+| Restyle Insights | Puts the Insights plugin's dashboard on the Stats page in City Pop's dusk too. |
 
-![City Pop's two settings under Settings > Plugins](docs/screenshots/settings.png)
+![City Pop's settings under Settings > Plugins](docs/screenshots/settings.png)
 
 City Pop also follows your system's reduced-motion setting. In Stash's SFW content mode City Pop keeps the dusk, the suns and the cassettes, drops the FM host's lines and the pool drops from the bursts, and draws the O counter as a cocktail.
 
-To find audio-only scenes, City Pop asks your Stash once for each new batch of scene cards on screen which of them have no video stream and no cover of their own, and keeps the answers until you reload the page. It makes no other requests and none beyond your own Stash server. Its fonts, Mr Dafoe, Jost and a subset of Zen Maru Gothic holding only the 16 Japanese characters the theme draws, ship inside the plugin. The plugin is about 320 KB.
+### Insights
+
+[Insights](https://gitlab.com/allisless0/stash-plugins) is another author's plugin, a stats dashboard on Stash's Stats page, drawn in its own Flexoki palette, which its sibling plugins share. With Restyle Insights on, City Pop gives it the dusk: navy panels on the hard shadow, the name in the brush script, Stash's tabs with the sunset under the open one, sunset and enamel buttons, coral links and cream tooltips, with each tab's colour taken from City Pop's palette. Insights' heatmaps and its codec, resolution and chart colours keep Insights' own tones. The setting takes effect the next time the Stats page opens. Off, Insights keeps its own look, and the only change is that its sidebar clears City Pop's taller navbar. City Pop is tested with Insights 2.11.0.
+
+To find audio-only scenes, City Pop asks your Stash once for each new batch of scene cards on screen which of them have no video stream and no cover of their own, and keeps the answers until you reload the page. It also reads its own settings from your Stash, and keeps Restyle Insights in your browser so the Stats page never opens in the wrong colours. It makes no other requests and none beyond your own Stash server. Its fonts, Mr Dafoe, Jost and a subset of Zen Maru Gothic holding only the 16 Japanese characters the theme draws, ship inside the plugin. The plugin is about 320 KB.
 
 ## Screenshots
 

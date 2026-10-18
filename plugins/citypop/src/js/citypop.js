@@ -39,6 +39,20 @@
   const state = {
     calm: false,
     voice: true,
+    insights: false,
+  }
+
+  // The Restyle Insights setting, kept from the last visit, so a page that
+  // opens on Stats never shows Insights in its own colours while the
+  // settings load
+  const INSIGHTS_KEY = 'citypop.restyleInsights'
+
+  function keptInsights() {
+    try {
+      return localStorage.getItem(INSIGHTS_KEY) === '1'
+    } catch {
+      return false
+    }
   }
 
   const originals = new WeakMap()
@@ -301,6 +315,14 @@
   function apply(next) {
     Object.assign(state, next)
     root.classList.toggle('citypop-calm', state.calm)
+    root.classList.toggle('citypop-insights', state.insights)
+    if ('insights' in next) {
+      try {
+        localStorage.setItem(INSIGHTS_KEY, state.insights ? '1' : '0')
+      } catch {
+        // A browser without storage loads the setting each visit.
+      }
+    }
     if (document.body) applyCopy(document.body)
   }
 
@@ -317,6 +339,7 @@
       apply({
         calm: settings.calmMode === true,
         voice: settings.plainCopy !== true,
+        insights: settings.restyleInsights === true,
       })
     } catch {
       // Not running inside Stash; keep the defaults.
@@ -331,10 +354,16 @@
       characterData: true,
       subtree: true,
     })
-    apply({})
+    apply({ insights: keptInsights() })
     if (window.PluginApi) {
       loadSettings()
       markAudio()
+      // Insights reads its own settings each time Stats opens; Restyle
+      // Insights follows suit, so changing it needs no reload
+      window.PluginApi.Event?.addEventListener('stash:location', (event) => {
+        const path = event.detail?.data?.location?.pathname ?? ''
+        if (/^\/stats\/?$/.test(path)) loadSettings()
+      })
     }
   }
 
