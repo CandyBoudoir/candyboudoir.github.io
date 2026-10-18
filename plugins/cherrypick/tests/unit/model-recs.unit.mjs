@@ -15,7 +15,11 @@ import {
 } from '../../src/js/model/signals.js'
 import { excludedTagIds } from '../../src/js/model/foryou.js'
 import { isPlaceholderTag } from '../../src/js/model/util.js'
-import { syntheticLibrary, syntheticStashdb } from './fixtures/synthetic.mjs'
+import {
+  syntheticLibrary,
+  syntheticStashdb,
+  withBookkeepingTags,
+} from './fixtures/synthetic.mjs'
 
 const { input } = syntheticLibrary()
 const plain = createEngine(buildDb(input)).compute({})
@@ -219,4 +223,15 @@ test('More like this on a scene with no studio leaves studio-less scenes unrelat
     const r = moreLikeThis(Mb, STATE, scene)
     for (const it of r.inLibrary) assert.doesNotMatch(it.reason, /^Also from/)
   }
+})
+
+test("More like this ignores other plugins' score and collection tags", () => {
+  const Mm = createEngine(buildDb(withBookkeepingTags(input))).compute({})
+  const rows = (E, scene) =>
+    moreLikeThis(E, STATE, scene).inLibrary.map((it) => [
+      it.scene.id,
+      it.reason,
+    ])
+  for (const scene of plain.db.owned.slice(0, 40))
+    assert.deepEqual(rows(Mm, Mm.db.scenes.get(scene.id)), rows(plain, scene))
 })
