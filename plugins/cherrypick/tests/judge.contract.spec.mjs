@@ -5,9 +5,10 @@
 // closer and 1 or 2 open the inspector without picking, its keys move
 // through the frames, O switches, Enter picks and Esc goes back instead of
 // pausing;
-// Play the preview plays Stash's preview clip, muted, and nothing records a
-// play; a scene without generated previews says so; at 390 px the scenes
-// stack with both Pick buttons above the footer.
+// Play the preview is in place when the inspector opens and plays Stash's
+// preview clip, muted, and nothing records a play; a scene without
+// generated previews says so; at 390 px the scenes stack with both Pick
+// buttons above the footer.
 //
 // The shared demo clips (tests/stash/prepare.mjs) have sprites and
 // previews, and the Scenes list's search for "ffmpeg" (their description)
@@ -142,6 +143,12 @@ test('a frame or Look closer opens the inspector without picking, and Esc goes b
   page.on('request', (r) => {
     if (/\/scene\/\d+\/stream/.test(r.url())) streams.push(r.url())
   })
+  // the scenes Stash has answered for about their preview clip
+  const answered = new Set()
+  page.on('response', (r) => {
+    const m = /\/scene\/(\d+)\/preview$/.exec(r.url())
+    if (m) answered.add(m[1])
+  })
   const play = await startBracket(page, CLIPS)
   const [left, right] = await sceneIds(play)
   // a frame under the cover opens the inspector at that frame (the third of
@@ -160,9 +167,24 @@ test('a frame or Look closer opens the inspector without picking, and Esc goes b
   )
   await expect(round(play)).toContainText('match 1 of 4')
   await play.locator('.cherrypick-insp-back').click()
-  // Look closer opens it on the cover
+  await expect(insp).toHaveCount(0)
+  // Look closer opens it on the cover. The match asked Stash about the
+  // scene's preview clip, so Play the preview is under the scrub bar from
+  // the inspector's first frame, and the dialog doesn't move up later.
+  await expect.poll(() => answered.has(left)).toBe(true)
+  await page.evaluate(() => {
+    const seen = new MutationObserver(() => {
+      if (!document.querySelector('.cherrypick-scrub')) return
+      window.__previewAtOpen = !!document.querySelector(
+        '.cherrypick-preview-btn',
+      )
+      seen.disconnect()
+    })
+    seen.observe(document.body, { childList: true, subtree: true })
+  })
   await play.locator('.cherrypick-look-btn').first().click()
   await expect(insp).toHaveAttribute('data-scene', left)
+  expect(await page.evaluate(() => window.__previewAtOpen)).toBe(true)
   await expect(round(play)).toContainText('match 1 of 4')
   // the cover and fifteen frames
   await expect(
