@@ -1,9 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.2.0
 
 - Watch This, a new setting in Cherry Pick's settings, off until you turn it on, puts one scene on the front page in place of Cherry Pick's rows: the one Cherry Pick expects you most want to watch now, in Stash's own player at the page's full width. Stash's own rows stay below it. The player works as on the scene page: Stash records the play and where you stopped, Stash's Auto-start video setting decides whether the scene starts by itself, and Space plays it with no click first. A line under the player gives the scene's title, its performers and why Cherry Pick picked it, and steps out once the scene plays. Nothing happens when the scene ends. For you, the rows that follow your watching and the Hall of Fame row keep their switches for when you turn Watch This off; the Hall of Fame stays on Cherry Pick's page.
 - Watch This's Skip, in the line under the player, as the player's next button or with the next-track media key, puts the scene to sleep for 48 hours and shows the next pick, one that shares no performer with the scenes you skipped that visit. A scene skipped again with no play in between sleeps for a week, then for 30 days each time; a play starts it again at 48 hours, and so does a Skip after playing at least a tenth of the scene. A shorter look before Skip doesn't count as a play. Back, in the line or as the player's previous button, brings the last skipped scene back with its sleep as it was. A pick left on screen without being played or skipped, on three different days, sleeps as if skipped. Skips teach Cherry Pick nothing and are kept in Stash's plugin configuration, so they hold on every device.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.40.4, Xenith 3.2.0 and Restash 0.3.0-55c1cb2.
 
 ## 0.1.8
 
