@@ -4,7 +4,9 @@
 #                        release tag (<folder>-vX.Y.Z) on prod, its zip served
 #                        from that tag's GitHub Release
 #   /develop/index.yml   develop channel: every plugin built from main, for
-#                        Stash develop builds and for plugins not released yet
+#                        Stash develop builds and for plugins not released
+#                        yet, except incubating ones (`incubating = true` in
+#                        plugin.mjs), which nothing publishes
 #   /juicy/index.yml     Juicy alone, for installs made from Juicy's own source
 #                        before the shared one existed, its zip served from
 #                        the release like the stable channel's (and
@@ -89,7 +91,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Build the develop channel
         working-directory: develop
-        run: pnpm install --frozen-lockfile && pnpm check && pnpm build
+        run: pnpm install --frozen-lockfile && pnpm check && node scripts/build.mjs --publish
       - name: Assemble the site
         run: node stable/scripts/assemble.mjs stable-site develop/dist site
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
