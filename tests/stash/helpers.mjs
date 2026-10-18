@@ -315,21 +315,67 @@ export async function settle(page) {
   await page.waitForTimeout(300)
 }
 
+// Settings › Plugins lists every installed plugin, so for its screenshot this
+// hides the ones not enabled (usePlugins leaves the plugin under test) in the
+// installed packages and in the plugin list, and shows the enabled ones'
+// headings without their versions. Adding a plugin or releasing a version
+// then changes no other plugin's baseline.
+async function onlyEnabledPlugins(page) {
+  // Longest name first, so a name that begins with another one finds its own
+  const { plugins } = await gql('{ plugins { id name enabled } }')
+  plugins.sort((a, b) => b.name.length - a.name.length)
+  for (const { id, name } of plugins.filter((p) => p.enabled)) {
+    await page
+      .locator('.installed-packages .package-id', { hasText: id })
+      .first()
+      .waitFor()
+    await page
+      .locator('.setting-group > .setting h3', { hasText: name })
+      .first()
+      .waitFor()
+  }
+  await page.evaluate((plugins) => {
+    for (const row of document.querySelectorAll('.installed-packages tr')) {
+      const id = row.querySelector('.package-id')?.textContent
+      if (id && !plugins.some((p) => p.enabled && p.id === id))
+        row.style.display = 'none'
+    }
+    for (const h3 of document.querySelectorAll(
+      '.setting-group > .setting h3',
+    )) {
+      const plugin = plugins.find((p) =>
+        h3.textContent.startsWith(`${p.name} `),
+      )
+      if (!plugin) continue
+      if (plugin.enabled) h3.textContent = plugin.name
+      else h3.closest('.setting-group').style.display = 'none'
+    }
+  }, plugins)
+}
+
 // The screenshots every theme takes: each page and flow, an empty list and the
 // plugin settings.
 export const SHOTS = [
   ...PAGES,
   ...FLOWS,
   ['empty', EMPTY_LIST, '.paginationIndex'],
-  ['settings', '/settings?tab=plugins', '.setting-section'],
+  [
+    'settings',
+    '/settings?tab=plugins',
+    '.setting-section',
+    [],
+    onlyEnabledPlugins,
+  ],
 ]
 
 // Lists the Stash classes in a built stylesheet that no visited page or flow
 // renders, and which of them still rendered on the baseline Stash version
 // (the plugin's tests/unmatched-baseline.txt). Those newly missing classes
 // point at what a Stash change removed; the rest only appear in dialogs,
-// menus or on hover. Writes both lists to test-results/<folder>-*.txt for
-// status.mjs and returns the newly missing ones.
+// menus or on hover. Writes both lists to pw-results/<folder>-*.txt for
+// status.mjs and the report artifact (Playwright empties test-results/ at the
+// start of each run, so the screenshot step would delete them there) and
+// returns the newly missing ones.
 export async function unmatchedClasses(page, { css, prefix, folder }) {
   const source = (await readFile(css, 'utf8'))
     .replace(/\/\*[\s\S]*?\*\//g, '')
@@ -368,13 +414,13 @@ export async function unmatchedClasses(page, { css, prefix, folder }) {
   const newlyMissing = baseline.length
     ? unmatched.filter((c) => !baseline.includes(c))
     : []
-  await mkdir('test-results', { recursive: true })
+  await mkdir('pw-results', { recursive: true })
   await writeFile(
-    `test-results/${folder}-unmatched-classes.txt`,
+    `pw-results/${folder}-unmatched-classes.txt`,
     unmatched.join('\n') + '\n',
   )
   await writeFile(
-    `test-results/${folder}-newly-missing-classes.txt`,
+    `pw-results/${folder}-newly-missing-classes.txt`,
     newlyMissing.join('\n'),
   )
   return newlyMissing
