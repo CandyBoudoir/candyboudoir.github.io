@@ -111,6 +111,9 @@ const pickId = async (page) =>
     .split('/')
     .pop()
 
+// Writes of the plugin's map are counted once Stash has answered them
+// ('requestfinished'), so a read after the count sees what they wrote.
+
 // The scene in the player, from its source (the line hides during playback)
 const playerSceneId = (page) =>
   page
@@ -303,7 +306,7 @@ test('Skip twice and Back once: one write to Stash, the snooze holds after a rel
     SIGNALS,
   )
   const writes = []
-  page.on('request', (r) => {
+  page.on('requestfinished', (r) => {
     if ((r.postData() || '').includes('CherryPickConfigurePlugin'))
       writes.push(Date.now())
   })
@@ -375,7 +378,7 @@ test("during playback the player's next and previous buttons skip and go back", 
   await expect(line(page)).toHaveCount(0)
 
   const writes = []
-  page.on('request', (r) => {
+  page.on('requestfinished', (r) => {
     if ((r.postData() || '').includes('CherryPickConfigurePlugin'))
       writes.push(r.postData())
   })
@@ -398,6 +401,77 @@ test("during playback the player's next and previous buttons skip and go back", 
   // Back puts the snooze back as it was: none
   await expect.poll(() => writes.length, { timeout: 15_000 }).toBe(2)
   expect(snoozesIn(await pluginConfig())).toEqual([])
+})
+
+test('a skip after playing a tenth of the pick starts its ladder again; a shorter look steps it up', async ({
+  page,
+}) => {
+  await setWatchThis(true)
+  await page.goto('/')
+  await ready(page)
+  const a = await pickId(page)
+  // a already two steps up, its snooze over, so it is still the pick. The
+  // page is left first: leaving counts a as ignored and writes the
+  // page's own snoozes.
+  await page.goto('about:blank')
+  await page.waitForTimeout(1500)
+  const now = Date.now()
+  await setPluginSettings(PLUGIN_ID, {
+    ...(await pluginConfig()),
+    snoozes: JSON.stringify([
+      { id: a, step: 2, until: now - 1000, at: now - 1000, ignored: 0 },
+    ]),
+    updatedAt: new Date(now).toISOString(),
+  })
+  await page.goto('/')
+  await ready(page)
+  expect(await pickId(page)).toBe(a)
+  const writes = []
+  page.on('requestfinished', (r) => {
+    if ((r.postData() || '').includes('CherryPickConfigurePlugin'))
+      writes.push(Date.now())
+  })
+  const next = page.locator(
+    '.cherrypick-watch-player .vjs-skip-button.vjs-icon-next-item',
+  )
+  const previous = page.locator(
+    '.cherrypick-watch-player .vjs-skip-button.vjs-icon-previous-item',
+  )
+  const stepOf = async (id) =>
+    snoozesIn(await pluginConfig()).find((e) => e.id === id)
+
+  // The demo clip lasts 8 seconds: 2 seconds of play is a quarter of it.
+  // The control bar takes clicks once the mouse moves over the player.
+  await page.keyboard.press('Space')
+  await expect(player(page)).toHaveClass(/vjs-playing/)
+  await page.waitForTimeout(2000)
+  await player(page).hover()
+  await next.click()
+  expect(
+    await page
+      .locator('.cherrypick-watch-player video')
+      .evaluate((v) => v.ended),
+  ).toBe(false)
+  await expect.poll(() => playerSceneId(page)).not.toBe(a)
+  await expect.poll(() => writes.length, { timeout: 15_000 }).toBe(1)
+  const watched = await stepOf(a)
+  expect(watched.step).toBe(1)
+  expect((watched.until - Date.now()) / HOUR).toBeGreaterThan(47.9)
+
+  // Back puts the two steps back; skipped at once, a look, it climbs
+  await previous.click()
+  await expect.poll(() => playerSceneId(page)).toBe(a)
+  expect(
+    await page
+      .locator('.cherrypick-watch-player video')
+      .evaluate((v) => v.paused),
+  ).toBe(true)
+  await next.click()
+  await expect.poll(() => playerSceneId(page)).not.toBe(a)
+  await expect.poll(() => writes.length, { timeout: 15_000 }).toBe(2)
+  const look = await stepOf(a)
+  expect(look.step).toBe(3)
+  expect((look.until - Date.now()) / HOUR).toBeGreaterThan(719.9)
 })
 
 test('at 1440×900 the line under the player shows without scrolling', async ({

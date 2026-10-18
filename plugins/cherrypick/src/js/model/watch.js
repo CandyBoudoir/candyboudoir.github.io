@@ -76,6 +76,13 @@ export const IGNORED_DAYS = 3
 // play percent (docs/stash-seams.md). A play recorded this long after a
 // snooze last changed is a play of its own, and resets the ladder.
 export const LOOK_MS = 2 * 60 * 1000
+// A pick that played for this share of its length before its skip was
+// watched, not looked at: the skip starts its ladder again, at the first
+// step. Play time counts the seconds the player spent playing, as Stash's
+// own play tracking does, not how far into the scene it got.
+export const WATCHED_SHARE = 0.1
+export const watchedEnough = (playedSeconds, duration) =>
+  duration > 0 && playedSeconds >= WATCHED_SHARE * duration
 
 /**
  * One scene's place on the ladder, as tier 1 keeps it (the `snoozes` key).
@@ -125,15 +132,19 @@ export function capped(snoozes) {
   return snoozes.filter((e) => keep.has(e.id))
 }
 
-// Skip: the scene one step up the ladder. Returns the new list and the
-// entry as it was, for Back to put back.
-export function skipScene(snoozes, id, now) {
+// Skip: the scene one step up the ladder, or, when it was watched
+// (watchedEnough), back on the first step with no ignored days, so it
+// still sleeps 48 hours. Returns the new list and the entry as it was, for
+// Back to put back.
+export function skipScene(snoozes, id, now, { watched = false } = {}) {
   const prev = entryOf(snoozes, id)
-  const next = {
-    ...stepUp(prev, id, now),
-    ignored: prev?.ignored || 0,
-    ignoredDay: prev?.ignoredDay || null,
-  }
+  const next = watched
+    ? { ...stepUp(null, id, now), ignored: 0, ignoredDay: null }
+    : {
+        ...stepUp(prev, id, now),
+        ignored: prev?.ignored || 0,
+        ignoredDay: prev?.ignoredDay || null,
+      }
   return { snoozes: capped([...without(snoozes, id), next]), prev }
 }
 

@@ -11,6 +11,7 @@ Plugins for [Stash](https://github.com/stashapp/stash), the self-hosted media or
 | [Juicy](plugins/juicy/)            | A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording.                    |
 | [Leather](plugins/leather/)        | A black leather theme: saddle stitching, nickel studs for ratings, a collar for favourites and a strict voice in the wording.                    |
 | [Overclock](plugins/overclock/)    | A hacker's heads-up display in acid yellow: charge chevrons for ratings, a reticle that locks on for favourites and a cold system voice.         |
+| [Tag Candy](plugins/tagcandy/)     | Glossy sticker icons for your tags, matched by StashDB link or name. Your own tag images stay unless you ask.                                    |
 
 <!-- plugins:end -->
 
@@ -66,6 +67,8 @@ pnpm test:compat contract
 ```
 
 `prepare.mjs` installs every plugin into the one Stash, and two themes enabled together would each see the other's CSS. Each plugin's spec files therefore start with `usePlugins` (`tests/stash/helpers.mjs`), which enables that plugin and disables the others; the shared pages, stash-box flows and screenshot helpers live in the same file.
+
+Tag Candy's specs start a Stash of their own from the binary `stash.sh` downloaded into `WORK/bin` (`plugins/tagcandy/tests/stash.mjs`), on port 9961 with a stand-in for the icon site on 9962 (`TAGCANDY_PORT` moves both), so Apply icons never changes the tag images the themes' screenshots show. They check the port is free first, since `stash.sh`'s readiness check would accept any Stash already listening there.
 
 `prepare.mjs` also points Stash at a mock stash-box (`tests/stash/stashbox.mjs`) that Playwright starts with the tests, so the Tagger, scrape dialogs and StashID links are checked against invented scenes, performers and studios with no stash-box account.
 
