@@ -10,9 +10,9 @@
  * properties it sets on those five roots, in a stylesheet it adds after this
  * one. These rules start at `#root`, or at the toast's id, so they outrank
  * its own, and all but the first wait for the Restyle Insights and
- * Performers Toolkit setting (.leather-restyle on <html>, from leather.js). It places
- * its toast and its review bar on a phone from Stash's navbar, so Leather's
- * taller bar needs nothing here.
+ * Performers Toolkit setting (.leather-restyle on <html>, from leather.js).
+ * It places its toast and its review bar on a phone from Stash's navbar, so
+ * Leather's taller bar needs nothing here.
  */
 
 /* The count on the Catalog tab is a Stash badge, which Leather dresses as a
