@@ -10,6 +10,8 @@ import {
   masks,
   onlyCityPop,
   openInsights,
+  openPerformerStats,
+  openPerformersToolkit,
   setPlugin,
   settle,
   usePlugins,
@@ -67,6 +69,36 @@ test.describe('Insights', () => {
       })
     })
   }
+})
+
+// Performers Toolkit in the dusk: its page, and a performer's page open on
+// its Stats tab (whose charts count back from today, so they are masked)
+test.describe('Performers Toolkit', () => {
+  test.beforeAll(async () => {
+    await usePlugins(PLUGIN_ID, 'PerformersToolkit')
+    await setPlugin({ restylePlugins: true })
+  })
+  test.afterAll(async () => {
+    await setPlugin({})
+    await onlyCityPop()
+  })
+
+  test("Performers Toolkit's page looks the same", async ({ page }) => {
+    await openPerformersToolkit(page, 'find')
+    await settle(page)
+    await expect(page).toHaveScreenshot('performers-toolkit.png', {
+      mask: [page.locator('.pt-read')],
+    })
+  })
+
+  test("a performer's Stats tab looks the same", async ({ page }) => {
+    await openPerformerStats(page, ids.performer)
+    await page.evaluate(() => window.scrollTo(0, 0))
+    await settle(page)
+    await expect(page).toHaveScreenshot('performer-stats.png', {
+      mask: [page.locator('.ptc .pt-bars')],
+    })
+  })
 })
 
 test.describe('phone', () => {

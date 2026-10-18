@@ -15,6 +15,8 @@ import {
   demoPath,
   onlyCityPop,
   openInsights,
+  openPerformerStats,
+  openPerformersToolkit,
   setPlugin,
   setSfw,
   unmatchedClasses,
@@ -517,6 +519,77 @@ test.describe('beside Insights', () => {
         css: 'dist/site/Theme-CityPop/citypop.css',
         folder: 'citypop',
         plugin: 'insights',
+      }),
+    ).toEqual([])
+  })
+})
+
+// Performers Toolkit, from the same author and in the same look as
+// Insights, follows the same setting: its page, the Stats tab it adds to a
+// performer's page and its toast take City Pop's palette, panels and type.
+test.describe('beside Performers Toolkit', () => {
+  test.beforeAll(async () => {
+    await usePlugins(PLUGIN_ID, 'PerformersToolkit')
+  })
+  test.afterAll(async () => {
+    await setPlugin({})
+    await onlyCityPop()
+  })
+
+  test('Performers Toolkit keeps its own look until the restyle is on', async ({
+    page,
+  }) => {
+    await setPlugin({})
+    await openPerformersToolkit(page)
+    await expect(page.locator('html')).not.toHaveClass(/\bcitypop-restyle\b/)
+    await expect(page.locator('.pt').first()).toHaveCSS(
+      'background-color',
+      'rgb(16, 15, 15)',
+    )
+  })
+
+  test('the restyle puts Performers Toolkit in the dusk', async ({ page }) => {
+    try {
+      await setPlugin({ restylePlugins: true })
+      await openPerformersToolkit(page)
+      await expect(page.locator('html')).toHaveClass(/\bcitypop-restyle\b/)
+      const root = page.locator('.pt').first()
+      await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      await expect(root.locator('.pt-title')).toHaveCSS(
+        'font-family',
+        /CityPop Dafoe/,
+      )
+      await expect(root.locator('.pt-card').first()).toHaveCSS(
+        'border-radius',
+        '4px',
+      )
+      await openPerformerStats(page, ids.performer)
+      const stats = page.locator('.ptc').first()
+      // Its own rules still paint from the palette City Pop gives it
+      expect(
+        await stats.evaluate((el) =>
+          getComputedStyle(el).getPropertyValue('--ui').trim(),
+        ),
+      ).toBe('#1a1848')
+      await expect(stats.locator('.pt-sec').first()).toHaveCSS(
+        'background-image',
+        /rgb\(31, 28, 85\)/,
+      )
+    } finally {
+      await setPlugin({})
+    }
+  })
+
+  // As for Insights, against
+  // plugins/citypop/tests/performerstoolkit-unmatched-baseline.txt
+  test('every Performers Toolkit class City Pop styles still renders', async ({
+    page,
+  }) => {
+    expect(
+      await unmatchedRestyledClasses(page, {
+        css: 'dist/site/Theme-CityPop/citypop.css',
+        folder: 'citypop',
+        plugin: 'performerstoolkit',
       }),
     ).toEqual([])
   })
