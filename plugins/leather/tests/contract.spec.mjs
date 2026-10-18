@@ -496,13 +496,17 @@ test('each restyle setting shows only while its plugin is on', async ({
     page.locator('.setting', {
       has: page.locator(`[id="plugin-${PLUGIN_ID}-${setting}"]`),
     })
+  // Each row's own display, since a Stash develop build folds a plugin's
+  // settings away until its heading is opened
+  const shows = (setting, on) =>
+    on
+      ? expect(row(setting)).not.toHaveCSS('display', 'none')
+      : expect(row(setting)).toHaveCSS('display', 'none')
   const rows = async (insights, toolkit) => {
     await page.goto('/settings?tab=plugins')
-    await row('calmMode').waitFor()
-    await expect(row('restyleInsights')).toBeVisible({ visible: insights })
-    await expect(row('restylePerformersToolkit')).toBeVisible({
-      visible: toolkit,
-    })
+    await row('calmMode').waitFor({ state: 'attached' })
+    await shows('restyleInsights', insights)
+    await shows('restylePerformersToolkit', toolkit)
   }
   try {
     await rows(false, false)
