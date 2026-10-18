@@ -8,6 +8,15 @@
   -webkit-line-clamp: 2;
 }
 
+/* RowSceneCard's wrapper, there to catch a click through, takes no box, so
+   Stash's card sits straight in the slider's slide as in Stash's own rows.
+   Its height: 98% then resolves against the slide, which the row stretches
+   to its tallest card, and its hr pushes the popover row to the foot: every
+   card ends at the same height whether its reason takes one line or two. */
+.cherrypick-card:not(.card) {
+  display: contents;
+}
+
 .cherrypick-hidden-card.card {
   align-items: center;
   display: flex;
