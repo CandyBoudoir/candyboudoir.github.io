@@ -331,16 +331,35 @@ if (want('plugin-page')) {
 
 if (want('settings')) {
   await page.goto('/settings?tab=plugins')
-  await page.getByText('For you row', { exact: true }).first().waitFor({
+  await page.getByText('Watch This', { exact: true }).first().waitFor({
     timeout: 30_000,
   })
   await page.evaluate(() => {
     const el = [...document.querySelectorAll('h3, h4, h5, h6, div')].find(
-      (e) => e.textContent.trim() === 'For you row',
+      (e) => e.textContent.trim() === 'Watch This',
     )
     window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 60)
   })
   await shot(page, 'settings')
+}
+
+// Watch This on: one scene ready to play where For you was, before play,
+// with the mouse off the player and the line. The setting goes back off
+// after.
+async function setWatchThis(on) {
+  const { configuration } = await gql('{ configuration { plugins } }')
+  await gql(
+    'mutation ($i: Map!) { configurePlugin(plugin_id: "CherryPick", input: $i) }',
+    { i: { ...configuration.plugins?.CherryPick, watchThis: on } },
+  )
+}
+if (want('watch-this')) {
+  await setWatchThis(true)
+  await page.goto('/')
+  await page.locator('.cherrypick-watch-title').waitFor({ timeout: 30_000 })
+  await page.mouse.move(1050, 24)
+  await shot(page, 'watch-this', { mouse: false })
+  await setWatchThis(false)
 }
 
 if (want('scene-bracket') || want('scene-inspector')) {

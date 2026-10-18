@@ -52,6 +52,9 @@ export const store = createStore({
   loadProgress: null,
   // session only
   watching: false,
+  // Watch This's visit: the pick on screen, the visit's skips and whether
+  // the pick was started (runtime/watchThis.js)
+  watchVisit: null,
   dialog: null,
   visit: 0,
   recentHidden: [],
@@ -87,9 +90,11 @@ export const tier1 = createTier1({
 // tier 3 for row signals. Settings are Stash's to write, except one the user
 // changes through Cherry Pick itself (changeSettings). Tier 1 writes wait
 // for a second of quiet (every write makes Stash refetch its
-// configuration, and bracket picks come quickly); the mirror takes each
-// change at once.
+// configuration, and bracket picks come quickly), and Watch This's snoozes
+// alone for five, so skips a few seconds apart go out as one write; the
+// mirror takes each change at once.
 const WRITE_DELAY_MS = 1000
+const SNOOZE_DELAY_MS = 5000
 const unsaved = new Set()
 const unsavedSettings = new Set()
 let saveTimer = null
@@ -125,7 +130,12 @@ function persist(next, prev) {
     tier1.stage(toConfig(next), keys)
     keys.forEach((k) => unsaved.add(k))
     clearTimeout(saveTimer)
-    saveTimer = setTimeout(saveNow, WRITE_DELAY_MS)
+    const onlySnoozes =
+      !unsavedSettings.size && [...unsaved].every((k) => k === 'snoozes')
+    saveTimer = setTimeout(
+      saveNow,
+      onlySnoozes ? SNOOZE_DELAY_MS : WRITE_DELAY_MS,
+    )
   }
   if (prev.signals !== next.signals) local.set(KEYS.signals, next.signals)
 }
