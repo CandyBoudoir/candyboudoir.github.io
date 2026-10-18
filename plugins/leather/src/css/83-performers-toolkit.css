@@ -9,11 +9,19 @@
  * It paints them in the same Flexoki palette as Insights, from custom
  * properties it sets on those five roots, in a stylesheet it adds after this
  * one. These rules start at `#root`, or at the toast's id, so they outrank
- * its own, and all of them wait for the Restyle Insights and Performers
- * Toolkit setting (.leather-restyle on <html>, from leather.js). It places
+ * its own, and all but the first wait for the Restyle Insights and
+ * Performers Toolkit setting (.leather-restyle on <html>, from leather.js). It places
  * its toast and its review bar on a phone from Stash's navbar, so Leather's
  * taller bar needs nothing here.
  */
+
+/* The count on the Catalog tab is a Stash badge, which Leather dresses as a
+   black leather tag, but it also carries the toolkit's .pt-badge class,
+   whose near-black type loads after Leather's. It keeps Leather's type
+   whether the setting is on or not. */
+#root .pt-tablink .badge.pt-badge {
+  color: var(--leather-text);
+}
 
 /* Its palette in Leather's, as for Insights. Each tab's accent follows:
    steel for Find and Performers, plum for History, green for Sources and
@@ -590,11 +598,13 @@
   color: var(--leather-danger);
 }
 
-/* Black type on the filled badges and tags */
+/* Black type on the filled badges and tags. The count on the Catalog tab
+   is also a .pt-badge, but a Stash .badge in a Stash tab, which Leather's
+   tag rules already colour. */
 .leather-restyle
   #root
   :is(
-    .pt-badge,
+    .pt-badge:not(.badge),
     .pt-covtag,
     .pt-sctag,
     .pt-cpick,

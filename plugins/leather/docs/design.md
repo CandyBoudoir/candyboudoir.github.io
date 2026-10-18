@@ -88,7 +88,7 @@ Insights writes some colours from its JavaScript as inline styles and SVG attrib
 
 The setting starts off because the two share their look with their sibling plugins (Movies Toolkit, Scenes Toolkit and others), which Leather leaves alone, so someone who runs several of them keeps one look until they choose otherwise. One setting covers both, so they never split. `leather.js` keeps it in the browser (`localStorage`, `leather.restylePlugins`), so a page they draw on never opens in Flexoki first, and reads the settings again on every page Stash opens, so changing it needs no reload.
 
-Insights' What works sidebar sticks under the navbar at Stash's height, so Leather moves it below its own 64px bar whether the setting is on or off. Performers Toolkit measures Stash's navbar for its toast and its review bar on a phone, so it needs nothing. The design-system page shows neither plugin.
+Insights' What works sidebar sticks under the navbar at Stash's height, so Leather moves it below its own 64px bar whether the setting is on or off. The count on the toolkit's Catalog tab is a Stash badge, which Leather dresses as a black leather tag, and also carries the toolkit's badge class, whose near-black type would win; it keeps Leather's type either way too. Performers Toolkit measures Stash's navbar for its toast and its review bar on a phone, so it needs nothing. The design-system page shows neither plugin.
 
 ## Settings
 

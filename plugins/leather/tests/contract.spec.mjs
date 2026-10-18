@@ -428,6 +428,38 @@ test.describe('beside Performers Toolkit', () => {
     }
   })
 
+  // The Catalog tab's count is a Stash badge in a Stash tab, which also
+  // carries Performers Toolkit's badge class. It shows once a stash-box has
+  // answered, which the mock stash-box does not, so the test shows it. It
+  // keeps Leather's type with the setting off too.
+  for (const restylePlugins of [false, true]) {
+    test(`the Catalog tab's count keeps Leather's tag type, restyle ${restylePlugins ? 'on' : 'off'}`, async ({
+      page,
+    }) => {
+      try {
+        await setPlugin({ restylePlugins })
+        await openPerformerStats(page, ids.performer)
+        const tab = page.locator('.pt-tablink[data-pt-tab="catalog"]')
+        const badge = tab.locator('.badge')
+        const show = () =>
+          badge.evaluate((el) => {
+            el.hidden = false
+            el.textContent = '12'
+          })
+        await show()
+        await expect(badge).toHaveCSS('color', 'rgb(236, 230, 227)')
+        await tab.click()
+        await expect(
+          page.locator('.pt-tablink[data-pt-tab="catalog"].active'),
+        ).toBeAttached()
+        await show()
+        await expect(badge).toHaveCSS('color', 'rgb(236, 230, 227)')
+      } finally {
+        await setPlugin({})
+      }
+    })
+  }
+
   // As for Insights, against
   // plugins/leather/tests/performerstoolkit-unmatched-baseline.txt
   test('every Performers Toolkit class Leather styles still renders', async ({
