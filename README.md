@@ -47,6 +47,8 @@ pnpm smoke                # after deploy:local cherrypick: a headless check of C
 
 Each plugin lives in `plugins/<name>/`: a `plugin.mjs` that tells the shared build (`scripts/build.mjs`) what goes into its plugin folder, its `CHANGELOG.md` and README, and its compatibility tests in `tests/`. `tests/stash/` is the Stash test harness the plugins share.
 
+A plugin still being built exports `incubating = true` from its `plugin.mjs`. `pnpm build`, the tests and `deploy:local` treat it like any other plugin, and the Publish workflow leaves it out of the develop channel and the site and never releases it. Removing the line lets it publish.
+
 ### Compatibility tests
 
 The Compatibility workflow installs the plugins on each Stash version listed in `tests/stash-versions.json` and on the latest Stash develop build, every night and on every change. It checks that Stash still renders the elements each plugin depends on and compares screenshots with baselines from the newest listed version. To run it against a local Stash:
@@ -73,7 +75,7 @@ Cherry Pick also has a walk through every feature on a library the size of a rea
 
 `main` is the trunk and feeds the develop channel. `prod` is the release branch. Every push to either publishes the site to GitHub Pages and checks the live files against the build.
 
-Each plugin releases on its own. When `prod` carries a plugin version with no `<name>-vX.Y.Z` tag yet, the Publish workflow tags it and publishes a GitHub Release from that version's section in the plugin's `CHANGELOG.md`. The stable channel builds each plugin from its latest tag, so a plugin's changes reach it only with a version bump. A manual run of the Publish workflow can pin a plugin to an older tag to roll it back. Plugin zips are reproducible, so the release asset and the zip the build makes share one sha256. The stable channel and Juicy's own source point Stash at each plugin's release asset, and the build stops if the asset hashes differently, so each release's download count reads as installs and updates of that version. The develop channel serves its zips from Pages.
+Each plugin releases on its own. When `prod` carries a plugin version with no `<name>-vX.Y.Z` tag yet, the Publish workflow tags it and publishes a GitHub Release from that version's section in the plugin's `CHANGELOG.md`. The stable channel builds each plugin from its latest tag, so a plugin's changes reach it only with a version bump. The bump is the release decision: changes merged to `main` without one reach only the develop channel. A manual run of the Publish workflow can pin a plugin to an older tag to roll it back. Plugin zips are reproducible, so the release asset and the zip the build makes share one sha256. The stable channel and Juicy's own source point Stash at each plugin's release asset, and the build stops if the asset hashes differently, so each release's download count reads as installs and updates of that version. The develop channel serves its zips from Pages.
 
 ## License
 

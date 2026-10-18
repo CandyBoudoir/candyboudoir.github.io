@@ -6,7 +6,10 @@
 //   <name>/      a plugin's own pages, and for a plugin with legacySource a
 //                source with that plugin alone (see plugins/juicy/plugin.mjs)
 // `--only <name>[,<name>]` builds just those plugins; scripts/stable.mjs
-// builds each plugin from its own release tag this way. dist/entries.json
+// builds each plugin from its own release tag this way. `--publish` leaves
+// out every plugin whose plugin.mjs exports `incubating = true`, for the
+// develop channel the Publish workflow deploys; without it they are built
+// like the rest, so the tests and deploy:local reach them. dist/entries.json
 // records the index entries for it.
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -18,11 +21,16 @@ const only = process.argv.includes('--only')
   ? process.argv[process.argv.indexOf('--only') + 1].split(',')
   : null
 
-const plugins = (await listPlugins()).filter(
+const publish = process.argv.includes('--publish')
+
+const named = (await listPlugins()).filter(
   (p) => !only || only.includes(p.name),
 )
-if (only && plugins.length !== only.length)
+if (only && named.length !== only.length)
   throw new Error(`No plugin folder for some of: ${only.join(', ')}`)
+const plugins = named.filter((p) => !(publish && p.mod.incubating))
+for (const { name } of named.filter((p) => !plugins.includes(p)))
+  console.log(`${name}: incubating, left out of the published site`)
 
 await rm(site, { recursive: true, force: true })
 await mkdir(site, { recursive: true })
