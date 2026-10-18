@@ -1,0 +1,126 @@
+/*
+ * Loading: a segmented bar that counts its percentage up over a scrolling hex
+ * dump, in place of Bootstrap's spinner. Calm mode holds it on a still frame
+ * at 64%.
+ */
+.LoadingIndicator .spinner-border {
+  --overclock-cut: 6px;
+  --overclock-pct: 64;
+
+  animation: overclock-load 2.5s steps(25, end) infinite;
+  background:
+    repeating-linear-gradient(
+        90deg,
+        var(--overclock-yellow) 0 8px,
+        transparent 8px 10px
+      )
+      0 0 / calc(var(--overclock-pct) * 1%) 100% no-repeat,
+    repeating-linear-gradient(
+      90deg,
+      rgb(243 230 0 / 13%) 0 8px,
+      transparent 8px 10px
+    );
+  background-origin: content-box;
+  border: 1px solid var(--overclock-yellow-lo);
+  border-radius: 0;
+  counter-reset: overclock-pct var(--overclock-pct);
+  height: 1.25rem;
+  margin-top: 1.1rem;
+  max-width: 100%;
+  padding: 2px;
+  position: relative;
+  vertical-align: middle;
+  width: 15rem;
+}
+
+/* The top line of the loader: what it is doing, and how far */
+.LoadingIndicator .spinner-border::before,
+.LoadingIndicator .spinner-border::after {
+  bottom: calc(100% + 5px);
+  font: 0.68rem/1 var(--overclock-font-label);
+  letter-spacing: 0.12em;
+  position: absolute;
+}
+
+.LoadingIndicator .spinner-border::before {
+  animation: overclock-blink 1s steps(1, end) infinite;
+  color: var(--overclock-cyan);
+  content: '▲ UPLOADING';
+  left: -1px;
+}
+
+/*
+ * Step counts divide 100 evenly: WebKit does not round an animated <integer>,
+ * and a fractional value would void the counter
+ */
+.LoadingIndicator .spinner-border::after {
+  --overclock-pct: 64;
+
+  animation: overclock-load 2.5s steps(25, end) infinite;
+  color: var(--overclock-yellow);
+  content: counter(overclock-pct, decimal-leading-zero) '%';
+  counter-reset: overclock-pct var(--overclock-pct);
+  right: -1px;
+}
+
+.LoadingIndicator-message {
+  color: var(--overclock-yellow);
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
+.LoadingIndicator::after {
+  animation: overclock-hexdump 3.2s steps(16, end) infinite;
+  background: url('assets/icons/hexdump.svg') 0 0 / 220px 176px repeat-y;
+  content: '';
+  height: 22px;
+  margin-top: 0.75rem;
+  max-width: 100%;
+  opacity: 0.8;
+  width: 220px;
+}
+
+/*
+ * Small and inline loaders, as in menus, buttons and the package manager:
+ * a short bar with no readout and no hex dump
+ */
+.LoadingIndicator:is(.small, .inline) .spinner-border,
+.saved-filter-list-menu .LoadingIndicator .spinner-border {
+  height: 0.75rem;
+  margin: 0 0.25rem;
+  padding: 1px;
+  width: 3.5rem;
+}
+
+.LoadingIndicator:is(.small, .inline) .spinner-border::before,
+.LoadingIndicator:is(.small, .inline) .spinner-border::after,
+.saved-filter-list-menu .LoadingIndicator .spinner-border::before,
+.saved-filter-list-menu .LoadingIndicator .spinner-border::after,
+.LoadingIndicator:is(.small, .inline)::after,
+.saved-filter-list-menu .LoadingIndicator::after {
+  content: none;
+}
+
+@keyframes overclock-load {
+  from {
+    --overclock-pct: 0;
+  }
+
+  to {
+    --overclock-pct: 100;
+  }
+}
+
+@keyframes overclock-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes overclock-hexdump {
+  to {
+    background-position: 0 -176px;
+  }
+}

@@ -1,0 +1,271 @@
+/*
+ * Buttons: flat panels with the bottom-right corner clipped at 45°. Bootstrap
+ * and Stash paint colours per variant and state with high specificity, so
+ * every variant sets these variables and the base rule applies them with
+ * !important. Stash renders its icon buttons as `.btn.minimal` (often with
+ * btn-primary or btn-secondary), so the variants skip `.minimal` and those
+ * stay bare.
+ */
+.btn {
+  --overclock-fill: transparent;
+  --overclock-edge: transparent;
+  --overclock-ink: var(--overclock-text);
+  --overclock-glow: none;
+
+  background-color: var(--overclock-fill) !important;
+  background-image: linear-gradient(
+    315deg,
+    var(--overclock-edge) calc(var(--overclock-cut) * 0.7071 + 1px),
+    transparent 0
+  );
+  background-origin: border-box;
+  border-color: var(--overclock-edge) !important;
+  border-radius: 0 !important;
+  box-shadow: var(--overclock-glow) !important;
+  color: var(--overclock-ink) !important;
+  font-family: var(--overclock-font-display);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: none;
+}
+
+.btn:focus-visible {
+  --overclock-glow:
+    inset 0 0 0 1px var(--overclock-bg), inset 0 0 0 3px var(--overclock-cyan);
+
+  outline: none;
+}
+
+.btn-primary:not(.minimal) {
+  --overclock-fill: var(--overclock-yellow);
+  --overclock-edge: var(--overclock-yellow);
+  --overclock-ink: var(--overclock-black);
+}
+
+.btn-primary:not(.minimal, :disabled, .disabled):hover {
+  --overclock-fill: var(--overclock-yellow-hi);
+  --overclock-edge: var(--overclock-yellow-hi);
+}
+
+.btn-primary:not(.minimal, :disabled, .disabled):active {
+  --overclock-fill: #d4c900;
+}
+
+.btn-secondary:not(.minimal),
+.btn-light:not(.minimal),
+.btn-dark:not(.minimal) {
+  --overclock-fill: var(--overclock-control);
+  --overclock-edge: var(--overclock-line);
+  --overclock-ink: var(--overclock-text);
+}
+
+:is(.btn-secondary, .btn-light, .btn-dark):not(
+    .minimal,
+    :disabled,
+    .disabled
+  ):hover,
+.show > .btn-secondary.dropdown-toggle:not(.minimal) {
+  --overclock-edge: var(--overclock-yellow);
+  --overclock-ink: var(--overclock-yellow);
+}
+
+/* The chosen item of a group reads as a cyan readout */
+.btn.btn-secondary:not(.minimal, :disabled, .disabled).active,
+.btn.btn-secondary:not(.minimal, :disabled, .disabled):active {
+  --overclock-fill: rgb(0 229 255 / 14%);
+  --overclock-edge: var(--overclock-cyan);
+  --overclock-ink: var(--overclock-cyan);
+  --overclock-glow: inset 0 -2px 0 var(--overclock-cyan);
+}
+
+.btn-success:not(.minimal) {
+  --overclock-fill: rgb(0 229 255 / 5%);
+  --overclock-edge: var(--overclock-cyan);
+  --overclock-ink: var(--overclock-cyan);
+}
+
+.btn-success:not(.minimal, :disabled, .disabled):hover {
+  --overclock-fill: rgb(0 229 255 / 16%);
+}
+
+.btn-info:not(.minimal) {
+  --overclock-fill: var(--overclock-cyan);
+  --overclock-edge: var(--overclock-cyan);
+  --overclock-ink: var(--overclock-black);
+}
+
+.btn-info:not(.minimal, :disabled, .disabled):hover {
+  --overclock-fill: #6ff0ff;
+  --overclock-edge: #6ff0ff;
+}
+
+.btn-warning:not(.minimal) {
+  --overclock-fill: rgb(243 230 0 / 5%);
+  --overclock-edge: var(--overclock-yellow);
+  --overclock-ink: var(--overclock-yellow);
+}
+
+.btn-warning:not(.minimal, :disabled, .disabled):hover {
+  --overclock-fill: rgb(243 230 0 / 16%);
+}
+
+/* Danger: alert red behind a strip of hazard stripes */
+.btn-danger:not(.minimal) {
+  --overclock-fill: var(--overclock-red);
+  --overclock-edge: var(--overclock-red);
+  --overclock-ink: var(--overclock-black);
+
+  background-image:
+    linear-gradient(
+      315deg,
+      var(--overclock-edge) calc(var(--overclock-cut) * 0.7071 + 1px),
+      transparent 0
+    ),
+    linear-gradient(
+      90deg,
+      transparent 15px,
+      var(--overclock-black) 15px 16px,
+      transparent 16px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      var(--overclock-yellow) 0 5px,
+      var(--overclock-black) 5px 10px
+    );
+  background-repeat: no-repeat;
+  background-size:
+    100% 100%,
+    100% 100%,
+    15px 100%;
+  border-left-color: var(--overclock-yellow) !important;
+  padding-left: calc(0.75rem + 15px);
+}
+
+.btn-danger.btn-sm:not(.minimal) {
+  padding-left: calc(0.5rem + 15px);
+}
+
+.btn-danger:not(.minimal, :disabled, .disabled):hover {
+  --overclock-fill: var(--overclock-red-hi);
+  --overclock-edge: var(--overclock-red-hi);
+}
+
+/* Disabled is locked: a dashed frame behind faint hazard stripes */
+.btn:not(.minimal, .btn-link):disabled,
+.btn.disabled:not(.minimal, .btn-link) {
+  --overclock-fill: transparent;
+  --overclock-edge: var(--overclock-line);
+  --overclock-ink: var(--overclock-dim);
+
+  background-image: var(--overclock-hazard-dim);
+  border-style: dashed;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.btn.minimal {
+  --overclock-fill: transparent;
+  --overclock-edge: transparent;
+  --overclock-ink: var(--overclock-text);
+
+  background-image: none;
+}
+
+.btn.minimal:not(:disabled, .disabled):hover {
+  --overclock-ink: var(--overclock-yellow);
+}
+
+.btn.minimal:disabled,
+.btn.minimal.disabled {
+  --overclock-ink: var(--overclock-dim);
+}
+
+.btn-link {
+  --overclock-ink: var(--overclock-cyan);
+
+  background-image: none;
+  font-family: var(--overclock-font-label);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-decoration: underline;
+  text-decoration-color: rgb(0 229 255 / 45%);
+  text-underline-offset: 4px;
+}
+
+.btn-link:hover {
+  --overclock-ink: var(--overclock-yellow);
+
+  text-decoration-color: var(--overclock-yellow);
+}
+
+.btn-sm {
+  --overclock-cut: 6px;
+
+  font-size: 0.78rem;
+}
+
+.btn-lg {
+  --overclock-cut: 12px;
+
+  font-size: 1.1rem;
+  padding: 0.55rem 1.6rem;
+}
+
+/* Inside a group only the last button is clipped, so the group reads as one */
+.btn-group > .btn:not(:last-child),
+.btn-group > .btn-group:not(:last-child) > .btn,
+.input-group .btn {
+  clip-path: none;
+}
+
+/* Selects styled as buttons (the page-size picker in list toolbars) */
+select.btn-secondary {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M0 0h4l2 3 2-3h4L6 8Z' fill='%23f3e600'/%3E%3C/svg%3E")
+      right 0.6rem center / 10px 7px no-repeat,
+    linear-gradient(
+        315deg,
+        var(--overclock-line) calc(var(--overclock-cut) * 0.7071 + 1px),
+        transparent 0
+      )
+      border-box;
+  font-family: var(--overclock-font-label);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  padding-right: 1.8rem;
+}
+
+select option {
+  background-color: var(--overclock-panel);
+  color: var(--overclock-text);
+}
+
+/*
+ * Chrome that Stash renders as plain buttons: the bars that fold the details
+ * panel away on scene and gallery pages, and the player's scrubber arrows.
+ * They stay quiet and never glitch.
+ */
+#root :is(.scene-divider, .gallery-divider, .details-divider) .btn,
+#root .scrubber-button {
+  --overclock-fill: transparent;
+  --overclock-edge: transparent;
+  --overclock-ink: var(--overclock-dim);
+
+  background-image: none;
+  clip-path: none;
+}
+
+#root .scrubber-button {
+  --overclock-fill: var(--overclock-panel);
+}
+
+#root :is(.scene-divider, .gallery-divider, .details-divider) .btn:hover,
+#root .scrubber-button:hover {
+  --overclock-ink: var(--overclock-yellow);
+}
+
+#root .scrubber-tags-background {
+  background-color: var(--overclock-panel);
+}

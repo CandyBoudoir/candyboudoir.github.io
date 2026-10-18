@@ -6,10 +6,11 @@ Plugins for [Stash](https://github.com/stashapp/stash), the self-hosted media or
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [Juicy](plugins/juicy/)            | A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording.                    |
 | [Leather](plugins/leather/)        | A black leather theme: saddle stitching, nickel studs for ratings, a collar for favourites and a strict voice in the wording.                    |
+| [Overclock](plugins/overclock/)    | A hacker's heads-up display in acid yellow: charge chevrons for ratings, a reticle that locks on for favourites and a cold system voice.         |
 | [Cherry Pick](plugins/cherrypick/) | Learns what you like from your ratings and plays: a For you row, Your score on unrated scenes, More like this, and performer and scene brackets. |
 | [Tag Candy](plugins/tagcandy/)     | Glossy sticker icons for your tags, matched by StashDB link or name. Your own tag images stay unless you ask.                                    |
 
-Each theme restyles all of Stash, so enable one theme at a time. Cherry Pick and Tag Candy work with either theme, or none.
+Each theme restyles all of Stash, so enable one theme at a time. Cherry Pick and Tag Candy work with any of them, or none.
 
 ## Install
 
@@ -78,4 +79,4 @@ Each plugin releases on its own. When `prod` carries a plugin version with no `<
 
 ## License
 
-MIT, except Cherry Pick, which is AGPL-3.0 (`plugins/cherrypick/LICENSE`). Juicy bundles Fredoka, and Leather bundles Grenze Gotisch and Oswald, under the SIL Open Font License 1.1 (each plugin's `assets/fonts` folder holds the license).
+MIT, except Cherry Pick, which is AGPL-3.0 (`plugins/cherrypick/LICENSE`). Juicy bundles Fredoka, Leather bundles Grenze Gotisch and Oswald, and Overclock bundles Chakra Petch and Share Tech Mono, under the SIL Open Font License 1.1 (each plugin's `assets/fonts` folder holds the license).

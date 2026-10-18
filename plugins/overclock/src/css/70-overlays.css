@@ -1,0 +1,487 @@
+/*
+ * Menus, popovers, tooltips, toasts and modals: clipped teal-black panels with
+ * a yellow left rule. Stash paints its menus slate through div.dropdown-menu
+ * rules, so the menu rules name the div too, and some menus and their items
+ * carry Bootstrap's !important bg-secondary.
+ */
+div.dropdown-menu {
+  --overclock-cut: 10px;
+  --overclock-edge: var(--overclock-line);
+
+  background:
+    linear-gradient(
+        315deg,
+        var(--overclock-edge) calc(var(--overclock-cut) * 0.7071 + 1px),
+        transparent 0
+      )
+      border-box,
+    var(--overclock-panel);
+  border: 1px solid var(--overclock-edge);
+  border-left: 3px solid var(--overclock-yellow);
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--overclock-text);
+  padding: 0.35rem 0;
+}
+
+div.dropdown-menu.bg-secondary {
+  background-color: var(--overclock-panel) !important;
+}
+
+div.dropdown-menu .dropdown-item.bg-secondary {
+  background-color: transparent !important;
+}
+
+.dropdown-item,
+div.dropdown-menu .dropdown-item {
+  color: var(--overclock-text);
+  font-family: var(--overclock-font-display);
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 0.42rem 1.1rem 0.42rem 0.95rem;
+  text-transform: uppercase;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus,
+div.dropdown-menu .dropdown-item:hover,
+div.dropdown-menu .dropdown-item:focus {
+  background: rgb(243 230 0 / 9%);
+  color: var(--overclock-yellow);
+}
+
+.dropdown-item:hover::before {
+  content: '▸ ';
+}
+
+.dropdown-item.active,
+.dropdown-item:active,
+div.dropdown-menu .dropdown-item.active,
+div.dropdown-menu .dropdown-item:active {
+  --overclock-cut: 7px;
+
+  background: var(--overclock-yellow);
+  color: var(--overclock-black);
+}
+
+.dropdown-item.disabled,
+.dropdown-item:disabled {
+  color: var(--overclock-dim);
+}
+
+.dropdown-divider {
+  background:
+    linear-gradient(var(--overclock-line) 0 0) 0 50% / 1px 5px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 100% 50% / 1px 5px no-repeat,
+    repeating-linear-gradient(
+        90deg,
+        var(--overclock-line) 0 3px,
+        transparent 3px 6px
+      )
+      50% 50% / calc(100% - 6px) 1px no-repeat;
+  border: 0;
+  height: 5px;
+  margin: 0.35rem 0.8rem;
+}
+
+.dropdown-header {
+  color: var(--overclock-dim);
+  font-family: var(--overclock-font-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/*
+ * Popovers (the tag and performer lists behind a card's counts) are the same
+ * panel. They keep square corners, since a clip would cut off their arrow.
+ */
+.popover {
+  background: var(--overclock-panel);
+  border: 1px solid var(--overclock-line);
+  border-left: 3px solid var(--overclock-yellow);
+  border-radius: 0;
+  box-shadow: 0 14px 28px -12px #000;
+  color: var(--overclock-text);
+}
+
+.popover-header {
+  background: var(--overclock-raised);
+  border-bottom: 1px dashed var(--overclock-rule);
+  border-radius: 0;
+  color: var(--overclock-cyan);
+  font-family: var(--overclock-font-label);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.popover-body {
+  color: var(--overclock-text);
+}
+
+.bs-popover-top > .arrow::before,
+.bs-popover-auto[x-placement^='top'] > .arrow::before {
+  border-top-color: var(--overclock-line);
+}
+
+.bs-popover-top > .arrow::after,
+.bs-popover-auto[x-placement^='top'] > .arrow::after {
+  border-top-color: var(--overclock-panel);
+}
+
+.bs-popover-bottom > .arrow::before,
+.bs-popover-auto[x-placement^='bottom'] > .arrow::before {
+  border-bottom-color: var(--overclock-line);
+}
+
+.bs-popover-bottom > .arrow::after,
+.bs-popover-auto[x-placement^='bottom'] > .arrow::after {
+  border-bottom-color: var(--overclock-panel);
+}
+
+.bs-popover-left > .arrow::before,
+.bs-popover-auto[x-placement^='left'] > .arrow::before {
+  border-left-color: var(--overclock-line);
+}
+
+.bs-popover-left > .arrow::after,
+.bs-popover-auto[x-placement^='left'] > .arrow::after {
+  border-left-color: var(--overclock-panel);
+}
+
+.bs-popover-right > .arrow::before,
+.bs-popover-auto[x-placement^='right'] > .arrow::before {
+  border-right-color: var(--overclock-yellow);
+}
+
+.bs-popover-right > .arrow::after,
+.bs-popover-auto[x-placement^='right'] > .arrow::after {
+  border-right-color: var(--overclock-yellow);
+}
+
+/* Tooltips: a small yellow tag */
+.tooltip.show {
+  opacity: 1;
+}
+
+.tooltip-inner {
+  --overclock-cut: 5px;
+
+  background: var(--overclock-yellow);
+  border-radius: 0;
+  color: var(--overclock-black);
+  font: 0.72rem/1.2 var(--overclock-font-label);
+  letter-spacing: 0.1em;
+  padding: 0.3rem 0.6rem;
+  text-transform: uppercase;
+}
+
+/* A title Stash cut short reads in full in its tooltip, in sentence case */
+.TruncatedText-tooltip .tooltip-inner {
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.bs-tooltip-top .arrow::before,
+.bs-tooltip-auto[x-placement^='top'] .arrow::before {
+  border-top-color: var(--overclock-yellow);
+}
+
+.bs-tooltip-bottom .arrow::before,
+.bs-tooltip-auto[x-placement^='bottom'] .arrow::before {
+  border-bottom-color: var(--overclock-yellow);
+}
+
+.bs-tooltip-left .arrow::before,
+.bs-tooltip-auto[x-placement^='left'] .arrow::before {
+  border-left-color: var(--overclock-yellow);
+}
+
+.bs-tooltip-right .arrow::before,
+.bs-tooltip-auto[x-placement^='right'] .arrow::before {
+  border-right-color: var(--overclock-yellow);
+}
+
+/*
+ * Toasts: a clipped panel with a yellow left rule. Stash puts the whole
+ * message in the toast's header and leaves the body empty, so the header
+ * carries the system's line in yellow, and the reticle, the STASH label and
+ * the message number sit in a band above it.
+ */
+.toast,
+.toast-container .toast {
+  --overclock-cut: 12px;
+  --overclock-edge: var(--overclock-line);
+
+  backdrop-filter: none;
+  background:
+    linear-gradient(
+        315deg,
+        var(--overclock-edge) calc(var(--overclock-cut) * 0.7071 + 1px),
+        transparent 0
+      )
+      border-box,
+    var(--overclock-panel);
+  border: 1px solid var(--overclock-edge);
+  border-left: 3px solid var(--overclock-yellow);
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--overclock-text);
+  padding-top: 1.95rem;
+  position: relative;
+}
+
+.toast-container {
+  opacity: 1;
+}
+
+/* The band: a cyan reticle and STASH over a dashed rule */
+.toast::before {
+  background: var(--overclock-cyan);
+  content: '';
+  height: 0.85rem;
+  left: 0.8rem;
+  mask: url('assets/icons/glyph-reticle.svg') center / contain no-repeat;
+  position: absolute;
+  top: 0.5rem;
+  width: 0.85rem;
+}
+
+.toast::after {
+  border-bottom: 1px dashed var(--overclock-rule);
+  color: var(--overclock-cyan);
+  content: 'Stash';
+  font: 0.7rem/1 var(--overclock-font-label);
+  left: 0;
+  letter-spacing: 0.16em;
+  padding: 0.6rem 0.8rem 0.55rem 2.15rem;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  text-transform: uppercase;
+  top: 0;
+}
+
+.toast-header,
+.toast-container .toast-header {
+  align-items: flex-start;
+  background: none;
+  border-bottom: 0;
+  color: var(--overclock-yellow);
+  font-family: var(--overclock-font-display);
+  font-size: 1.12rem;
+  font-weight: 600;
+  gap: 0.5rem;
+  letter-spacing: 0.03em;
+  line-height: 1.25;
+  padding: 0.6rem 0.8rem 0.75rem;
+}
+
+/* The message number, at the right end of the band */
+.toast-header::after {
+  color: var(--overclock-dim);
+  content: 'MSG.0x1F';
+  font: 0.7rem/1 var(--overclock-font-label);
+  letter-spacing: 0.16em;
+  pointer-events: none;
+  position: absolute;
+  right: 0.8rem;
+  top: 0.6rem;
+}
+
+.toast-container .toast-header .close {
+  color: var(--overclock-muted);
+  font-family: var(--overclock-font-label);
+  opacity: 1;
+  text-shadow: none;
+}
+
+.toast-container .toast-header .close:hover {
+  color: var(--overclock-yellow);
+}
+
+.toast-body:empty {
+  display: none;
+}
+
+.toast-container .toast.danger {
+  border-left-color: var(--overclock-red);
+}
+
+.toast-container .toast.danger .toast-header {
+  color: var(--overclock-red-hi);
+}
+
+.toast-container .toast.danger::before {
+  background: var(--overclock-red);
+}
+
+.toast-container .toast.danger::after {
+  color: var(--overclock-red);
+  content: 'Alert';
+}
+
+.toast-container .toast.warning::after {
+  color: var(--overclock-yellow);
+  content: 'Warning';
+}
+
+/* Modals: a plain HUD bar, or a hazard band when the dialog destroys */
+:is(#root, .modal) .modal-content {
+  --overclock-cut: 16px;
+  --overclock-edge: var(--overclock-line);
+
+  background:
+    linear-gradient(
+        315deg,
+        var(--overclock-edge) calc(var(--overclock-cut) * 0.7071 + 1px),
+        transparent 0
+      )
+      border-box,
+    var(--overclock-panel);
+  border: 1px solid var(--overclock-edge);
+  border-radius: 0;
+  color: var(--overclock-text);
+}
+
+/* Stash paints each modal section slate; let the panel show through */
+.modal-header,
+.modal-body,
+.modal-footer {
+  background-color: transparent;
+  color: var(--overclock-text);
+}
+
+:is(#root, .modal) .modal-header {
+  align-items: center;
+  background:
+    linear-gradient(var(--overclock-yellow) 0 0) 0 50% / 3px 55% no-repeat,
+    linear-gradient(180deg, #142428, #0f1b1e);
+  border-bottom: 1px solid var(--overclock-line);
+  border-radius: 0;
+  font-family: var(--overclock-font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  gap: 0.75rem;
+  justify-content: flex-start;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  padding: 0.75rem 1rem 0.75rem 1.4rem;
+  text-transform: uppercase;
+}
+
+:is(#root, .modal) .modal-header::after {
+  color: var(--overclock-dim);
+  content: 'SYS.DLG // 0x2A';
+  font: 0.64rem/1 var(--overclock-font-label);
+  letter-spacing: 0.12em;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.modal-title {
+  color: var(--overclock-text);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+}
+
+.modal-header .fa-icon {
+  color: var(--overclock-yellow);
+  height: 0.9em;
+}
+
+:is(#root, .modal) .modal-content:has(.modal-footer .btn-danger) .modal-header {
+  background: var(--overclock-hazard);
+  border-bottom-color: var(--overclock-yellow);
+  padding: 0.9rem 1rem;
+}
+
+:is(#root, .modal)
+  .modal-content:has(.modal-footer .btn-danger)
+  .modal-header
+  > :is(span, .modal-title) {
+  background: var(--overclock-bg);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 7px),
+    calc(100% - 7px) 100%,
+    0 100%
+  );
+  color: var(--overclock-red);
+  padding: 0.25rem 0.8rem 0.25rem 0.7rem;
+}
+
+:is(#root, .modal)
+  .modal-content:has(.modal-footer .btn-danger)
+  .modal-header
+  .fa-icon {
+  display: none;
+}
+
+:is(#root, .modal)
+  .modal-content:has(.modal-footer .btn-danger)
+  .modal-header::after {
+  background: var(--overclock-bg);
+  color: var(--overclock-yellow);
+  content: 'Irreversible';
+  padding: 0.35rem 0.5rem;
+  text-transform: uppercase;
+}
+
+.modal-body {
+  color: var(--overclock-muted);
+}
+
+.modal-footer {
+  border-top: 1px dashed var(--overclock-rule);
+}
+
+.modal-header .close,
+.modal .close {
+  color: var(--overclock-muted);
+  opacity: 1;
+  text-shadow: none;
+}
+
+.modal .close:hover {
+  color: var(--overclock-yellow);
+}
+
+/* The edit filter dialog's criteria are a list, not cards */
+.edit-filter-dialog .criterion-list .card {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px dashed var(--overclock-rule);
+  clip-path: none;
+}
+
+.edit-filter-dialog .criterion-list .card .filter-item-header {
+  background: none;
+  border-bottom: 0;
+}
+
+.modal-backdrop.show {
+  background-color: var(--overclock-void);
+  opacity: 0.8;
+}
+
+.alert {
+  background: var(--overclock-raised);
+  border: 1px solid var(--overclock-line);
+  border-left: 3px solid var(--overclock-yellow);
+  border-radius: 0;
+  color: var(--overclock-text);
+}
+
+.alert-danger {
+  border-left-color: var(--overclock-red);
+}
+
+.alert-success {
+  border-left-color: var(--overclock-cyan);
+}
