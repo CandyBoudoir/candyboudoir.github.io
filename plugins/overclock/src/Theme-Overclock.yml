@@ -1,0 +1,20 @@
+name: Theme - Overclock
+description: A hacker's heads-up display in acid yellow and data cyan on matte black. Charge chevrons for ratings, a reticle that locks on for favourites and a cold system voice.
+version: 0.1.0
+url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/overclock
+ui:
+  css:
+    - overclock.css
+  javascript:
+    - overclock.js
+  assets:
+    /: assets
+settings:
+  calmMode:
+    displayName: Calm mode
+    description: Turn off Overclock's animations (hover glitches, scan lines, bursts, the ticking loader).
+    type: BOOLEAN
+  plainCopy:
+    displayName: Plain labels
+    description: Keep Stash's own wording instead of Overclock's system voice. Stash's SFW mode always uses plain labels.
+    type: BOOLEAN
