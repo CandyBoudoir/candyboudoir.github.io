@@ -1,0 +1,1699 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>City Pop design system</title>
+    <meta
+      name="description"
+      content="City Pop, an airbrushed 1980s dusk theme for Stash: palette, type, motifs and Stash components in City Pop style."
+    />
+    <link rel="icon" href="Theme-CityPop/assets/icons/sun.svg" />
+    <!-- Bootstrap 4.6 stands in for Stash's own base styles. -->
+    <link rel="stylesheet" href="ds/vendor/bootstrap.min.css" />
+    <link rel="stylesheet" href="Theme-CityPop/citypop.css" />
+    <link rel="stylesheet" href="ds/ds.css" />
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="i-tag" viewBox="0 0 16 16">
+        <path
+          fill-rule="evenodd"
+          d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l7.5 7.5-6 6L1 7ZM4.6 3.2a1.4 1.4 0 1 0 0 2.8a1.4 1.4 0 1 0 0-2.8Z"
+        />
+      </symbol>
+      <symbol id="i-user" viewBox="0 0 16 16">
+        <circle cx="8" cy="4.8" r="3.2" />
+        <path d="M1.8 15c0-3.5 2.8-6 6.2-6s6.2 2.5 6.2 6Z" />
+      </symbol>
+      <symbol id="i-box" viewBox="0 0 16 16">
+        <path d="M1 4.5 8 1l7 3.5v7L8 15l-7-3.5Zm7 1.8 4.6-2.2L8 2 3.4 4.1Z" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 16 16">
+        <path d="m1.5 8.6 1.6-1.6 3 3 6.8-6.8 1.6 1.6-8.4 8.4Z" />
+      </symbol>
+      <symbol id="i-cross" viewBox="0 0 16 16">
+        <path
+          d="m3.1 1.5 4.9 4.9 4.9-4.9 1.6 1.6L9.6 8l4.9 4.9-1.6 1.6L8 9.6l-4.9 4.9-1.6-1.6L6.4 8 1.5 3.1Z"
+        />
+      </symbol>
+      <symbol id="i-filter" viewBox="0 0 16 16">
+        <path d="M1 2h14l-5.5 6.5V14l-3-1.5V8.5Z" />
+      </symbol>
+      <symbol id="i-grid" viewBox="0 0 16 16">
+        <path d="M1 1h6v6H1Zm8 0h6v6H9ZM1 9h6v6H1Zm8 0h6v6H9Z" />
+      </symbol>
+      <symbol id="i-list" viewBox="0 0 16 16">
+        <path
+          d="M1 2h3v3H1Zm5 .5h9v2H6ZM1 7h3v3H1Zm5 .5h9v2H6ZM1 12h3v3H1Zm5 .5h9v2H6Z"
+        />
+      </symbol>
+      <symbol id="i-star" viewBox="0 0 576 512">
+        <path
+          fill="currentColor"
+          d="M288 0 359 186 576 186 400 300 466 512 288 384 110 512 176 300 0 186 217 186Z"
+        />
+      </symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M12 21.2C6.4 17.4 2.6 13.9 2.6 9.5C2.6 6.4 5 4 8 4C9.8 4 11.2 4.9 12 6.3C12.8 4.9 14.2 4 16 4C19 4 21.4 6.4 21.4 9.5C21.4 13.9 17.6 17.4 12 21.2Z"
+        />
+      </symbol>
+      <symbol id="i-chevron" viewBox="0 0 16 16">
+        <path d="M3 10.5 8 5.5l5 5-1.4 1.4L8 8.3l-3.6 3.6Z" />
+      </symbol>
+      <symbol id="i-drops" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M12 2s-7 8.5-7 13a7 7 0 0 0 14 0c0-4.5-7-13-7-13Z"
+        />
+      </symbol>
+      <symbol id="i-zoom" viewBox="0 0 512 512">
+        <path
+          fill="currentColor"
+          d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376C296.3 401.1 253.9 416 208 416 93.1 416 0 322.9 0 208S93.1 0 208 0 416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
+        />
+      </symbol>
+    </svg>
+
+    <!-- Like Stash's MainNavbar: below 1200px the page links fold behind the toggler -->
+    <nav class="navbar navbar-expand-xl navbar-dark bg-dark top-nav">
+      <button
+        class="navbar-toggler"
+        type="button"
+        aria-controls="ds-nav"
+        aria-expanded="false"
+        aria-label="Menu"
+        id="ds-toggler"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="navbar-brand">
+        <button class="btn btn-primary minimal brand-link">Stash</button>
+      </div>
+      <div class="navbar-collapse collapse" id="ds-nav">
+        <div class="navbar-nav">
+          <div class="nav-link">
+            <a class="minimal btn btn-primary active" href="#top">Scenes</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Images</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Groups</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Markers</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Galleries</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Performers</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Studios</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Tags</a>
+          </div>
+        </div>
+      </div>
+      <div class="nav-utility">
+        <button class="btn btn-primary minimal">Settings</button>
+      </div>
+    </nav>
+
+    <div class="ds-controls">
+      <span class="label">Try it</span>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-calm" />
+        <label class="custom-control-label" for="ds-calm">Calm mode</label>
+      </div>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-plain" />
+        <label class="custom-control-label" for="ds-plain">Plain labels</label>
+      </div>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-sfw" />
+        <label class="custom-control-label" for="ds-sfw">Stash SFW mode</label>
+      </div>
+    </div>
+
+    <div id="root">
+      <div class="main container-fluid p-0" id="ds-main">
+        <header class="ds-hero">
+          <div>
+            <div class="kicker">A theme for Stash</div>
+            <h1 class="wordmark"><span class="ds-chrome">City Pop</span></h1>
+            <div class="ds-sub">
+              <span lang="ja">シティポップ</span
+              ><span class="ds-dial" aria-hidden="true"></span
+              ><span>FM 86.1 · <span lang="ja">真夜中</span></span>
+            </div>
+            <p class="tagline">
+              Airbrushed dusk from 1980s Japanese album covers: a night-blue
+              sky, a striped sunset sun and a turquoise pool. Every card is a
+              record sleeve, every audio-only scene is a cassette, and a
+              late-night FM host keeps you on her frequency until the expressway
+              empties out.
+            </p>
+          </div>
+          <div class="ds-hero-art" aria-hidden="true">
+            <img class="cover" src="ds/art/cover-pool.webp" alt="" />
+            <img class="pinup" src="ds/art/pinup.webp" alt="" />
+            <img class="tape" src="ds/motifs/cassette.svg" alt="" />
+            <img class="shades" src="ds/motifs/sunglasses.svg" alt="" />
+            <img
+              class="glint"
+              src="Theme-CityPop/assets/icons/glint.svg"
+              alt=""
+            />
+          </div>
+        </header>
+
+        <section class="ds-section">
+          <h2>
+            <img src="Theme-CityPop/assets/icons/sun.svg" alt="" />Palette
+          </h2>
+          <p class="ds-lede">
+            Night blue graded up into violet is the ground, with the sunset glow
+            fixed along the bottom edge of the screen. Panels are deep
+            navy-violet. Sunset coral marks what is primary, active or rated;
+            turquoise pool water is the second accent, for focus, switches and
+            success. Glints are pure white. Text is 15.3:1 on a panel, muted
+            9.9:1 and dim 6.5:1. Only the sun disc itself, low in the right
+            corner, is too bright to read text over, so in Stash it stays down
+            wherever full-width content crosses the horizon.
+          </p>
+          <div class="ds-swatches">
+            <div class="ds-swatch">
+              <div class="chip ds-chip-sunset"></div>
+              <div class="meta">
+                <code>--citypop-sun</code>
+                <div class="hex">#FF7A6B</div>
+                <div class="role">Primary, active, ratings</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #ff8a7a"></div>
+              <div class="meta">
+                <code>--citypop-coral</code>
+                <div class="hex">#FF8A7A</div>
+                <div class="role">Coral text, numbers, links</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #ffb36b"></div>
+              <div class="meta">
+                <code>--citypop-apricot</code>
+                <div class="hex">#FFB36B</div>
+                <div class="role">Glow, warning, the sun's top</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #c23a8e"></div>
+              <div class="meta">
+                <code>--citypop-magenta</code>
+                <div class="hex">#C23A8E</div>
+                <div class="role">Deep sunset, title shadows</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-pool"></div>
+              <div class="meta">
+                <code>--citypop-pool</code>
+                <div class="hex">#4FE3DA</div>
+                <div class="role">Second accent: focus, switches, success</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-night"></div>
+              <div class="meta">
+                <code>--citypop-night</code>
+                <div class="hex">#0C0E30</div>
+                <div class="role">Page ground, the sky overhead</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #1a1848"></div>
+              <div class="meta">
+                <code>--citypop-panel</code>
+                <div class="hex">#1A1848</div>
+                <div class="role">Navbar, cards, panels, menus</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #252262"></div>
+              <div class="meta">
+                <code>--citypop-raised</code>
+                <div class="hex">#252262</div>
+                <div class="role">Secondary buttons, tabs</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #3a3678"></div>
+              <div class="meta">
+                <code>--citypop-line</code>
+                <div class="hex">#3A3678</div>
+                <div class="role">Rules and borders</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #fff4ec"></div>
+              <div class="meta">
+                <code>--citypop-text</code>
+                <div class="hex">#FFF4EC</div>
+                <div class="role">Text · 15.3:1 on a panel</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #cbc3ec"></div>
+              <div class="meta">
+                <code>--citypop-muted</code>
+                <div class="hex">#CBC3EC</div>
+                <div class="role">Secondary text · 9.9:1</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #a39bd3"></div>
+              <div class="meta">
+                <code>--citypop-dim</code>
+                <div class="hex">#A39BD3</div>
+                <div class="role">Dates, captions · 6.5:1</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section ds-type">
+          <h2><img src="ds/motifs/cassette.svg" alt="" />Type</h2>
+          <p class="ds-lede">
+            Mr Dafoe, an 80s brush script, is kept for titles: the wordmark,
+            section titles and the names on detail pages and performer cards.
+            Her lines are Jost Light Italic, the thin Futura oblique of the
+            era's liner notes. Jost carries everything else too, in tracked caps
+            for labels, buttons and navigation. Zen Maru Gothic sets the few
+            Japanese words, and the plugin carries only those characters. Every
+            Japanese word the theme draws is listed below.
+          </p>
+          <div class="ds-panel">
+            <div class="specimen">
+              <div class="spec">Mr Dafoe · wordmark, section titles, names</div>
+              <div class="t-display ds-chrome">Midnight Drive</div>
+            </div>
+            <div class="specimen">
+              <div class="spec">
+                Jost 300 italic · her lines: toasts, the loader, empty lists
+              </div>
+              <div class="t-voice">Stay on my frequency…</div>
+              <div class="t-voice">
+                Air check rolling. Don’t touch the dial.
+              </div>
+            </div>
+            <div class="specimen">
+              <div class="spec">
+                Jost 500 · card titles, modal titles, headings
+              </div>
+              <div class="t-title">
+                Sweet Tooth · Midnight Fizz · fizz-pop.jpg
+              </div>
+            </div>
+            <div class="specimen">
+              <div class="spec">
+                Jost 500 caps, tracked · buttons, tags, tabs, overlays
+              </div>
+              <div class="t-label">
+                Scenes · Performers · Rating: 5 · 24:16 · 4K ·
+                <span lang="ja">A面</span> 28CP-001
+              </div>
+            </div>
+            <div class="specimen">
+              <div class="spec">
+                Zen Maru Gothic 500 and 700 · the Japanese words, and nothing
+                else
+              </div>
+              <dl class="ds-words">
+                <div>
+                  <dt lang="ja">シティポップ</dt>
+                  <dd>
+                    <i>shiti poppu</i> · city pop · under the wordmark on this
+                    page
+                  </dd>
+                </div>
+                <div>
+                  <dt lang="ja">真夜中</dt>
+                  <dd><i>mayonaka</i> · midnight · this page's radio dial</dd>
+                </div>
+                <div>
+                  <dt lang="ja">真夜中ラジオ</dt>
+                  <dd>
+                    <i>mayonaka rajio</i> · midnight radio · the label on an
+                    audio-only scene's cassette
+                  </dd>
+                </div>
+                <div>
+                  <dt lang="ja">A面</dt>
+                  <dd>
+                    <i>ē-men</i> · side A · a scene's catalogue label, shown on
+                    hover, and the cassette's side stamp
+                  </dd>
+                </div>
+                <div>
+                  <dt lang="ja">B面</dt>
+                  <dd>
+                    <i>bī-men</i> · side B · a performer's catalogue label,
+                    shown on hover
+                  </dd>
+                </div>
+                <div>
+                  <dt lang="ja">夕焼け</dt>
+                  <dd>
+                    <i>yūyake</i> · sunset glow · the obi on this page's record
+                    sleeve
+                  </dd>
+                </div>
+              </dl>
+            </div>
+            <div class="specimen">
+              <div class="spec">System UI · descriptions and settings</div>
+              <div class="t-body">
+                Stash keeps your descriptions, settings and file details on the
+                system font, so long text stays easy to read.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/palm.svg" alt="" />Motifs and glyphs</h2>
+          <p class="ds-lede">
+            Six motifs drawn as airbrushed SVG: smooth gradients, crisp offset
+            shadows and the white four-point glint of an 80s anime cel on
+            anything glossy. The cassette is the audio-only cover and the
+            loader, the striped sun is the rating and the signature, and the
+            palms stand in the backdrop. The poolside at dusk and the pin-up on
+            her pool float were rendered locally with Qwen-Image 2512 (Apache
+            2.0): the pool ships with the theme for empty lists, and the pin-up
+            appears on this page only and hides in SFW mode. The flat glyphs are
+            CSS masks, so they take any fill.
+          </p>
+          <div class="ds-panel">
+            <div class="ds-motifs">
+              <div class="ds-motif">
+                <img src="ds/motifs/cassette.svg" alt="" /><span>cassette</span>
+              </div>
+              <div class="ds-motif">
+                <img src="Theme-CityPop/assets/icons/sun.svg" alt="" /><span
+                  >striped sun</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/palm.svg" alt="" /><span>palms</span>
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/sunglasses.svg" alt="" /><span
+                  >sunglasses</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/headphones.svg" alt="" /><span
+                  >headphones</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/cocktail.svg" alt="" /><span
+                  >tequila sunrise</span
+                >
+              </div>
+            </div>
+            <div class="ds-row m-0">
+              <span
+                class="ds-glyph"
+                title="rating"
+                style="
+                  mask-image: url('Theme-CityPop/assets/icons/glyph-sun.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph is-unlit"
+                title="rating, empty"
+                style="
+                  mask-image: url('Theme-CityPop/assets/icons/glyph-sun-line.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                title="favourite"
+                style="
+                  mask-image: url('Theme-CityPop/assets/icons/glyph-heart.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph is-unlit"
+                title="not favourite"
+                style="
+                  mask-image: url('Theme-CityPop/assets/icons/glyph-heart-line.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph is-pool"
+                title="O counter"
+                style="
+                  mask-image: url('Theme-CityPop/assets/icons/glyph-splash.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph is-pool"
+                title="O counter in SFW mode"
+                style="
+                  mask-image: url('Theme-CityPop/assets/icons/glyph-cocktail.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph is-white"
+                title="glint"
+                style="mask-image: url('Theme-CityPop/assets/icons/glint.svg')"
+              ></span>
+              <span class="ds-caption"
+                >The rating, an empty rating, the favourite, not favourite, the
+                O counter, the cocktail that replaces it in SFW mode, and the
+                glint.</span
+              >
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/sunglasses.svg" alt="" />Buttons</h2>
+          <p class="ds-lede">
+            Buttons are glossy enamel with a crisp airbrush shadow that sits
+            under them like late sun. Primary is the sunset with navy type and a
+            white glint on its corner; secondary is night violet. Success is
+            pool turquoise, warning apricot, info sky blue and danger hot coral.
+            Pressing pushes the button down onto its shadow, and joined buttons
+            share one shadow.
+          </p>
+          <div class="ds-row">
+            <button class="btn btn-primary">Save</button>
+            <button class="btn btn-secondary">Edit</button>
+            <button class="btn btn-success">Scan</button>
+            <button class="btn btn-warning">Generate</button>
+            <button class="btn btn-info">Identify</button>
+            <button class="btn btn-danger">Delete</button>
+            <button class="btn btn-primary" disabled>Disabled</button>
+          </div>
+          <div class="ds-row">
+            <button class="btn btn-primary btn-sm">Small</button>
+            <button class="btn btn-primary btn-lg">Large</button>
+            <div class="btn-group">
+              <button class="btn btn-secondary">Grid</button>
+              <button class="btn btn-secondary active">List</button>
+              <button class="btn btn-secondary">Wall</button>
+            </div>
+            <button class="btn btn-primary minimal">Minimal</button>
+            <a class="btn btn-link" href="#top">Link button</a>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2>
+            <img src="Theme-CityPop/assets/icons/sun.svg" alt="" />Tags, ratings
+            and favourites
+          </h2>
+          <p class="ds-lede">
+            Tags are night-violet pills with a striped sun for a dot. A rating
+            is a row of striped sunset suns, outlined when empty. The favourite
+            is a glossy sunset heart with a white glint, and the O counter is a
+            drop falling into a pool ripple, which becomes a cocktail in SFW
+            mode. Click them and glints, suns and pool drops fly off.
+          </p>
+          <div class="ds-row">
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Candy</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Pastel</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Poolside</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Behind the scenes</div></a></span
+            >
+            <span class="badge badge-primary">New</span>
+            <span class="badge badge-info">4K</span>
+          </div>
+          <div class="ds-row ds-panel">
+            <div class="rating-stars" id="ds-rating">
+              <button
+                class="btn btn-secondary minimal star-fill-100"
+                data-star="1"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-secondary minimal star-fill-100"
+                data-star="2"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-secondary minimal star-fill-100"
+                data-star="3"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-secondary minimal star-fill-0"
+                data-star="4"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-secondary minimal star-fill-0"
+                data-star="5"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <span class="star-rating-number">3</span>
+            </div>
+            <span class="name-icons">
+              <button
+                class="btn btn-primary minimal favorite-button not-favorite"
+                id="ds-fav"
+                title="Favourite"
+              >
+                <svg class="svg-inline--fa fa-heart" width="28" height="28">
+                  <use href="#i-heart" />
+                </svg>
+              </button>
+            </span>
+            <div class="btn-group count-button" id="ds-o">
+              <button
+                class="btn btn-secondary minimal count-icon"
+                title="O Count"
+              >
+                <span
+                  ><svg width="22" height="22"><use href="#i-drops" /></svg
+                ></span>
+              </button>
+              <button class="btn btn-secondary minimal count-value">
+                <span>2</span>
+              </button>
+            </div>
+            <span class="ds-caption"
+              >Click the suns, the heart and the ripple.</span
+            >
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/cassette.svg" alt="" />Cards</h2>
+          <p class="ds-lede">
+            Cards are record sleeves: a printed keyline inside the picture and a
+            pressed crease for the rule. Hover lifts the sleeve off its shadow,
+            sweeps a sunset across the picture, flashes a glint and shows the
+            catalogue label, side and number, hidden at rest so forty cards
+            never read as forty serial numbers. The rating is a small
+            cassette-label sticker beside the checkbox, and progress is an FM
+            dial. An audio-only scene, one with no video stream and no cover of
+            its own, gets a cassette on a pool at dusk, its reels turning on
+            hover.
+          </p>
+          <div class="ds-cards">
+            <div class="scene-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  aria-label="Select Sweet Tooth"
+                />
+              </div>
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards">
+                  <div class="scene-card-preview ph ph-1"></div>
+                  <div class="rating-banner rating-5">Rating: 5</div>
+                  <div class="scene-specs-overlay">
+                    <span class="overlay-resolution">4K</span
+                    ><span class="overlay-duration">24:16</span>
+                  </div>
+                </a>
+                <div class="studio-overlay">
+                  <a href="#cards">Pop Club</a>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-indicator" style="width: 42%"></div>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    Sweet Tooth
+                  </h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-09-18</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>6</span>
+                </button>
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>2</span>
+                </button>
+                <div class="btn-group count-button">
+                  <button
+                    class="btn btn-secondary minimal count-icon"
+                    title="O Count"
+                  >
+                    <span
+                      ><svg class="ds-ico" viewBox="0 0 24 24">
+                        <use href="#i-drops" /></svg
+                    ></span></button
+                  ><button class="btn btn-secondary minimal count-value">
+                    <span>3</span>
+                  </button>
+                </div>
+                <div class="organized">
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-box" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="scene-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  aria-label="Select Midnight Fizz"
+                />
+              </div>
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards">
+                  <div class="scene-card-preview ph ph-3"></div>
+                  <div class="rating-banner rating-4">Rating: 4</div>
+                  <div class="scene-specs-overlay">
+                    <span class="overlay-resolution">1080p</span
+                    ><span class="overlay-duration">31:02</span>
+                  </div>
+                </a>
+                <div class="studio-overlay">
+                  <a href="#cards">Midnight Candy Co.</a>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    Midnight Fizz
+                  </h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-06-15</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>9</span>
+                </button>
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>1</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="scene-card grid-card card citypop-audio">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  aria-label="Select Late Night Request"
+                />
+              </div>
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards">
+                  <div class="scene-card-preview" id="ds-audio"></div>
+                  <div class="rating-banner rating-5">Rating: 5</div>
+                  <div class="scene-specs-overlay">
+                    <span class="overlay-resolution">Audio</span
+                    ><span class="overlay-duration">18:40</span>
+                  </div>
+                </a>
+                <div class="studio-overlay">
+                  <a href="#cards">Sugar Shack</a>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-indicator" style="width: 78%"></div>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    Late Night Request
+                  </h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-04-13</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>5</span>
+                </button>
+                <div class="organized">
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-box" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ds-cards mt-4">
+            <div class="performer-card grid-card card">
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div class="performer-card-image ph ph-5"></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button favorite"
+                  title="Favourite"
+                >
+                  <svg class="svg-inline--fa fa-heart">
+                    <use href="#i-heart" />
+                  </svg>
+                </button>
+                <div class="rating-banner rating-5">Rating: 5</div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <span class="performer-name">Gumdrop Gigi</span>
+                  </h5></a
+                >
+                <div class="performer-card__age">29 years old</div>
+              </div>
+            </div>
+            <div class="performer-card grid-card card">
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div class="performer-card-image ph ph-2"></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button not-favorite"
+                  title="Favourite"
+                >
+                  <svg class="svg-inline--fa fa-heart">
+                    <use href="#i-heart" />
+                  </svg>
+                </button>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <span class="performer-name">Sherbet Sparks</span>
+                  </h5></a
+                >
+                <div class="performer-card__age">32 years old</div>
+              </div>
+            </div>
+            <div class="performer-card grid-card card">
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div class="performer-card-image ph ph-6"></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button not-favorite"
+                  title="Favourite"
+                >
+                  <svg class="svg-inline--fa fa-heart">
+                    <use href="#i-heart" />
+                  </svg>
+                </button>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <span class="performer-name">Licorice Lux</span>
+                  </h5></a
+                >
+                <div class="performer-card__age">34 years old</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ds-cards mt-4">
+            <div class="image-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check"
+                  checked
+                  aria-label="Select fizz-pop.jpg"
+                />
+              </div>
+              <div class="thumbnail-section">
+                <a class="image-card-link" href="#cards"
+                  ><div class="image-card-preview portrait ph ph-4">
+                    <div class="preview-button">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        title="Zoom"
+                      >
+                        <svg class="svg-inline--fa fa-magnifying-glass fa-icon">
+                          <use href="#i-zoom" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="rating-banner rating-5">Rating: 5</div></a
+                >
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    fizz-pop.jpg
+                  </h5></a
+                >
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>1</span>
+                </button>
+              </div>
+            </div>
+            <div class="image-card grid-card card">
+              <div class="thumbnail-section">
+                <a class="image-card-link" href="#cards"
+                  ><div class="image-card-preview ph ph-2">
+                    <div class="preview-button">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        title="Zoom"
+                      >
+                        <svg class="svg-inline--fa fa-magnifying-glass fa-icon">
+                          <use href="#i-zoom" />
+                        </svg>
+                      </button>
+                    </div></div
+                ></a>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    jelly-bean.jpg
+                  </h5></a
+                >
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>2</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section ds-scenes">
+          <h2><img src="ds/motifs/palm.svg" alt="" />Scenes page</h2>
+          <p class="ds-lede">
+            The page you live on. The search well and its filter keys read as
+            one control, joined buttons share one hard shadow, the count is
+            printed like a dial scale and the pager is one strip with the
+            current page in sunset. A list covers the horizon, so the backdrop
+            sun stays down behind it and never sits behind a card.
+          </p>
+          <div class="item-list-container">
+            <div role="toolbar" class="filtered-list-toolbar btn-toolbar">
+              <div class="clearable-input-group search-term-input">
+                <input
+                  placeholder="Search…"
+                  class="clearable-text-field form-control"
+                  aria-label="Search"
+                />
+              </div>
+              <div role="group" class="btn-group">
+                <button
+                  type="button"
+                  class="filter-button btn btn-secondary"
+                  title="Edit Filter"
+                >
+                  <svg class="ds-ico"><use href="#i-filter" /></svg>
+                </button>
+              </div>
+              <div role="group" class="sort-by-select dropdown btn-group">
+                <button type="button" class="dropdown-toggle btn btn-secondary">
+                  Date
+                </button>
+                <button type="button" class="btn btn-secondary">
+                  <svg class="ds-ico"><use href="#i-chevron" /></svg>
+                </button>
+              </div>
+              <div role="group" class="btn-group">
+                <button type="button" class="btn active btn-secondary">
+                  <svg class="ds-ico"><use href="#i-grid" /></svg>
+                </button>
+                <button type="button" class="btn btn-secondary">
+                  <svg class="ds-ico"><use href="#i-list" /></svg>
+                </button>
+              </div>
+            </div>
+            <div class="paginationIndex">1-40 of 312 (3h 12m · 8 GiB)</div>
+            <div class="card-grid">
+              <div class="scene-card grid-card card">
+                <div class="card-controls">
+                  <input
+                    type="checkbox"
+                    class="card-check"
+                    aria-label="Select Lollipop Lane"
+                  />
+                </div>
+                <div class="video-section thumbnail-section">
+                  <a class="scene-card-link" href="#scenes">
+                    <div class="scene-card-preview ph ph-6"></div>
+                    <div class="rating-banner rating-3">Rating: 3</div>
+                    <div class="scene-specs-overlay">
+                      <span class="overlay-resolution">1080p</span
+                      ><span class="overlay-duration">22:48</span>
+                    </div>
+                  </a>
+                  <div class="studio-overlay">
+                    <a href="#scenes">Sugar Shack</a>
+                  </div>
+                </div>
+                <div class="card-section">
+                  <a href="#scenes"
+                    ><h5 class="card-section-title flex-aligned">
+                      Lollipop Lane
+                    </h5></a
+                  >
+                  <div class="scene-card__details">
+                    <span class="scene-card__date">2026-05-14</span>
+                  </div>
+                </div>
+                <hr />
+                <div class="btn-group card-popovers">
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-tag" /></svg
+                    ><span>4</span>
+                  </button>
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-user" /></svg
+                    ><span>2</span>
+                  </button>
+                </div>
+              </div>
+              <div class="scene-card grid-card card">
+                <div class="card-controls">
+                  <input
+                    type="checkbox"
+                    class="card-check"
+                    aria-label="Select Velvet Hour"
+                  />
+                </div>
+                <div class="video-section thumbnail-section">
+                  <a class="scene-card-link" href="#scenes">
+                    <div class="scene-card-preview ph ph-2"></div>
+                    <div class="scene-specs-overlay">
+                      <span class="overlay-resolution">4K</span
+                      ><span class="overlay-duration">41:05</span>
+                    </div>
+                  </a>
+                  <div class="studio-overlay">
+                    <a href="#scenes">Pop Club</a>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-indicator" style="width: 64%"></div>
+                  </div>
+                </div>
+                <div class="card-section">
+                  <a href="#scenes"
+                    ><h5 class="card-section-title flex-aligned">
+                      Velvet Hour
+                    </h5></a
+                  >
+                  <div class="scene-card__details">
+                    <span class="scene-card__date">2026-01-19</span>
+                  </div>
+                </div>
+                <hr />
+                <div class="btn-group card-popovers">
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-tag" /></svg
+                    ><span>7</span>
+                  </button>
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-user" /></svg
+                    ><span>1</span>
+                  </button>
+                </div>
+              </div>
+              <div class="scene-card grid-card card">
+                <div class="card-controls">
+                  <input
+                    type="checkbox"
+                    class="card-check"
+                    aria-label="Select Crimson Candy"
+                  />
+                </div>
+                <div class="video-section thumbnail-section">
+                  <a class="scene-card-link" href="#scenes">
+                    <div class="scene-card-preview ph ph-4"></div>
+                    <div class="rating-banner rating-4">Rating: 4</div>
+                    <div class="scene-specs-overlay">
+                      <span class="overlay-resolution">1080p</span
+                      ><span class="overlay-duration">35:30</span>
+                    </div>
+                  </a>
+                  <div class="studio-overlay">
+                    <a href="#scenes">Midnight Candy Co.</a>
+                  </div>
+                </div>
+                <div class="card-section">
+                  <a href="#scenes"
+                    ><h5 class="card-section-title flex-aligned">
+                      Crimson Candy
+                    </h5></a
+                  >
+                  <div class="scene-card__details">
+                    <span class="scene-card__date">2026-03-12</span>
+                  </div>
+                </div>
+                <hr />
+                <div class="btn-group card-popovers">
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-tag" /></svg
+                    ><span>3</span>
+                  </button>
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-user" /></svg
+                    ><span>2</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="pagination-footer-container">
+              <div role="group" class="pagination btn-group">
+                <button disabled type="button" class="btn btn-secondary">
+                  «
+                </button>
+                <button disabled type="button" class="btn btn-secondary">
+                  ‹
+                </button>
+                <button type="button" class="btn active btn-secondary">
+                  1
+                </button>
+                <button type="button" class="btn btn-secondary">2</button>
+                <button type="button" class="btn btn-secondary">3</button>
+                <button type="button" class="btn btn-secondary">›</button>
+                <button type="button" class="btn btn-secondary">»</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section ds-jcard" id="performer-page">
+          <h2><img src="ds/motifs/sunglasses.svg" alt="" />Performer page</h2>
+          <p class="ds-lede">
+            Her page is an open J-card, the paper insert of a cassette case. Her
+            picture is the cover, cut to the J-card's own 2:3 and weighted to
+            the top so any picture fits; Stash still opens the whole picture on
+            a click. Her name runs down the spine on a cream strip with the
+            sunset stripes, and her details are the flap's track listing, with
+            dotted leaders. On a phone the spine lies flat under the cover.
+          </p>
+          <div class="detail-header full-width">
+            <div class="detail-container">
+              <div class="detail-header-image">
+                <button type="button" class="btn btn-link">
+                  <span class="performer ph ph-5"></span>
+                </button>
+              </div>
+              <div class="row">
+                <div class="performer-head col">
+                  <h2>
+                    <span class="performer-name">Sherbet Sparks</span>
+                    <span class="name-icons">
+                      <button
+                        type="button"
+                        class="minimal favorite-button favorite btn btn-primary"
+                        title="Favourite"
+                      >
+                        <svg class="svg-inline--fa fa-heart">
+                          <use href="#i-heart" />
+                        </svg>
+                      </button>
+                    </span>
+                  </h2>
+                  <div>
+                    <span class="alias-head">Sherbet, Miss Sparks</span>
+                  </div>
+                  <div class="quality-group">
+                    <div class="rating-stars">
+                      <button class="btn btn-secondary minimal star-fill-100">
+                        <div class="filled-star">
+                          <svg class="svg-inline--fa">
+                            <use href="#i-star" />
+                          </svg>
+                        </div>
+                        <div class="unfilled-star">
+                          <svg class="svg-inline--fa">
+                            <use href="#i-star" />
+                          </svg>
+                        </div>
+                      </button>
+                      <button class="btn btn-secondary minimal star-fill-100">
+                        <div class="filled-star">
+                          <svg class="svg-inline--fa">
+                            <use href="#i-star" />
+                          </svg>
+                        </div>
+                        <div class="unfilled-star">
+                          <svg class="svg-inline--fa">
+                            <use href="#i-star" />
+                          </svg>
+                        </div>
+                      </button>
+                      <button class="btn btn-secondary minimal star-fill-100">
+                        <div class="filled-star">
+                          <svg class="svg-inline--fa">
+                            <use href="#i-star" />
+                          </svg>
+                        </div>
+                        <div class="unfilled-star">
+                          <svg class="svg-inline--fa">
+                            <use href="#i-star" />
+                          </svg>
+                        </div>
+                      </button>
+                      <button class="btn btn-secondary minimal star-fill-100">
+                        <div class="filled-star">
+                          <svg class="svg-inline--fa">
+                            <use href="#i-star" />
+                          </svg>
+                        </div>
+                        <div class="unfilled-star">
+                          <svg class="svg-inline--fa">
+                            <use href="#i-star" />
+                          </svg>
+                        </div>
+                      </button>
+                      <button class="btn btn-secondary minimal star-fill-0">
+                        <div class="filled-star">
+                          <svg class="svg-inline--fa">
+                            <use href="#i-star" />
+                          </svg>
+                        </div>
+                        <div class="unfilled-star">
+                          <svg class="svg-inline--fa">
+                            <use href="#i-star" />
+                          </svg>
+                        </div>
+                      </button>
+                      <span class="star-rating-number">4</span>
+                    </div>
+                  </div>
+                  <div class="detail-group">
+                    <div class="detail-item">
+                      <span class="detail-item-title">Gender</span
+                      ><span class="detail-item-value">Female</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-item-title">Age</span
+                      ><span class="detail-item-value">32 (1994-07-21)</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-item-title">Hair colour</span
+                      ><span class="detail-item-value">Black</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-item-title">Height</span
+                      ><span class="detail-item-value">165 cm</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-item-title">Career length</span
+                      ><span class="detail-item-value">2015 -</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-item-title">Tags</span
+                      ><span class="detail-item-value"
+                        ><span class="tag-item badge badge-secondary"
+                          ><a href="#performer-page"
+                            ><div>Poolside</div></a
+                          ></span
+                        ></span
+                      >
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-item-title">Stash IDs</span
+                      ><span class="detail-item-value"
+                        ><span class="stash-id-pill"
+                          ><span>CandyDB</span
+                          ><a href="#performer-page">p-sparks</a></span
+                        ></span
+                      >
+                    </div>
+                  </div>
+                  <div class="col">
+                    <div class="details-edit">
+                      <button type="button" class="btn btn-primary">
+                        Edit
+                      </button>
+                      <button type="button" class="btn btn-secondary">
+                        Auto tag
+                      </button>
+                      <button type="button" class="btn btn-danger">
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/cocktail.svg" alt="" />Forms and menus</h2>
+          <p class="ds-lede">
+            Inputs are night-blue wells, and focus draws a pool-turquoise ring.
+            Menus are navy panels on the hard shadow, toasts carry the stripe
+            band and speak in her light italic, tooltips are cream cassette
+            labels, and a modal carries the stripe band under its title.
+          </p>
+          <div class="ds-row ds-panel">
+            <input
+              class="form-control"
+              style="max-width: 280px"
+              placeholder="Search scenes…"
+            />
+            <select class="custom-select" style="max-width: 200px">
+              <option>Sort by rating</option>
+              <option>Sort by date</option>
+            </select>
+            <div class="custom-control custom-checkbox">
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="ds-check"
+                checked
+              />
+              <label class="custom-control-label" for="ds-check"
+                >Organised only</label
+              >
+            </div>
+            <div class="custom-control custom-switch">
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="ds-switch"
+                checked
+              />
+              <label class="custom-control-label" for="ds-switch"
+                >Show previews</label
+              >
+            </div>
+          </div>
+          <div class="ds-overlays ds-static">
+            <div>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="#menu">Play random</a>
+                <a class="dropdown-item active" href="#menu"
+                  >Generate previews</a
+                >
+                <a class="dropdown-item" href="#menu">Export</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#menu">Delete…</a>
+              </div>
+              <div class="tooltip bs-tooltip-top show mt-3" role="tooltip">
+                <div class="tooltip-inner">Organised</div>
+              </div>
+            </div>
+            <div class="toast-container">
+              <div class="toast success show" role="status">
+                <div class="toast-header">Started generating</div>
+              </div>
+              <div class="toast success show mt-3" role="status">
+                <div class="toast-header">Performer Favourited</div>
+              </div>
+            </div>
+            <div>
+              <div class="modal-content">
+                <div class="modal-header"><span>Delete scene?</span></div>
+                <div class="modal-body">
+                  The file stays on disk unless you tick the box.
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary">Cancel</button>
+                  <button class="btn btn-danger">Delete</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/headphones.svg" alt="" />Stash-box</h2>
+          <p class="ds-lede">
+            The Tagger stays flat and still, since you clear hundreds of rows.
+            The chosen row gets a sunset edge and the chosen select a turquoise
+            ring; the repeated buttons keep the sunset but not the glint.
+            StashID links are a pool-blue tab with the ID on night violet, and
+            in a scrape dialog the winning side's toggle is pool water.
+          </p>
+          <div class="ds-row">
+            <span class="stash-id-pill" data-endpoint="CandyDB"
+              ><span>CandyDB</span><a href="#stash-box">s-sweet-tooth</a></span
+            >
+            <span class="text-success"
+              ><svg class="ds-ico"><use href="#i-check" /></svg> Duration is a
+              match</span
+            >
+            <span class="text-warning">Duration off by at least 2s</span>
+            <span class="text-danger">No results found</span>
+          </div>
+          <div class="search-item mb-4">
+            <ul class="list-unstyled m-0">
+              <li class="row mx-0 search-result selected-result active">
+                <div class="col-lg-5 d-flex">
+                  <div class="scene-image-container">
+                    <div class="scene-image ds-cover ph ph-1"></div>
+                  </div>
+                  <div class="scene-metadata">
+                    <h4 class="m-0">Sweet Tooth</h4>
+                    <h5>Pop Club · 2026-09-18</h5>
+                    <span class="stash-id-pill" data-endpoint="CandyDB"
+                      ><span>CandyDB</span
+                      ><a href="#stash-box">s-sweet-tooth</a></span
+                    >
+                  </div>
+                </div>
+                <div class="col-lg-7">
+                  <div class="ds-match">
+                    <span class="entity-name">Studio: Pop Club</span>
+                    <div class="btn-group">
+                      <button class="btn btn-secondary">Create</button
+                      ><button class="btn btn-secondary">Skip</button>
+                    </div>
+                    <div
+                      class="studio-select studio-select-active react-select"
+                    >
+                      <div class="react-select__control">
+                        <span class="react-select__single-value">Pop Club</span
+                        ><span class="react-select__indicator">▾</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ds-match">
+                    <span class="entity-name">Performer: Taffy Twinkle</span>
+                    <div class="btn-group">
+                      <button class="btn btn-secondary">Create</button
+                      ><button class="btn btn-primary">Skip</button>
+                    </div>
+                    <div class="performer-select react-select">
+                      <div class="react-select__control">
+                        <span class="react-select__placeholder"
+                          >Select Performer</span
+                        ><span class="react-select__indicator">▾</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ds-match">
+                    <span class="entity-name">Performer: Gumdrop Gigi</span>
+                    <span class="text-success"
+                      ><svg class="ds-ico"><use href="#i-check" /></svg>
+                      Matched: Gumdrop Gigi</span
+                    >
+                  </div>
+                </div>
+              </li>
+              <li class="row mx-0 mt-2 search-result">
+                <div class="col">
+                  <h4 class="m-0">Sugar Rush</h4>
+                  <h5 class="m-0">Sugar Shack · 2026-08-17</h5>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="ds-static">
+            <div class="modal-dialog scrape-dialog modal-lg m-0">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <span>Scene Scrape Results</span>
+                </div>
+                <div class="modal-body">
+                  <div class="row">
+                    <div class="col-3"></div>
+                    <div class="col column-label">Existing</div>
+                    <div class="col column-label">Scraped</div>
+                  </div>
+                  <div class="row align-items-center mt-3">
+                    <div class="col-3 col-form-label">Title</div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-muted">
+                              <use href="#i-cross" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="Sugar Rush"
+                          readonly
+                        />
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-success">
+                              <use href="#i-check" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="Sweet Tooth"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row align-items-center mt-3">
+                    <div class="col-3 col-form-label">Date</div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-success">
+                              <use href="#i-check" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="2026-09-18"
+                          readonly
+                        />
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-muted">
+                              <use href="#i-cross" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="2026-09-20"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary">Cancel</button>
+                  <button class="btn btn-primary">Apply</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/palm.svg" alt="" />Navigation</h2>
+          <p class="ds-lede">
+            The navbar is the night sky with the J-card stripe band along its
+            foot, and the active page is a sunset sticker. On a phone held
+            upright Stash docks the bar at the bottom, and the band moves to its
+            top edge. The open tab is underlined with a single sunset bar, and a
+            tab's count is a small well that turns sunset when open.
+          </p>
+          <div class="ds-panel">
+            <ul class="nav nav-tabs mb-3">
+              <li class="nav-item">
+                <a class="nav-link active" href="#nav"
+                  >Scenes
+                  <span class="badge badge-pill badge-secondary">3</span></a
+                >
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#nav"
+                  >Galleries
+                  <span class="badge badge-pill badge-secondary">1</span></a
+                >
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#nav">Groups</a>
+              </li>
+              <li class="nav-item"><a class="nav-link" href="#nav">Edit</a></li>
+            </ul>
+            <div role="group" class="pagination btn-group">
+              <button disabled type="button" class="btn btn-secondary">
+                «
+              </button>
+              <button disabled type="button" class="btn btn-secondary">
+                ‹
+              </button>
+              <button type="button" class="page-count btn btn-secondary">
+                1 of 4
+              </button>
+              <button type="button" class="btn btn-secondary">›</button>
+              <button type="button" class="btn btn-secondary">»</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/cassette.svg" alt="" />Loading and empty</h2>
+          <p class="ds-lede">
+            The loader is a cassette with both reels turning. An empty list
+            shows the empty pool at dusk on a little record sleeve, and her
+            line; without the voice it keeps the pool and drops the line.
+          </p>
+          <div class="ds-row" style="align-items: stretch">
+            <div class="ds-panel" style="min-width: 260px">
+              <div class="LoadingIndicator">
+                <div class="spinner-border" role="status">
+                  <span class="sr-only">Loading…</span>
+                </div>
+                <h4 class="LoadingIndicator-message">Loading…</h4>
+              </div>
+            </div>
+            <div class="ds-panel" style="min-width: 260px">
+              <div>No results found.</div>
+            </div>
+            <div class="ds-panel" style="min-width: 260px">
+              <span
+                class="filter-container text-muted paginationIndex center-text"
+                >0-0 of 0<br
+              /></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/headphones.svg" alt="" />Copy</h2>
+          <p class="ds-lede">
+            A late-night FM host, in earnest: request postcards, the air check
+            (taping a broadcast off the radio, the 1980s FM habit), side A and
+            side B. She keeps you listening, praises you for it and makes you
+            wait. Matches are exact and whole-text, so titles, tags and
+            descriptions are never touched. Plain labels and Stash's SFW mode
+            turn her off.
+          </p>
+          <div class="ds-panel">
+            <table class="ds-copy">
+              <thead>
+                <tr>
+                  <th>Stash says</th>
+                  <th>City Pop says</th>
+                </tr>
+              </thead>
+              <tbody id="ds-copy-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <footer class="ds-footer">
+          <p>
+            Mr Dafoe by Sudtipos, Jost by Owen Earl (indestructible type*) and
+            Zen Maru Gothic by Yoshimichi Ohira, all SIL OFL 1.1 and bundled
+            with the plugin, since Stash blocks font hosts. The poolside and the
+            pin-up were rendered locally with Qwen-Image 2512 (Apache 2.0).
+            Bootstrap 4.6 stands in for Stash's own styles. Built with Claude,
+            Anthropic's AI coding assistant.
+            <a
+              href="https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/citypop"
+              >Source and install</a
+            >.
+          </p>
+        </footer>
+      </div>
+    </div>
+
+    <script src="Theme-CityPop/citypop.js"></script>
+    <script src="ds/ds.js"></script>
+  </body>
+</html>

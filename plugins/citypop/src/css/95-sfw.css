@@ -1,0 +1,50 @@
+/*
+ * Empty states: the empty pool at dusk on a little record sleeve, and her
+ * line. Stash marks an empty list with nothing but "0-0 of 0" in
+ * .paginationIndex, and citypop.js adds the line.
+ */
+.citypop-empty,
+.paginationIndex[data-citypop-empty] {
+  align-items: center;
+  color: var(--citypop-text);
+  display: flex;
+  flex-direction: column;
+  font-size: 1.3rem;
+  gap: 0.7rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.citypop-empty::before,
+.paginationIndex[data-citypop-empty]::before {
+  background: url('assets/icons/pool-sm.webp') center / cover no-repeat;
+  border: 4px solid var(--citypop-paper);
+  box-shadow: 5px 5px 0 var(--citypop-drop);
+  content: '';
+  height: 96px;
+  margin-bottom: 0.3rem;
+  transform: rotate(-4deg);
+  width: 96px;
+}
+
+/* Stash marks the line .text-muted, which Bootstrap sets with !important */
+.paginationIndex[data-citypop-empty] {
+  color: var(--citypop-text) !important;
+  font-size: 0;
+  padding-block: 1.5rem;
+}
+
+.paginationIndex[data-citypop-empty]::after {
+  content: attr(data-citypop-empty);
+  font-size: 1.3rem;
+}
+
+/*
+ * Stash's SFW content mode keeps the dusk and drops the voice (citypop.js
+ * keeps Stash's own wording). The empty pool has no figure in it, so it
+ * stays. Stash swaps the O counter for a thumbs-up of its own, which the
+ * ripple mask skips; anything that still draws the ripple becomes a cocktail.
+ */
+.sfw-content-mode .count-button .count-icon svg:not(.svg-inline--fa) {
+  mask-image: url('assets/icons/glyph-cocktail.svg');
+}

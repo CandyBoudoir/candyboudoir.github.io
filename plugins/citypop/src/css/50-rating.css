@@ -1,0 +1,146 @@
+/*
+ * Ratings: striped sunset suns; an empty one is the same sun drawn in
+ * outline. The Font Awesome star paths are hidden and the svg box paints the
+ * sun through a mask.
+ */
+.rating-stars svg {
+  background: var(--citypop-unlit);
+  mask: url('assets/icons/glyph-sun-line.svg') center / 92% no-repeat;
+}
+
+.rating-stars .filled-star svg {
+  background: var(--citypop-sunset);
+  mask-image: url('assets/icons/glyph-sun.svg');
+}
+
+.rating-stars .filled-star {
+  filter: drop-shadow(1.5px 1.5px 0 rgb(4 3 22 / 80%));
+}
+
+.rating-stars svg path,
+.rating-stars svg use {
+  visibility: hidden;
+}
+
+/* A full sun covers its outline */
+.rating-stars .star-fill-100 .unfilled-star {
+  visibility: hidden;
+}
+
+.rating-stars .btn.minimal {
+  transition: transform var(--citypop-medium) var(--citypop-ease);
+}
+
+.rating-stars .btn.minimal:not(:disabled):hover,
+.rating-stars .btn.minimal:not(:disabled, .disabled):active {
+  background: none;
+}
+
+.rating-stars .btn.minimal:not(:disabled):hover {
+  transform: translateY(-3px);
+}
+
+.rating-stars .btn.minimal:not(:disabled):active {
+  transform: translateY(1px) scale(0.9);
+}
+
+.star-rating-number {
+  color: var(--citypop-coral);
+  font-family: var(--citypop-font-label);
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+/*
+ * Favourite: a heart in outline; favourited, a glossy sunset heart with a
+ * white glint. Stash colours favourites and their shadow three classes deep,
+ * so these rules start at #root.
+ */
+.favorite-button svg {
+  background-color: currentcolor;
+  mask: url('assets/icons/glyph-heart-line.svg') center / contain no-repeat;
+}
+
+.favorite-button svg path,
+.favorite-button svg use {
+  visibility: hidden;
+}
+
+#root button.btn.favorite-button.not-favorite {
+  color: var(--citypop-unlit);
+}
+
+#root button.btn.favorite-button.not-favorite:hover {
+  color: var(--citypop-coral);
+}
+
+.favorite-button.favorite svg {
+  background:
+    var(--citypop-glint) 24% 22% / 44% 44% no-repeat,
+    linear-gradient(160deg, #ffd59a 0%, #ff8a6e 38%, #f5508a 72%, #c23a8e 100%);
+  mask-image: url('assets/icons/glyph-heart.svg');
+}
+
+#root button.btn.favorite-button.favorite,
+#root button.btn.favorite-button.favorite:hover {
+  filter: drop-shadow(1.5px 2px 0 rgb(4 3 22 / 80%));
+}
+
+/* The heart beside a name, on detail pages */
+.name-icons .favorite-button svg {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+/* On a card the heart sits on the picture, so it takes a dark edge */
+#root .grid-card button.btn.favorite-button svg {
+  height: 28px;
+  width: 28px;
+}
+
+#root .grid-card button.btn.favorite-button {
+  filter: drop-shadow(1px 1px 0 rgb(4 3 22 / 90%))
+    drop-shadow(0 0 4px rgb(4 3 22 / 60%));
+}
+
+#root .grid-card button.btn.favorite-button.not-favorite {
+  color: rgb(255 250 244 / 85%);
+}
+
+#root .grid-card button.btn.favorite-button.favorite {
+  filter: drop-shadow(1.5px 2px 0 rgb(4 3 22 / 90%))
+    drop-shadow(0 0 4px rgb(4 3 22 / 50%));
+}
+
+/*
+ * The O counter is a drop falling into a pool ripple. Stash draws it with its
+ * own SweatDrops svg (no Font Awesome class), and the play count beside it
+ * uses Font Awesome, so the mask skips those.
+ */
+.count-button .count-icon svg:not(.svg-inline--fa) {
+  background-color: currentcolor;
+  mask: url('assets/icons/glyph-splash.svg') center / 100% no-repeat;
+}
+
+.count-button .count-icon svg:not(.svg-inline--fa) :is(path, rect, use) {
+  visibility: hidden;
+}
+
+.count-button .btn.minimal {
+  color: var(--citypop-pool-hi);
+}
+
+.count-button .btn.minimal:not(:disabled):hover,
+.count-button button.count-icon:hover {
+  color: #b5fbf5;
+}
+
+.count-button .count-value.btn.minimal {
+  color: var(--citypop-text);
+}
+
+.count-value {
+  font-family: var(--citypop-font-label);
+  font-weight: 600;
+}

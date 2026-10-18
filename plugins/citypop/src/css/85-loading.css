@@ -1,0 +1,49 @@
+/* Loading: a cassette with both reels turning, in place of Bootstrap's spinner */
+.LoadingIndicator .spinner-border {
+  animation: none;
+  background: url('assets/icons/tape-shell.svg') center / contain no-repeat;
+  border: 0;
+  border-radius: 0;
+  height: 104px;
+  position: relative;
+  width: 150px;
+}
+
+.LoadingIndicator .spinner-border::before,
+.LoadingIndicator .spinner-border::after {
+  animation: citypop-spin 1.4s linear infinite;
+  background: url('assets/icons/reel.svg') center / contain no-repeat;
+  content: '';
+  height: 14.6px;
+  left: calc(31.45% - 7.3px);
+  position: absolute;
+  top: calc(40.7% - 7.3px);
+  width: 14.6px;
+}
+
+.LoadingIndicator .spinner-border::after {
+  left: calc(65.32% - 7.3px);
+}
+
+/* Small and inline loaders, as in menus and the package manager, keep one reel */
+.LoadingIndicator:is(.small, .inline) .spinner-border,
+.saved-filter-list-menu .LoadingIndicator .spinner-border {
+  animation: citypop-spin 1.4s linear infinite;
+  background-image: url('assets/icons/reel.svg');
+  height: 16px;
+  margin: 0 0.25rem;
+  width: 16px;
+}
+
+.LoadingIndicator:is(.small, .inline) .spinner-border::before,
+.LoadingIndicator:is(.small, .inline) .spinner-border::after,
+.saved-filter-list-menu .LoadingIndicator .spinner-border::before,
+.saved-filter-list-menu .LoadingIndicator .spinner-border::after {
+  content: none;
+}
+
+.LoadingIndicator-message {
+  color: var(--citypop-text);
+  font-size: 1.3rem;
+  margin: 0;
+}
