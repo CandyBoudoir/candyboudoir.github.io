@@ -5,16 +5,25 @@
  * Insights paints itself in the Flexoki palette from custom properties it
  * sets on #insights, and adds its stylesheet to the page the first time Stats
  * opens, after this one. The rules here therefore start at `#root #insights`,
- * which outranks its own. Everything but the sidebar offset waits for the
- * Restyle Insights and Performers Toolkit setting: leather.js puts
- * .leather-restyle on <html> when it is on. Off, both keep the look they
- * share with their sibling plugins, for anyone who prefers it.
+ * which outranks its own. Everything but the sidebar offset and the rule
+ * that hides the setting waits for the Restyle Insights setting: leather.js
+ * puts .leather-restyle-insights on <html> when it is on. Off, Insights
+ * keeps the look it shares with its sibling plugins, for anyone who
+ * prefers it.
  *
  * Its heatmaps, codec and resolution colours and the colours of other
  * plugins' cards come from its JavaScript as inline colours, so they keep
  * Insights' own tones; only their empty cells and the charts' grey lines
  * and labels move to the leather.
  */
+
+/* The Restyle Insights setting shows only while Insights is on. Stash puts
+   a script tag for each enabled plugin into the page's head, and gives the
+   setting's switch the id plugin-<plugin>-<setting>. */
+:root:not(:has(script[src*='/plugin/Insights/']))
+  .setting:has([id='plugin-Theme-Leather-restyleInsights']) {
+  display: none;
+}
 
 /* The "What works for you" sidebar sticks under the navbar, which Leather
    makes taller than Stash's 48.75px, whether the setting is on or not */
@@ -27,7 +36,7 @@
    blood red, Library cognac, Files verdigris, Health the warning amber,
    Collection the success green and Movies plum; links and blue charts are
    steel, and O's are thread, like the flogger */
-.leather-restyle #root #insights {
+.leather-restyle-insights #root #insights {
   --bg: var(--leather-bg);
   --bg2: var(--leather-well);
   --ui: var(--leather-surface);
@@ -61,13 +70,13 @@
 
 /* The head: the name in blackletter beside a stud, as in the navbar, and
    the tabs as Stash's tabs, the open one a raised flap with a red edge */
-.leather-restyle #root #insights .ins-head {
+.leather-restyle-insights #root #insights .ins-head {
   border-bottom: 2px solid #000;
   box-shadow: 0 1px 0 rgb(255 255 255 / 5%);
   margin-bottom: 20px;
 }
 
-.leather-restyle #root #insights .ins-title {
+.leather-restyle-insights #root #insights .ins-title {
   color: var(--leather-text);
   font-family: var(--leather-font-display);
   font-size: 2.2rem;
@@ -78,11 +87,11 @@
   text-shadow: 0 2px 0 #000;
 }
 
-.leather-restyle #root #insights .ins-title .ins-ic {
+.leather-restyle-insights #root #insights .ins-title .ins-ic {
   display: none;
 }
 
-.leather-restyle #root #insights .ins-title::before {
+.leather-restyle-insights #root #insights .ins-title::before {
   background: var(--leather-stud-face);
   box-shadow:
     0 0 0 1px #000,
@@ -94,12 +103,12 @@
   width: 13px;
 }
 
-.leather-restyle #root #insights .ins-meta {
+.leather-restyle-insights #root #insights .ins-meta {
   font-family: var(--leather-font-label);
   letter-spacing: 0.06em;
 }
 
-.leather-restyle #root #insights .ins-tabs {
+.leather-restyle-insights #root #insights .ins-tabs {
   align-self: flex-end;
   background: none;
   border: 0;
@@ -109,7 +118,7 @@
   padding: 0;
 }
 
-.leather-restyle #root #insights .ins-tab {
+.leather-restyle-insights #root #insights .ins-tab {
   background: none;
   border: 1px solid transparent;
   border-bottom: 0;
@@ -124,12 +133,12 @@
   text-transform: uppercase;
 }
 
-.leather-restyle #root #insights .ins-tab:hover {
+.leather-restyle-insights #root #insights .ins-tab:hover {
   background: none;
   color: #fff;
 }
 
-.leather-restyle #root #insights .ins-tab.on {
+.leather-restyle-insights #root #insights .ins-tab.on {
   background: var(--leather-tex) var(--leather-raised);
   border-color: #000;
   box-shadow:
@@ -139,7 +148,7 @@
 }
 
 /* Cards are stitched leather, as Stash's own */
-.leather-restyle #root #insights .ins-card {
+.leather-restyle-insights #root #insights .ins-card {
   background: var(--leather-tex) var(--leather-surface);
   border: 1px solid #000;
   border-radius: var(--leather-radius);
@@ -150,7 +159,7 @@
     0 14px 26px -16px #000;
 }
 
-.leather-restyle #root #insights .ins-card::after {
+.leather-restyle-insights #root #insights .ins-card::after {
   border: 6px solid transparent;
   border-image: var(--leather-stitch) 10 round;
   content: '';
@@ -159,16 +168,22 @@
   position: absolute;
 }
 
-.leather-restyle #root #insights :is(.ins-tile.click, .ins-pull):hover {
+.leather-restyle-insights
+  #root
+  #insights
+  :is(.ins-tile.click, .ins-pull):hover {
   border-color: #000;
 }
 
-.leather-restyle #root #insights :is(.ins-tile.click, .ins-pull):hover::after {
+.leather-restyle-insights
+  #root
+  #insights
+  :is(.ins-tile.click, .ins-pull):hover::after {
   border-image-source: var(--leather-stitch-red);
 }
 
 /* Card titles in blackletter */
-.leather-restyle #root #insights .ins-ch > b {
+.leather-restyle-insights #root #insights .ins-ch > b {
   font-family: var(--leather-font-display);
   font-size: 1.35rem;
   font-weight: 700;
@@ -176,7 +191,7 @@
   line-height: 1.05;
 }
 
-.leather-restyle #root #insights :is(.ins-badge, .ins-sq) {
+.leather-restyle-insights #root #insights :is(.ins-badge, .ins-sq) {
   border-color: #000;
   border-radius: 4px;
   box-shadow:
@@ -185,14 +200,14 @@
 }
 
 /* A tile's colour edge is dyed into the leather, without a glow */
-.leather-restyle #root #insights .ins-tile::before {
+.leather-restyle-insights #root #insights .ins-tile::before {
   box-shadow: none;
   width: 5px;
 }
 
 /* Numbers in Oswald, never in blackletter, and small caps in Oswald's
    letterspaced capitals */
-.leather-restyle
+.leather-restyle-insights
   #root
   #insights
   :is(
@@ -211,7 +226,7 @@
   letter-spacing: 0.02em;
 }
 
-.leather-restyle
+.leather-restyle-insights
   #root
   #insights
   :is(
@@ -231,7 +246,7 @@
 
 /* Wells, where the charts sit, are debossed into the panel and flat, so the
    grain never runs behind a bar */
-.leather-restyle #root #insights :is(.ins-well, .ins-hubqueue) {
+.leather-restyle-insights #root #insights :is(.ins-well, .ins-hubqueue) {
   background: var(--leather-well);
   border: 1px solid #000;
   border-radius: 4px;
@@ -241,7 +256,7 @@
 }
 
 /* Chips and switches are debossed like Stash's fields */
-.leather-restyle
+.leather-restyle-insights
   #root
   #insights
   :is(.ins-chip, .ins-nav, .ins-pill, .ins-seg, .ins-hchip) {
@@ -255,7 +270,7 @@
     0 1px 0 rgb(255 255 255 / 7%);
 }
 
-.leather-restyle #root #insights :is(.ins-chip, .ins-seg button) {
+.leather-restyle-insights #root #insights :is(.ins-chip, .ins-seg button) {
   font-family: var(--leather-font-label);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -263,7 +278,10 @@
 
 /* The chosen chip of a row is pressed into oxblood with a stitch, as in
    Stash's button groups */
-.leather-restyle #root #insights :is(.ins-chip.on, .ins-seg button.on) {
+.leather-restyle-insights
+  #root
+  #insights
+  :is(.ins-chip.on, .ins-seg button.on) {
   background: var(--leather-grain), var(--leather-ox-dye);
   border-color: #000;
   box-shadow:
@@ -274,20 +292,20 @@
   outline-offset: -4px;
 }
 
-.leather-restyle #root #insights .ins-hchip.on {
+.leather-restyle-insights #root #insights .ins-hchip.on {
   background: color-mix(in srgb, var(--c) 22%, var(--leather-raised));
   border-color: color-mix(in srgb, var(--c) 55%, #000);
 }
 
 /* The chosen row of What works is a blood-red patch, as in Stash's pill
    navs */
-.leather-restyle #root #insights .ins-side-b {
+.leather-restyle-insights #root #insights .ins-side-b {
   border-radius: 4px;
   font-family: var(--leather-font-label);
   letter-spacing: 0.06em;
 }
 
-.leather-restyle #root #insights .ins-side-b.on {
+.leather-restyle-insights #root #insights .ins-side-b.on {
   background: var(--leather-grain), var(--leather-blood-dye);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 20%),
@@ -301,7 +319,7 @@
    blood red with two rivets for the one that goes ahead, bright red for the
    one that deletes. The stitch hangs off ::after, because the Refresh button
    shows its busy dot in ::before. */
-.leather-restyle #root #insights .ins-btn {
+.leather-restyle-insights #root #insights .ins-btn {
   background: var(--leather-tex) var(--leather-raised);
   border: 1px solid #000;
   border-radius: 5px;
@@ -323,7 +341,7 @@
     filter var(--leather-fast) var(--leather-ease);
 }
 
-.leather-restyle #root #insights .ins-btn::after {
+.leather-restyle-insights #root #insights .ins-btn::after {
   border: 5px solid transparent;
   border-image: var(--leather-stitch) 10 round;
   content: '';
@@ -333,15 +351,15 @@
   position: absolute;
 }
 
-.leather-restyle #root #insights .ins-btn:not(:disabled):hover {
+.leather-restyle-insights #root #insights .ins-btn:not(:disabled):hover {
   color: #fff;
 }
 
-.leather-restyle #root #insights .ins-btn:not(:disabled):hover::after {
+.leather-restyle-insights #root #insights .ins-btn:not(:disabled):hover::after {
   border-image-source: var(--leather-stitch-red);
 }
 
-.leather-restyle #root #insights .ins-btn:not(:disabled):active {
+.leather-restyle-insights #root #insights .ins-btn:not(:disabled):active {
   box-shadow:
     inset 0 2px 5px rgb(0 0 0 / 80%),
     inset 0 -1px 0 rgb(255 255 255 / 6%),
@@ -349,7 +367,7 @@
   transform: translateY(1px);
 }
 
-.leather-restyle #root #insights .ins-btn.ins-pri {
+.leather-restyle-insights #root #insights .ins-btn.ins-pri {
   background:
     radial-gradient(
       circle at 10.2px calc(50% - 1px),
@@ -374,51 +392,51 @@
   padding-inline: 1.5rem;
 }
 
-.leather-restyle #root #insights .ins-btn.ins-pri:not(:disabled):hover,
-.leather-restyle #root #insights .ins-btn.danger:not(:disabled):hover {
+.leather-restyle-insights #root #insights .ins-btn.ins-pri:not(:disabled):hover,
+.leather-restyle-insights #root #insights .ins-btn.danger:not(:disabled):hover {
   filter: brightness(1.12);
 }
 
-.leather-restyle #root #insights .ins-btn.danger {
+.leather-restyle-insights #root #insights .ins-btn.danger {
   background:
     var(--leather-grain),
     linear-gradient(180deg, #ec2f48 0%, #c41b33 50%, #911226 100%);
   color: #fff;
 }
 
-.leather-restyle #root #insights .ins-btn.danger.armed {
+.leather-restyle-insights #root #insights .ins-btn.danger.armed {
   box-shadow:
     0 0 0 2px var(--leather-bg),
     0 0 0 4px var(--leather-danger),
     0 2px 3px rgb(0 0 0 / 55%);
 }
 
-.leather-restyle #root #insights .ins-btn:disabled {
+.leather-restyle-insights #root #insights .ins-btn:disabled {
   box-shadow: none;
   filter: saturate(0.25) brightness(0.75);
   opacity: 0.5;
 }
 
 /* Links read as Stash's: the text with a dashed red underline */
-.leather-restyle #root #insights :is(.ins-go, .ins-hlink) {
+.leather-restyle-insights #root #insights :is(.ins-go, .ins-hlink) {
   color: var(--leather-text);
   text-decoration: underline dashed var(--leather-blood-hi) 1px;
   text-underline-offset: 4px;
 }
 
-.leather-restyle
+.leather-restyle-insights
   #root
   #insights
   :is(.ins-go:hover, .ins-hlink:hover:not(:disabled)) {
   color: var(--leather-blood-hi);
 }
 
-.leather-restyle #root #insights .ins-go .ins-ic {
+.leather-restyle-insights #root #insights .ins-go .ins-ic {
   color: var(--leather-blood-hi);
 }
 
 /* Rules between rows are a faint stitch */
-.leather-restyle
+.leather-restyle-insights
   #root
   #insights
   :is(
@@ -431,18 +449,18 @@
   border-top: 1px dashed rgb(185 174 169 / 16%);
 }
 
-.leather-restyle #root #insights .ins-con tr + tr td {
+.leather-restyle-insights #root #insights .ins-con tr + tr td {
   border-top: 1px dashed rgb(185 174 169 / 16%);
 }
 
-.leather-restyle #root #insights .ins-hkc {
+.leather-restyle-insights #root #insights .ins-hkc {
   background: var(--leather-tex) var(--leather-raised);
   border-color: #000;
   border-radius: 4px;
 }
 
 /* Up and down, keep and delete: their status colours dyed into the panel */
-.leather-restyle #root #insights :is(.ins-lift.up, .ins-k.keep) {
+.leather-restyle-insights #root #insights :is(.ins-lift.up, .ins-k.keep) {
   background: color-mix(
     in srgb,
     var(--leather-success) 16%,
@@ -450,7 +468,7 @@
   );
 }
 
-.leather-restyle #root #insights :is(.ins-lift.down, .ins-k.del) {
+.leather-restyle-insights #root #insights :is(.ins-lift.down, .ins-k.del) {
   background: color-mix(
     in srgb,
     var(--leather-danger) 16%,
@@ -458,7 +476,7 @@
   );
 }
 
-.leather-restyle #root #insights .ins-k.look {
+.leather-restyle-insights #root #insights .ins-k.look {
   background: color-mix(
     in srgb,
     var(--leather-warning) 16%,
@@ -466,7 +484,7 @@
   );
 }
 
-.leather-restyle #root #insights .ins-error {
+.leather-restyle-insights #root #insights .ins-error {
   background: color-mix(
     in srgb,
     var(--leather-danger) 12%,
@@ -480,20 +498,20 @@
 
 /* Ticked copies are dyed blood red, as Stash's checkboxes; switches are a
    leather strap with a nickel snap */
-.leather-restyle #root #insights .ins-bx {
+.leather-restyle-insights #root #insights .ins-bx {
   border-color: #000;
   border-radius: 3px;
 }
 
-.leather-restyle #root #insights .ins-bx.on {
+.leather-restyle-insights #root #insights .ins-bx.on {
   background: var(--leather-grain), var(--leather-blood-dye);
 }
 
-.leather-restyle #root #insights .ins-bx.on::after {
+.leather-restyle-insights #root #insights .ins-bx.on::after {
   border-color: #fff;
 }
 
-.leather-restyle #root #insights .ins-tog i {
+.leather-restyle-insights #root #insights .ins-tog i {
   background:
     linear-gradient(rgb(0 0 0 / 45%), rgb(0 0 0 / 25%)),
     var(--leather-tex) var(--leather-surface);
@@ -502,11 +520,11 @@
     inset 0 1px 3px rgb(0 0 0 / 90%);
 }
 
-.leather-restyle #root #insights .ins-tog.on i {
+.leather-restyle-insights #root #insights .ins-tog.on i {
   background: var(--leather-grain), var(--leather-ox-dye);
 }
 
-.leather-restyle #root #insights .ins-tog i::after {
+.leather-restyle-insights #root #insights .ins-tog i::after {
   background: radial-gradient(
     circle at 36% 30%,
     #fff 0 8%,
@@ -520,21 +538,21 @@
 }
 
 /* Treemap type and the calendar's hover ring */
-.leather-restyle #root #insights .ins-tm div {
+.leather-restyle-insights #root #insights .ins-tm div {
   color: var(--leather-bg);
 }
 
-.leather-restyle #root #insights .ins-cal i:hover:not(.f) {
+.leather-restyle-insights #root #insights .ins-cal i:hover:not(.f) {
   outline-color: var(--leather-blood-hi);
 }
 
-.leather-restyle #root #insights :is(.ins-th, .ins-poster) {
+.leather-restyle-insights #root #insights :is(.ins-th, .ins-poster) {
   border-radius: 3px;
 }
 
 /* Empty heatmap cells and the charts' grey lines and labels, which Insights
    writes as inline colours */
-.leather-restyle
+.leather-restyle-insights
   #root
   #insights
   :is(.ins-cal, .ins-hm, .ins-legend)
@@ -543,37 +561,37 @@
 }
 
 /* The tag picked in Top tags, whose row carries its colour as --c */
-.leather-restyle #root #insights .ins-row[style*='--c:#A9BA5A' i] {
+.leather-restyle-insights #root #insights .ins-row[style*='--c:#A9BA5A' i] {
   --c: color-mix(in srgb, var(--leather-success) 55%, #fff) !important;
 }
 
-.leather-restyle #root #insights .ins-ring circle[stroke='#282726' i] {
+.leather-restyle-insights #root #insights .ins-ring circle[stroke='#282726' i] {
   stroke: var(--leather-well);
 }
 
-.leather-restyle #root #insights svg line[stroke='#282726' i] {
+.leather-restyle-insights #root #insights svg line[stroke='#282726' i] {
   stroke: var(--leather-line);
 }
 
-.leather-restyle #root #insights svg line[stroke='#575653' i] {
+.leather-restyle-insights #root #insights svg line[stroke='#575653' i] {
   stroke: var(--leather-text-faint);
 }
 
-.leather-restyle #root #insights svg text[fill='#878580' i] {
+.leather-restyle-insights #root #insights svg text[fill='#878580' i] {
   fill: var(--leather-text-dim);
 }
 
-.leather-restyle #root #insights svg path[stroke='#A9BA5A' i] {
+.leather-restyle-insights #root #insights svg path[stroke='#A9BA5A' i] {
   stroke: var(--leather-success);
 }
 
-.leather-restyle #root #insights svg stop[stop-color='#879A39' i] {
+.leather-restyle-insights #root #insights svg stop[stop-color='#879A39' i] {
   stop-color: var(--leather-success);
 }
 
 /* Its tooltip is stitched leather, like Stash's in Leather, in sentence
    case for its longer lines. It sits on <body>, outside #insights. */
-.leather-restyle #ins-tip {
+.leather-restyle-insights #ins-tip {
   background: var(--leather-tex) var(--leather-raised);
   border: 1px solid #000;
   border-radius: 4px;

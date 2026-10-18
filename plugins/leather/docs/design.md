@@ -75,7 +75,7 @@ Stash's SFW content mode keeps the leather and the studs and drops the collar an
 
 [Insights](https://gitlab.com/allisless0/stash-plugins) (a stats dashboard on Stash's Stats page) and Performers Toolkit (a page at `/performerstoolkit`, a strip under a performer's name, Stats and Catalog tabs on the performer's page, a button on the Performers list and a toast) come from another author's suite of plugins. Each paints itself in the Flexoki palette through custom properties it sets on its own roots (`#insights`; `.pt`, `.ptc`, `.pt-strip`, `.pt-entry` and `#pt-toast`): `--bg`, `--bg2`, `--ui` to `--ui3`, `--tx3` to `--hi`, eight accents from `--re` to `--ma`, and in Insights `--up`, `--down` and `--o`. Each adds its stylesheet to the page after Leather's, so `82-insights.css` and `83-performers-toolkit.css` start their rules at `#root` (or at the id of a root that sits on `<body>`), which outranks theirs.
 
-With the Restyle Insights and Performers Toolkit setting on, `leather.js` puts `.leather-restyle` on `<html>`, and both take the leather:
+Each has a setting of its own, Restyle Insights and Restyle Performers Toolkit. With one on, `leather.js` puts `.leather-restyle-insights` or `.leather-restyle-toolkit` on `<html>`, and that plugin takes the leather:
 
 - **Their palette** becomes Leather's: surface leather for panels, `--leather-well` for wells and Leather's text tones. Their eight accents need colours that tell apart side by side, where a row of Insights tiles or its State chart shows five or more at once, so blood, nickel and the status tones are joined by the four data dyes. In Insights, You is nickel, Actions blood red, Library cognac, Files verdigris, Metadata health amber, Collection green and Movies plum; in Performers Toolkit, Find and Performers are steel, History plum and Sources green. Links and Insights' other blue charts are steel, and O's are thread, like the flogger. Insights grades from good to bad in green, amber, cognac and red, so You takes nickel and blood red keeps to Actions, deleting and state. Their own rules keep painting from these properties, so their charts and rings follow.
 - **Their panels go**: the dashboard and the toolkit's page drop their dark slab, and their cards lie on the page as stitched leather like Stash's cards. An Insights tile's colour edge is dyed in without a glow, and a toolkit card's kind (a message, a run, an error) is dyed along its top edge.
@@ -86,19 +86,22 @@ With the Restyle Insights and Performers Toolkit setting on, `leather.js` puts `
 
 Insights writes some colours from its JavaScript as inline styles and SVG attributes. Its heatmaps, its codec and resolution colours, its grade ring, the colours of the toolkit plugins' cards and the segments of its splits keep Insights' tones. The empty heatmap cells, the charts' grey grid lines and labels, the growth line and the tag picked in Top tags (whose row carries its colour as `--c`) are matched by their exact inline colour and moved to the leather; an Insights release that changes one of those values puts that one piece back in its own colour. Performers Toolkit sets its colours in its stylesheet, so its fixed colours (good, bad, link hovers, the black type on its badges, the kinds of its toast and review bar) are moved by class.
 
-The setting starts off because the two share their look with their sibling plugins (Movies Toolkit, Scenes Toolkit and others), which Leather leaves alone, so someone who runs several of them keeps one look until they choose otherwise. One setting covers both, so they never split. `leather.js` keeps it in the browser (`localStorage`, `leather.restylePlugins`), so a page they draw on never opens in Flexoki first, and reads the settings again on every page Stash opens, so changing it needs no reload.
+The settings start off because the two share their look with their sibling plugins (Movies Toolkit, Scenes Toolkit and others), which Leather leaves alone, so someone who runs several of them keeps one look until they choose otherwise. They are two so either plugin can keep its own look; turning both on keeps the pair alike. `leather.js` keeps them in the browser (`localStorage`, `leather.restyle`), so a page the plugins draw on never opens in Flexoki first, and reads the settings again on every page Stash opens, so changing one needs no reload.
 
-Insights' What works sidebar sticks under the navbar at Stash's height, so Leather moves it below its own 64px bar whether the setting is on or off. The count on the toolkit's Catalog tab is a Stash badge, which Leather dresses as a black leather tag, and also carries the toolkit's badge class, whose near-black type would win; it keeps Leather's type either way too. Performers Toolkit measures Stash's navbar for its toast and its review bar on a phone, so it needs nothing. The design-system page shows neither plugin.
+Each setting shows in Settings > Plugins only while its plugin is installed and on, since it has nothing to restyle otherwise. Stash puts a script tag for each enabled plugin into the page's head (`/plugin/<id>/javascript`) and gives a setting's switch the id `plugin-<plugin>-<setting>`, so one CSS rule per setting hides its row (`:root:not(:has(script[src*='/plugin/Insights/'])) .setting:has([id='plugin-Theme-Leather-restyleInsights'])`), with no request and no flash. A plugin switched on in Settings shows its setting after the next page load.
+
+Insights' What works sidebar sticks under the navbar at Stash's height, so Leather moves it below its own 64px bar whether Restyle Insights is on or off. The count on the toolkit's Catalog tab is a Stash badge, which Leather dresses as a black leather tag, and also carries the toolkit's badge class, whose near-black type would win; it keeps Leather's type either way too. Performers Toolkit measures Stash's navbar for its toast and its review bar on a phone, so it needs nothing. The design-system page shows neither plugin.
 
 ## Settings
 
-| Setting                                 | Key              | Effect                                  |
-| --------------------------------------- | ---------------- | --------------------------------------- |
-| Calm mode                               | `calmMode`       | Turns off Leather's animations          |
-| Plain labels                            | `plainCopy`      | Keeps Stash's own wording               |
-| Restyle Insights and Performers Toolkit | `restylePlugins` | Puts those two plugins in black leather |
+| Setting                    | Key                        | Effect                                   |
+| -------------------------- | -------------------------- | ---------------------------------------- |
+| Calm mode                  | `calmMode`                 | Turns off Leather's animations           |
+| Plain labels               | `plainCopy`                | Keeps Stash's own wording                |
+| Restyle Insights           | `restyleInsights`          | Puts Insights in black leather           |
+| Restyle Performers Toolkit | `restylePerformersToolkit` | Puts Performers Toolkit in black leather |
 
-All three default to off, so a fresh install gets the full theme and leaves the two plugins as their author drew them.
+All of them default to off, so a fresh install gets the full theme and leaves the two plugins as their author drew them. The two restyle settings show only while their plugin is on.
 
 ## Coupling to Stash
 
