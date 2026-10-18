@@ -6,6 +6,8 @@ import { STASH_BOX } from './tests/stash/stashbox-data.mjs'
 // keeps its own in plugins/<name>/tests/, with its screenshot baselines. Tests change
 // Stash settings, so they run one at a time. The mock stash-box that
 // prepare.mjs pointed Stash at starts with the tests.
+const step = process.env.PW_STEP
+
 export default defineConfig({
   testDir: 'plugins',
   timeout: 60_000,
@@ -21,13 +23,26 @@ export default defineConfig({
   snapshotPathTemplate: '{testDir}/{testFileDir}/snapshots/{arg}{ext}',
   // PW_STEP (contract, visual) also writes a JSON report to
   // pw-results/<step>.json, which tests/stash/status.mjs reads to tell one
-  // plugin's results from another's.
+  // plugin's results from another's, and gives each step its own output
+  // folder and HTML report, since Playwright empties both at the start of a
+  // run and the screenshot step would delete the element checks' traces.
+  outputDir: step ? `test-results/${step}` : 'test-results',
   reporter: [
     ['list'],
-    ...(process.env.CI ? [['html', { open: 'never' }]] : []),
-    ...(process.env.PW_STEP
-      ? [['json', { outputFile: `pw-results/${process.env.PW_STEP}.json` }]]
+    ...(process.env.CI
+      ? [
+          [
+            'html',
+            {
+              open: 'never',
+              outputFolder: step
+                ? `playwright-report/${step}`
+                : 'playwright-report',
+            },
+          ],
+        ]
       : []),
+    ...(step ? [['json', { outputFile: `pw-results/${step}.json` }]] : []),
   ],
   use: {
     baseURL: process.env.STASH_URL ?? 'http://127.0.0.1:9999',
