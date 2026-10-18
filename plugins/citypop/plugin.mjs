@@ -11,6 +11,11 @@ const modules = join(root, 'node_modules')
 
 export const id = 'Theme-CityPop'
 export const title = 'City Pop'
+// A theme restyles all of Stash, and Cherry Pick's specs run under each one.
+export const kind = 'theme'
+// The line about the plugin in the repo's README (scripts/readme.mjs).
+export const summary =
+  'An airbrushed 1980s dusk from city pop LPs: record-sleeve cards, striped suns for ratings, cassettes for audio scenes and a late-night FM voice.'
 // Paths in this folder whose changes alter the plugin zip. Tests, docs, tools
 // and the design-system page are left out so changing them offers users no
 // update.

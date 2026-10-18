@@ -10,8 +10,8 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "check": "prettier --check . && eslint && stylelint \"**/*.css\"",
-    "format": "prettier --write . && eslint --fix && stylelint --fix \"**/*.css\"",
+    "check": "prettier --check . && eslint && stylelint \"**/*.css\" && node scripts/readme.mjs --check",
+    "format": "node scripts/readme.mjs && prettier --write . && eslint --fix && stylelint --fix \"**/*.css\"",
     "deploy:local": "pnpm build && scripts/deploy-local.sh",
     "smoke": "node plugins/cherrypick/tests/smoke.mjs",
     "test:compat": "playwright test",

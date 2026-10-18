@@ -3,6 +3,7 @@
 // these check that its pieces still render, take the theme's look and raise
 // no page errors with each theme enabled beside it.
 import { expect, test } from '@playwright/test'
+import { listPlugins } from '../../../scripts/site.mjs'
 import {
   forYouCards,
   setUpCherryPick,
@@ -19,15 +20,17 @@ test.afterAll(async () => {
   await usePlugins('CherryPick')
 })
 
+// Every CandyBoudoir theme (`kind = 'theme'` in its plugin.mjs) except the
+// incubating ones, so a theme still being built cannot hold back a Cherry
+// Pick release
+const themes = (await listPlugins())
+  .filter(({ mod }) => mod.kind === 'theme' && !mod.incubating)
+  .map(({ mod }) => mod.id)
+
 const unratedPlayed = (ids) =>
   ids.scenes['Bright Street'] ?? Object.values(ids.scenes)[0]
 
-for (const theme of [
-  'Theme-Juicy',
-  'Theme-Leather',
-  'Theme-Overclock',
-  'Theme-CityPop',
-]) {
+for (const theme of themes) {
   test(`with ${theme}: the rows, badges and scene line render in the theme`, async ({
     page,
   }) => {
