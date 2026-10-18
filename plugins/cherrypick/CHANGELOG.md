@@ -1,9 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.1.6
 
-- A scene bracket's Look closer opens with Play the preview already under the scrub bar. It appeared a moment later the first time you looked closer at each scene, and the dialog moved up about 20px as it did, so a click or hover just after opening could land below the bar.
 - Every card in Cherry Pick's front-page rows and in More like this ends at the same height, as in Stash's own rows. A card whose reason fit on one line ended about 20px above one whose reason took two, with its counts and ⋯ menu.
+- A scene bracket's Look closer opens with Play the preview already under the scrub bar. It appeared a moment later the first time you looked closer at each scene, and the dialog moved up about 20px as it did, so a click or hover just after opening could land below the bar.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.40.1, Xenith 3.2.0 and Restash 0.3.0-55c1cb2.
 
 ## 0.1.5
 
