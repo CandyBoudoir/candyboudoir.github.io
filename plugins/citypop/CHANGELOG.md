@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0
+
+Insights and Performers Toolkit in the dusk, for Stash v0.31.1.
+
+- Restyle Insights and Restyle Performers Toolkit settings put those two plugins by another author in City Pop's look: navy panels on the hard shadow, their names in the brush script, Stash's tabs with the sunset under the open one, enamel buttons, night-blue fields and chips with the chosen one in sunset, pool-water switches, coral links, a cream tooltip, and sheets and a toast under the stripe band. Each tab's colour comes from City Pop's palette. Insights' heatmaps and its codec, resolution and chart colours keep their own tones.
+- Both settings start off, and each shows in Settings > Plugins only while its plugin is on. A change takes effect on the next page you open, without a reload, and so do Calm mode and Plain labels.
+- Insights' What works sidebar clears City Pop's taller navbar, and the count on Performers Toolkit's Catalog tab keeps City Pop's tab colours, with the restyle on or off.
+- Tested beside Insights 2.11.0 and Performers Toolkit 0.4.2.
+
 ## 0.1.0
 
 First release, for Stash v0.31.1.

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0
+
+Insights and Performers Toolkit on the display, for Stash v0.31.1.
+
+- Restyle Insights and Restyle Performers Toolkit settings put those two plugins by another author on Overclock's display: chamfered teal-black panels with frame lines and corner brackets, their names in Chakra Petch, Stash's tabs with a yellow underline under the open one, clipped buttons, cyan links, segmented bars, numbers and labels in Share Tech Mono and a yellow tooltip. Each tab keeps a colour of its own, from Overclock's yellow, cyan, red and magenta and four more signals in orange, green, blue and violet. Insights' heatmaps and its codec, resolution and chart colours keep their own tones.
+- Both settings start off, and each shows in Settings > Plugins only while its plugin is on. A change takes effect on the next page you open, without a reload, and so do Calm mode and Plain labels.
+- Insights' What works sidebar clears Overclock's taller navbar, and the count on Performers Toolkit's Catalog tab keeps Overclock's tab colours, with the restyle on or off.
+- Tested beside Insights 2.11.0 and Performers Toolkit 0.4.2.
+
 ## 0.1.0
 
 First release, for Stash v0.31.1.

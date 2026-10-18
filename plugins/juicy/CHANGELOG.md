@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0
+
+Insights and Performers Toolkit in candy, for Stash v0.31.1.
+
+- Restyle Insights and Restyle Performers Toolkit settings put those two plugins by another author in Juicy's look: plum sticker cards on the polka dots, their names in Fredoka, candy tabs filled with each tab's colour, glossy pink and plum buttons, deep plum fields, pink chips and switches for the chosen option, cyan links, ink and lime tooltips, and a plum toast with its kind on the left edge. Each tab's colour comes from Juicy's palette, and O's are bubblegum, as on the O counter. Insights' heatmaps and its codec, resolution and chart colours keep their own tones.
+- Both settings start off, and each shows in Settings > Plugins only while its plugin is on. A change takes effect on the next page you open, without a reload, and so do Calm mode and Plain labels.
+- Insights' What works sidebar sticks below Juicy's pink rule, and the count on Performers Toolkit's Catalog tab stays white like the other tabs' counts, with the restyle on or off.
+- Tested beside Insights 2.11.0 and Performers Toolkit 0.4.2.
+
 ## 0.4.0
 
 A new mascot, for Stash v0.31.1.
