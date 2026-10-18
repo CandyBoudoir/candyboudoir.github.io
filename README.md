@@ -6,6 +6,7 @@ Plugins for [Stash](https://github.com/stashapp/stash), the self-hosted media or
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [Juicy](plugins/juicy/)            | A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording.                    |
 | [Leather](plugins/leather/)        | A black leather theme: saddle stitching, nickel studs for ratings, a collar for favourites and a strict voice in the wording.                    |
+| [Overclock](plugins/overclock/)    | A hacker's heads-up display in acid yellow: charge chevrons for ratings, a reticle that locks on for favourites and a cold system voice.         |
 | [City Pop](plugins/citypop/)       | An airbrushed 1980s dusk from city pop LPs: record-sleeve cards, striped suns for ratings, cassettes for audio scenes and a late-night FM voice. |
 | [Cherry Pick](plugins/cherrypick/) | Learns what you like from your ratings and plays: a For you row, Your score on unrated scenes, More like this, and performer and scene brackets. |
 
@@ -76,4 +77,4 @@ Each plugin releases on its own. When `prod` carries a plugin version with no `<
 
 ## License
 
-MIT, except Cherry Pick, which is AGPL-3.0 (`plugins/cherrypick/LICENSE`). Juicy bundles Fredoka, Leather bundles Grenze Gotisch and Oswald, and City Pop bundles Mr Dafoe, Jost and Zen Maru Gothic, under the SIL Open Font License 1.1 (each plugin's `assets/fonts` folder holds the license).
+MIT, except Cherry Pick, which is AGPL-3.0 (`plugins/cherrypick/LICENSE`). Juicy bundles Fredoka, Leather bundles Grenze Gotisch and Oswald, Overclock bundles Chakra Petch and Share Tech Mono, and City Pop bundles Mr Dafoe, Jost and Zen Maru Gothic, under the SIL Open Font License 1.1 (each plugin's `assets/fonts` folder holds the license).

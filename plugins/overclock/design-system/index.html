@@ -1,0 +1,1305 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Overclock design system</title>
+    <meta
+      name="description"
+      content="Overclock, a hacker's heads-up display theme for Stash: palette, type, motifs and Stash components in Overclock style."
+    />
+    <link rel="icon" href="ds/motifs/favicon.svg" />
+    <!-- Bootstrap 4.6 stands in for Stash's own base styles. -->
+    <link rel="stylesheet" href="ds/vendor/bootstrap.min.css" />
+    <link rel="stylesheet" href="Theme-Overclock/overclock.css" />
+    <link rel="stylesheet" href="ds/ds.css" />
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="i-tag" viewBox="0 0 16 16">
+        <path
+          fill-rule="evenodd"
+          d="M1 2.5A1.5 1.5 0 0 1 2.5 1H7l7.5 7.5-6 6L1 7ZM4.6 3.2a1.4 1.4 0 1 0 0 2.8a1.4 1.4 0 1 0 0-2.8Z"
+        />
+      </symbol>
+      <symbol id="i-user" viewBox="0 0 16 16">
+        <circle cx="8" cy="4.8" r="3.2" />
+        <path d="M1.8 15c0-3.5 2.8-6 6.2-6s6.2 2.5 6.2 6Z" />
+      </symbol>
+      <symbol id="i-box" viewBox="0 0 16 16">
+        <path d="M1 4.5 8 1l7 3.5v7L8 15l-7-3.5Zm7 1.8 4.6-2.2L8 2 3.4 4.1Z" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 16 16">
+        <path d="m1.5 8.6 1.6-1.6 3 3 6.8-6.8 1.6 1.6-8.4 8.4Z" />
+      </symbol>
+      <symbol id="i-cross" viewBox="0 0 16 16">
+        <path
+          d="m3.1 1.5 4.9 4.9 4.9-4.9 1.6 1.6L9.6 8l4.9 4.9-1.6 1.6L8 9.6l-4.9 4.9-1.6-1.6L6.4 8 1.5 3.1Z"
+        />
+      </symbol>
+      <symbol id="i-bars" viewBox="0 0 16 16">
+        <path d="M1 3h14v2H1Zm0 4h14v2H1Zm0 4h14v2H1Z" />
+      </symbol>
+      <symbol id="i-gear" viewBox="0 0 16 16">
+        <path
+          d="M6.6 1h2.8l.4 2 1.4.8 1.9-.7 1.4 2.4-1.5 1.3v1.6l1.5 1.3-1.4 2.4-1.9-.7-1.4.8-.4 2H6.6l-.4-2-1.4-.8-1.9.7-1.4-2.4 1.5-1.3V7.2L1.5 5.9l1.4-2.4 1.9.7 1.4-.8ZM8 5.6a2.4 2.4 0 1 0 0 4.8 2.4 2.4 0 1 0 0-4.8Z"
+        />
+      </symbol>
+      <symbol id="i-star" viewBox="0 0 576 512">
+        <path
+          fill="currentColor"
+          d="M288 0 359 186 576 186 400 300 466 512 288 384 110 512 176 300 0 186 217 186Z"
+        />
+      </symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M12 21.2C6.4 17.4 2.6 13.9 2.6 9.5C2.6 6.4 5 4 8 4C9.8 4 11.2 4.9 12 6.3C12.8 4.9 14.2 4 16 4C19 4 21.4 6.4 21.4 9.5C21.4 13.9 17.6 17.4 12 21.2Z"
+        />
+      </symbol>
+      <symbol id="i-drops" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M12 2s-7 8.5-7 13a7 7 0 0 0 14 0c0-4.5-7-13-7-13Z"
+        />
+      </symbol>
+      <symbol id="i-zoom" viewBox="0 0 512 512">
+        <path
+          fill="currentColor"
+          d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376C296.3 401.1 253.9 416 208 416 93.1 416 0 322.9 0 208S93.1 0 208 0 416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
+        />
+      </symbol>
+    </svg>
+
+    <!-- Like Stash's MainNavbar: below 1200px the page links fold behind the toggler -->
+    <nav class="navbar navbar-expand-xl navbar-dark bg-dark top-nav">
+      <div class="navbar-brand">
+        <button class="btn btn-primary minimal brand-link">Stash</button>
+      </div>
+      <div class="navbar-collapse collapse" id="ds-nav">
+        <div class="navbar-nav">
+          <div class="nav-link">
+            <a class="minimal btn btn-primary active" href="#top">Scenes</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Images</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Groups</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Markers</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Galleries</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Performers</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Studios</a>
+          </div>
+          <div class="nav-link">
+            <a class="minimal btn btn-primary" href="#top">Tags</a>
+          </div>
+        </div>
+      </div>
+      <div class="navbar-buttons navbar-nav flex-row">
+        <button class="btn btn-primary minimal" title="Settings">
+          <svg class="svg-inline--fa fa-gear ds-ico">
+            <use href="#i-gear" />
+          </svg>
+        </button>
+        <button
+          class="navbar-toggler collapsed"
+          type="button"
+          aria-controls="ds-nav"
+          aria-expanded="false"
+          aria-label="Menu"
+          id="ds-toggler"
+        >
+          <svg class="svg-inline--fa fa-bars"><use href="#i-bars" /></svg>
+        </button>
+      </div>
+    </nav>
+
+    <div class="ds-controls">
+      <span class="label">Try it</span>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-calm" />
+        <label class="custom-control-label" for="ds-calm">Calm mode</label>
+      </div>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-plain" />
+        <label class="custom-control-label" for="ds-plain">Plain labels</label>
+      </div>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="ds-sfw" />
+        <label class="custom-control-label" for="ds-sfw">Stash SFW mode</label>
+      </div>
+    </div>
+
+    <div id="root">
+      <div class="main container-fluid p-0" id="ds-main">
+        <header class="ds-hero">
+          <div>
+            <div class="kicker">A theme for Stash</div>
+            <h1 class="ds-wordmark" data-text="Overclock">Overclock</h1>
+            <div class="ds-hudline" aria-hidden="true">
+              <span class="ds-led"></span><span>Session active</span>
+              <span class="ds-barcode"></span>
+              <span class="ds-sync"></span>
+              <span>0x7F3A · CH.07</span>
+            </div>
+            <p class="tagline">
+              The heads-up display of a control rig, running a session on you.
+              Matte black panels with clipped corners, frame brackets, hex
+              readouts and a scanline, in acid yellow and data cyan. Ratings
+              charge up, the favourite locks on, the O counter overloads and
+              every hover glitches.
+            </p>
+          </div>
+          <div class="ds-hero-art" aria-hidden="true">
+            <img class="ring" src="ds/motifs/hud-ring.svg" alt="" />
+            <img class="jack" src="ds/motifs/jack.svg" alt="" />
+            <img class="reticle" src="ds/motifs/reticle.svg" alt="" />
+            <img class="readout" src="ds/motifs/hud-readout.svg" alt="" />
+          </div>
+        </header>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/eye.svg" alt="" />Palette</h2>
+          <p class="ds-lede">
+            Matte black with a faint dot grid carries the page, and the panels
+            are a deep teal-black. Acid yellow marks what the system wants from
+            you: primary buttons, the active tab, ratings and the lock. Data
+            cyan carries readouts, info and the scan line. Alert red is kept for
+            danger and misses, magenta appears only as a glitch fringe, and
+            yellow-and-black hazard stripes mark danger and locked states.
+          </p>
+          <div class="ds-swatches">
+            <div class="ds-swatch">
+              <div class="chip" style="background: #f3e600"></div>
+              <div class="meta">
+                <code>--overclock-yellow</code>
+                <div class="hex">#F3E600</div>
+                <div class="role">
+                  Acid yellow: primary, active, ratings, the lock
+                </div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #00e5ff"></div>
+              <div class="meta">
+                <code>--overclock-cyan</code>
+                <div class="hex">#00E5FF</div>
+                <div class="role">Data cyan: info, readouts, the scan line</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #ff1f4b"></div>
+              <div class="meta">
+                <code>--overclock-red</code>
+                <div class="hex">#FF1F4B</div>
+                <div class="role">Alert red: danger and misses</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-magenta"></div>
+              <div class="meta">
+                <code>--overclock-magenta</code>
+                <div class="hex">#FF2FD0</div>
+                <div class="role">Glitch fringe only</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-hazard"></div>
+              <div class="meta">
+                <code>--overclock-hazard</code>
+                <div class="hex">#F3E600 / #0A0A0C</div>
+                <div class="role">
+                  Hazard stripes: danger and locked states only
+                </div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-bg"></div>
+              <div class="meta">
+                <code>--overclock-bg</code>
+                <div class="hex">#0A0A0C</div>
+                <div class="role">Matte black with a dot grid</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip ds-chip-panel"></div>
+              <div class="meta">
+                <code>--overclock-panel</code>
+                <div class="hex">#0D1416</div>
+                <div class="role">Deep teal-black: panels, cards, menus</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #122024"></div>
+              <div class="meta">
+                <code>--overclock-raised</code>
+                <div class="hex">#122024</div>
+                <div class="role">Raised panels, the HUD bar</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #3b5a60"></div>
+              <div class="meta">
+                <code>--overclock-line</code>
+                <div class="hex">#3B5A60</div>
+                <div class="role">Frame lines, brackets, ticks</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #e8efee"></div>
+              <div class="meta">
+                <code>--overclock-text</code>
+                <div class="hex">#E8EFEE</div>
+                <div class="role">Text</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #a8bab9"></div>
+              <div class="meta">
+                <code>--overclock-muted</code>
+                <div class="hex">#A8BAB9</div>
+                <div class="role">Secondary text, 9.2:1 on panels</div>
+              </div>
+            </div>
+            <div class="ds-swatch">
+              <div class="chip" style="background: #86999a"></div>
+              <div class="meta">
+                <code>--overclock-dim</code>
+                <div class="hex">#86999A</div>
+                <div class="role">Captions and labels, 6.2:1 on panels</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section ds-type">
+          <h2><img src="ds/motifs/timer.svg" alt="" />Type</h2>
+          <p class="ds-lede">
+            Chakra Petch at 600 to 700 is the squared display face for the
+            wordmark, section titles, card titles and the system's lines. Share
+            Tech Mono carries every readout, label and number: hex IDs,
+            durations, ratings and the session clock. Descriptions and settings
+            stay on the system font, so long text reads easily. Both fonts ship
+            inside the plugin.
+          </p>
+          <div class="ds-panel">
+            <div class="specimen">
+              <div class="spec">
+                Chakra Petch 700 · wordmark, section titles
+              </div>
+              <div class="t-display">Jack in.</div>
+            </div>
+            <div class="specimen">
+              <div class="spec">
+                Chakra Petch 600 · card titles, toasts, the system's lines
+              </div>
+              <div class="t-voice">Idle. Hands where I can see them.</div>
+            </div>
+            <div class="specimen">
+              <div class="spec">
+                Share Tech Mono · readouts, labels, numbers
+              </div>
+              <div class="t-mono">
+                SYS.ONLINE · CH.07 · ID:7F3A · 24:16 · 4K · 064%
+              </div>
+            </div>
+            <div class="specimen">
+              <div class="spec">System UI · descriptions and settings</div>
+              <div class="t-body">
+                Stash keeps your descriptions, settings and file details on the
+                system font, so long text stays easy to read.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/jack.svg" alt="" />Motifs and glyphs</h2>
+          <p class="ds-lede">
+            Flat technical line art in acid yellow and data cyan on teal-black:
+            a neural jack plug on its cable, a targeting reticle, an optical
+            implant with an aperture iris, a microchip, a digital padlock with a
+            hazard band, a wired controller and a countdown timer. They appear
+            on this page only; the theme ships the glyphs, the hex dump and the
+            flat scope trace for empty lists. The flat glyphs are CSS masks, so
+            they take any fill.
+          </p>
+          <div class="ds-panel">
+            <div class="ds-motifs">
+              <div class="ds-motif">
+                <img src="ds/motifs/jack.svg" alt="" /><span>neural jack</span>
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/reticle.svg" alt="" /><span
+                  >targeting reticle</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/eye.svg" alt="" /><span
+                  >optical implant</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/chip.svg" alt="" /><span>microchip</span>
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/padlock.svg" alt="" /><span
+                  >firewall lock</span
+                >
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/deck.svg" alt="" /><span>controller</span>
+              </div>
+              <div class="ds-motif">
+                <img src="ds/motifs/timer.svg" alt="" /><span>countdown</span>
+              </div>
+            </div>
+            <div class="ds-row m-0">
+              <span
+                class="ds-glyph"
+                title="rating"
+                style="
+                  mask-image: url('Theme-Overclock/assets/icons/glyph-charge.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph is-lo"
+                title="rating, empty"
+                style="
+                  mask-image: url('Theme-Overclock/assets/icons/glyph-charge-outline.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                title="favourite, open"
+                style="
+                  mask-image: url('Theme-Overclock/assets/icons/glyph-reticle-open.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                title="favourite, locked"
+                style="
+                  mask-image: url('Theme-Overclock/assets/icons/glyph-reticle.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph"
+                title="O counter"
+                style="
+                  mask-image: url('Theme-Overclock/assets/icons/glyph-bolt.svg');
+                "
+              ></span>
+              <span
+                class="ds-glyph is-cyan"
+                title="burst shard"
+                style="
+                  mask-image: url('Theme-Overclock/assets/icons/glyph-shard.svg');
+                "
+              ></span>
+              <span class="ds-caption"
+                >Rating, empty rating, favourite open and locked, O counter and
+                burst shard.</span
+              >
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/deck.svg" alt="" />Buttons</h2>
+          <p class="ds-lede">
+            Buttons are flat panels with the bottom-right corner clipped at 45°.
+            Primary is solid acid yellow with black type. Secondary is a
+            teal-black panel that turns yellow under the pointer, and the chosen
+            item in a group goes cyan. Scan and Generate are outlined in cyan
+            and yellow, Identify is solid cyan, and Delete is red behind a strip
+            of hazard stripes. A disabled button is locked behind faint stripes.
+            Hovering slices the button and splits it red and cyan for 170ms.
+          </p>
+          <div class="ds-row">
+            <button class="btn btn-primary">Save</button>
+            <button class="btn btn-secondary">Edit</button>
+            <button class="btn btn-success">Scan</button>
+            <button class="btn btn-warning">Generate</button>
+            <button class="btn btn-info">Identify</button>
+            <button class="btn btn-danger">Delete</button>
+            <button class="btn btn-primary" disabled>Disabled</button>
+          </div>
+          <div class="ds-row">
+            <button class="btn btn-primary btn-sm">Small</button>
+            <button class="btn btn-primary btn-lg">Large</button>
+            <div class="btn-group">
+              <button class="btn btn-secondary">Grid</button>
+              <button class="btn btn-secondary active">List</button>
+              <button class="btn btn-secondary">Wall</button>
+            </div>
+            <button class="btn btn-primary minimal">Minimal</button>
+            <a class="btn btn-link" href="#top">Link button</a>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2>
+            <img src="ds/motifs/reticle.svg" alt="" />Tags, ratings and
+            favourites
+          </h2>
+          <p class="ds-lede">
+            Tags are clipped mono chips with a cyan status light. Ratings are
+            five charge chevrons that fill left to right in yellow, with empty
+            ones outlined, and hovering one lights every chevron up to it. The
+            favourite is a targeting reticle that closes and locks with a small
+            Locked tag. The O counter is an overload bolt. Clicking any of them
+            throws square pixels, data shards and hex digits.
+          </p>
+          <div class="ds-row">
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Neon</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Chrome</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Night shift</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Synthwave</div></a></span
+            >
+            <span class="tag-item tag-link badge badge-secondary"
+              ><a href="#tags"><div>Behind the scenes</div></a></span
+            >
+            <span class="badge badge-primary">New</span>
+            <span class="badge badge-info">4K</span>
+          </div>
+          <div class="ds-row ds-panel">
+            <div
+              class="rating-stars rating-stars-precision-full"
+              id="ds-rating"
+            >
+              <button
+                class="btn btn-secondary minimal star-fill-100"
+                data-star="1"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-secondary minimal star-fill-100"
+                data-star="2"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-secondary minimal star-fill-100"
+                data-star="3"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-secondary minimal star-fill-0"
+                data-star="4"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <button
+                class="btn btn-secondary minimal star-fill-0"
+                data-star="5"
+              >
+                <div class="filled-star">
+                  <svg class="svg-inline--fa fa-star set">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+                <div class="unfilled-star">
+                  <svg class="svg-inline--fa fa-star unset">
+                    <use href="#i-star" />
+                  </svg>
+                </div>
+              </button>
+              <span class="star-rating-number">3</span>
+            </div>
+            <span class="name-icons">
+              <button
+                class="btn btn-primary minimal favorite-button not-favorite"
+                id="ds-fav"
+                title="Favourite"
+              >
+                <svg class="svg-inline--fa fa-heart" width="28" height="28">
+                  <use href="#i-heart" />
+                </svg>
+              </button>
+            </span>
+            <div class="btn-group count-button" id="ds-o">
+              <button
+                class="btn btn-secondary minimal count-icon"
+                title="O Count"
+              >
+                <span
+                  ><svg width="22" height="22"><use href="#i-drops" /></svg
+                ></span>
+              </button>
+              <button class="btn btn-secondary minimal count-value">
+                <span>2</span>
+              </button>
+            </div>
+            <span class="ds-caption"
+              >Click the chevrons, the reticle and the bolt.</span
+            >
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/eye.svg" alt="" />Cards</h2>
+          <p class="ds-lede">
+            Cards are chamfered panels with corner brackets. On hover the
+            brackets snap inward to frame the picture, a cyan scan line sweeps
+            it once and a readout counts to 100%. The rating is a yellow tag
+            with a mono number and a five-segment meter, progress is a segmented
+            bar and the divider is a dashed rule with a tick at each end.
+            Performers carry an ID readout and are targeted on hover. Audio-only
+            scenes get a live oscilloscope trace and level meter. Pictures are
+            never tinted: every effect on them comes with the pointer and clears
+            with it.
+          </p>
+          <div class="ds-cards">
+            <div class="scene-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check form-control"
+                  aria-label="Select Jack In"
+                />
+              </div>
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards">
+                  <div class="scene-card-preview ph ph-1"></div>
+                  <div class="rating-banner rating-5">Rating: 5</div>
+                  <div class="scene-specs-overlay">
+                    <span class="overlay-resolution">4K</span
+                    ><span class="overlay-duration">24:16</span>
+                  </div>
+                </a>
+                <div class="studio-overlay">
+                  <a href="#cards">Neon Saints</a>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-indicator" style="width: 42%"></div>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">Jack In</h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-09-14</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>6</span>
+                </button>
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>1</span>
+                </button>
+                <div class="btn-group count-button">
+                  <button
+                    class="btn btn-secondary minimal count-icon"
+                    title="O Count"
+                  >
+                    <span
+                      ><svg class="ds-ico" viewBox="0 0 24 24">
+                        <use href="#i-drops" /></svg
+                    ></span></button
+                  ><button class="btn btn-secondary minimal count-value">
+                    <span>3</span>
+                  </button>
+                </div>
+                <div class="organized">
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-box" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="scene-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check form-control"
+                  aria-label="Select Firewall"
+                />
+              </div>
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards">
+                  <div class="scene-card-preview ph ph-3"></div>
+                  <div class="rating-banner rating-4">Rating: 4</div>
+                  <div class="scene-specs-overlay">
+                    <span class="overlay-resolution">1080p</span
+                    ><span class="overlay-duration">31:02</span>
+                  </div>
+                </a>
+                <div class="studio-overlay">
+                  <a href="#cards">Lowlight Labs</a>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">Firewall</h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-08-30</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>9</span>
+                </button>
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>1</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="scene-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check form-control"
+                  aria-label="Select Reprogramming"
+                />
+              </div>
+              <div class="video-section thumbnail-section">
+                <a class="scene-card-link" href="#cards">
+                  <div class="scene-card-preview ds-audio-cover">
+                    <div class="ds-scope" aria-hidden="true">
+                      <i class="ds-trace"></i>
+                      <span class="ds-eq"
+                        ><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i
+                        ><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i
+                        ><i></i><i></i><i></i><i></i
+                      ></span>
+                      <span class="ds-scope-tag">CH.07 · Audio only</span>
+                      <span class="ds-scope-db">-12 dB</span>
+                    </div>
+                  </div>
+                  <div class="scene-specs-overlay">
+                    <span class="overlay-resolution">Audio</span
+                    ><span class="overlay-duration">18:40</span>
+                  </div>
+                </a>
+                <div class="studio-overlay">
+                  <a href="#cards">Synthetica</a>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-indicator" style="width: 78%"></div>
+                </div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    Reprogramming
+                  </h5></a
+                >
+                <div class="scene-card__details">
+                  <span class="scene-card__date">2026-07-02</span>
+                </div>
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-tag" /></svg><span>5</span>
+                </button>
+                <div class="organized">
+                  <button class="btn btn-primary minimal">
+                    <svg class="ds-ico"><use href="#i-box" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ds-cards mt-4">
+            <div class="performer-card grid-card card">
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div class="performer-card-image ph ph-5"></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button favorite"
+                  title="Favourite"
+                >
+                  <svg class="svg-inline--fa fa-heart">
+                    <use href="#i-heart" />
+                  </svg>
+                </button>
+                <div class="rating-banner rating-5">Rating: 5</div>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <span class="performer-name">Nova Hex</span>
+                  </h5></a
+                >
+                <div class="performer-card__age">29 years old</div>
+              </div>
+            </div>
+            <div class="performer-card grid-card card">
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div class="performer-card-image ph ph-2"></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button not-favorite"
+                  title="Favourite"
+                >
+                  <svg class="svg-inline--fa fa-heart">
+                    <use href="#i-heart" />
+                  </svg>
+                </button>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <span class="performer-name">Kira Volt</span>
+                  </h5></a
+                >
+                <div class="performer-card__age">26 years old</div>
+              </div>
+            </div>
+            <div class="performer-card grid-card card">
+              <div class="thumbnail-section">
+                <a href="#cards"
+                  ><div class="performer-card-image ph ph-6"></div
+                ></a>
+                <button
+                  class="btn btn-primary minimal favorite-button not-favorite"
+                  title="Favourite"
+                >
+                  <svg class="svg-inline--fa fa-heart">
+                    <use href="#i-heart" />
+                  </svg>
+                </button>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    <span class="performer-name">Juno Static</span>
+                  </h5></a
+                >
+                <div class="performer-card__age">34 years old</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ds-cards mt-4">
+            <div class="image-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check form-control"
+                  checked
+                  aria-label="Select chrome.jpg"
+                />
+              </div>
+              <div class="thumbnail-section">
+                <a class="image-card-link" href="#cards"
+                  ><div class="image-card-preview portrait ph ph-4">
+                    <div class="preview-button">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        title="Zoom"
+                      >
+                        <svg class="svg-inline--fa fa-magnifying-glass fa-icon">
+                          <use href="#i-zoom" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="rating-banner rating-5">Rating: 5</div></a
+                >
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    chrome.jpg
+                  </h5></a
+                >
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>1</span>
+                </button>
+              </div>
+            </div>
+            <div class="image-card grid-card card">
+              <div class="card-controls">
+                <input
+                  type="checkbox"
+                  class="card-check form-control"
+                  aria-label="Select neon-rain.jpg"
+                />
+              </div>
+              <div class="thumbnail-section">
+                <a class="image-card-link" href="#cards"
+                  ><div class="image-card-preview ph ph-2">
+                    <div class="preview-button">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        title="Zoom"
+                      >
+                        <svg class="svg-inline--fa fa-magnifying-glass fa-icon">
+                          <use href="#i-zoom" />
+                        </svg>
+                      </button>
+                    </div></div
+                ></a>
+              </div>
+              <div class="card-section">
+                <a href="#cards"
+                  ><h5 class="card-section-title flex-aligned">
+                    neon-rain.jpg
+                  </h5></a
+                >
+              </div>
+              <hr />
+              <div class="btn-group card-popovers">
+                <button class="btn btn-primary minimal">
+                  <svg class="ds-ico"><use href="#i-user" /></svg><span>2</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/padlock.svg" alt="" />Forms and menus</h2>
+          <p class="ds-lede">
+            Inputs are dark fields with a bottom rule and corner ticks. Focus
+            turns the frame yellow and starts a blinking block. Menus, popovers
+            and toasts are clipped panels with a yellow left rule, and the
+            tooltip is a small yellow tag. The modal header is a hazard-striped
+            band for destructive dialogs and a plain HUD bar otherwise.
+          </p>
+          <div class="ds-row ds-panel">
+            <input
+              class="form-control"
+              style="max-width: 280px"
+              placeholder="Search scenes…"
+            />
+            <select class="custom-select" style="max-width: 200px">
+              <option>Sort by rating</option>
+              <option>Sort by date</option>
+            </select>
+            <div class="custom-control custom-checkbox">
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="ds-check"
+                checked
+              />
+              <label class="custom-control-label" for="ds-check"
+                >Organised only</label
+              >
+            </div>
+            <div class="custom-control custom-switch">
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="ds-switch"
+                checked
+              />
+              <label class="custom-control-label" for="ds-switch"
+                >Show previews</label
+              >
+            </div>
+          </div>
+          <div class="ds-overlays ds-static">
+            <div>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="#menu">Play random</a>
+                <a class="dropdown-item active" href="#menu"
+                  >Generate previews</a
+                >
+                <a class="dropdown-item" href="#menu">Export</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#menu">Delete…</a>
+              </div>
+              <div class="tooltip bs-tooltip-top show mt-3" role="tooltip">
+                <div class="tooltip-inner">Organised</div>
+              </div>
+            </div>
+            <div class="toast-container">
+              <div class="toast success show" role="status">
+                <div class="toast-header">
+                  <span class="mr-auto">Started generating</span>
+                </div>
+              </div>
+              <div class="toast success show mt-3" role="status">
+                <div class="toast-header">
+                  <span class="mr-auto">Performer Favourited</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="modal-content">
+                <div class="modal-header"><span>Delete scene?</span></div>
+                <div class="modal-body">
+                  The file stays on disk unless you tick the box.
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary">Cancel</button>
+                  <button class="btn btn-danger">Delete</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/chip.svg" alt="" />Stash-box</h2>
+          <p class="ds-lede">
+            The Tagger stays still because people clear hundreds of rows in a
+            sitting, so it gets no glitch, scan line or motion. The chosen row
+            gets a yellow edge and the chosen select a yellow frame. Matches
+            read in cyan, warnings in yellow and misses in red. StashID links
+            are a cyan tag with the ID on a chip.
+          </p>
+          <div class="ds-row">
+            <span class="stash-id-pill" data-endpoint="StashDB"
+              ><span>StashDB</span
+              ><a href="#stash-box">7c2e91b4-jackin</a></span
+            >
+            <span class="text-success"
+              ><svg class="ds-ico"><use href="#i-check" /></svg> Duration is a
+              match</span
+            >
+            <span class="text-warning">Duration off by at least 2s</span>
+            <span class="text-danger">No results found</span>
+          </div>
+          <div class="search-item mb-4">
+            <ul class="list-unstyled m-0">
+              <li class="row mx-0 search-result selected-result active">
+                <div class="col-lg-5 d-flex">
+                  <div class="scene-image-container">
+                    <div class="scene-image ds-cover ph ph-1"></div>
+                  </div>
+                  <div class="scene-metadata">
+                    <h4 class="m-0">Jack In</h4>
+                    <h5>Neon Saints · 2026-09-14</h5>
+                    <span class="stash-id-pill" data-endpoint="StashDB"
+                      ><span>StashDB</span
+                      ><a href="#stash-box">7c2e91b4</a></span
+                    >
+                  </div>
+                </div>
+                <div class="col-lg-7">
+                  <div class="ds-match">
+                    <span class="entity-name">Studio: Neon Saints</span>
+                    <div class="btn-group">
+                      <button class="btn btn-secondary">Create</button
+                      ><button class="btn btn-secondary">Skip</button>
+                    </div>
+                    <div
+                      class="studio-select studio-select-active react-select"
+                    >
+                      <div class="react-select__control">
+                        <span class="react-select__single-value"
+                          >Neon Saints</span
+                        ><span class="react-select__indicator">▾</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ds-match">
+                    <span class="entity-name">Performer: Kira Volt</span>
+                    <div class="btn-group">
+                      <button class="btn btn-secondary">Create</button
+                      ><button class="btn btn-primary">Skip</button>
+                    </div>
+                    <div class="performer-select react-select">
+                      <div class="react-select__control">
+                        <span class="react-select__placeholder"
+                          >Select Performer</span
+                        ><span class="react-select__indicator">▾</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ds-match">
+                    <span class="entity-name">Performer: Nova Hex</span>
+                    <span class="text-success"
+                      ><svg class="ds-ico"><use href="#i-check" /></svg>
+                      Matched: Nova Hex</span
+                    >
+                  </div>
+                </div>
+              </li>
+              <li class="row mx-0 mt-2 search-result">
+                <div class="col">
+                  <h4 class="m-0">Night Shift</h4>
+                  <h5 class="m-0">Lowlight Labs · 2026-02-14</h5>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="ds-static">
+            <div class="modal-dialog scrape-dialog modal-lg m-0">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <span>Scene Scrape Results</span>
+                </div>
+                <div class="modal-body">
+                  <div class="row">
+                    <div class="col-3"></div>
+                    <div class="col column-label">Existing</div>
+                    <div class="col column-label">Scraped</div>
+                  </div>
+                  <div class="row align-items-center mt-3">
+                    <div class="col-3 col-form-label">Title</div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-muted">
+                              <use href="#i-cross" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="Night Shift"
+                          readonly
+                        />
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-success">
+                              <use href="#i-check" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="Jack In"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row align-items-center mt-3">
+                    <div class="col-3 col-form-label">Date</div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-success">
+                              <use href="#i-check" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="2026-09-11"
+                          readonly
+                        />
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button class="btn btn-secondary">
+                            <svg class="ds-ico text-muted">
+                              <use href="#i-cross" />
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          class="form-control bg-secondary text-white border-secondary"
+                          value="2026-09-14"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary">Cancel</button>
+                  <button class="btn btn-primary">Apply</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/deck.svg" alt="" />Navigation</h2>
+          <p class="ds-lede">
+            The navbar is a HUD strip with a yellow underline and tick marks,
+            and the active page sits in a yellow chamfered tab with a status
+            pip. A session clock starts when you arrive and ticks. On a phone
+            held upright Stash docks the bar at the bottom, and the underline
+            moves to its top edge. Tabs light yellow with a heavy underline, and
+            Stash's pagination is a row of clipped keys with the current page
+            lit.
+          </p>
+          <div class="ds-panel">
+            <ul class="nav nav-tabs mb-3">
+              <li class="nav-item">
+                <a class="nav-link active" href="#nav">Details</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#nav">Scenes</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#nav">Galleries</a>
+              </li>
+              <li class="nav-item"><a class="nav-link" href="#nav">Edit</a></li>
+            </ul>
+            <div role="group" class="pagination btn-group">
+              <button
+                disabled
+                title="First"
+                type="button"
+                class="btn btn-secondary"
+              >
+                <span>«</span>
+              </button>
+              <button
+                disabled
+                title="Previous"
+                type="button"
+                class="btn btn-secondary"
+              >
+                &lt;
+              </button>
+              <button type="button" class="btn active btn-secondary">1</button>
+              <button type="button" class="btn btn-secondary">2</button>
+              <button type="button" class="btn btn-secondary">3</button>
+              <button title="Next" type="button" class="btn btn-secondary">
+                &gt;
+              </button>
+              <button title="Last" type="button" class="btn btn-secondary">
+                <span>»</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/timer.svg" alt="" />Loading and empty</h2>
+          <p class="ds-lede">
+            The loader is a segmented bar that counts its percentage up over a
+            scrolling hex dump, and Calm mode holds it on a still frame at 64%.
+            An empty list gets a dead scope with a flat cyan trace and the line
+            No signal, and keeps the scope with no line under Plain labels or in
+            SFW mode.
+          </p>
+          <div class="ds-row" style="align-items: stretch">
+            <div class="ds-panel" style="min-width: 260px">
+              <div class="LoadingIndicator">
+                <div class="spinner-border" role="status">
+                  <span class="sr-only">Loading…</span>
+                </div>
+                <h4 class="LoadingIndicator-message">Loading…</h4>
+              </div>
+            </div>
+            <div class="ds-panel" style="min-width: 260px">
+              <div>No results found.</div>
+            </div>
+            <div class="ds-panel" style="min-width: 260px">
+              <span
+                class="filter-container text-muted paginationIndex center-text"
+                >0-0 of 0<br
+              /></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="ds-section">
+          <h2><img src="ds/motifs/jack.svg" alt="" />Copy</h2>
+          <p class="ds-lede">
+            The control system running the session, short and cold, written like
+            a game that is playing you. Matches are exact and whole-text, so
+            titles, tags and descriptions are never touched. Plain labels and
+            Stash's SFW mode turn them off.
+          </p>
+          <div class="ds-panel">
+            <table class="ds-copy">
+              <thead>
+                <tr>
+                  <th>Stash says</th>
+                  <th>Overclock says</th>
+                </tr>
+              </thead>
+              <tbody id="ds-copy-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <footer class="ds-footer">
+          <p>
+            Chakra Petch by Cadson Demak and Share Tech Mono by Carrois
+            Apostrophe, both SIL OFL 1.1 and bundled with the plugin, since
+            Stash blocks font hosts. Bootstrap 4.6 stands in for Stash's own
+            styles. Built with Claude, Anthropic's AI coding assistant.
+            <a
+              href="https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/overclock"
+              >Source and install</a
+            >.
+          </p>
+        </footer>
+      </div>
+    </div>
+
+    <script src="Theme-Overclock/overclock.js"></script>
+    <script src="ds/ds.js"></script>
+  </body>
+</html>

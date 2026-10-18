@@ -1,0 +1,105 @@
+/*
+ * Overclock design tokens. Stash compiles its colours from SCSS and exposes no
+ * custom properties, so every rule in this theme reads from these instead.
+ * Every url() in this theme resolves against overclock.css.
+ */
+
+/*
+ * Registered so they animate (readouts that count, the blinking caret) or
+ * stay on the element that sets them: --overclock-cut is the 45° corner cut,
+ * and a child never inherits its parent's.
+ */
+@property --overclock-cut {
+  inherits: false;
+  initial-value: 8px;
+  syntax: '<length>';
+}
+
+@property --overclock-pct {
+  inherits: false;
+  initial-value: 0;
+  syntax: '<integer>';
+}
+
+@property --overclock-sec {
+  inherits: false;
+  initial-value: 0;
+  syntax: '<integer>';
+}
+
+@property --overclock-min {
+  inherits: false;
+  initial-value: 0;
+  syntax: '<integer>';
+}
+
+@property --overclock-caret {
+  inherits: false;
+  initial-value: transparent;
+  syntax: '<color>';
+}
+
+:root {
+  color-scheme: dark;
+  accent-color: #f3e600;
+
+  /* Signals */
+  --overclock-yellow: #f3e600;
+  --overclock-yellow-hi: #fff46b;
+  --overclock-yellow-lo: #8f8700;
+  --overclock-cyan: #00e5ff;
+  --overclock-cyan-lo: #0a7f8f;
+  --overclock-red: #ff1f4b;
+  --overclock-red-hi: #ff5c7c;
+  --overclock-magenta: #ff2fd0;
+
+  /* Surfaces, from the void forward */
+  --overclock-void: #050506;
+  --overclock-bg: #0a0a0c;
+  --overclock-field: #070b0c;
+  --overclock-panel: #0d1416;
+  --overclock-control: #0f1b1e;
+  --overclock-chip: #0f1d21;
+  --overclock-raised: #122024;
+  --overclock-rule: #24363b;
+  --overclock-line: #3b5a60;
+  --overclock-black: #0a0a0c;
+
+  /* Text */
+  --overclock-text: #e8efee;
+  --overclock-muted: #a8bab9;
+  --overclock-dim: #86999a;
+
+  /* Hazard stripes mark danger and locked states only */
+  --overclock-hazard: repeating-linear-gradient(
+    -45deg,
+    #f3e600 0 7px,
+    #0a0a0c 7px 14px
+  );
+  --overclock-hazard-dim: repeating-linear-gradient(
+    -45deg,
+    rgb(243 230 0 / 13%) 0 6px,
+    transparent 6px 12px
+  );
+
+  /* The red and cyan split a glitch leaves on type */
+  --overclock-split:
+    -2px 0 0 rgb(255 31 75 / 85%), 2px 0 0 rgb(0 229 255 / 85%);
+
+  /*
+   * The navbar is a HUD strip with tick marks under it, taller than Stash's
+   * own 48.75px bar. Stash spaces the page, the sidebar and its sticky bars by
+   * that height, so 80-pages.css moves them with this.
+   */
+  --overclock-nav-height: 58px;
+
+  /* Type */
+  --overclock-font-display:
+    'Overclock Chakra', 'Bahnschrift', 'DIN Alternate', 'Arial Narrow',
+    sans-serif;
+  --overclock-font-label:
+    'Overclock Mono', ui-monospace, 'SF Mono', menlo, consolas, monospace;
+  --overclock-font-body:
+    system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial,
+    sans-serif;
+}

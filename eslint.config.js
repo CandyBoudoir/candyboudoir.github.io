@@ -15,7 +15,12 @@ export default defineConfig(
     // Plugins built from ES modules (Cherry Pick): JSX compiled by esbuild
     // against PluginApi.React, so React is a global the shim provides.
     files: ['plugins/*/src/js/**/*.js', 'plugins/*/src/js/**/*.jsx'],
-    ignores: ['plugins/juicy/**', 'plugins/leather/**', 'plugins/citypop/**'],
+    ignores: [
+      'plugins/juicy/**',
+      'plugins/leather/**',
+      'plugins/overclock/**',
+      'plugins/citypop/**',
+    ],
     languageOptions: {
       sourceType: 'module',
       globals: globals.browser,

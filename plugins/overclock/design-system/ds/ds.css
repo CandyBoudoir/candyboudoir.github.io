@@ -1,0 +1,1310 @@
+/*
+ * Design-system page only. Stash's own stylesheet positions card overlays,
+ * stacks the rating stars and fixes the navbar to the window; this file stands
+ * in for those few rules so the specimens below match Stash's layout, and
+ * dresses the page itself. Everything Stash shows comes from overclock.css.
+ */
+@counter-style ds-hex {
+  system: numeric;
+  symbols: '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' 'A' 'B' 'C' 'D' 'E' 'F';
+}
+
+/*
+ * A url() resolves against the stylesheet that uses it, so this page's own
+ * dressing takes copies of the files it needs from the plugin folder.
+ */
+:root {
+  --ds-barcode: url('motifs/barcode.svg');
+  --ds-trace: url('motifs/trace.svg');
+}
+
+/* Stash fixes its navbar and pads the page for it; here the bar is sticky */
+body {
+  font-family: var(--overclock-font-body);
+  padding: 0 0 6rem;
+}
+
+#ds-main {
+  counter-reset: ds-sec ds-pnl;
+}
+
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+.top-nav .navbar-buttons {
+  display: flex;
+  margin-left: auto;
+}
+
+.top-nav .navbar-collapse {
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+@media (width < 1200px) {
+  .top-nav.navbar {
+    flex-wrap: wrap;
+  }
+
+  .top-nav .navbar-toggler {
+    margin-left: 0.5rem;
+    order: 2;
+  }
+
+  .top-nav .navbar-collapse {
+    flex-basis: 100%;
+    order: 3;
+  }
+
+  .top-nav .navbar-collapse.show {
+    display: flex;
+  }
+}
+
+/* On this page the bar stays at the top of a phone, its ticks below */
+@media (width <= 575.98px) and (orientation: portrait) {
+  body {
+    padding: 0 0 6rem;
+  }
+
+  .top-nav.navbar {
+    padding: 0.5rem 1rem 0.7rem;
+  }
+
+  .top-nav.navbar::after {
+    bottom: 0;
+    top: auto;
+    transform: none;
+  }
+
+  .top-nav .navbar-collapse.show {
+    border-bottom: 0;
+    border-top: 1px dashed var(--overclock-line);
+    margin: 0.5rem 0 0;
+    padding: 0.6rem 0 0;
+  }
+}
+
+/* The "Try it" switches */
+.ds-controls {
+  align-items: center;
+  backdrop-filter: blur(8px);
+  background: rgb(10 10 12 / 88%);
+  border-bottom: 1px dashed var(--overclock-line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  padding: 0.6rem 1rem;
+  position: sticky;
+  top: var(--overclock-nav-height);
+  z-index: 1020;
+}
+
+.ds-controls .label {
+  color: var(--overclock-yellow);
+  font-family: var(--overclock-font-label);
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.ds-controls .label::before {
+  content: '▸ ';
+}
+
+.ds-controls .custom-control-label {
+  font-family: var(--overclock-font-label);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ds-controls .custom-control:hover .custom-control-label {
+  animation: overclock-glitch 170ms steps(1, end) 1;
+}
+
+/* Below 1200px the demo navbar wraps, so the switches stop sticking under it */
+@media (width < 1200px) {
+  .ds-controls {
+    position: static;
+  }
+}
+
+/* Sections: every one opens on a HUD rule with ticks and a data label */
+.ds-section {
+  counter-increment: ds-sec;
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 3.5rem 1rem 0;
+  position: relative;
+}
+
+.ds-section::before {
+  background:
+    linear-gradient(var(--overclock-line) 0 0) 0 0 / 1px 7px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 100% 0 / 1px 7px no-repeat,
+    linear-gradient(var(--overclock-yellow) 0 0) 0 0 / 48px 2px no-repeat;
+  border-top: 1px solid var(--overclock-rule);
+  color: var(--overclock-dim);
+  content: 'SEC.' counter(ds-sec, decimal-leading-zero) '  ·  0x3'
+    counter(ds-sec, ds-hex) 'A  ·  SYNC OK';
+  display: block;
+  font: 0.64rem/1 var(--overclock-font-label);
+  letter-spacing: 0.16em;
+  margin-bottom: 1.6rem;
+  padding-top: 0.45rem;
+  text-align: right;
+  white-space: pre;
+}
+
+.ds-section > h2 {
+  align-items: center;
+  color: var(--overclock-yellow);
+  display: flex;
+  font-size: 2.1rem;
+  font-weight: 700;
+  gap: 0.6rem;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+  margin-bottom: 0.25rem;
+}
+
+.ds-section > h2::before {
+  align-self: flex-start;
+  color: var(--overclock-cyan);
+  content: counter(ds-sec, decimal-leading-zero);
+  font: 0.8rem/1 var(--overclock-font-label);
+  letter-spacing: 0.1em;
+  margin-top: 0.15rem;
+}
+
+.ds-section > h2::after {
+  background:
+    linear-gradient(var(--overclock-yellow) 0 0) 100% 50% / 7px 7px no-repeat,
+    repeating-linear-gradient(
+        90deg,
+        var(--overclock-line) 0 4px,
+        transparent 4px 8px
+      )
+      0 50% / calc(100% - 14px) 1px no-repeat;
+  content: '';
+  flex: 1;
+  height: 7px;
+  min-width: 2rem;
+}
+
+.ds-section > h2 img {
+  height: 2.6rem;
+  width: 2.6rem;
+}
+
+.ds-lede {
+  color: var(--overclock-muted);
+  margin-bottom: 1.5rem;
+  max-width: 70ch;
+}
+
+.ds-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Panels: teal-black screens with clipped corners, two brackets and a channel */
+.ds-panel {
+  --overclock-cut: 12px;
+
+  background:
+    linear-gradient(
+        315deg,
+        var(--overclock-line) calc(var(--overclock-cut) * 0.7071 + 1px),
+        transparent 0
+      )
+      border-box,
+    linear-gradient(
+        135deg,
+        var(--overclock-line) calc(var(--overclock-cut) * 0.7071 + 1px),
+        transparent 0
+      )
+      border-box,
+    repeating-linear-gradient(
+      0deg,
+      rgb(255 255 255 / 1.6%) 0 1px,
+      transparent 1px 3px
+    ),
+    var(--overclock-panel);
+  border: 1px solid var(--overclock-rule);
+  clip-path: polygon(
+    12px 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    0 100%,
+    0 12px
+  );
+  counter-increment: ds-pnl;
+  padding: 1.25rem;
+  position: relative;
+}
+
+.ds-panel::after {
+  background:
+    linear-gradient(var(--overclock-yellow) 0 0) 100% 0 / 12px 2px no-repeat,
+    linear-gradient(var(--overclock-yellow) 0 0) 100% 0 / 2px 12px no-repeat,
+    linear-gradient(var(--overclock-cyan) 0 0) 0 100% / 12px 2px no-repeat,
+    linear-gradient(var(--overclock-cyan) 0 0) 0 100% / 2px 12px no-repeat;
+  content: '';
+  inset: -1px;
+  pointer-events: none;
+  position: absolute;
+}
+
+.ds-panel::before {
+  color: var(--overclock-dim);
+  content: 'CH.' counter(ds-pnl, decimal-leading-zero);
+  font: 0.58rem/1 var(--overclock-font-label);
+  letter-spacing: 0.14em;
+  pointer-events: none;
+  position: absolute;
+  right: 1.3rem;
+  top: 0.35rem;
+}
+
+.ds-caption {
+  color: var(--overclock-dim);
+  font-size: 0.85rem;
+}
+
+/* Hero: the wordmark on a HUD, the jack under the reticle */
+.ds-hero {
+  align-items: center;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  margin: 0 auto;
+  max-width: 1180px;
+  min-height: 420px;
+  overflow: clip;
+  padding: 3rem 1rem 1rem;
+  position: relative;
+}
+
+.ds-hero::before {
+  background:
+    linear-gradient(var(--overclock-line) 0 0) 0 0 / 22px 1px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 0 0 / 1px 22px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 100% 0 / 22px 1px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 100% 0 / 1px 22px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 0 100% / 22px 1px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 0 100% / 1px 22px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 100% 100% / 22px 1px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 100% 100% / 1px 22px no-repeat;
+  content: '';
+  inset: 1.4rem 0.4rem 0.2rem;
+  pointer-events: none;
+  position: absolute;
+}
+
+.ds-hero::after {
+  color: var(--overclock-dim);
+  content: 'X 0420  ·  Y 1180  ·  Z 07';
+  font: 0.6rem/1 var(--overclock-font-label);
+  left: 1.2rem;
+  letter-spacing: 0.16em;
+  pointer-events: none;
+  position: absolute;
+  top: 1.75rem;
+  white-space: pre;
+}
+
+.ds-hero .kicker {
+  color: var(--overclock-cyan);
+  font-family: var(--overclock-font-label);
+  font-size: 0.8rem;
+  letter-spacing: 0.24em;
+  margin: 1.2rem 0 0.75rem;
+  text-transform: uppercase;
+}
+
+.ds-hero .kicker::after {
+  animation: overclock-blink 1s steps(1, end) infinite;
+  background: var(--overclock-yellow);
+  content: '';
+  display: inline-block;
+  height: 0.9em;
+  margin-left: 0.4em;
+  vertical-align: -0.1em;
+  width: 0.55em;
+}
+
+.ds-wordmark {
+  color: var(--overclock-yellow);
+  font: 700 clamp(3.2rem, 8.6vw, 6.9rem) / 0.95 var(--overclock-font-display);
+  letter-spacing: 0.03em;
+  margin: 0;
+  position: relative;
+  text-shadow:
+    -3px 0 0 rgb(255 47 208 / 55%),
+    3px 0 0 rgb(0 229 255 / 55%);
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+/* Two copies of the word, sliced and shifted every few seconds */
+.ds-wordmark::before,
+.ds-wordmark::after {
+  clip-path: inset(50% 0 50% 0);
+  content: attr(data-text);
+  inset: 0;
+  position: absolute;
+  text-shadow: none;
+}
+
+.ds-wordmark::before {
+  animation: ds-slice-a 4.2s steps(1, end) infinite;
+  color: var(--overclock-cyan);
+}
+
+.ds-wordmark::after {
+  animation: ds-slice-b 4.2s steps(1, end) infinite;
+  color: var(--overclock-magenta);
+}
+
+@keyframes ds-slice-a {
+  0% {
+    clip-path: inset(18% 0 62% 0);
+    transform: translateX(-7px);
+  }
+
+  2% {
+    clip-path: inset(60% 0 22% 0);
+    transform: translateX(5px);
+  }
+
+  4% {
+    clip-path: inset(38% 0 48% 0);
+    transform: translateX(-3px);
+  }
+
+  6%,
+  100% {
+    clip-path: inset(50% 0 50% 0);
+    transform: none;
+  }
+}
+
+@keyframes ds-slice-b {
+  0% {
+    clip-path: inset(70% 0 8% 0);
+    transform: translateX(6px);
+  }
+
+  2% {
+    clip-path: inset(8% 0 76% 0);
+    transform: translateX(-6px);
+  }
+
+  4% {
+    clip-path: inset(46% 0 40% 0);
+    transform: translateX(4px);
+  }
+
+  6%,
+  100% {
+    clip-path: inset(50% 0 50% 0);
+    transform: none;
+  }
+}
+
+.ds-hudline {
+  align-items: center;
+  color: var(--overclock-dim);
+  display: flex;
+  flex-wrap: wrap;
+  font: 0.7rem/1 var(--overclock-font-label);
+  gap: 0.5rem 0.9rem;
+  letter-spacing: 0.14em;
+  margin-top: 1.1rem;
+  text-transform: uppercase;
+}
+
+.ds-hudline > span:nth-child(2) {
+  color: var(--overclock-cyan);
+}
+
+.ds-led {
+  animation: overclock-blink 1.2s steps(1, end) infinite;
+  background: var(--overclock-cyan);
+  height: 7px;
+  margin-right: -0.4rem;
+  width: 7px;
+}
+
+.ds-barcode {
+  background: var(--overclock-yellow);
+  height: 16px;
+  mask: var(--ds-barcode) 0 0 / 100% 100% no-repeat;
+  width: 92px;
+}
+
+.ds-sync {
+  color: var(--overclock-yellow);
+}
+
+.ds-sync::before {
+  --overclock-pct: 64;
+
+  animation: overclock-load 5s steps(50, end) infinite;
+  content: 'Sync ' counter(overclock-pct, decimal-leading-zero) '%';
+  counter-reset: overclock-pct var(--overclock-pct);
+}
+
+.ds-hero .tagline {
+  color: var(--overclock-muted);
+  font-size: 1.15rem;
+  margin-top: 1.25rem;
+  max-width: 50ch;
+}
+
+.ds-hero-art {
+  aspect-ratio: 1;
+  position: relative;
+}
+
+.ds-hero-art img {
+  position: absolute;
+}
+
+.ds-hero-art .ring {
+  animation: ds-ring 24s steps(96, end) infinite;
+  left: 3%;
+  opacity: 0.9;
+  top: 3%;
+  width: 94%;
+}
+
+@keyframes ds-ring {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ds-hero-art .jack {
+  left: 8%;
+  top: 8%;
+  width: 78%;
+}
+
+.ds-hero-art .reticle {
+  animation: ds-track 6s steps(1, end) infinite;
+  left: 50%;
+  top: 2%;
+  width: 34%;
+}
+
+@keyframes ds-track {
+  0%,
+  100% {
+    transform: none;
+  }
+
+  48% {
+    transform: translate(-4px, 3px) scale(1.04);
+  }
+
+  50% {
+    transform: translate(2px, -2px);
+  }
+
+  52% {
+    transform: none;
+  }
+}
+
+.ds-hero-art .readout {
+  bottom: -3%;
+  left: -7%;
+  width: 46%;
+}
+
+/* Palette */
+.ds-swatches {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+}
+
+.ds-swatch {
+  background: var(--overclock-panel);
+  border: 1px solid var(--overclock-rule);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    0 100%
+  );
+  overflow: hidden;
+}
+
+.ds-swatch .chip {
+  border-bottom: 1px solid var(--overclock-rule);
+  height: 84px;
+}
+
+.ds-swatch .meta {
+  padding: 0.6rem 0.75rem 0.75rem;
+}
+
+.ds-swatch code {
+  color: var(--overclock-cyan);
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+.ds-swatch .hex {
+  color: var(--overclock-text);
+  font-family: var(--overclock-font-label);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+}
+
+.ds-swatch .role {
+  color: var(--overclock-muted);
+  font-size: 0.8rem;
+}
+
+/* Swatches that show the motif, not only the colour */
+.ds-chip-magenta {
+  background: linear-gradient(
+    90deg,
+    #0a0a0c 0 30%,
+    #ff2fd0 30% 36%,
+    #f3e600 36% 64%,
+    #00e5ff 64% 70%,
+    #0a0a0c 70%
+  );
+}
+
+.ds-chip-hazard {
+  background: repeating-linear-gradient(
+    -45deg,
+    #f3e600 0 12px,
+    #0a0a0c 12px 24px
+  );
+}
+
+.ds-chip-bg {
+  background:
+    radial-gradient(circle, rgb(0 229 255 / 28%) 1px, transparent 1.4px) 0 0 /
+      14px 14px,
+    #0a0a0c;
+}
+
+.ds-chip-panel {
+  background:
+    linear-gradient(
+      135deg,
+      transparent 14px,
+      #3b5a60 14px 15px,
+      transparent 15px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgb(255 255 255 / 3%) 0 1px,
+      transparent 1px 3px
+    ),
+    #0d1416;
+}
+
+/* Type */
+.ds-type .specimen {
+  border-bottom: 1px dashed var(--overclock-rule);
+  padding: 1rem 0;
+}
+
+.ds-type .specimen:last-child {
+  border-bottom: 0;
+}
+
+.ds-type .spec {
+  color: var(--overclock-cyan);
+  font-family: var(--overclock-font-label);
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+}
+
+.ds-type .t-display {
+  color: var(--overclock-yellow);
+  font: 700 4rem/1 var(--overclock-font-display);
+  letter-spacing: 0.04em;
+  text-shadow:
+    -2px 0 0 rgb(255 47 208 / 55%),
+    2px 0 0 rgb(0 229 255 / 55%);
+  text-transform: uppercase;
+}
+
+.ds-type .t-voice {
+  color: var(--overclock-text);
+  font: 600 1.7rem/1.15 var(--overclock-font-display);
+  letter-spacing: 0.03em;
+}
+
+.ds-type .t-mono {
+  color: var(--overclock-cyan);
+  font: 1.1rem/1.3 var(--overclock-font-label);
+  letter-spacing: 0.08em;
+}
+
+.ds-type .t-body {
+  color: var(--overclock-muted);
+}
+
+/* Motifs and glyphs */
+.ds-motifs {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  margin-bottom: 1.5rem;
+}
+
+.ds-motif {
+  align-items: center;
+  background:
+    linear-gradient(var(--overclock-line) 0 0) 0 0 / 10px 1px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 0 0 / 1px 10px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 100% 0 / 10px 1px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 100% 0 / 1px 10px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 0 100% / 10px 1px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 0 100% / 1px 10px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 100% 100% / 10px 1px no-repeat,
+    linear-gradient(var(--overclock-line) 0 0) 100% 100% / 1px 10px no-repeat;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.9rem 0.4rem 0.6rem;
+}
+
+.ds-motif:hover {
+  background-image:
+    linear-gradient(var(--overclock-yellow) 0 0),
+    linear-gradient(var(--overclock-yellow) 0 0),
+    linear-gradient(var(--overclock-yellow) 0 0),
+    linear-gradient(var(--overclock-yellow) 0 0),
+    linear-gradient(var(--overclock-yellow) 0 0),
+    linear-gradient(var(--overclock-yellow) 0 0),
+    linear-gradient(var(--overclock-yellow) 0 0),
+    linear-gradient(var(--overclock-yellow) 0 0);
+}
+
+.ds-motif img {
+  height: 88px;
+  width: 88px;
+}
+
+.ds-motif:hover img {
+  animation: overclock-jitter 150ms steps(1, end) 1;
+  filter: drop-shadow(-2px 0 0 rgb(255 31 75 / 70%))
+    drop-shadow(2px 0 0 rgb(0 229 255 / 70%));
+}
+
+.ds-motif span {
+  color: var(--overclock-dim);
+  font-family: var(--overclock-font-label);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.ds-glyph {
+  background: var(--overclock-yellow);
+  display: inline-block;
+  height: 32px;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  width: 32px;
+}
+
+.ds-glyph.is-lo {
+  background: var(--overclock-yellow-lo);
+}
+
+.ds-glyph.is-cyan {
+  background: var(--overclock-cyan);
+}
+
+/* Cards, as Stash lays them out */
+.ds-cards {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.ds-cards .scene-card {
+  width: 300px;
+}
+
+.ds-cards .performer-card {
+  width: 220px;
+}
+
+.ds-cards .image-card {
+  width: 240px;
+}
+
+.scene-card-preview {
+  align-items: center;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  justify-content: center;
+}
+
+.performer-card-image {
+  align-items: center;
+  aspect-ratio: 2 / 3;
+  display: flex;
+  justify-content: center;
+}
+
+.image-card-preview {
+  align-items: center;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.image-card-preview.portrait {
+  aspect-ratio: 3 / 4;
+}
+
+.grid-card .card-controls {
+  align-items: center;
+  display: flex;
+  left: 0.5rem;
+  position: absolute;
+  top: 0.7rem;
+  z-index: 1;
+}
+
+.grid-card .card-check {
+  height: 1.2rem;
+  opacity: 0;
+  width: 1.2rem;
+}
+
+.grid-card:hover .card-check {
+  opacity: 0.75;
+}
+
+.preview-button {
+  display: flex;
+  height: 100%;
+  position: absolute;
+  width: 100%;
+}
+
+.rating-banner {
+  position: absolute;
+}
+
+/* Stash fades the picture's overlays while a card is hovered */
+.grid-card:hover :is(.rating-banner, .studio-overlay) {
+  opacity: 0;
+}
+
+.studio-overlay {
+  max-width: 40%;
+  position: absolute;
+  text-align: right;
+  z-index: 8;
+}
+
+.scene-specs-overlay {
+  position: absolute;
+}
+
+.grid-card .progress-bar {
+  left: 0;
+  position: absolute;
+  right: 0;
+}
+
+.card-section {
+  padding: 0.6rem 0.8rem 0.3rem;
+}
+
+.card-popovers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0 0.4rem 0.5rem;
+}
+
+.card-popovers .btn {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+.ds-ico {
+  fill: currentcolor;
+  height: 14px;
+  width: 14px;
+}
+
+.performer-card .favorite-button {
+  padding: 0;
+  position: absolute;
+  right: 5px;
+  top: 10px;
+  z-index: 2;
+}
+
+.performer-card .favorite-button svg {
+  height: 2rem;
+  margin: 0 0.4rem;
+  width: 2rem;
+}
+
+/* Audio-only covers: a live oscilloscope trace and a level meter */
+.ds-audio-cover {
+  background:
+    linear-gradient(rgb(0 229 255 / 30%) 0 0) 0 50% / 100% 1px no-repeat,
+    linear-gradient(rgb(0 229 255 / 9%) 1px, transparent 1px) 0 0 / 100% 12.5%,
+    linear-gradient(90deg, rgb(0 229 255 / 9%) 1px, transparent 1px) 0 0 / 10%
+      100%,
+    #040607;
+  overflow: hidden;
+  position: relative;
+}
+
+.ds-scope {
+  inset: 0;
+  position: absolute;
+}
+
+.ds-trace {
+  animation: ds-trace 2.2s linear infinite;
+  background: var(--ds-trace) 0 0 / 240px 100% repeat-x;
+  height: 62%;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 19%;
+}
+
+@keyframes ds-trace {
+  to {
+    background-position: -240px 0;
+  }
+}
+
+.ds-eq {
+  align-items: flex-end;
+  bottom: 14px;
+  display: flex;
+  gap: 2px;
+  height: 30px;
+  left: 10px;
+  position: absolute;
+  width: 44%;
+}
+
+.ds-eq i {
+  animation: ds-eq 900ms steps(4, end) infinite alternate;
+  background: repeating-linear-gradient(
+    0deg,
+    var(--overclock-yellow) 0 2px,
+    transparent 2px 3px
+  );
+  flex: 1;
+  height: 40%;
+  transform-origin: bottom;
+}
+
+.ds-eq i:nth-child(3n) {
+  animation-duration: 700ms;
+  height: 70%;
+}
+
+.ds-eq i:nth-child(3n + 1) {
+  animation-delay: -300ms;
+  animation-duration: 1100ms;
+  height: 55%;
+}
+
+.ds-eq i:nth-child(4n) {
+  animation-delay: -500ms;
+  height: 90%;
+}
+
+.ds-eq i:nth-child(5n + 2) {
+  animation-duration: 600ms;
+  height: 25%;
+}
+
+@keyframes ds-eq {
+  from {
+    transform: scaleY(0.35);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.ds-scope-tag,
+.ds-scope-db {
+  color: var(--overclock-cyan);
+  font: 0.6rem/1 var(--overclock-font-label);
+  left: 10px;
+  letter-spacing: 0.1em;
+  position: absolute;
+  text-transform: uppercase;
+  top: 10px;
+}
+
+.ds-scope-db {
+  color: var(--overclock-yellow);
+  top: 24px;
+}
+
+/* Rating stars, as Stash's Rating/styles.scss stacks them */
+.rating-stars {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.rating-stars button {
+  font-size: inherit;
+  line-height: 1;
+  position: relative;
+}
+
+.rating-stars .filled-star {
+  height: 100%;
+  left: 0.03rem;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+}
+
+.rating-stars .star-fill-0 .filled-star {
+  width: 0;
+}
+
+.rating-stars .star-fill-100 .filled-star {
+  width: 1em;
+}
+
+.rating-stars svg {
+  display: block;
+  height: 1em;
+  width: 1em;
+}
+
+.star-rating-number {
+  margin-left: 0.5rem;
+}
+
+/* Overlays shown in place rather than floating */
+.ds-static .dropdown-menu,
+.ds-static .toast,
+.ds-static .modal-content,
+.ds-static .tooltip {
+  display: block;
+  float: none;
+  left: auto;
+  opacity: 1;
+  position: relative;
+  top: auto;
+}
+
+.ds-static .tooltip-inner {
+  display: inline-block;
+}
+
+.ds-overlays {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+/* Bootstrap's spinner box */
+.LoadingIndicator {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+/* Stash-box: the layout the Tagger and react-select give these */
+.search-item {
+  padding: 1rem;
+}
+
+.search-result {
+  padding: 1rem 0;
+}
+
+.scene-metadata {
+  margin-left: 1rem;
+}
+
+.ds-cover {
+  aspect-ratio: 16 / 9;
+  height: 7rem;
+}
+
+.ds-match {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.ds-match .entity-name {
+  flex: 1 1 10rem;
+}
+
+.ds-match .react-select {
+  width: 14rem;
+}
+
+.react-select__control {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 0 0.75rem;
+}
+
+.stash-id-pill {
+  display: inline-flex;
+  font-size: 90%;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.stash-id-pill span,
+.stash-id-pill a {
+  padding: 0.25em 0.6em;
+}
+
+.scrape-dialog {
+  max-width: 760px;
+}
+
+/* Stash's pagination keys keep their own width */
+.pagination .btn {
+  flex-grow: 0;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+/* The pagination line Stash prints above a list */
+.paginationIndex {
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+}
+
+/* Copy table */
+.ds-copy {
+  width: 100%;
+}
+
+.ds-copy td,
+.ds-copy th {
+  border-top: 1px dashed var(--overclock-rule);
+  padding: 0.6rem 0.75rem;
+}
+
+.ds-copy th {
+  color: var(--overclock-dim);
+  font-family: var(--overclock-font-label);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ds-copy td:first-child {
+  color: var(--overclock-muted);
+  font-family: var(--overclock-font-label);
+  font-size: 0.88rem;
+}
+
+.ds-copy td:last-child {
+  color: var(--overclock-yellow);
+  font-family: var(--overclock-font-display);
+  font-size: 1.08rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.ds-copy tbody tr:hover td:last-child {
+  color: var(--overclock-yellow-hi);
+}
+
+.ds-footer {
+  color: var(--overclock-dim);
+  font-family: var(--overclock-font-label);
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+  margin: 4rem auto 0;
+  max-width: 1180px;
+  padding: 0 1rem;
+}
+
+.ds-footer::before {
+  background: var(--overclock-line);
+  content: '';
+  display: block;
+  height: 18px;
+  margin-bottom: 0.8rem;
+  mask: var(--ds-barcode) 0 0 / 100% 100% no-repeat;
+  width: 150px;
+}
+
+/*
+ * Picture stand-ins: soft blends of night-city light (sodium amber, neon
+ * magenta, signal cyan) in place of covers, so each specimen frames something
+ * with a picture's light and shade. They are colour only.
+ */
+.ph {
+  background-color: #0b0d12;
+}
+
+.ph-1 {
+  background:
+    radial-gradient(
+      34% 60% at 40% 58%,
+      #f0b48a 0,
+      #c46a52 38%,
+      transparent 72%
+    ),
+    radial-gradient(40% 50% at 74% 28%, #b5307a 0, transparent 70%),
+    linear-gradient(160deg, #2a2234, #0b0d12 70%);
+}
+
+.ph-2 {
+  background:
+    radial-gradient(
+      30% 56% at 60% 55%,
+      #9fe3ef 0,
+      #3c8fa8 40%,
+      transparent 72%
+    ),
+    radial-gradient(45% 70% at 20% 40%, #3d2a5a 0, transparent 70%),
+    linear-gradient(200deg, #121a2a, #070910 75%);
+}
+
+.ph-3 {
+  background:
+    radial-gradient(
+      28% 50% at 50% 46%,
+      #e9c7a0 0,
+      #a8705a 36%,
+      transparent 70%
+    ),
+    radial-gradient(60% 60% at 80% 80%, #2e7c8c88 0, transparent 70%),
+    linear-gradient(140deg, #262832, #090a0f 70%);
+}
+
+.ph-4 {
+  background:
+    radial-gradient(
+      36% 64% at 36% 52%,
+      #f3e3d4 0,
+      #c78a96 34%,
+      transparent 70%
+    ),
+    radial-gradient(50% 50% at 78% 40%, #7a2b8f 0, transparent 72%),
+    linear-gradient(180deg, #2b2836, #0c0a12 70%);
+}
+
+.ph-5 {
+  background:
+    radial-gradient(
+      40% 54% at 50% 38%,
+      #f1cdb4 0,
+      #b97a7e 40%,
+      transparent 72%
+    ),
+    radial-gradient(70% 40% at 50% 100%, #1f6f86 0, transparent 70%),
+    linear-gradient(170deg, #2c3038, #0d0e16 75%);
+}
+
+.ph-6 {
+  background:
+    radial-gradient(
+      34% 56% at 58% 50%,
+      #f2b98c 0,
+      #a5524f 46%,
+      transparent 74%
+    ),
+    radial-gradient(40% 40% at 18% 24%, #c8f03c44 0, transparent 70%),
+    linear-gradient(150deg, #1d1828, #0b0d12 70%);
+}
+
+@media (width <= 720px) {
+  .ds-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .ds-hero::after {
+    display: none;
+  }
+
+  .ds-hero-art {
+    max-width: 320px;
+  }
+
+  .ds-hero-art .readout {
+    left: 0;
+  }
+
+  .ds-type .t-display {
+    font-size: 2.8rem;
+  }
+
+  .ds-section > h2 {
+    font-size: 1.6rem;
+  }
+
+  .ds-section > h2 img {
+    height: 2rem;
+    width: 2rem;
+  }
+
+  .ds-cards .scene-card,
+  .ds-cards .performer-card,
+  .ds-cards .image-card {
+    width: 100%;
+  }
+
+  .search-result .col-lg-5.d-flex {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .scene-metadata {
+    margin-left: 0;
+    min-width: 0;
+  }
+}
