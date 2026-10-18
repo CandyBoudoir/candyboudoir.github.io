@@ -581,38 +581,39 @@ test.describe('beside Performers Toolkit', () => {
   })
 
   // The Catalog tab's count is a Stash badge in a Stash tab, which also
-  // carries Performers Toolkit's badge class. It shows once a stash-box has
-  // answered, which the mock stash-box does not, so the test shows it.
-  test("the Catalog tab's count reads, closed and open", async ({ page }) => {
-    try {
-      await setPlugin({ restylePlugins: true })
-      await openPerformerStats(page, ids.performer)
-      const badge = page.locator('.pt-tablink[data-pt-tab="catalog"] .badge')
-      await badge.evaluate((el) => {
-        el.hidden = false
-        el.textContent = '12'
-      })
-      const reads = async () => {
+  // carries Performers Toolkit's badge class, with its own navy type. It
+  // shows once a stash-box has answered, which the mock stash-box does not,
+  // so the test shows it. City Pop's tab colours win with the restyle on
+  // and off.
+  for (const restyle of [false, true]) {
+    test(`the Catalog tab's count reads, closed and open, restyle ${restyle ? 'on' : 'off'}`, async ({
+      page,
+    }) => {
+      try {
+        await setPlugin(restyle ? { restylePlugins: true } : {})
+        await openPerformerStats(page, ids.performer)
+        const tab = page.locator('.pt-tablink[data-pt-tab="catalog"]')
+        const badge = tab.locator('.badge')
+        const show = () =>
+          badge.evaluate((el) => {
+            el.hidden = false
+            el.textContent = '12'
+          })
+        await show()
         const { color, background } = await badge.evaluate((el) => {
           const style = getComputedStyle(el)
           return { color: style.color, background: style.backgroundColor }
         })
         expect(contrast(color, background)).toBeGreaterThanOrEqual(4.5)
+        await tab.click()
+        await expect(tab).toHaveClass(/\bactive\b/)
+        await show()
+        await expect(badge).toHaveCSS('color', 'rgb(27, 17, 69)')
+      } finally {
+        await setPlugin({})
       }
-      await reads()
-      await page.locator('.pt-tablink[data-pt-tab="catalog"]').click()
-      await expect(
-        page.locator('.pt-tablink[data-pt-tab="catalog"].active'),
-      ).toBeAttached()
-      await badge.evaluate((el) => {
-        el.hidden = false
-        el.textContent = '12'
-      })
-      await expect(badge).toHaveCSS('color', 'rgb(27, 17, 69)')
-    } finally {
-      await setPlugin({})
-    }
-  })
+    })
+  }
 
   // As for Insights, against
   // plugins/citypop/tests/performerstoolkit-unmatched-baseline.txt
