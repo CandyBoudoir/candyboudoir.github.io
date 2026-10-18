@@ -8,22 +8,26 @@ The design-system page (`design-system/index.html`, built to `dist/site/juicy/in
 
 Sampled from the sticker references. Every rule in `src/css` reads these custom properties, because Stash compiles its colours from SCSS and exposes none of its own.
 
-| Token                 | Hex       | Use                                          |
-| --------------------- | --------- | -------------------------------------------- |
-| `--juicy-pink`        | `#FC3D9F` | Primary buttons, active nav, the brand       |
-| `--juicy-bubblegum`   | `#FC68B2` | Hover states, highlights, the loader         |
-| `--juicy-magenta`     | `#DD2A97` | Pressed states, gradient shadows             |
-| `--juicy-lime`        | `#D7FA54` | Card hover halo, focus rings, selection      |
-| `--juicy-gold`        | `#FDDA4E` | Rating hearts and rating badges              |
-| `--juicy-cyan`        | `#00A8F0` | Links, info                                  |
-| `--juicy-purple`      | `#9B30FF` | Tags and secondary chips                     |
-| `--juicy-danger`      | `#FF5A4E` | Destructive actions, kept clear of the pinks |
-| `--juicy-ink`         | `#010224` | Outlines, hard drop shadows, text on candy   |
-| `--juicy-bg`          | `#150A2E` | Page background, with pink polka dots        |
-| `--juicy-card`        | `#22123F` | Cards, panels, sidebars                      |
-| `--juicy-card-raised` | `#2D1852` | Menus, secondary buttons, toasts             |
+| Token                 | Hex       | Use                                           |
+| --------------------- | --------- | --------------------------------------------- |
+| `--juicy-pink`        | `#FC3D9F` | Primary buttons, active nav, the brand        |
+| `--juicy-bubblegum`   | `#FC68B2` | Hover states, highlights, the loader          |
+| `--juicy-magenta`     | `#DD2A97` | Pressed states, gradient shadows              |
+| `--juicy-lime`        | `#D7FA54` | Card hover halo, focus rings, selection       |
+| `--juicy-gold`        | `#FDDA4E` | Rating hearts and rating badges               |
+| `--juicy-cyan`        | `#00A8F0` | Links, info                                   |
+| `--juicy-purple`      | `#9B30FF` | Tags and secondary chips                      |
+| `--juicy-danger`      | `#FF5A4E` | Destructive actions, kept clear of the pinks  |
+| `--juicy-ink`         | `#010224` | Outlines, hard drop shadows, text on candy    |
+| `--juicy-bg`          | `#150A2E` | Page background, with pink polka dots         |
+| `--juicy-card`        | `#22123F` | Cards, panels, sidebars                       |
+| `--juicy-card-raised` | `#2D1852` | Menus, secondary buttons, toasts              |
+| `--juicy-tangerine`   | `#FE9A4E` | Between gold and danger, for restyled plugins |
+| `--juicy-blueberry`   | `#6B86FF` | Between cyan and purple, for restyled plugins |
 
-Text on candy fills (pink, lime, gold, cyan, danger) is ink, which keeps contrast at 6:1 or better. Text on plum is `--juicy-text` (`#FFF2FA`).
+Text on candy fills (pink, lime, gold, cyan, danger) is ink, which keeps contrast at 6:1 or better. Text on plum is `--juicy-text` (`#FFF2FA`), with `--juicy-text-muted`, `--juicy-text-dim` and `--juicy-text-faint` for quieter lines.
+
+Tangerine and blueberry are the two colours the plugins Juicy restyles need beyond the stickers' eight (see Insights and Performers Toolkit). Each sits between two palette colours, and blueberry is lighter than their midpoint so its text reads on plum at 5:1.
 
 ## Type
 
@@ -66,15 +70,41 @@ Cheeky copy swaps a short list of Stash's own messages for flirtier ones (the li
 
 Stash's SFW content mode keeps Juicy's colours and drops the cheek: cheeky copy is off, bursts lose their drips, the empty state shows a heart instead of the mascot, and Stash's own SFW icon swap (a thumbs-up for the O counter) is left alone.
 
+## Insights and Performers Toolkit
+
+[Insights](https://gitlab.com/allisless0/stash-plugins) (a stats dashboard on Stash's Stats page) and Performers Toolkit (a page at `/performerstoolkit`, a strip under a performer's name, Stats and Catalog tabs on the performer's page, a button on the Performers list and a toast) come from another author's suite of plugins. Each paints itself in the Flexoki palette through custom properties it sets on its own roots (`#insights`; `.pt`, `.ptc`, `.pt-strip`, `.pt-entry` and `#pt-toast`): `--bg`, `--bg2`, `--ui` to `--ui3`, `--tx3` to `--hi`, eight accents from `--re` to `--ma`, and in Insights `--up`, `--down`, `--o` and `--otx`. Each adds its stylesheet to the page after Juicy's, so `82-insights.css` and `83-performers-toolkit.css` start their rules at `#root` (or at the id of a root that sits on `<body>`), which outranks theirs.
+
+Each has a setting of its own, Restyle Insights and Restyle Performers Toolkit. With one on, `juicy.js` puts `.juicy-restyle-insights` or `.juicy-restyle-toolkit` on `<html>`, and that plugin takes the candy:
+
+- **Their palette** becomes Juicy's: plum cards in deep plum wells, Juicy's text tones, and a candy colour for each tab. In Insights, You is pink, Actions coral, Library tangerine, Files cyan, Metadata health gold, Collection lime and Movies purple; in Performers Toolkit, Find is blueberry, Performers pink, History purple and Sources lime. O's are bubblegum, as on the O counter. Their own rules keep painting from these properties, so everything they colour through them follows, their charts and rings included. Their `--acc`, which each sets per tab, is left to them.
+- **Their slabs go**: Insights' dashboard and the toolkit's page drop their dark panel, and their cards sit on the polka dots as plum stickers on the hard ink drop. Cards never tilt, since a dashboard is read; clickable Insights tiles take the lime halo on hover. A tile's colour edge loses its glow, and a toolkit card's coloured top edge becomes a candy lip inside the ink outline.
+- **Their heads** set the name in Fredoka on an ink drop, and their tabs are candy pills on a plum tray, the open one filled with its tab's colour. On phones, where both set their tabs out in rows, the tray takes a card's corners. The toolkit's tabs on a performer's page are Stash's own and already Juicy's.
+- **Fields, chips and switches** are deep plum with a plum line, and the chosen chip, step or dimension is pink candy, like Stash's active pills. A chosen card in a list takes the lime selection edge, like the Tagger's picked match. Buttons are glossy pills on the ink drop that lift and squish: plum, pink for the one that goes ahead, coral for the one that deletes. Ticked boxes and switches are pink with ink ticks and knobs. Links are cyan and turn bubblegum; good and bad read in lime and coral.
+- **Card icons, numbers and small caps** are candy stickers and Fredoka. Insights' tooltip is ink with lime text, like Stash's in Juicy; the toolkit's sheets are plum stickers with the pink ring of Stash's modals, and its toast is a raised plum sticker with its kind on a thick left edge, like Stash's toasts.
+
+Insights writes some colours from its JavaScript as inline styles and SVG attributes. Its heatmaps, its codec and resolution colours, the colours of the toolkit plugins' cards and the segments of its splits keep Insights' tones. The empty heatmap cells, the charts' grey grid lines and labels, the growth line and the tag picked in Top tags (a `--c` on its row) are matched by their exact inline colour and moved to Juicy's; an Insights release that changes one of those values puts that one piece back in its own colour. Performers Toolkit sets its colours in its stylesheet, so its fixed colours (good, bad, link hovers, O's, the ink on its badges, its toast's and review bar's kinds) are moved by class.
+
+The settings start off because the two share their look with their sibling plugins (Movies Toolkit, Scenes Toolkit and others), which Juicy leaves alone, so someone who runs several of them keeps one look until they choose otherwise. They are two so either plugin can keep its own look; turning both on keeps the pair alike. `juicy.js` keeps them in the browser (`localStorage`, `juicy.restyle`), so a page the plugins draw on never opens in Flexoki first, and reads the settings again on every page Stash opens, so changing one needs no reload.
+
+Each setting shows in Settings > Plugins only while its plugin is installed and on, since it has nothing to restyle otherwise. Stash puts a script tag for each enabled plugin into the page's head (`/plugin/<id>/javascript`) and gives a setting's switch the id `plugin-<plugin>-<setting>`, so one CSS rule per setting hides its row (`:root:not(:has(script[src*='/plugin/Insights/'])) .setting:has([id='plugin-Theme-Juicy-restyleInsights'])`), with no request and no flash. A plugin switched on in Settings shows its setting after the next page load.
+
+Two rules apply with the setting off too. Insights' What works sidebar sticks 60px from the top, 11.25px under Stash's 48.75px navbar; Juicy's bar is as tall but draws its 3px pink rule below it, so the sidebar moves to 63px. Performers Toolkit's count on the Catalog tab is a Stash badge, a purple tag chip in Juicy, that also carries its `.pt-badge` class, whose ink type comes after Juicy's white and reads at 3.9:1 on the purple, so the count keeps the white of the other tabs' counts. Performers Toolkit measures Stash's navbar for its toast and its review bar on a phone, so it needs no offset.
+
+The design-system page shows neither.
+
 ## Settings
 
-| Setting      | Key         | Effect                       |
-| ------------ | ----------- | ---------------------------- |
-| Calm mode    | `calmMode`  | Turns off Juicy's animations |
-| Plain labels | `plainCopy` | Keeps Stash's own wording    |
+| Setting                    | Key                        | Effect                                   |
+| -------------------------- | -------------------------- | ---------------------------------------- |
+| Calm mode                  | `calmMode`                 | Turns off Juicy's animations             |
+| Plain labels               | `plainCopy`                | Keeps Stash's own wording                |
+| Restyle Insights           | `restyleInsights`          | Puts Insights in Juicy's candy           |
+| Restyle Performers Toolkit | `restylePerformersToolkit` | Puts Performers Toolkit in Juicy's candy |
 
-Both default to off, so a fresh install gets the full theme.
+All of them default to off, so a fresh install gets the full theme and leaves the two plugins as their author drew them. The two restyle settings show only while their plugin is on.
 
 ## Coupling to Stash
 
 The theme targets Stash's markup as of v0.31.1. The selectors it depends on most are `.top-nav`, `.grid-card`, `.scene-card`, `.performer-card`, `.thumbnail-section`, `.rating-stars`, `.rating-banner`, `.tag-item`, `.count-button`, `.favorite-button`, `.LoadingIndicator` and `.sfw-content-mode`. Stash changes its markup between releases (v0.29 and v0.31 both moved list layouts), so each Stash release needs a pass over the design-system page and a live check on a real library. The stash-box screens depend on `.search-item`, `.search-result`, `.selected-result`, `.stash-id-pill`, `.scrape-dialog` and the `-select-active` classes; the compatibility tests reach them through a mock stash-box. Image cards depend on `.image-card` and `.preview-button`. Some Stash rules outrank a plain class (`div.dropdown-menu`, favourites, range sliders, the image zoom button), and modals render outside `#root`, so Juicy's rules for those use matching selectors, `#root`, or `:is(#root, .modal)`.
+
+The rules for the two restyled plugins target Insights 2.11.0 and Performers Toolkit 0.4.2: their custom properties, their `ins-*` and `pt-*` classes and a few of Insights' inline colours (see Insights and Performers Toolkit). The tests install those releases' files in every test Stash (`RESTYLED` in `tests/stash/companions.mjs`), and a contract test per plugin fails when a class Juicy styles stops rendering on its tour of the plugin, against `tests/insights-unmatched-baseline.txt` and `tests/performerstoolkit-unmatched-baseline.txt`, the classes the demo library never shows (Insights' toolkit hub, duplicates and movies; the toolkit's review screens, catalog cards and sheets). The nightly run opens a "Restyle <plugin>" issue when a newer release of either is out.

@@ -31,12 +31,45 @@
   const state = {
     calm: false,
     cheeky: true,
+    insights: false,
+    toolkit: false,
+  }
+
+  // The two restyle settings, for the Insights and Performers Toolkit
+  // plugins: each is a class on <html> that its plugin's CSS waits for, kept
+  // from the last visit, so a page the plugin draws on never shows it in its
+  // own colours while the settings load
+  const RESTYLES = {
+    insights: {
+      setting: 'restyleInsights',
+      className: 'juicy-restyle-insights',
+    },
+    toolkit: {
+      setting: 'restylePerformersToolkit',
+      className: 'juicy-restyle-toolkit',
+    },
+  }
+  const RESTYLE_KEY = 'juicy.restyle'
+
+  function keptRestyles() {
+    try {
+      const kept = JSON.parse(localStorage.getItem(RESTYLE_KEY)) ?? {}
+      return Object.fromEntries(
+        Object.keys(RESTYLES).map((key) => [key, kept[key] === true]),
+      )
+    } catch {
+      return {}
+    }
   }
 
   const originals = new WeakMap()
 
   function sfwMode() {
     return document.querySelector('.sfw-content-mode') !== null
+  }
+
+  function wantCheeky() {
+    return state.cheeky && !sfwMode()
   }
 
   function reducedMotion() {
@@ -87,11 +120,10 @@
   // Without the cheek (Plain labels or SFW mode) the empty list keeps a heart
   // and no line.
   function markEmptyLists() {
-    const wantCheeky = state.cheeky && !sfwMode()
     for (const index of document.querySelectorAll('.paginationIndex')) {
       const empty = /^0-0 of 0\b/.test(index.textContent.trim())
       if (empty) {
-        index.dataset.juicyEmpty = wantCheeky ? EMPTY_LIST_LINE : ''
+        index.dataset.juicyEmpty = wantCheeky() ? EMPTY_LIST_LINE : ''
       } else {
         delete index.dataset.juicyEmpty
       }
@@ -99,8 +131,7 @@
   }
 
   function applyCopy(start) {
-    const wantCheeky = state.cheeky && !sfwMode()
-    walkText(start, wantCheeky ? rewriteTextNode : restoreTextNode)
+    walkText(start, wantCheeky() ? rewriteTextNode : restoreTextNode)
     markEmptyLists()
   }
 
@@ -116,8 +147,7 @@
     for (const node of nodes) {
       if (!node.isConnected) continue
       if (node.nodeType === Node.TEXT_NODE) {
-        const wantCheeky = state.cheeky && !sfwMode()
-        if (wantCheeky) rewriteTextNode(node)
+        if (wantCheeky()) rewriteTextNode(node)
       } else if (node.nodeType === Node.ELEMENT_NODE) {
         applyCopy(node)
       }
@@ -167,10 +197,30 @@
 
   // Settings ----------------------------------------------------------------
 
+  // The cheek the whole page was last walked with. apply walks it again only
+  // when that changes, by Plain labels or SFW mode (on the design-system page
+  // too); the observer keeps up with the page in between.
+  let walkedCheeky
+
   function apply(next) {
     Object.assign(state, next)
     root.classList.toggle('juicy-calm', state.calm)
-    if (document.body) applyCopy(document.body)
+    for (const [key, { className }] of Object.entries(RESTYLES))
+      root.classList.toggle(className, state[key] === true)
+    if (Object.keys(RESTYLES).some((key) => key in next)) {
+      try {
+        localStorage.setItem(
+          RESTYLE_KEY,
+          JSON.stringify({ insights: state.insights, toolkit: state.toolkit }),
+        )
+      } catch {
+        // A browser without storage loads the settings each visit.
+      }
+    }
+    if (document.body && wantCheeky() !== walkedCheeky) {
+      walkedCheeky = wantCheeky()
+      applyCopy(document.body)
+    }
   }
 
   async function loadSettings() {
@@ -186,6 +236,12 @@
       apply({
         calm: settings.calmMode === true,
         cheeky: settings.plainCopy !== true,
+        ...Object.fromEntries(
+          Object.entries(RESTYLES).map(([key, { setting }]) => [
+            key,
+            settings[setting] === true,
+          ]),
+        ),
       })
     } catch {
       // Not running inside Stash; keep the defaults.
@@ -200,8 +256,13 @@
       characterData: true,
       subtree: true,
     })
-    apply({})
-    if (window.PluginApi) loadSettings()
+    apply(keptRestyles())
+    if (window.PluginApi) {
+      loadSettings()
+      // The settings are read again on every page Stash opens, so changing
+      // one takes effect on the next page, with no reload
+      window.PluginApi.Event?.addEventListener('stash:location', loadSettings)
+    }
   }
 
   window.Juicy = { apply, burst, copy: CHEEKY_COPY }
