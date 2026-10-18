@@ -184,9 +184,9 @@ function contrast(a, b) {
 }
 
 // Insights, another author's stats dashboard on the Stats page (RESTYLED in
-// tests/stash/companions.mjs), keeps its own look until Restyle Insights and
-// Performers Toolkit is on, and then takes Juicy's palette, stickers and
-// type. Its sidebar clears Juicy's pink rule either way.
+// tests/stash/companions.mjs), keeps its own look until Restyle Insights is
+// on, and then takes Juicy's palette, stickers and type. Its sidebar clears
+// Juicy's pink rule either way.
 test.describe('beside Insights', () => {
   test.beforeAll(async () => {
     await usePlugins(PLUGIN_ID, 'Insights')
@@ -201,7 +201,9 @@ test.describe('beside Insights', () => {
   }) => {
     await setPlugin({})
     await openInsights(page)
-    await expect(page.locator('html')).not.toHaveClass(/\bjuicy-restyle\b/)
+    await expect(page.locator('html')).not.toHaveClass(
+      /\bjuicy-restyle-insights\b/,
+    )
     await expect(page.locator('#insights')).toHaveCSS(
       'background-color',
       'rgb(16, 15, 15)',
@@ -210,9 +212,11 @@ test.describe('beside Insights', () => {
 
   test('the restyle puts Insights in the candy', async ({ page }) => {
     try {
-      await setPlugin({ restylePlugins: true })
+      await setPlugin({ restyleInsights: true })
       await openInsights(page, 'library')
-      await expect(page.locator('html')).toHaveClass(/\bjuicy-restyle\b/)
+      await expect(page.locator('html')).toHaveClass(
+        /\bjuicy-restyle-insights\b/,
+      )
       const root = page.locator('#insights')
       await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       // Insights' own rules still paint from the palette Juicy gives it
@@ -252,18 +256,24 @@ test.describe('beside Insights', () => {
       await setPlugin({})
       await page.goto(EMPTY_LIST)
       await page.locator('.paginationIndex').waitFor()
-      await expect(page.locator('html')).not.toHaveClass(/\bjuicy-restyle\b/)
-      await setPlugin({ restylePlugins: true })
+      await expect(page.locator('html')).not.toHaveClass(
+        /\bjuicy-restyle-insights\b/,
+      )
+      await setPlugin({ restyleInsights: true })
       await page
         .locator('a[href="/stats"]')
         .filter({ visible: true })
         .first()
         .click()
-      await expect(page.locator('html')).toHaveClass(/\bjuicy-restyle\b/)
+      await expect(page.locator('html')).toHaveClass(
+        /\bjuicy-restyle-insights\b/,
+      )
       // Kept for the next visit, so Stats never opens in Insights' colours
       expect(
-        await page.evaluate(() => localStorage.getItem('juicy.restylePlugins')),
-      ).toBe('1')
+        await page.evaluate(
+          () => JSON.parse(localStorage.getItem('juicy.restyle')).insights,
+        ),
+      ).toBe(true)
     } finally {
       await setPlugin({})
     }
@@ -291,8 +301,9 @@ test.describe('beside Insights', () => {
 })
 
 // Performers Toolkit, from the same author and in the same look as
-// Insights, follows the same setting: its page, the Stats tab it adds to a
-// performer's page and its toast take Juicy's palette, stickers and type.
+// Insights, has a setting of its own: with Restyle Performers Toolkit on, its
+// page, the Stats tab it adds to a performer's page and its toast take
+// Juicy's palette, stickers and type.
 test.describe('beside Performers Toolkit', () => {
   test.beforeAll(async () => {
     await usePlugins(PLUGIN_ID, 'PerformersToolkit')
@@ -307,7 +318,9 @@ test.describe('beside Performers Toolkit', () => {
   }) => {
     await setPlugin({})
     await openPerformersToolkit(page)
-    await expect(page.locator('html')).not.toHaveClass(/\bjuicy-restyle\b/)
+    await expect(page.locator('html')).not.toHaveClass(
+      /\bjuicy-restyle-toolkit\b/,
+    )
     await expect(page.locator('.pt').first()).toHaveCSS(
       'background-color',
       'rgb(16, 15, 15)',
@@ -316,9 +329,11 @@ test.describe('beside Performers Toolkit', () => {
 
   test('the restyle puts Performers Toolkit in the candy', async ({ page }) => {
     try {
-      await setPlugin({ restylePlugins: true })
+      await setPlugin({ restylePerformersToolkit: true })
       await openPerformersToolkit(page)
-      await expect(page.locator('html')).toHaveClass(/\bjuicy-restyle\b/)
+      await expect(page.locator('html')).toHaveClass(
+        /\bjuicy-restyle-toolkit\b/,
+      )
       const root = page.locator('.pt').first()
       await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       await expect(root.locator('.pt-title')).toHaveCSS(
@@ -350,12 +365,12 @@ test.describe('beside Performers Toolkit', () => {
   // carries Performers Toolkit's badge class. It shows once a stash-box has
   // answered, which the mock stash-box does not, so the test shows it. It
   // reads as Juicy's purple tag chip with the setting on or off.
-  for (const restylePlugins of [false, true]) {
+  for (const restylePerformersToolkit of [false, true]) {
     test(`the Catalog tab's count reads, closed and open, restyle ${
-      restylePlugins ? 'on' : 'off'
+      restylePerformersToolkit ? 'on' : 'off'
     }`, async ({ page }) => {
       try {
-        await setPlugin({ restylePlugins })
+        await setPlugin({ restylePerformersToolkit })
         await openPerformerStats(page, ids.performer)
         const tab = page.locator('.pt-tablink[data-pt-tab="catalog"]')
         const badge = tab.locator('.badge')
@@ -395,6 +410,34 @@ test.describe('beside Performers Toolkit', () => {
       }),
     ).toEqual([])
   })
+})
+
+// Each restyle setting shows in Settings > Plugins only while its plugin
+// is on, since it has nothing to restyle otherwise
+test('each restyle setting shows only while its plugin is on', async ({
+  page,
+}) => {
+  const row = (setting) =>
+    page.locator('.setting', {
+      has: page.locator(`[id="plugin-${PLUGIN_ID}-${setting}"]`),
+    })
+  const rows = async (insights, toolkit) => {
+    await page.goto('/settings?tab=plugins')
+    await row('calmMode').waitFor()
+    await expect(row('restyleInsights')).toBeVisible({ visible: insights })
+    await expect(row('restylePerformersToolkit')).toBeVisible({
+      visible: toolkit,
+    })
+  }
+  try {
+    await rows(false, false)
+    await usePlugins(PLUGIN_ID, 'Insights')
+    await rows(true, false)
+    await usePlugins(PLUGIN_ID, 'PerformersToolkit')
+    await rows(false, true)
+  } finally {
+    await onlyJuicy()
+  }
 })
 
 // Not a pass/fail check: lists the Stash classes in juicy.css that no visited

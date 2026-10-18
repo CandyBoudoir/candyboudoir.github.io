@@ -31,19 +31,34 @@
   const state = {
     calm: false,
     cheeky: true,
-    restyle: false,
+    insights: false,
+    toolkit: false,
   }
 
-  // The Restyle Insights and Performers Toolkit setting, kept from the last
-  // visit, so a page those plugins draw on never shows them in their own
-  // colours while the settings load
-  const RESTYLE_KEY = 'juicy.restylePlugins'
+  // The two restyle settings, for the Insights and Performers Toolkit
+  // plugins: each is a class on <html> that its plugin's CSS waits for, kept
+  // from the last visit, so a page the plugin draws on never shows it in its
+  // own colours while the settings load
+  const RESTYLES = {
+    insights: {
+      setting: 'restyleInsights',
+      className: 'juicy-restyle-insights',
+    },
+    toolkit: {
+      setting: 'restylePerformersToolkit',
+      className: 'juicy-restyle-toolkit',
+    },
+  }
+  const RESTYLE_KEY = 'juicy.restyle'
 
-  function keptRestyle() {
+  function keptRestyles() {
     try {
-      return localStorage.getItem(RESTYLE_KEY) === '1'
+      const kept = JSON.parse(localStorage.getItem(RESTYLE_KEY)) ?? {}
+      return Object.fromEntries(
+        Object.keys(RESTYLES).map((key) => [key, kept[key] === true]),
+      )
     } catch {
-      return false
+      return {}
     }
   }
 
@@ -190,12 +205,16 @@
   function apply(next) {
     Object.assign(state, next)
     root.classList.toggle('juicy-calm', state.calm)
-    root.classList.toggle('juicy-restyle', state.restyle)
-    if ('restyle' in next) {
+    for (const [key, { className }] of Object.entries(RESTYLES))
+      root.classList.toggle(className, state[key] === true)
+    if (Object.keys(RESTYLES).some((key) => key in next)) {
       try {
-        localStorage.setItem(RESTYLE_KEY, state.restyle ? '1' : '0')
+        localStorage.setItem(
+          RESTYLE_KEY,
+          JSON.stringify({ insights: state.insights, toolkit: state.toolkit }),
+        )
       } catch {
-        // A browser without storage loads the setting each visit.
+        // A browser without storage loads the settings each visit.
       }
     }
     if (document.body && wantCheeky() !== walkedCheeky) {
@@ -217,7 +236,12 @@
       apply({
         calm: settings.calmMode === true,
         cheeky: settings.plainCopy !== true,
-        restyle: settings.restylePlugins === true,
+        ...Object.fromEntries(
+          Object.entries(RESTYLES).map(([key, { setting }]) => [
+            key,
+            settings[setting] === true,
+          ]),
+        ),
       })
     } catch {
       // Not running inside Stash; keep the defaults.
@@ -232,7 +256,7 @@
       characterData: true,
       subtree: true,
     })
-    apply({ restyle: keptRestyle() })
+    apply(keptRestyles())
     if (window.PluginApi) {
       loadSettings()
       // The settings are read again on every page Stash opens, so changing
