@@ -479,7 +479,9 @@ test.describe('beside Performers Toolkit', () => {
 })
 
 // Each restyle setting shows in Settings > Plugins only while its plugin
-// is on, since it has nothing to restyle otherwise
+// is on, since it has nothing to restyle otherwise. Overclock hides its row
+// with display: none; the row's section may be collapsed (Stash develop
+// starts plugin settings closed), so the test reads the row's display.
 test('each restyle setting shows only while its plugin is on', async ({
   page,
 }) => {
@@ -487,13 +489,14 @@ test('each restyle setting shows only while its plugin is on', async ({
     page.locator('.setting', {
       has: page.locator(`[id="plugin-${PLUGIN_ID}-${setting}"]`),
     })
+  const shown = (setting) =>
+    row(setting).evaluate((el) => getComputedStyle(el).display !== 'none')
   const rows = async (insights, toolkit) => {
     await page.goto('/settings?tab=plugins')
-    await row('calmMode').waitFor()
-    await expect(row('restyleInsights')).toBeVisible({ visible: insights })
-    await expect(row('restylePerformersToolkit')).toBeVisible({
-      visible: toolkit,
-    })
+    await row('calmMode').waitFor({ state: 'attached' })
+    await expect.poll(() => shown('calmMode')).toBe(true)
+    await expect.poll(() => shown('restyleInsights')).toBe(insights)
+    await expect.poll(() => shown('restylePerformersToolkit')).toBe(toolkit)
   }
   try {
     await rows(false, false)
