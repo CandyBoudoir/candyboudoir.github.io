@@ -83,6 +83,8 @@ With Apply bracket ratings automatically on, under Settings > Plugins, the champ
 
 With a StashDB key in Settings > Metadata Providers, Cherry Pick uses it straight away and also shows how widely a scene is held, a scene's rank among a performer's scenes, and the scenes you don't have. Without one, where those would show, a Connect StashDB button walks you through getting a key and adds it to Stash's settings for you. Cherry Pick's page can stop the lookups without removing the key.
 
+Each scene you don't have links to where to get it, as StashDB lists it: its page on a clip store or tube (Clips4Sale, iWantClips, ManyVids, Pornhub and the like), named on the button, or else on its studio's site, with tracking codes removed, beside its StashDB page.
+
 ![A performer's StashDB scenes that are not in the library, most popular first](docs/screenshots/not-in-library.png)
 
 ### With Ascension, HotOrNot, Xenith or Restash

@@ -295,9 +295,24 @@ test("a linked performer's scenes you don't have, most popular first; the second
     'href',
     `https://stashdb.org/scenes/${MISSING[0].id}`,
   )
-  await expect(first.locator('.cherrypick-studio-link')).toHaveAttribute(
+  // the studio's page, without its tracking parameters
+  const studioLink = first.locator('.cherrypick-store-link')
+  await expect(studioLink).toHaveText('Studio')
+  await expect(studioLink).toHaveAttribute(
     'href',
     `https://example.com/scenes/${MISSING[0].id}`,
+  )
+  // a store's page, named for the store, past the Wayback Machine's copy
+  const onStore = MISSING.slice(0, 12).find(
+    (s) => s.studio.id === 'sdb-st-toffee',
+  )
+  const storeLink = cards(page)
+    .filter({ hasText: onStore.title })
+    .locator('.cherrypick-store-link')
+  await expect(storeLink).toHaveText('Candy Clips')
+  await expect(storeLink).toHaveAttribute(
+    'href',
+    `https://clips.example/clip/${onStore.id}`,
   )
   await expect(first.locator('.studio-overlay a')).toHaveAttribute(
     'href',

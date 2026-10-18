@@ -3,11 +3,12 @@
 // popover buttons), so themes style it like any scene card. Stash's
 // SceneCard needs a scene from the user's library, so this one is drawn
 // here: the StashDB cover, title, date and studio, the reason it is shown,
-// a "Not in your library" badge, and links to the scene on its studio's
-// site and on StashDB. Its menu has Not interested only.
+// a "Not in your library" badge, and links to where to get the scene (a
+// store or its studio's site) and to StashDB. Its menu has Not interested
+// only.
 import { components, FontAwesomeSolid, ReactRouterDOM } from '../runtime/api.js'
 import { fetchedScene } from '../stashdb/layer.js'
-import { stashdbPage } from '../stashdb/queries.js'
+import { stashdbPage, storeOf } from '../stashdb/queries.js'
 import { CardMenu } from './CardMenu.jsx'
 import { useAppState } from './hooks.js'
 
@@ -35,9 +36,8 @@ export function StashdbSceneCard({ scene, item, rowId, width, zoom = 1 }) {
     (s) =>
       (scene.studio && s.db?.studios.get(scene.studio.id)?.localId) || null,
   )
-  const studioUrl = useAppState(
-    (s) => fetchedScene(s, scene.stashId)?.studioUrl || null,
-  )
+  const store = storeOf(useAppState((s) => fetchedScene(s, scene.stashId)))
+  const studioSite = store && /^studio$/i.test(store.site)
   const url = stashdbPage(endpoint, 'scenes', scene.stashId)
   const duration = fmtDuration(scene.duration)
   const icon = (i) => (Icon ? <Icon icon={i} /> : null)
@@ -98,15 +98,19 @@ export function StashdbSceneCard({ scene, item, rowId, width, zoom = 1 }) {
       </div>
       <hr />
       <div className="card-popovers btn-group">
-        {studioUrl ? (
+        {store ? (
           <a
-            className="minimal btn btn-primary cherrypick-studio-link"
-            href={studioUrl}
-            title="The scene on its studio's site"
+            className="minimal btn btn-primary cherrypick-store-link"
+            href={store.url}
+            title={
+              studioSite
+                ? "The scene on its studio's site"
+                : `The scene on ${store.site}`
+            }
             {...EXTERNAL}
           >
             {icon(faExternalLinkAlt)}
-            <span>Studio</span>
+            <span>{store.site}</span>
           </a>
         ) : null}
         <a

@@ -93,7 +93,7 @@ const SCENE_FIELDS = `
     studio { id name parent { id name } }
     performers { performer { id name disambiguation gender } }
     tags { id name }
-    urls { url site { name } }
+    urls { url site { name category { name } } }
   }
 `
 
@@ -169,21 +169,29 @@ function imageOf(images) {
   return (wide || list[0])?.url || null
 }
 
-// Query parameters that carry an affiliate or tracking code. Store links and
-// affiliate codes never appear in the plugin, so the studio link keeps only
-// the address of the scene's page.
+// Query parameters that carry an affiliate or tracking code. Affiliate codes
+// never appear in the plugin, so a link keeps only the address of the
+// scene's page.
 const TRACKING =
   /^(utm_\w*|ref|refid|referrer|aff\w*|nats|ats|campaign\w*|track\w*|click\w*|coupon\w*|promo\w*|partner\w*|source|src|fbclid|gclid)$/i
 
-// The scene's page on its studio's site, from StashDB's links.
-export function studioLink(urls) {
-  const link = (urls || []).find((u) =>
-    /^studio$/i.test(u?.site?.name || u?.type || ''),
-  )
-  if (!link?.url) return null
+// StashDB files each link under the site whose address pattern it matches.
+// The stores and tubes a scene is sold or shown on (Clips4Sale, iWantClips,
+// ManyVids, Pornhub, ...) are sites in this category; "Studio" has no
+// pattern and takes the rest, mostly paysites.
+export const STORE_CATEGORY = 'Content distribution platforms'
+
+// Archives copy a page; they never sell the scene. The stores' patterns
+// match a Wayback Machine copy of their own pages too.
+const ARCHIVE = /(^|\.)(archive\.org|archive\.(is|ph|today))$/i
+
+// A link's address without tracking parameters or fragment, or null when it
+// is not a web page or is an archive's copy.
+function cleanUrl(raw) {
   try {
-    const url = new URL(link.url)
-    if (!/^https?:$/.test(url.protocol)) return null
+    const url = new URL(raw)
+    if (!/^https?:$/.test(url.protocol) || ARCHIVE.test(url.hostname))
+      return null
     for (const k of [...url.searchParams.keys()])
       if (TRACKING.test(k)) url.searchParams.delete(k)
     url.hash = ''
@@ -194,9 +202,37 @@ export function studioLink(urls) {
 }
 
 /**
- * One StashDB scene, in buildDb's StashdbScene shape, plus `studioUrl` for
- * the card (buildDb ignores it). heldBy is left out when the answer had no
- * fingerprints, so merging never overwrites a known count.
+ * Where to get the scene, from StashDB's links: a store's page first, else
+ * its studio's, as { url, site } with the site's name ("Clips4Sale",
+ * "Studio"), or null when StashDB lists neither.
+ */
+export function storeLink(urls) {
+  const links = (urls || [])
+    .map((u) => ({
+      site: u?.site?.name,
+      category: u?.site?.category?.name,
+      url: cleanUrl(u?.url),
+    }))
+    .filter((u) => u.url && u.site)
+  const link =
+    links.find((u) => u.category === STORE_CATEGORY) ||
+    links.find((u) => /^studio$/i.test(u.site))
+  return link ? { url: link.url, site: link.site } : null
+}
+
+// Where to get a fetched scene: { url, site }, or null. A scene cached
+// before store links carries only its studio link, studioUrl; the cache
+// keeps it until its 7 days run out or Clear StashDB cache on Cherry Pick's
+// page, so an update never sends every page's lookups again at once.
+export const storeOf = (scene) =>
+  scene?.store ||
+  (scene?.studioUrl ? { url: scene.studioUrl, site: 'Studio' } : null)
+
+/**
+ * One StashDB scene, in buildDb's StashdbScene shape, plus `store` for the
+ * card (buildDb ignores it). heldBy is left out when the answer had no
+ * fingerprints, and store when it had no link, so merging never overwrites
+ * a known count or link.
  */
 export function sceneFromApi(row) {
   const st = row.studio
@@ -223,8 +259,9 @@ export function sceneFromApi(row) {
         disambiguation: p.disambiguation || null,
       })),
     tags: (row.tags || []).map((t) => ({ id: t.id, name: t.name })),
-    studioUrl: studioLink(row.urls),
   }
+  const store = storeLink(row.urls)
+  if (store) scene.store = store
   if (row.fingerprints) scene.heldBy = heldByOf(row.fingerprints)
   return scene
 }

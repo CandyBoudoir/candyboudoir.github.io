@@ -245,6 +245,9 @@ const SDB_SCENES = [
   ['Candy Crossing', 45, [nova, milo], toffee],
 ]
 
+// StashDB's category for the stores and tubes a scene is sold or shown on
+const STORES = { name: 'Content distribution platforms' }
+
 const LANDSCAPE = ['sugar-rush', 'cherry-pop', 'sweet-tooth', 'lollipop-lane']
 const hash = (n, salt) =>
   ((n + 1) * 2654435761 + salt).toString(16).padStart(16, '0').slice(-16)
@@ -266,15 +269,28 @@ const stashdbScenes = SDB_SCENES.map(([title, popularity, cast, studio], i) => {
     studio: { ...studio, parent: studio.parent ?? null },
     performers: cast.map((p) => ({ as: null, performer: p })),
     tags: [sdbTags[i % 5], sdbTags[(i + 2) % 5]],
-    // the studio's page for the scene, with tracking parameters Cherry
-    // Pick must drop
-    urls: [
-      {
-        url: `https://example.com/scenes/${id}?ats=candy&utm_source=stashdb`,
-        type: 'STUDIO',
-        site: { name: 'Studio' },
-      },
-    ],
+    // Fudge Factory's scenes link to the studio's page, with tracking
+    // parameters Cherry Pick must drop; Toffee Lane's to a clip store,
+    // after a Wayback Machine copy that StashDB files under the store too
+    urls:
+      studio === toffee
+        ? [
+            {
+              url: `https://web.archive.org/web/2025/https://clips.example/clip/${id}`,
+              site: { name: 'Candy Clips', category: STORES },
+            },
+            {
+              url: `https://clips.example/clip/${id}?aff=candy`,
+              site: { name: 'Candy Clips', category: STORES },
+            },
+          ]
+        : [
+            {
+              url: `https://example.com/scenes/${id}?ats=candy&utm_source=stashdb`,
+              type: 'STUDIO',
+              site: { name: 'Studio', category: { name: 'Primary sources' } },
+            },
+          ],
     fingerprints: [
       {
         algorithm: 'OSHASH',
