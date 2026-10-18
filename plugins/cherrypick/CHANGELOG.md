@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- A scene you don't have links to where to get it on many more cards: its page on the clip store or tube StashDB lists it on (Clips4Sale, iWantClips, ManyVids, Pornhub and the like), with the store's name on the button. Cherry Pick took only the links StashDB files under Studio, which holds paysites; StashDB files a store's link under the store's own name, so about three in four clip-store scenes showed StashDB alone. A store's page comes before the studio's, and a Wayback Machine copy never counts. A scene already in the StashDB cache keeps its studio link until its answer is 7 days old, so nothing is fetched again at once.
+- A scene you don't have links to where to get it on many more cards: its page on the clip store or tube StashDB lists it on (Clips4Sale, iWantClips, ManyVids, Pornhub and the like), with the store's name on the button. Cherry Pick took only the links StashDB files under Studio, which holds paysites; StashDB files a store's link under the store's own name, so about three in four clip-store scenes showed StashDB alone. A store's page comes before the studio's, and a Wayback Machine copy never counts. A scene already in the StashDB cache shows its studio link once more while Cherry Pick asks StashDB about it again in the background, and its store link from then on.
+- Pages you have visited before show their StashDB scenes straight away, also after a week. Cherry Pick asked StashDB again for an answer over 7 days old before showing it, so More like this's scenes you don't have could take five seconds to appear. It now shows the answer it has and asks again in the background once the page's own lookups are done, within the same limits (one request a second, six per page). The new answer is kept and shows the next time Stash loads or another page asks for it, so nothing on the page changes while you look at it. Answers are kept for 30 days; an older one is asked for again before it shows.
 
 ## 0.1.6
 

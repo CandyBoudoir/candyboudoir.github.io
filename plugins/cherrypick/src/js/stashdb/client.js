@@ -9,13 +9,24 @@
 // A failure is never an error on the page: the lookup returns nothing, and
 // the page shows what it has without StashDB.
 //
-// Answers are cached in IndexedDB (tier 3) for 7 days, one entry per lookup
-// (`stashdb:<lookup>:<id>`), so a second visit to a page sends nothing.
+// Answers are kept in IndexedDB (tier 3), one entry per lookup
+// (`stashdb:<lookup>:<id>`), so a second visit to a page sends nothing. An
+// answer under 7 days old is used as it is. One from 7 to 30 days old, or
+// kept in an older format, is used too, and asked for again in the
+// background once the page's own lookups are done (revalidate): the new
+// answer is only kept, and shows the next time a page asks for it, so
+// nothing on the page changes under the user. One over 30 days old is asked
+// for again before it is used.
 // Everything it touches comes in as arguments, so the unit tests run it with
 // a fake fetch, cache and clock.
 
 export const CACHE_PREFIX = 'stashdb:'
+// What a lookup keeps, by version. An entry from an older version is used
+// while it is asked for again, so a new version must still read the old
+// ones (2: links carry their site's category, for store links).
+export const CACHE_FORMAT = 2
 export const TTL_MS = 7 * 24 * 3600 * 1000
+export const MAX_AGE_MS = 30 * 24 * 3600 * 1000
 export const GAP_MS = 1000
 export const PER_VIEW = 6
 const TIMEOUT_MS = 20 * 1000
@@ -35,6 +46,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
  *   gapMs?: number,
  *   perView?: number,
  *   ttlMs?: number,
+ *   maxAgeMs?: number,
  *   timeoutMs?: number,
  *   log?: (text: string) => void,
  * }} io
@@ -45,6 +57,7 @@ export function createStashdbClient(io) {
   const gapMs = io.gapMs ?? GAP_MS
   const perView = io.perView ?? PER_VIEW
   const ttlMs = io.ttlMs ?? TTL_MS
+  const maxAgeMs = io.maxAgeMs ?? MAX_AGE_MS
   const timeoutMs = io.timeoutMs ?? TIMEOUT_MS
   const log = io.log || (() => {})
 
@@ -55,6 +68,10 @@ export function createStashdbClient(io) {
   let refused = false
   let chain = Promise.resolve()
   const inflight = new Map()
+  // stale lookups to ask for again this view (key -> job), and the ones
+  // being asked for now
+  const later = new Map()
+  const refreshing = new Set()
   const stats = { requests: 0, hits: 0, skipped: 0, failed: 0 }
 
   function rest(ms, why) {
@@ -126,6 +143,7 @@ export function createStashdbClient(io) {
     newView() {
       view++
       sent = 0
+      later.clear()
     },
 
     // One GraphQL request, queued behind the others. Resolves to the
@@ -137,35 +155,61 @@ export function createStashdbClient(io) {
       return p
     },
 
-    // The cached entry for a lookup if it is fresh: { at, data }, or null.
+    // The cached entry for a lookup if it can be used: { at, data, stale },
+    // or null. stale: old enough or in an older format to ask for again.
     async peek(key) {
       const hit = await io.cache.get(CACHE_PREFIX + key)
-      if (hit && typeof hit.at === 'number' && now() - hit.at < ttlMs) {
-        stats.hits++
-        return hit
-      }
-      return null
+      if (!hit || typeof hit.at !== 'number') return null
+      const age = now() - hit.at
+      if (age >= maxAgeMs) return null
+      stats.hits++
+      return { ...hit, stale: age >= ttlMs || hit.v !== CACHE_FORMAT }
     },
 
     async put(key, data) {
-      const entry = { at: now(), data }
+      const entry = { at: now(), v: CACHE_FORMAT, data }
       await io.cache.set(CACHE_PREFIX + key, entry)
       return entry
     },
 
-    // A lookup through the cache: load() runs only on a miss, and resolves
-    // to the data to keep (null is kept too: "StashDB has no such scene"),
-    // or undefined when the request did not happen or failed (nothing is
-    // kept). Two calls for one key share one load. Resolves to the entry
-    // { at, data }, or null.
+    // Ask for a stale lookup again once this view's own lookups are done:
+    // job sends the requests and keeps the answer. One job per key.
+    refresh(key, job) {
+      if (!later.has(key) && !refreshing.has(key)) later.set(key, job)
+    },
+
+    // The refreshes queued for this view, one after another, through the
+    // same queue and per-view budget as every request. A new view drops
+    // the rest; a refresh that fails leaves the stale entry for next time.
+    async revalidate() {
+      const forView = view
+      for (const [key, job] of later) {
+        if (forView !== view) return
+        later.delete(key)
+        refreshing.add(key)
+        try {
+          await job()
+        } finally {
+          refreshing.delete(key)
+        }
+      }
+    },
+
+    // A lookup through the cache: load() runs on a miss, and later for a
+    // stale entry, and resolves to the data to keep (null is kept too:
+    // "StashDB has no such scene"), or undefined when the request did not
+    // happen or failed (nothing is kept). Two calls for one key share one
+    // load. Resolves to the entry { at, data, stale? }, or null.
     cached(key, load) {
       if (inflight.has(key)) return inflight.get(key)
+      const keep = async () => {
+        const data = await load()
+        return data === undefined ? null : this.put(key, data)
+      }
       const p = (async () => {
         const hit = await this.peek(key)
-        if (hit) return hit
-        const data = await load()
-        if (data === undefined) return null
-        return this.put(key, data)
+        if (hit?.stale) this.refresh(key, keep)
+        return hit || keep()
       })().finally(() => inflight.delete(key))
       inflight.set(key, p)
       return p

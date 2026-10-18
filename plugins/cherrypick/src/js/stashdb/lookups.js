@@ -45,40 +45,56 @@ export async function studioScenes(client, id) {
   return { part: studioPart(id, entry.data), entries: [stamp(key, entry)] }
 }
 
-// Scenes by id, with their held-by counts. Cached per scene; the ones not
-// cached go in one request per SCENE_BATCH. A scene StashDB does not have
-// is cached as null and adds nothing.
-export async function scenesById(client, ids) {
-  const scenes = []
-  const entries = []
-  const missing = []
-  for (const id of [...new Set(ids)]) {
-    const hit = await client.peek('scene:' + id)
-    if (!hit) missing.push(id)
-    else {
-      entries.push(stamp('scene:' + id, hit))
-      if (hit.data) scenes.push(hit.data)
-    }
-  }
-  let complete = true
-  for (let i = 0; i < missing.length; i += SCENE_BATCH) {
-    const chunk = missing.slice(i, i + SCENE_BATCH)
+// Scenes by id from StashDB, one request per SCENE_BATCH, each kept in the
+// cache as it comes (a scene StashDB does not have as null). Resolves to
+// their entries by id, without the ones whose request failed.
+async function fetchScenes(client, ids) {
+  const got = new Map()
+  for (let i = 0; i < ids.length; i += SCENE_BATCH) {
+    const chunk = ids.slice(i, i + SCENE_BATCH)
     const data = await client.request(
       scenesByIdQuery(chunk.length),
       scenesByIdVariables(chunk),
     )
-    if (!data) {
-      complete = false
-      continue
-    }
+    if (!data) continue
     for (const [j, id] of chunk.entries()) {
       const row = data['s' + j]
-      const scene = row ? sceneFromApi(row) : null
-      const entry = await client.put('scene:' + id, scene)
-      entries.push(stamp('scene:' + id, entry))
-      if (scene) scenes.push(scene)
+      got.set(
+        id,
+        await client.put('scene:' + id, row ? sceneFromApi(row) : null),
+      )
     }
   }
+  return got
+}
+
+// Scenes by id, with their held-by counts. Cached per scene; the ones not
+// cached go to StashDB, and stale ones go again in the background, all
+// together. A scene StashDB does not have adds nothing.
+export async function scenesById(client, ids) {
+  const scenes = []
+  const entries = []
+  const missing = []
+  const stale = []
+  const add = (id, entry) => {
+    entries.push(stamp('scene:' + id, entry))
+    if (entry.data) scenes.push(entry.data)
+  }
+  for (const id of [...new Set(ids)]) {
+    const hit = await client.peek('scene:' + id)
+    if (!hit) missing.push(id)
+    else {
+      add(id, hit)
+      if (hit.stale) stale.push(id)
+    }
+  }
+  const got = await fetchScenes(client, missing)
+  for (const id of missing) if (got.has(id)) add(id, got.get(id))
+  if (stale.length)
+    client.refresh('scenes:' + stale.join(','), () =>
+      fetchScenes(client, stale),
+    )
+  const complete = got.size === missing.length
   if (!complete && !scenes.length) return null
   return { part: { scenes }, entries, complete }
 }

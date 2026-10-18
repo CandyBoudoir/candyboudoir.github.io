@@ -149,7 +149,7 @@ Your browser keeps only what Cherry Pick can do without: a copy of your library 
 ### Network requests
 
 - **Your Stash server**, through Stash's own GraphQL API: your library, the plugin configuration, and the custom fields and ratings above. In a scene bracket, also the sprite sheets and preview clips Stash generated for the scenes on screen and the next match's.
-- **StashDB** (`https://stashdb.org/graphql`), only when Stash has a StashDB key, and never after you choose Stop using StashDB on Cherry Pick's page: the StashDB ids of the performers, scenes and studios on the pages you open, sent with your key in StashDB's `ApiKey` header, at most six requests per page, one a second. Answers are cached in your browser for 7 days. The covers of scenes you don't have load from StashDB's image server.
+- **StashDB** (`https://stashdb.org/graphql`), only when Stash has a StashDB key, and never after you choose Stop using StashDB on Cherry Pick's page: the StashDB ids of the performers, scenes and studios on the pages you open, sent with your key in StashDB's `ApiKey` header, at most six requests per page, one a second. Answers are kept in your browser for 30 days. After 7 days a page shows the answer it has and asks StashDB again in the background, within the same limits, and the new answer shows the next time Stash loads or another page asks for it. The covers of scenes you don't have load from StashDB's image server.
 
 Cherry Pick sends nothing to CandyBoudoir or anyone else.
 

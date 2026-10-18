@@ -70,6 +70,8 @@ test.describe.configure({ mode: 'serial' })
 
 /** @type {{ query: string, variables: object, apiKey: string }[]} */
 let toStashdb = []
+// While set, StashDB's answers wait for it.
+let hold = null
 
 async function routeStashdb(context) {
   // Anything else on stashdb.org (the dialog's links): refused.
@@ -83,6 +85,7 @@ async function routeStashdb(context) {
       ...request.postDataJSON(),
       apiKey: request.headers()['apikey'],
     })
+    await hold
     const response = await route.fetch({ url: MOCK })
     await route.fulfill({ response })
   })
@@ -200,8 +203,33 @@ test.afterAll(async () => {
 
 test.beforeEach(async ({ context }) => {
   toStashdb = []
+  hold = null
   await routeStashdb(context)
 })
+
+// Cherry Pick's cached answer for a lookup, in the browser's IndexedDB.
+// olderBy: make it that much older first, in the format 0.1.6 kept (no v).
+const cacheEntry = (page, key, olderBy = 0) =>
+  page.evaluate(
+    ([key, olderBy]) =>
+      new Promise((resolve, reject) => {
+        const open = indexedDB.open('cherrypick')
+        open.onerror = () => reject(open.error)
+        open.onsuccess = () => {
+          const store = open.result
+            .transaction('cache', 'readwrite')
+            .objectStore('cache')
+          const get = store.get(key)
+          get.onsuccess = () => {
+            const entry = get.result
+            if (!olderBy || !entry) return resolve(entry)
+            const aged = { at: entry.at - olderBy, data: entry.data }
+            store.put(aged, key).onsuccess = () => resolve(aged)
+          }
+        }
+      }),
+    [key, olderBy],
+  )
 
 const section = (page) => page.locator('.cherrypick-not-in-library')
 const cards = (page) => section(page).locator('.cherrypick-missing')
@@ -329,6 +357,34 @@ test("a linked performer's scenes you don't have, most popular first; the second
   expect(toStashdb).toHaveLength(1)
 })
 
+test('an answer over a week old shows at once, and StashDB is asked again behind it', async ({
+  page,
+}) => {
+  const key = `stashdb:performer-scenes:${PERFORMER.stashId}`
+  await page.goto(`/performers/${ids.performer}`)
+  await expect(cards(page)).toHaveCount(12)
+  expect(toStashdb).toHaveLength(1)
+  // eight days old, and kept in 0.1.6's format
+  const aged = await cacheEntry(page, key, 8 * 24 * 3600 * 1000)
+  // StashDB answers nothing until released
+  let release
+  hold = new Promise((r) => (release = r))
+  await page.reload()
+  await expect(cards(page)).toHaveCount(12)
+  await expect.poll(() => toStashdb.length).toBe(2)
+  expect(lookups('list')).toHaveLength(2)
+  await expect(cards(page)).toHaveCount(12)
+  release()
+  await expect
+    .poll(async () => (await cacheEntry(page, key))?.at > aged.at)
+    .toBe(true)
+  expect((await cacheEntry(page, key)).v).toBe(2)
+  // fresh again: the next visit asks nothing
+  await page.reload()
+  await expect(cards(page)).toHaveCount(12)
+  expect(toStashdb).toHaveLength(2)
+})
+
 test('Not interested takes a card out', async ({ page }) => {
   await page.goto(`/performers/${ids.performer}`)
   await expect(cards(page)).toHaveCount(12)
@@ -373,7 +429,7 @@ test('the plugin page: connected, the cache, and clearing it', async ({
   const box = page.locator('#stashdb')
   await expect(box).toContainText('Connected')
   await expect(box).toContainText(
-    '1 lookup, the oldest from today. Lookups are cached in this browser for 7 days.',
+    '1 lookup, the oldest from today. Lookups are kept in this browser for 30 days, and asked for again in the background after 7.',
   )
   await box.getByRole('button', { name: 'Clear StashDB cache' }).click()
   await expect(box).toContainText('Nothing looked up yet.')
