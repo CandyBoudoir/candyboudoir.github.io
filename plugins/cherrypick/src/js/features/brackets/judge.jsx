@@ -73,8 +73,10 @@ async function loadSheet(id, vtt) {
 }
 
 // Fetches what a match needs for these scenes, once each: the look, then
-// the sprite list. The match on screen asks for its two scenes and the next
-// match's.
+// the sprite list and whether Stash made the preview clip. The match on
+// screen asks for its two scenes and the next match's, so the inspector
+// opens with Play the preview in place: it sits under the scrub bar, and
+// arriving later moved the centred dialog up under the mouse.
 export function prepareScenes(ids) {
   const missing = ids.filter((id) => id && !asked.has(id))
   if (!missing.length) return
@@ -87,6 +89,7 @@ export function prepareScenes(ids) {
         looks.set(id, look)
         if (look?.paths?.vtt) loadSheet(id, look.paths.vtt)
         else sheets.set(id, NONE)
+        if (look?.paths?.preview) probePreview(id, look.paths.preview)
       }
       changed()
     },
@@ -439,9 +442,6 @@ export function SceneInspector({ id, frame, setFrame }) {
   const [playing, setPlaying] = React.useState(false)
   const look = looks.get(id)
   const previewUrl = look?.paths?.preview
-  React.useEffect(() => {
-    if (previewUrl) probePreview(id, previewUrl)
-  }, [id, previewUrl])
   // moving through the frames stops the preview
   React.useEffect(() => setPlaying(false), [frame])
   if (!M) return null
