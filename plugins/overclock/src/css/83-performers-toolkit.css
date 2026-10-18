@@ -1,0 +1,751 @@
+/*
+ * Performers Toolkit, another author's plugin from the same suite as
+ * Insights (gitlab.com/allisless0/stash-plugins), on Overclock's display:
+ * its page at /performerstoolkit (.pt), the Stats and Catalog tabs on a
+ * performer's page (.ptc), the strip under the performer's name
+ * (#pt-strip), its button on the Performers list (.pt-entry, a Stash button
+ * Overclock already styles) and its toast (#pt-toast, on <body>).
+ *
+ * It paints itself in the Flexoki palette from custom properties it sets on
+ * those roots, from a stylesheet it adds after this one, with single-class
+ * or id selectors, so these rules start at `#root` (the toast at its id).
+ * All of it but the Catalog tab's count and the rule that hides the setting
+ * waits for the Restyle Performers Toolkit setting
+ * (.overclock-restyle-toolkit on <html>, from overclock.js). Its bars and
+ * rings paint from the palette, so they follow it; the colours it writes
+ * as hex are matched by their rule and moved here.
+ */
+
+/* The Restyle Performers Toolkit setting shows only while Performers
+   Toolkit is on, as Restyle Insights does for Insights */
+:root:not(:has(script[src*='/plugin/PerformersToolkit/']))
+  .setting:has([id='plugin-Theme-Overclock-restylePerformersToolkit']) {
+  display: none;
+}
+
+/* The count on a performer's Catalog tab is a Stash badge that also carries
+   .pt-badge, whose near-black type the toolkit sets for its own filled
+   badges. On Overclock's dark badge that type would vanish, so the count
+   keeps Overclock's badge type and corners whether the setting is on or
+   not. */
+#root .badge.pt-badge {
+  border-radius: 0;
+  color: var(--overclock-text);
+}
+
+/* The palette Insights takes, from 82-insights.css. --acc stays the
+   toolkit's: it picks one of these per tab. */
+.overclock-restyle-toolkit #root :is(.pt, .ptc, .pt-strip, .pt-entry),
+.overclock-restyle-toolkit #pt-toast {
+  --bg: var(--overclock-bg);
+  --bg2: var(--overclock-field);
+  --ui: var(--overclock-panel);
+  --ui2: var(--overclock-raised);
+  --ui3: var(--overclock-line);
+  --tx3: color-mix(in srgb, var(--overclock-dim) 45%, var(--overclock-line));
+  --tx2: var(--overclock-dim);
+  --tx1b: var(--overclock-muted);
+  --tx: var(--overclock-text);
+  --hi: #fff;
+  --re: var(--overclock-red);
+  --or: var(--overclock-orange);
+  --ye: var(--overclock-yellow);
+  --gr: var(--overclock-green);
+  --cy: var(--overclock-cyan);
+  --bl: var(--overclock-blue);
+  --pu: var(--overclock-violet);
+  --ma: var(--overclock-magenta);
+}
+
+/* No slab of its own on the toolkit page: the cards sit on the dot grid */
+.overclock-restyle-toolkit #root .pt {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* The head, as Insights': the name in Chakra Petch over a frame line with
+   ticks, and Stash's tabs, the open one yellow on a heavy underline */
+.overclock-restyle-toolkit #root .pt-head {
+  background: repeating-linear-gradient(
+      90deg,
+      var(--overclock-line) 0 1px,
+      transparent 1px 12px
+    )
+    0 100% / 100% 4px no-repeat;
+  border-bottom: 1px solid var(--overclock-line);
+  margin-bottom: 18px;
+}
+
+.overclock-restyle-toolkit #root .pt-title {
+  color: var(--overclock-text);
+  font-family: var(--overclock-font-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.overclock-restyle-toolkit #root .pt-title .pt-ic {
+  color: var(--overclock-yellow);
+}
+
+.overclock-restyle-toolkit #root .pt-read {
+  color: var(--overclock-dim);
+  font-family: var(--overclock-font-label);
+  letter-spacing: 0.04em;
+}
+
+.overclock-restyle-toolkit #root .pt-tabs {
+  align-self: flex-end;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  gap: 0.2rem;
+  padding: 0;
+}
+
+.overclock-restyle-toolkit #root .pt-tab {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--overclock-cut)),
+    calc(100% - var(--overclock-cut)) 100%,
+    0 100%
+  );
+  color: var(--overclock-muted);
+  font-family: var(--overclock-font-display);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 0.5rem 1rem;
+  text-transform: uppercase;
+}
+
+.overclock-restyle-toolkit #root .pt-tab:hover {
+  color: var(--overclock-yellow);
+}
+
+.overclock-restyle-toolkit #root .pt-tab.on {
+  background: rgb(243 230 0 / 8%);
+  box-shadow: inset 0 -3px 0 var(--overclock-yellow);
+  color: var(--overclock-yellow);
+}
+
+/* Panels are chamfered, with a frame line, both cuts drawn and a cyan
+   bracket in the bottom-left corner; the dialog, the review bar and the
+   toast also take an overlay's yellow left rule */
+.overclock-restyle-toolkit #root :is(.pt-card, .pt-sheet, .pt-mcard, .pt-ccard),
+.overclock-restyle-toolkit #root .pt-rvbar,
+.overclock-restyle-toolkit #pt-toast {
+  --overclock-cut: 12px;
+  --overclock-edge: var(--overclock-line);
+
+  background:
+    linear-gradient(
+        135deg,
+        var(--overclock-edge) calc(var(--overclock-cut) * 0.7071 + 1px),
+        transparent 0
+      )
+      border-box,
+    linear-gradient(
+        315deg,
+        var(--overclock-edge) calc(var(--overclock-cut) * 0.7071 + 1px),
+        transparent 0
+      )
+      border-box,
+    var(--overclock-panel);
+  border: 1px solid var(--overclock-edge);
+  border-radius: 0;
+  box-shadow: none;
+  clip-path: polygon(
+    var(--overclock-cut) 0,
+    100% 0,
+    100% calc(100% - var(--overclock-cut)),
+    calc(100% - var(--overclock-cut)) 100%,
+    0 100%,
+    0 var(--overclock-cut)
+  );
+}
+
+.overclock-restyle-toolkit #root .pt-card {
+  position: relative;
+}
+
+.overclock-restyle-toolkit #root .pt-card::after {
+  background:
+    linear-gradient(var(--overclock-cyan) 0 0) 0 100% / 10px 2px no-repeat,
+    linear-gradient(var(--overclock-cyan) 0 0) 0 100% / 2px 10px no-repeat;
+  bottom: 3px;
+  content: '';
+  height: 10px;
+  left: 3px;
+  opacity: 0.7;
+  pointer-events: none;
+  position: absolute;
+  width: 10px;
+}
+
+.overclock-restyle-toolkit #root :is(.pt-sheet, .pt-rvbar),
+.overclock-restyle-toolkit #pt-toast {
+  border-left: 3px solid var(--tk, var(--overclock-yellow));
+}
+
+.overclock-restyle-toolkit #root .pt-sheet {
+  scrollbar-color: var(--overclock-line) transparent;
+}
+
+/* A card's top rule says how a job went: cyan while it runs and when it
+   ends, red frame when it failed */
+.overclock-restyle-toolkit
+  #root
+  .pt-card:is(.pt-msg, .pt-busy, .pt-run, .pt-runend) {
+  border-top-color: var(--overclock-cyan);
+}
+
+.overclock-restyle-toolkit #root .pt-card.pt-err {
+  --overclock-edge: var(--overclock-red);
+}
+
+.overclock-restyle-toolkit #root .pt-ch b,
+.overclock-restyle-toolkit #root :is(.pt-flowt, .pt-chead b) {
+  font-family: var(--overclock-font-display);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* The toast: yellow for news, cyan when something is done, red for an
+   error, as Overclock's toasts */
+.overclock-restyle-toolkit #pt-toast {
+  --tk: var(--overclock-yellow);
+
+  color: var(--overclock-text);
+  font-family: var(--overclock-font-label);
+  letter-spacing: 0.04em;
+}
+
+.overclock-restyle-toolkit #pt-toast.pt-t-done {
+  --tk: var(--overclock-cyan);
+}
+
+.overclock-restyle-toolkit #pt-toast.pt-t-warn {
+  --tk: var(--overclock-yellow);
+}
+
+.overclock-restyle-toolkit #pt-toast.pt-t-error {
+  --tk: var(--overclock-red);
+}
+
+/* The review bar's status line, coloured the same way */
+.overclock-restyle-toolkit #root .pt-rvstat:is(.pt-s-done, .pt-s-info) {
+  --sk: var(--overclock-cyan);
+}
+
+.overclock-restyle-toolkit #root .pt-rvstat.pt-s-warn {
+  --sk: var(--overclock-yellow);
+}
+
+.overclock-restyle-toolkit #root .pt-rvstat.pt-s-error {
+  --sk: var(--overclock-red);
+
+  color: var(--overclock-red-hi);
+}
+
+.overclock-restyle-toolkit
+  #root
+  .pt-rvstat:is(.pt-s-done, .pt-s-info, .pt-s-error, .pt-s-warn) {
+  border-radius: 0;
+  font-family: var(--overclock-font-label);
+}
+
+/* Fields are dark, with a bottom rule and corner ticks, and turn yellow
+   when focused, as Overclock's form fields */
+.overclock-restyle-toolkit
+  #root
+  :is(.pt-input, .pt-sel, .pt-acct select, .pt-seg select) {
+  --overclock-tick: var(--overclock-line);
+
+  background:
+    linear-gradient(var(--overclock-tick) 0 0) 0 0 / 1px 7px no-repeat,
+    linear-gradient(var(--overclock-tick) 0 0) 0 0 / 7px 1px no-repeat,
+    linear-gradient(var(--overclock-tick) 0 0) 100% 0 / 1px 7px no-repeat,
+    linear-gradient(var(--overclock-tick) 0 0) 100% 0 / 7px 1px no-repeat,
+    var(--overclock-field);
+  border: 0;
+  border-bottom: 1px solid var(--overclock-line);
+  border-radius: 0;
+  box-shadow: none;
+  caret-color: var(--overclock-yellow);
+  color: var(--overclock-text);
+}
+
+.overclock-restyle-toolkit #root .pt-input::placeholder {
+  color: var(--overclock-dim);
+  font-family: var(--overclock-font-label);
+  letter-spacing: 0.04em;
+}
+
+.overclock-restyle-toolkit
+  #root
+  :is(.pt-input, .pt-sel, .pt-acct select, .pt-seg select):focus {
+  --overclock-tick: var(--overclock-yellow);
+
+  border-bottom-color: var(--overclock-yellow);
+  box-shadow: 0 0 0 1px rgb(243 230 0 / 70%);
+}
+
+.overclock-restyle-toolkit #root :is(.pt-sel, .pt-acct select, .pt-seg select) {
+  font-family: var(--overclock-font-label);
+}
+
+/* Chips, pills, steps and switches are clipped mono tags on a control
+   panel */
+.overclock-restyle-toolkit
+  #root
+  :is(.pt-chip, .pt-pill, .pt-step, .pt-tog, .pt-rc, .pt-cnt) {
+  --overclock-cut: 6px;
+  --overclock-edge: var(--overclock-line);
+
+  background:
+    linear-gradient(
+        315deg,
+        var(--overclock-edge) calc(var(--overclock-cut) * 0.7071 + 1px),
+        transparent 0
+      )
+      border-box,
+    var(--overclock-chip);
+  border: 1px solid var(--overclock-edge);
+  border-radius: 0;
+  box-shadow: none;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--overclock-cut)),
+    calc(100% - var(--overclock-cut)) 100%,
+    0 100%
+  );
+  font-family: var(--overclock-font-label);
+  letter-spacing: 0.04em;
+}
+
+/* A switch's label is a setting, so it stays on the system font */
+.overclock-restyle-toolkit #root .pt-tog {
+  font-family: inherit;
+  letter-spacing: normal;
+}
+
+.overclock-restyle-toolkit
+  #root
+  :is(button.pt-chip, a.pt-chip, .pt-tog:not(:disabled), a.pt-cnt):hover {
+  --overclock-edge: var(--overclock-yellow);
+
+  color: var(--overclock-yellow);
+}
+
+/* The chosen chip of a row is a cyan readout, as in Stash's button groups;
+   the step you are on is yellow, as the page you are on */
+.overclock-restyle-toolkit #root .pt-chip.on {
+  --overclock-edge: var(--overclock-cyan);
+
+  background-color: rgb(0 229 255 / 14%);
+  box-shadow: inset 0 -2px 0 var(--overclock-cyan);
+  color: var(--overclock-cyan);
+}
+
+.overclock-restyle-toolkit #root .pt-step.on {
+  --overclock-edge: var(--overclock-yellow);
+
+  background-color: rgb(243 230 0 / 10%);
+  color: var(--overclock-yellow);
+}
+
+.overclock-restyle-toolkit #root .pt-step b {
+  border-radius: 0;
+  font-family: var(--overclock-font-label);
+  font-weight: 400;
+}
+
+.overclock-restyle-toolkit #root .pt-step.on b {
+  background: var(--overclock-yellow);
+  color: var(--overclock-black);
+}
+
+/* Switches are square and yellow when on */
+.overclock-restyle-toolkit #root .pt-tog i {
+  background: var(--overclock-field);
+  border-radius: 0;
+  box-shadow: inset 0 0 0 1px var(--overclock-line);
+}
+
+.overclock-restyle-toolkit #root .pt-tog i::after {
+  background: var(--overclock-line);
+  border-radius: 0;
+}
+
+.overclock-restyle-toolkit #root .pt-tog.on i {
+  background: var(--overclock-yellow);
+  box-shadow: none;
+}
+
+.overclock-restyle-toolkit #root .pt-tog.on i::after {
+  background: var(--overclock-black);
+}
+
+.overclock-restyle-toolkit #root .pt kbd {
+  background: var(--overclock-field);
+  border: 1px solid var(--overclock-line);
+  border-bottom-width: 2px;
+  border-radius: 0;
+  font-family: var(--overclock-font-label);
+  font-weight: 400;
+}
+
+/* Wells, the rows and choices inside a panel, are dark fields in a rule */
+.overclock-restyle-toolkit
+  #root
+  :is(
+    .pt-frow,
+    .pt-way,
+    .pt-src1,
+    .pt-boxr,
+    .pt-tile,
+    .pt-edit,
+    .pt-none,
+    .pt-ct,
+    .pt-sc,
+    .pt-scard,
+    .pt-cand,
+    .pt-dcard,
+    .pt-prow,
+    .pt-box,
+    .pt-fbr,
+    .pt-rec,
+    .pt-wait
+  ) {
+  background: var(--overclock-field);
+  border: 1px solid var(--overclock-rule);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.overclock-restyle-toolkit
+  #root
+  :is(.pt-sc, .pt-scard, .pt-cand, .pt-dcard, .pt-prow):hover {
+  background: var(--overclock-panel);
+  border-color: var(--overclock-yellow);
+}
+
+/* The one you pick takes a yellow edge, as the chosen result does in
+   Stash's Tagger */
+.overclock-restyle-toolkit
+  #root
+  :is(.pt-sc.on, .pt-cand.on, .pt-scard.on, .pt-dcard.on) {
+  background: color-mix(
+    in srgb,
+    var(--overclock-yellow) 7%,
+    var(--overclock-field)
+  );
+  border-color: var(--overclock-yellow);
+  box-shadow: inset 3px 0 0 var(--overclock-yellow);
+}
+
+/* Pictures sit square, in a rule */
+.overclock-restyle-toolkit #root :is(.pt-shot, .pt-pbig, .pt-gcell, .pt-pc) {
+  border: 1px solid var(--overclock-rule);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.overclock-restyle-toolkit
+  #root
+  :is(
+    .pt-thumb,
+    .pt-ava,
+    .pt-scimg,
+    .pt-sccov,
+    .pt-cimg,
+    .pt-mcov,
+    .pt-cccov,
+    .pt-ctimg
+  ) {
+  border-radius: 0;
+}
+
+/* Tags on pictures and badges are clipped mono tags, black on their
+   signal; the tag on the one you picked is yellow. The count on the Catalog
+   tab is also a .pt-badge, but a Stash .badge in a Stash tab, which
+   Overclock's own rules already style. */
+.overclock-restyle-toolkit
+  #root
+  :is(
+    .pt-badge:not(.badge),
+    .pt-covtag,
+    .pt-sctag,
+    .pt-cpick,
+    .pt-dtag,
+    .pt-scpick,
+    .pt-st
+  ) {
+  --overclock-cut: 5px;
+
+  border-radius: 0;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--overclock-cut)),
+    calc(100% - var(--overclock-cut)) 100%,
+    0 100%
+  );
+  font-family: var(--overclock-font-label);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.overclock-restyle-toolkit
+  #root
+  :is(.pt-badge:not(.badge), .pt-covtag, .pt-sctag) {
+  color: var(--overclock-black);
+}
+
+.overclock-restyle-toolkit
+  #root
+  :is(.pt-cpick, .pt-scard.on .pt-scpick, .pt-dcard.on .pt-dtag) {
+  background: var(--overclock-yellow);
+  border-color: transparent;
+  color: var(--overclock-black);
+}
+
+/* Buttons are flat panels with the bottom-right corner clipped: a control
+   panel that turns yellow under the pointer, solid yellow for the one that
+   goes ahead, red behind hazard stripes for the one that deletes */
+.overclock-restyle-toolkit #root .pt-btn {
+  --overclock-fill: var(--overclock-control);
+  --overclock-edge: var(--overclock-line);
+  --overclock-ink: var(--overclock-text);
+
+  background:
+    linear-gradient(
+        315deg,
+        var(--overclock-edge) calc(var(--overclock-cut) * 0.7071 + 1px),
+        transparent 0
+      )
+      border-box,
+    var(--overclock-fill);
+  border: 1px solid var(--overclock-edge);
+  border-radius: 0;
+  box-shadow: none;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--overclock-cut)),
+    calc(100% - var(--overclock-cut)) 100%,
+    0 100%
+  );
+  color: var(--overclock-ink);
+  font-family: var(--overclock-font-display);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.overclock-restyle-toolkit #root .pt-btn:not(:disabled):hover {
+  --overclock-edge: var(--overclock-yellow);
+  --overclock-ink: var(--overclock-yellow);
+}
+
+.overclock-restyle-toolkit #root .pt-btn.pt-pri {
+  --overclock-fill: var(--overclock-yellow);
+  --overclock-edge: var(--overclock-yellow);
+  --overclock-ink: var(--overclock-black);
+}
+
+.overclock-restyle-toolkit #root .pt-btn.pt-pri:not(:disabled):hover {
+  --overclock-fill: var(--overclock-yellow-hi);
+  --overclock-edge: var(--overclock-yellow-hi);
+  --overclock-ink: var(--overclock-black);
+}
+
+.overclock-restyle-toolkit #root .pt-btn.pt-pri kbd {
+  background: rgb(10 10 12 / 12%);
+  border-color: rgb(10 10 12 / 40%);
+  color: var(--overclock-black);
+}
+
+.overclock-restyle-toolkit #root .pt-btn.pt-danger:not(:disabled) {
+  --overclock-fill: var(--overclock-red);
+  --overclock-edge: var(--overclock-red);
+  --overclock-ink: var(--overclock-black);
+
+  background:
+    linear-gradient(
+        315deg,
+        var(--overclock-edge) calc(var(--overclock-cut) * 0.7071 + 1px),
+        transparent 0
+      )
+      border-box,
+    linear-gradient(
+        90deg,
+        transparent 15px,
+        var(--overclock-black) 15px 16px,
+        transparent 16px
+      )
+      border-box,
+    repeating-linear-gradient(
+        -45deg,
+        var(--overclock-yellow) 0 5px,
+        var(--overclock-black) 5px 10px
+      )
+      0 0 / 15px 100% no-repeat border-box,
+    var(--overclock-fill);
+  border-left-color: var(--overclock-yellow);
+  padding-left: calc(12px + 15px);
+}
+
+.overclock-restyle-toolkit #root .pt-btn.pt-danger:not(:disabled):hover {
+  --overclock-fill: var(--overclock-red-hi);
+  --overclock-edge: var(--overclock-red-hi);
+  --overclock-ink: var(--overclock-black);
+}
+
+/* The quiet delete: a control panel with red type that frames red */
+.overclock-restyle-toolkit #root .pt-btn.pt-dangerl {
+  --overclock-ink: var(--overclock-red-hi);
+}
+
+.overclock-restyle-toolkit #root .pt-btn.pt-dangerl:not(:disabled):hover {
+  --overclock-edge: var(--overclock-red);
+  --overclock-ink: var(--overclock-red-hi);
+}
+
+/* Disabled is locked: a dashed frame behind faint hazard stripes */
+.overclock-restyle-toolkit #root .pt-btn:disabled {
+  --overclock-fill: transparent;
+  --overclock-edge: var(--overclock-line);
+  --overclock-ink: var(--overclock-dim);
+
+  background: var(--overclock-hazard-dim);
+  border-style: dashed;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+/* Links read in cyan and turn yellow under the pointer, as everywhere in
+   Overclock */
+.overclock-restyle-toolkit #root :is(.pt-link, button.pt-spmore, a.pt-pill),
+.overclock-restyle-toolkit #pt-toast .pt-link {
+  color: var(--overclock-cyan);
+}
+
+.overclock-restyle-toolkit #root button.pt-spmore .pt-ic {
+  color: var(--overclock-cyan);
+}
+
+.overclock-restyle-toolkit
+  #root
+  :is(
+    .pt-link,
+    a.pt-fname,
+    .pt-mtitle a,
+    .pt-sctitle,
+    .pt-cctt,
+    a.pt-pill,
+    button.pt-spmore
+  ):hover,
+.overclock-restyle-toolkit #root .pt-sct:hover .pt-sctt,
+.overclock-restyle-toolkit #root .pt-cop:hover .pt-cn,
+.overclock-restyle-toolkit #pt-toast .pt-link:hover {
+  color: var(--overclock-yellow);
+}
+
+/* The colours the toolkit writes as hex: good reads cyan like a match, bad
+   red like a miss, O's in the suite's light blue */
+.overclock-restyle-toolkit
+  #root
+  :is(
+    .pt-c-gr,
+    .pt-pill.pt-good,
+    .pt-why .ok,
+    .pt-delkeep,
+    .pt-fwc b,
+    .pt-banner.pt-b-gr,
+    .pt-frow b.pt-c-gr
+  ) {
+  color: var(--overclock-cyan);
+}
+
+.overclock-restyle-toolkit #root :is(.pt-err, .pt-c-re, .pt-why .no) {
+  color: var(--overclock-red-hi);
+}
+
+.overclock-restyle-toolkit #root :is(.pt-c-bl, .pt-sp-o) {
+  color: var(--overclock-blue-hi);
+}
+
+.overclock-restyle-toolkit
+  #root
+  :is(.pt-why span, .pt-seg, .pt-banner, .pt-fwc) {
+  border-radius: 0;
+}
+
+.overclock-restyle-toolkit #root .pt-zoom input {
+  accent-color: var(--overclock-yellow);
+}
+
+.overclock-restyle-toolkit #root :is(.pt-fbl, .pt-strip, .pt-hitems) {
+  scrollbar-color: var(--overclock-line) transparent;
+}
+
+/* The strip under a performer's name reads as a mono readout */
+.overclock-restyle-toolkit #root #pt-strip {
+  font-family: var(--overclock-font-label);
+  letter-spacing: 0.04em;
+}
+
+/* Numbers and small caps are readouts in Share Tech Mono */
+.overclock-restyle-toolkit
+  #root
+  :is(
+    .pt-tile b,
+    .pt-cnt b,
+    .pt-ring b,
+    .pt-pnum,
+    .pt-dmid b,
+    .pt-tc,
+    .pt-num,
+    .pt-bl
+  ) {
+  font-family: var(--overclock-font-label);
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.overclock-restyle-toolkit #root :is(.pt-tk, .pt-sh) {
+  font-family: var(--overclock-font-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Bars are segmented like Overclock's progress bars, and square */
+.overclock-restyle-toolkit
+  #root
+  :is(.pt-bw i, .pt-track, .pt-track i, .pt-lbar) {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.overclock-restyle-toolkit #root .pt-bw i {
+  mask: repeating-linear-gradient(0deg, #000 0 5px, transparent 5px 7px);
+}
+
+.overclock-restyle-toolkit #root .pt-track i {
+  mask: repeating-linear-gradient(90deg, #000 0 8px, transparent 8px 10px);
+}

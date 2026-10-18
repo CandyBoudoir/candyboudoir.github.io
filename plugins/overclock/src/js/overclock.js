@@ -1,7 +1,8 @@
-// Overclock's JavaScript extras: pixel bursts on rating, the system voice and
-// the calm switch. Everything here is optional decoration: the theme is complete
-// in CSS, and this file degrades to nothing when PluginApi or GraphQL are
-// missing (as on the design-system page).
+// Overclock's JavaScript extras: pixel bursts on rating, the system voice, the
+// calm switch and the switches that restyle Insights and Performers Toolkit.
+// Everything here is optional decoration: the theme is complete in CSS, and
+// this file degrades to nothing when PluginApi or GraphQL are missing (as on
+// the design-system page).
 ;(function () {
   'use strict'
 
@@ -60,6 +61,35 @@
   const state = {
     calm: false,
     voice: true,
+    insights: false,
+    toolkit: false,
+  }
+
+  // The two restyle settings, for the Insights and Performers Toolkit
+  // plugins: each is a class on <html> that its plugin's CSS waits for, kept
+  // from the last visit, so a page the plugin draws on never shows it in its
+  // own colours while the settings load
+  const RESTYLES = {
+    insights: {
+      setting: 'restyleInsights',
+      className: 'overclock-restyle-insights',
+    },
+    toolkit: {
+      setting: 'restylePerformersToolkit',
+      className: 'overclock-restyle-toolkit',
+    },
+  }
+  const RESTYLE_KEY = 'overclock.restyle'
+
+  function keptRestyles() {
+    try {
+      const kept = JSON.parse(localStorage.getItem(RESTYLE_KEY)) ?? {}
+      return Object.fromEntries(
+        Object.keys(RESTYLES).map((key) => [key, kept[key] === true]),
+      )
+    } catch {
+      return {}
+    }
   }
 
   const originals = new WeakMap()
@@ -200,9 +230,24 @@
   // Settings ----------------------------------------------------------------
 
   function apply(next) {
+    const voice = wantVoice()
     Object.assign(state, next)
     root.classList.toggle('overclock-calm', state.calm)
-    if (document.body) applyCopy(document.body)
+    for (const [key, { className }] of Object.entries(RESTYLES))
+      root.classList.toggle(className, state[key] === true)
+    if (Object.keys(RESTYLES).some((key) => key in next)) {
+      try {
+        localStorage.setItem(
+          RESTYLE_KEY,
+          JSON.stringify({ insights: state.insights, toolkit: state.toolkit }),
+        )
+      } catch {
+        // A browser without storage loads the settings each visit.
+      }
+    }
+    // The copy changes only when the voice does; the observer keeps up with
+    // the page in between
+    if (document.body && wantVoice() !== voice) applyCopy(document.body)
   }
 
   async function loadSettings() {
@@ -218,6 +263,12 @@
       apply({
         calm: settings.calmMode === true,
         voice: settings.plainCopy !== true,
+        ...Object.fromEntries(
+          Object.entries(RESTYLES).map(([key, { setting }]) => [
+            key,
+            settings[setting] === true,
+          ]),
+        ),
       })
     } catch {
       // Not running inside Stash; keep the defaults.
@@ -232,8 +283,14 @@
       characterData: true,
       subtree: true,
     })
-    apply({})
-    if (window.PluginApi) loadSettings()
+    apply(keptRestyles())
+    applyCopy(document.body)
+    if (window.PluginApi) {
+      loadSettings()
+      // The settings are read again on every page Stash opens, so changing
+      // one takes effect on the next page, with no reload
+      window.PluginApi.Event?.addEventListener('stash:location', loadSettings)
+    }
   }
 
   window.Overclock = {
