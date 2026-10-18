@@ -580,6 +580,40 @@ test.describe('beside Performers Toolkit', () => {
     }
   })
 
+  // The Catalog tab's count is a Stash badge in a Stash tab, which also
+  // carries Performers Toolkit's badge class. It shows once a stash-box has
+  // answered, which the mock stash-box does not, so the test shows it.
+  test("the Catalog tab's count reads, closed and open", async ({ page }) => {
+    try {
+      await setPlugin({ restylePlugins: true })
+      await openPerformerStats(page, ids.performer)
+      const badge = page.locator('.pt-tablink[data-pt-tab="catalog"] .badge')
+      await badge.evaluate((el) => {
+        el.hidden = false
+        el.textContent = '12'
+      })
+      const reads = async () => {
+        const { color, background } = await badge.evaluate((el) => {
+          const style = getComputedStyle(el)
+          return { color: style.color, background: style.backgroundColor }
+        })
+        expect(contrast(color, background)).toBeGreaterThanOrEqual(4.5)
+      }
+      await reads()
+      await page.locator('.pt-tablink[data-pt-tab="catalog"]').click()
+      await expect(
+        page.locator('.pt-tablink[data-pt-tab="catalog"].active'),
+      ).toBeAttached()
+      await badge.evaluate((el) => {
+        el.hidden = false
+        el.textContent = '12'
+      })
+      await expect(badge).toHaveCSS('color', 'rgb(27, 17, 69)')
+    } finally {
+      await setPlugin({})
+    }
+  })
+
   // As for Insights, against
   // plugins/citypop/tests/performerstoolkit-unmatched-baseline.txt
   test('every Performers Toolkit class City Pop styles still renders', async ({
