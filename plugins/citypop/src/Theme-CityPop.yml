@@ -1,6 +1,6 @@
 name: Theme - City Pop
 description: Airbrushed 1980s dusk from Japanese city pop album covers. Record-sleeve cards, striped sunset suns for ratings, cassettes for audio-only scenes and a late-night FM host's voice.
-version: 0.1.0
+version: 0.2.0
 url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/citypop
 ui:
   css:
@@ -17,4 +17,12 @@ settings:
   plainCopy:
     displayName: Plain labels
     description: Keep Stash's own wording instead of the FM host's lines. Stash's SFW mode always uses plain labels.
+    type: BOOLEAN
+  restyleInsights:
+    displayName: Restyle Insights
+    description: "Off: the Insights plugin keeps its own Flexoki look on the Stats page. On: it takes City Pop's dusk, panels, buttons and type. Shows while Insights is on; takes effect on the next page you open."
+    type: BOOLEAN
+  restylePerformersToolkit:
+    displayName: Restyle Performers Toolkit
+    description: "Off: the Performers Toolkit plugin keeps its own Flexoki look on its page and on performer pages. On: it takes City Pop's dusk, panels, buttons and type. Shows while Performers Toolkit is on; takes effect on the next page you open."
     type: BOOLEAN

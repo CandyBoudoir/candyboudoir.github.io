@@ -2,7 +2,7 @@
 
 A pink, playful theme for [Stash](https://github.com/stashapp/stash), the self-hosted media organizer. Juicy installs as a Stash plugin, so you switch it on, off or update it from Settings > Plugins instead of pasting CSS into the Custom CSS box.
 
-Juicy brings glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording. Calm mode and Plain labels settings turn the motion and the copy down, and Stash's SFW mode keeps the candy and drops the cheek. The [live preview](https://candyboudoir.github.io/juicy/) shows every component on Stash's own markup, and the design rules are in [docs/design.md](docs/design.md). Juicy 0.4.0 is built and tested on Stash v0.31.1, including the Tagger and scrape screens that a stash-box such as StashDB adds.
+Juicy brings glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording. Calm mode and Plain labels settings turn the motion and the copy down, and Stash's SFW mode keeps the candy and drops the cheek. The [live preview](https://candyboudoir.github.io/juicy/) shows every component on Stash's own markup, and the design rules are in [docs/design.md](docs/design.md). Juicy 0.5.0 is built and tested on Stash v0.31.1, including the Tagger and scrape screens that a stash-box such as StashDB adds.
 
 ![The scenes page with Juicy: glossy sticker cards with gold rating badges on a dotted plum background](docs/screenshots/scenes.png)
 
@@ -26,18 +26,24 @@ Juicy installed from its first source, `https://candyboudoir.github.io/juicy/ind
 
 ## Settings
 
-Juicy's settings sit with the plugin under Settings > Plugins. Both start off.
+Juicy's settings sit with the plugin under Settings > Plugins. All of them start off, and each restyle setting shows only while its plugin is installed and on.
 
-| Setting      | Effect                                                                 |
-| ------------ | ---------------------------------------------------------------------- |
-| Calm mode    | Turns off hover tilts, heart bursts and the bubble loader's animation. |
-| Plain labels | Keeps Stash's own wording instead of Juicy's cheeky copy.              |
+| Setting                    | Effect                                                                                  |
+| -------------------------- | --------------------------------------------------------------------------------------- |
+| Calm mode                  | Turns off hover tilts, heart bursts and the bubble loader's animation.                  |
+| Plain labels               | Keeps Stash's own wording instead of Juicy's cheeky copy.                               |
+| Restyle Insights           | Puts the Insights plugin's dashboard on the Stats page in Juicy's candy too.            |
+| Restyle Performers Toolkit | Puts the Performers Toolkit plugin's page and performer-page tabs in Juicy's candy too. |
 
-![Juicy's two settings under Settings > Plugins](docs/screenshots/settings.png)
+![Juicy's settings under Settings > Plugins](docs/screenshots/settings.png)
 
 Juicy also follows your system's reduced-motion setting. In Stash's SFW content mode it keeps the colours, drops the cheeky copy and the drips, and shows a heart instead of the mascot.
 
-Juicy makes no network requests beyond your own Stash server. Its font, Fredoka, ships inside the plugin.
+### Insights and Performers Toolkit
+
+[Insights](https://gitlab.com/allisless0/stash-plugins) (a stats dashboard on Stash's Stats page) and Performers Toolkit (a page at `/performerstoolkit`, and a strip and Stats and Catalog tabs on each performer's page) come from another author's suite of plugins, which share their own Flexoki look. With Restyle Insights or Restyle Performers Toolkit on, Juicy gives that plugin its candy: plum sticker cards on the polka dots, their names in Fredoka, candy tabs filled with each tab's colour, glossy pink and plum buttons, deep plum fields, pink chips and switches for the chosen option, cyan links, Juicy's ink and lime tooltips, and a plum toast with its kind on the left edge. Each tab's colour comes from Juicy's palette, and O's are bubblegum, as on the O counter. Turn both on to keep the two alike. Insights' heatmaps and its codec, resolution and chart colours keep Insights' own tones. Each setting takes effect on the next page you open. Off, each keeps its own look, except that Insights' sidebar sticks below Juicy's pink rule and the count on Performers Toolkit's Catalog tab stays white like the other tabs' counts. Juicy is tested with Insights 2.11.0 and Performers Toolkit 0.4.2.
+
+Juicy reads its own settings from your Stash on each page, and keeps the two restyle settings in your browser so those pages never open in their own colours first. It makes no other requests and none beyond your own Stash server. Its font, Fredoka, ships inside the plugin.
 
 ## Screenshots
 

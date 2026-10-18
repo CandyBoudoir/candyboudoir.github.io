@@ -15,6 +15,7 @@ Every rule in `src/css` reads these custom properties, because Stash compiles it
 | `--citypop-apricot` | `#FFB36B` | Glow, warning, the sun's top                |
 | `--citypop-magenta` | `#C23A8E` | Deep sunset, the shadow under script titles |
 | `--citypop-pool`    | `#4FE3DA` | Focus, switches, success                    |
+| `--citypop-sky`     | `#A3BBFF` | Info, and Insights' Files tab               |
 | `--citypop-night`   | `#0C0E30` | Page, the sky overhead                      |
 | `--citypop-panel`   | `#1A1848` | Navbar, cards, panels, menus                |
 | `--citypop-raised`  | `#252262` | Secondary buttons, tabs, scrape fields      |
@@ -100,14 +101,38 @@ The culture is in the voice as homage: real customs of Japanese late-night radio
 
 Stash's SFW content mode keeps the dusk, the suns, the hearts and the cassettes. The FM host's lines are off, bursts lose their pool drops, and the O counter is a cocktail wherever Stash still draws its own ripple glyph. Stash's own SFW icon for the O counter (a thumbs-up) is left alone. The plugin ships no figure illustration; the pin-up on the design-system page hides in SFW mode.
 
+## Insights and Performers Toolkit
+
+[Insights](https://gitlab.com/allisless0/stash-plugins) (a stats dashboard on Stash's Stats page) and Performers Toolkit (a page at `/performerstoolkit`, a strip under a performer's name, Stats and Catalog tabs on the performer's page, a button on the Performers list and a toast) come from another author's suite of plugins. Each paints itself in the Flexoki palette through custom properties it sets on its own roots (`#insights`; `.pt`, `.ptc`, `.pt-strip`, `.pt-entry` and `#pt-toast`): `--bg`, `--bg2`, `--ui` to `--ui3`, `--tx3` to `--hi`, eight accents from `--re` to `--ma`, and in Insights `--up`, `--down` and `--o`. Each adds its stylesheet to the page after City Pop's, so `82-insights.css` and `83-performers-toolkit.css` start their rules at `#root` (or at the id of a root that sits on `<body>`), which outranks theirs.
+
+Each has a setting of its own, Restyle Insights and Restyle Performers Toolkit. With one on, `citypop.js` puts `.citypop-restyle-insights` or `.citypop-restyle-toolkit` on `<html>`, and that plugin takes the dusk:
+
+- **Their palette** becomes City Pop's: navy panels and night-blue wells, City Pop's text tones, and each tab's colour from the sunset and the pool. In Insights, You is the sunset, Actions pink, Library apricot, Files sky, Metadata health gold, Collection pool turquoise and Movies lilac; in Performers Toolkit, Find and Performers are deep pool blue, History lilac and Sources pool turquoise. O's are pool water, as on the O counter. Their own rules keep painting from these properties, so everything they colour through them follows, their charts and rings included.
+- **Their panels go**: Insights' dashboard and the toolkit's page drop their dark slab, and their cards sit on the dusk like Stash's own pages, where the sun stays down. Cards are navy panels on the hard shadow, with no glow on a tile's colour edge; a toolkit card's coloured top edge still says what it is.
+- **Their heads** set the name in the brush script, and their tabs read as Stash's tabs: Jost caps, with one sunset bar under the open tab. The toolkit's tabs on a performer's page are Stash's own and already are.
+- **Fields, chips and switches** are night-blue wells with the pool focus ring, and the chosen chip or step of a row is the sunset; a chosen card in a list takes a sunset edge. Buttons are enamel: night violet, the sunset with a glint for the one that goes ahead, hot coral for the one that deletes. Ticked boxes and switches are pool water. Links are coral; good and bad read in pool turquoise and hot coral.
+- **Numbers and small caps** are in Jost. Insights' tooltip is a cream cassette label; the toolkit's sheets and its toast are navy panels under the stripe band, the toast with its kind on the left edge, like Stash's own.
+
+Insights writes some colours from its JavaScript as inline styles and SVG attributes. Its heatmaps, its codec and resolution colours, the colours of the toolkit plugins' cards and the segments of its splits keep Insights' tones. The empty heatmap cells, the charts' grey grid lines and labels, the growth line and the tag picked in Top tags are matched by their exact inline colour and moved to the dusk; an Insights release that changes one of those values puts that one piece back in its own colour. Performers Toolkit sets its colours in its stylesheet, so its fixed colours (good, bad, link hovers, the navy type on its badges, its toast's kinds) are moved by class.
+
+The settings start off because the two share their look with their sibling plugins (Movies Toolkit, Scene Toolkit and others), which City Pop leaves alone, so someone who runs several of them keeps one look until they choose otherwise. They are two so either plugin can keep its own look; turning both on keeps the pair alike. `citypop.js` keeps them in the browser (`localStorage`, `citypop.restyle`), so a page the plugins draw on never opens in Flexoki first, and reads the settings again on every page Stash opens, so changing one needs no reload.
+
+Each setting shows in Settings > Plugins only while its plugin is installed and on, since it has nothing to restyle otherwise. Stash puts a script tag for each enabled plugin into the page's head (`/plugin/<id>/javascript`) and gives a setting's switch the id `plugin-<plugin>-<setting>`, so one CSS rule per setting hides its row (`:root:not(:has(script[src*='/plugin/Insights/'])) .setting:has([id='plugin-Theme-CityPop-restyleInsights'])`), with no request and no flash. A plugin switched on in Settings shows its setting after the next page load.
+
+One rule applies with the setting off too: Insights' What works sidebar sticks under the navbar at Stash's height, so City Pop moves it below its own 60px bar. Performers Toolkit measures Stash's navbar for its toast and its review bar on a phone, so it needs nothing.
+
+The design-system page shows neither.
+
 ## Settings
 
-| Setting      | Key         | Effect                          |
-| ------------ | ----------- | ------------------------------- |
-| Calm mode    | `calmMode`  | Turns off City Pop's animations |
-| Plain labels | `plainCopy` | Keeps Stash's own wording       |
+| Setting                    | Key                        | Effect                                     |
+| -------------------------- | -------------------------- | ------------------------------------------ |
+| Calm mode                  | `calmMode`                 | Turns off City Pop's animations            |
+| Plain labels               | `plainCopy`                | Keeps Stash's own wording                  |
+| Restyle Insights           | `restyleInsights`          | Puts Insights in City Pop's dusk           |
+| Restyle Performers Toolkit | `restylePerformersToolkit` | Puts Performers Toolkit in City Pop's dusk |
 
-Both default to off, so a fresh install gets the full theme.
+All of them default to off, so a fresh install gets the full theme and leaves the two plugins as their author drew them. The two restyle settings show only while their plugin is on.
 
 ## Coupling to Stash
 
@@ -122,6 +147,7 @@ Some couplings are specific to City Pop:
 - Some menus and their items carry Bootstrap's `bg-secondary`, which sets their colour with `!important`, so the menu rules override it with `!important` too.
 - Some Stash rules outrank a plain class (`div.dropdown-menu`, `div.react-select__control`, favourites, range sliders, the image zoom button), and modals render outside `#root`, so City Pop's rules for those use matching selectors, `#root`, or `:is(#root, .modal)`.
 - A `url()` inside a custom property resolves against the stylesheet that uses it, so every rule that uses `--citypop-caustic` or `--citypop-glint` lives in `citypop.css`. The design-system page keeps its own copies of those tokens in `ds/ds.css`.
+- The rules for the two plugins target Insights 2.11.0 and Performers Toolkit 0.4.2: their custom properties, their `ins-*` and `pt-*` classes and a few of Insights' inline colours (see Insights and Performers Toolkit). The tests install those releases' files in every test Stash (`RESTYLED` in `tests/stash/companions.mjs`), and a contract test per plugin fails when a class City Pop styles stops rendering on its tour of the plugin, against `tests/insights-unmatched-baseline.txt` and `tests/performerstoolkit-unmatched-baseline.txt`, the classes the demo library never shows (Insights' toolkit hub, duplicates and movies; the toolkit's review screens, catalog cards and sheets). The nightly run opens a "Restyle <plugin>" issue when a newer release of either is out.
 
 ## Tools
 

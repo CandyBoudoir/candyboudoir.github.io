@@ -53,6 +53,14 @@
   --overclock-red-hi: #ff5c7c;
   --overclock-magenta: #ff2fd0;
 
+  /* Four more signals, for the tabs and charts of the plugins Overclock
+     restyles (82-insights.css, 83-performers-toolkit.css) only */
+  --overclock-orange: #ff8a1f;
+  --overclock-green: #4dff6a;
+  --overclock-blue: #4a8dff;
+  --overclock-blue-hi: #8cb6ff;
+  --overclock-violet: #a66bff;
+
   /* Surfaces, from the void forward */
   --overclock-void: #050506;
   --overclock-bg: #0a0a0c;

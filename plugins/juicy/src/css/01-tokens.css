@@ -18,6 +18,11 @@
   --juicy-ink: #010224;
   --juicy-danger: #ff5a4e;
 
+  /* Two hues the palette lacks, each between two of its own, for the other
+     authors' plugins Juicy restyles, which have eight colours */
+  --juicy-tangerine: #fe9a4e; /* between gold and danger */
+  --juicy-blueberry: #6b86ff; /* between cyan and purple, light enough to read */
+
   /* Surfaces, deep plum from back to front */
   --juicy-bg: #150a2e;
   --juicy-bg-deep: #0d0520;
@@ -29,6 +34,7 @@
   --juicy-text: #fff2fa;
   --juicy-text-muted: #cdb6e0;
   --juicy-text-dim: #957cb0;
+  --juicy-text-faint: #67527f;
 
   /* Tints */
   --juicy-pink-soft: rgb(252 61 159 / 16%);

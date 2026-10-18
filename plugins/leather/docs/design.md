@@ -23,7 +23,7 @@ Every rule in `src/css` reads these custom properties, because Stash compiles it
 | `--leather-text-muted` | `#A99F9B` | Secondary text                           |
 | `--leather-text-dim`   | `#948A8B` | Dates and captions, AA on leather        |
 
-Black leather and nickel carry almost everything. Blood red marks what is chosen, active or hers, and oxblood is its pressed and deeper version. Status text keeps its meaning in muted tones: `--leather-success` `#8FD3A6`, `--leather-warning` `#E6AD69` and `--leather-danger` `#F0596C`.
+Black leather and nickel carry almost everything. Blood red marks what is chosen, active or hers, and oxblood is its pressed and deeper version. Status text keeps its meaning in muted tones: `--leather-success` `#8FD3A6`, `--leather-warning` `#E6AD69` and `--leather-danger` `#F0596C`. Four dyes serve only the charts and tabs of the plugins Leather restyles (see Insights and Performers Toolkit): `--leather-cognac` `#CC6F34`, `--leather-steel` `#8EA9C9`, `--leather-verdigris` `#6DB5AC` and `--leather-plum` `#A982BF`, with `--leather-well` `#0A0809` for the wells their charts sit in and `--leather-text-faint` `#6E6366` for their faintest labels.
 
 ## Type
 
@@ -71,14 +71,37 @@ Strict copy swaps a short list of Stash's own messages for short orders in her v
 
 Stash's SFW content mode keeps the leather and the studs and drops the collar and the voice: strict copy is off, bursts lose their sparks, the favourite is a stud that turns blood red, and an empty list shows an O-ring. Stash's own SFW icon for the O counter (a thumbs-up) is left alone.
 
+## Insights and Performers Toolkit
+
+[Insights](https://gitlab.com/allisless0/stash-plugins) (a stats dashboard on Stash's Stats page) and Performers Toolkit (a page at `/performerstoolkit`, a strip under a performer's name, Stats and Catalog tabs on the performer's page, a button on the Performers list and a toast) come from another author's suite of plugins. Each paints itself in the Flexoki palette through custom properties it sets on its own roots (`#insights`; `.pt`, `.ptc`, `.pt-strip`, `.pt-entry` and `#pt-toast`): `--bg`, `--bg2`, `--ui` to `--ui3`, `--tx3` to `--hi`, eight accents from `--re` to `--ma`, and in Insights `--up`, `--down` and `--o`. Each adds its stylesheet to the page after Leather's, so `82-insights.css` and `83-performers-toolkit.css` start their rules at `#root` (or at the id of a root that sits on `<body>`), which outranks theirs.
+
+Each has a setting of its own, Restyle Insights and Restyle Performers Toolkit. With one on, `leather.js` puts `.leather-restyle-insights` or `.leather-restyle-toolkit` on `<html>`, and that plugin takes the leather:
+
+- **Their palette** becomes Leather's: surface leather for panels, `--leather-well` for wells and Leather's text tones. Their eight accents need colours that tell apart side by side, where a row of Insights tiles or its State chart shows five or more at once, so blood, nickel and the status tones are joined by the four data dyes. In Insights, You is nickel, Actions blood red, Library cognac, Files verdigris, Metadata health amber, Collection green and Movies plum; in Performers Toolkit, Find and Performers are steel, History plum and Sources green. Links and Insights' other blue charts are steel, and O's are thread, like the flogger. Insights grades from good to bad in green, amber, cognac and red, so You takes nickel and blood red keeps to Actions, deleting and state. Their own rules keep painting from these properties, so their charts and rings follow.
+- **Their panels go**: the dashboard and the toolkit's page drop their dark slab, and their cards lie on the page as stitched leather like Stash's cards. An Insights tile's colour edge is dyed in without a glow, and a toolkit card's kind (a message, a run, an error) is dyed along its top edge.
+- **The grain stays where it reads.** Cards keep the pebble grain behind their row bars and small charts. The wells that hold Insights' larger charts and heatmaps, and the toolkit's tiles, list cards and review wells, are flat and debossed, so pictures and numbers never sit on the texture.
+- **Their heads** set the name in blackletter beside a stud, as in the navbar, and their tabs read as Stash's tabs: Oswald caps, the open one a raised leather flap with a red edge. Card and dialog titles are blackletter too. Numbers and small caps are in Oswald, which keeps every figure out of blackletter.
+- **Fields, chips and switches** are debossed like Stash's fields, with the red stitch on focus, and the chosen chip or step of a row is pressed into oxblood with a stitch. A chosen card in a toolkit list takes the blood-red edge of the Tagger's chosen result. Buttons are dyed leather with an inner stitch: black, blood red with two rivets for the one that goes ahead, bright red for the one that deletes. Ticked boxes are blood red, switches are a leather strap with a nickel snap, links carry Stash's dashed red underline, and good and bad read in Leather's status green and red.
+- **Overlays** are stitched leather. Insights' tooltip matches Stash's tooltips in Leather, in sentence case for its longer lines. The toolkit's dialogs sit over a darkened page with their stitch drawn as their own border, since they scroll, and its toast has its kind dyed along the left edge.
+
+Insights writes some colours from its JavaScript as inline styles and SVG attributes. Its heatmaps, its codec and resolution colours, its grade ring, the colours of the toolkit plugins' cards and the segments of its splits keep Insights' tones. The empty heatmap cells, the charts' grey grid lines and labels, the growth line and the tag picked in Top tags (whose row carries its colour as `--c`) are matched by their exact inline colour and moved to the leather; an Insights release that changes one of those values puts that one piece back in its own colour. Performers Toolkit sets its colours in its stylesheet, so its fixed colours (good, bad, link hovers, the black type on its badges, the kinds of its toast and review bar) are moved by class.
+
+The settings start off because the two share their look with their sibling plugins (Movies Toolkit, Scenes Toolkit and others), which Leather leaves alone, so someone who runs several of them keeps one look until they choose otherwise. They are two so either plugin can keep its own look; turning both on keeps the pair alike. `leather.js` keeps them in the browser (`localStorage`, `leather.restyle`), so a page the plugins draw on never opens in Flexoki first, and reads the settings again on every page Stash opens, so changing one needs no reload.
+
+Each setting shows in Settings > Plugins only while its plugin is installed and on, since it has nothing to restyle otherwise. Stash puts a script tag for each enabled plugin into the page's head (`/plugin/<id>/javascript`) and gives a setting's switch the id `plugin-<plugin>-<setting>`, so one CSS rule per setting hides its row (`:root:not(:has(script[src*='/plugin/Insights/'])) .setting:has([id='plugin-Theme-Leather-restyleInsights'])`), with no request and no flash. A plugin switched on in Settings shows its setting after the next page load.
+
+Insights' What works sidebar sticks under the navbar at Stash's height, so Leather moves it below its own 64px bar whether Restyle Insights is on or off. The count on the toolkit's Catalog tab is a Stash badge, which Leather dresses as a black leather tag, and also carries the toolkit's badge class, whose near-black type would win; it keeps Leather's type either way too. Performers Toolkit measures Stash's navbar for its toast and its review bar on a phone, so it needs nothing. The design-system page shows neither plugin.
+
 ## Settings
 
-| Setting      | Key         | Effect                         |
-| ------------ | ----------- | ------------------------------ |
-| Calm mode    | `calmMode`  | Turns off Leather's animations |
-| Plain labels | `plainCopy` | Keeps Stash's own wording      |
+| Setting                    | Key                        | Effect                                   |
+| -------------------------- | -------------------------- | ---------------------------------------- |
+| Calm mode                  | `calmMode`                 | Turns off Leather's animations           |
+| Plain labels               | `plainCopy`                | Keeps Stash's own wording                |
+| Restyle Insights           | `restyleInsights`          | Puts Insights in black leather           |
+| Restyle Performers Toolkit | `restylePerformersToolkit` | Puts Performers Toolkit in black leather |
 
-Both default to off, so a fresh install gets the full theme.
+All of them default to off, so a fresh install gets the full theme and leaves the two plugins as their author drew them. The two restyle settings show only while their plugin is on.
 
 ## Coupling to Stash
 
@@ -86,10 +109,11 @@ The theme targets Stash's markup as of v0.31.1. The selectors it depends on most
 
 Some couplings are specific to Leather:
 
-- The navbar is 64px (`--leather-nav-height`) where Stash's is 48.75px. Stash spaces the page by its own height in several places, so `80-pages.css` moves the body padding, the filter sidebar, the sidebar toggle, the sticky detail header and the task queue to match, and on an upright phone, where Stash docks the bar at the bottom, the bottom padding and the pagination footer. A Stash release that adds a rule using 48.75px needs the same.
+- The navbar is 64px (`--leather-nav-height`) where Stash's is 48.75px. Stash spaces the page by its own height in several places, so `80-pages.css` moves the body padding, the filter sidebar, the sidebar toggle, the sticky detail header and the task queue to match, and on an upright phone, where Stash docks the bar at the bottom, the bottom padding and the pagination footer. `82-insights.css` moves Insights' sticky sidebar the same way. A Stash release that adds a rule using 48.75px needs the same.
 - Some menus and their items carry Bootstrap's `bg-secondary`, which sets their colour with `!important`, so the menu rules override it with `!important` too.
 - Some Stash rules outrank a plain class (`div.dropdown-menu`, `div.react-select__control`, favourites, range sliders, the image zoom button), and modals render outside `#root`, so Leather's rules for those use matching selectors, `#root`, or `:is(#root, .modal)`.
 - A `url()` inside a custom property resolves against the stylesheet that uses it, so every rule that uses `--leather-tex`, `--leather-grain` or the stitch tokens lives in `leather.css`. The design-system page keeps its own copies of those tokens in `ds/ds.css`.
+- The rules for the two plugins target Insights 2.11.0 and Performers Toolkit 0.4.2: their custom properties, their `ins-*` and `pt-*` classes and a few of Insights' inline colours (see Insights and Performers Toolkit). The tests install those releases' files in every test Stash (`RESTYLED` in `tests/stash/companions.mjs`), and a contract test per plugin fails when a class Leather styles stops rendering on its tour of the plugin, against `tests/insights-unmatched-baseline.txt` and `tests/performerstoolkit-unmatched-baseline.txt`, the classes the demo library never shows (Insights' toolkit hub, duplicates and movies; the toolkit's review screens, catalog cards and dialogs). The nightly run opens a "Restyle <plugin>" issue when a newer release of either is out.
 
 ## Tools
 

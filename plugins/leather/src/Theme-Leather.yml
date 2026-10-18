@@ -1,6 +1,6 @@
 name: Theme - Leather
 description: Black pebble-grain leather, saddle stitching and nickel studs with a blood-red accent. Studs for ratings, a collar for favourites and a strict voice.
-version: 0.1.0
+version: 0.2.0
 url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/leather
 ui:
   css:
@@ -17,4 +17,12 @@ settings:
   plainCopy:
     displayName: Plain labels
     description: Keep Stash's own wording instead of Leather's strict copy. Stash's SFW mode always uses plain labels.
+    type: BOOLEAN
+  restyleInsights:
+    displayName: Restyle Insights
+    description: "Off: the Insights plugin keeps its own Flexoki look on the Stats page. On: it takes Leather's black leather, stitching, studs and blackletter. Shows while Insights is on; takes effect on the next page you open."
+    type: BOOLEAN
+  restylePerformersToolkit:
+    displayName: Restyle Performers Toolkit
+    description: "Off: the Performers Toolkit plugin keeps its own Flexoki look on its page and on performer pages. On: it takes Leather's black leather, stitching, studs and blackletter. Shows while Performers Toolkit is on; takes effect on the next page you open."
     type: BOOLEAN

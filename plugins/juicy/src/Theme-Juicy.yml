@@ -1,6 +1,6 @@
 name: Theme - Juicy
 description: Pink, playful and a little naughty. Glossy candy stickers, gold hearts for ratings and a gum-bubble loader.
-version: 0.4.0
+version: 0.5.0
 url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/juicy
 ui:
   css:
@@ -17,4 +17,12 @@ settings:
   plainCopy:
     displayName: Plain labels
     description: Keep Stash's own wording instead of Juicy's cheeky copy. Stash's SFW mode always uses plain labels.
+    type: BOOLEAN
+  restyleInsights:
+    displayName: Restyle Insights
+    description: "Off: the Insights plugin keeps its own Flexoki look on the Stats page. On: it takes Juicy's candy, plum panels, buttons and type. Shows while Insights is on; takes effect on the next page you open."
+    type: BOOLEAN
+  restylePerformersToolkit:
+    displayName: Restyle Performers Toolkit
+    description: "Off: the Performers Toolkit plugin keeps its own Flexoki look on its page and on performer pages. On: it takes Juicy's candy, plum panels, buttons and type. Shows while Performers Toolkit is on; takes effect on the next page you open."
     type: BOOLEAN

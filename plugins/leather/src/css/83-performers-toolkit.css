@@ -1,0 +1,683 @@
+/*
+ * Performers Toolkit, another author's plugin from the same suite as
+ * Insights (gitlab.com/allisless0/stash-plugins), in black leather: its page
+ * at /performerstoolkit (.pt), the Stats and Catalog tabs it adds to a
+ * performer's page (.ptc), the strip under the performer's name
+ * (#pt-strip), its button on the Performers list (.pt-entry, a Stash button
+ * Leather already dresses) and its toast (#pt-toast, on <body>).
+ *
+ * It paints them in the same Flexoki palette as Insights, from custom
+ * properties it sets on those five roots, in a stylesheet it adds after this
+ * one. These rules start at `#root`, or at the toast's id, so they outrank
+ * its own, and all of them wait for the Restyle Performers Toolkit setting
+ * (.leather-restyle-toolkit on <html>, from leather.js), but for the two
+ * that follow.
+ * It places its toast and its review bar on a phone from Stash's navbar, so
+ * Leather's taller bar needs nothing here.
+ */
+
+/* The Restyle Performers Toolkit setting shows only while Performers
+   Toolkit is on, as Restyle Insights does for Insights */
+:root:not(:has(script[src*='/plugin/PerformersToolkit/']))
+  .setting:has([id='plugin-Theme-Leather-restylePerformersToolkit']) {
+  display: none;
+}
+
+/* The count on the Catalog tab is a Stash badge, which Leather dresses as a
+   black leather tag, but it also carries the toolkit's .pt-badge class,
+   whose near-black type loads after Leather's. It keeps Leather's type
+   whether the setting is on or not. */
+#root .pt-tablink .badge.pt-badge {
+  color: var(--leather-text);
+}
+
+/* Its palette in Leather's, as for Insights. Each tab's accent follows:
+   steel for Find and Performers, plum for History, green for Sources and
+   cognac for Clean-up */
+.leather-restyle-toolkit #root :is(.pt, .ptc, .pt-strip, .pt-entry),
+.leather-restyle-toolkit #pt-toast {
+  --bg: var(--leather-bg);
+  --bg2: var(--leather-well);
+  --ui: var(--leather-surface);
+  --ui2: var(--leather-raised);
+  --ui3: var(--leather-line);
+  --tx3: var(--leather-text-faint);
+  --tx2: var(--leather-text-dim);
+  --tx1b: var(--leather-text-muted);
+  --tx: var(--leather-text);
+  --hi: #fff;
+  --re: var(--leather-blood-hi);
+  --or: var(--leather-cognac);
+  --ye: var(--leather-warning);
+  --gr: var(--leather-success);
+  --cy: var(--leather-verdigris);
+  --bl: var(--leather-steel);
+  --pu: var(--leather-plum);
+  --ma: var(--leather-nickel);
+}
+
+/* The page has no slab of its own: its cards lie on the page */
+.leather-restyle-toolkit #root .pt {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* The head: the name in blackletter beside a stud, the tabs as Stash's
+   tabs, the open one a raised flap with a red edge */
+.leather-restyle-toolkit #root .pt-head {
+  border-bottom: 2px solid #000;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 5%);
+  margin-bottom: 18px;
+}
+
+.leather-restyle-toolkit #root .pt-title {
+  color: var(--leather-text);
+  font-family: var(--leather-font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  gap: 0.6rem;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  margin-right: 0.5rem;
+  text-shadow: 0 2px 0 #000;
+}
+
+.leather-restyle-toolkit #root .pt-title .pt-ic {
+  display: none;
+}
+
+.leather-restyle-toolkit #root .pt-title::before {
+  background: var(--leather-stud-face);
+  box-shadow:
+    0 0 0 1px #000,
+    0 2px 3px rgb(0 0 0 / 70%);
+  content: '';
+  flex: none;
+  height: 13px;
+  margin-top: 0.2rem;
+  width: 13px;
+}
+
+.leather-restyle-toolkit #root .pt-read {
+  font-family: var(--leather-font-label);
+  letter-spacing: 0.06em;
+}
+
+.leather-restyle-toolkit #root .pt-tabs {
+  align-self: flex-end;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  gap: 0.2rem;
+  padding: 0;
+}
+
+.leather-restyle-toolkit #root .pt-tab {
+  background: none;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 5px 5px 0 0;
+  box-shadow: none;
+  color: var(--leather-text-muted);
+  font-family: var(--leather-font-label);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  padding: 0.55rem 0.8rem 0.6rem;
+  text-transform: uppercase;
+}
+
+.leather-restyle-toolkit #root .pt-tab:hover {
+  color: #fff;
+}
+
+.leather-restyle-toolkit #root .pt-tab.on {
+  background: var(--leather-tex) var(--leather-raised);
+  border-color: #000;
+  box-shadow:
+    inset 0 3px 0 var(--leather-blood-hi),
+    inset 0 4px 0 rgb(0 0 0 / 40%);
+  color: #fff;
+}
+
+/* Cards, the review bar and the catalog's cards are stitched leather, as
+   Stash's own. A card's kind (a message, a run, an error) is a dye along
+   its top edge. */
+.leather-restyle-toolkit #root :is(.pt-card, .pt-mcard, .pt-ccard, .pt-rvbar) {
+  background: var(--leather-tex) var(--leather-surface);
+  border: 1px solid #000;
+  border-radius: var(--leather-radius);
+  box-shadow:
+    inset 0 3px 0 var(--leather-pt-edge, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 7%),
+    inset 0 -1px 0 rgb(0 0 0 / 60%),
+    0 2px 4px rgb(0 0 0 / 50%),
+    0 14px 26px -16px #000;
+}
+
+/* The review bar sticks, and on a phone is fixed, so it keeps its own
+   position */
+.leather-restyle-toolkit #root :is(.pt-card, .pt-mcard, .pt-ccard) {
+  position: relative;
+}
+
+.leather-restyle-toolkit
+  #root
+  :is(.pt-card, .pt-mcard, .pt-ccard, .pt-rvbar)::after {
+  border: 6px solid transparent;
+  border-image: var(--leather-stitch) 10 round;
+  content: '';
+  inset: 1px;
+  pointer-events: none;
+  position: absolute;
+}
+
+.leather-restyle-toolkit
+  #root
+  :is(.pt-card.pt-msg, .pt-card.pt-runend, .pt-mcard.ex) {
+  --leather-pt-edge: var(--leather-success);
+}
+
+.leather-restyle-toolkit #root :is(.pt-card.pt-busy, .pt-card.pt-run) {
+  --leather-pt-edge: var(--leather-verdigris);
+}
+
+.leather-restyle-toolkit #root .pt-card.pt-err {
+  --leather-pt-edge: var(--leather-danger);
+}
+
+/* Its sheets are dialogs: stitched leather over a darkened page, like
+   Stash's modals in Leather. A sheet scrolls, so its stitch is its own
+   border, which the content scrolls inside, as in Leather's menus. */
+.leather-restyle-toolkit #root .pt-veil {
+  background: rgb(0 0 0 / 75%);
+}
+
+.leather-restyle-toolkit #root .pt-sheet {
+  background: var(--leather-tex) var(--leather-surface);
+  border: 7px solid transparent;
+  border-image: var(--leather-stitch) 10 / 6px round;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 1px 0 rgb(255 255 255 / 7%),
+    0 30px 60px -20px #000;
+  padding: 12px;
+}
+
+/* The titles of cards and sheets in blackletter; numbers in Oswald, never
+   in blackletter, and small caps in Oswald's letterspaced capitals */
+.leather-restyle-toolkit
+  #root
+  :is(.pt-card > .pt-ch > b, .pt-sheet > .pt-ch > b, .pt-flowt, .pt-herot > b) {
+  font-family: var(--leather-font-display);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+}
+
+.leather-restyle-toolkit #root :is(.pt-card, .pt-sheet) > .pt-ch > b {
+  font-size: 1.35rem;
+}
+
+.leather-restyle-toolkit #root .pt-flowt {
+  font-size: 1.6rem;
+}
+
+.leather-restyle-toolkit #root .pt-herot > b {
+  font-size: 1.4rem;
+}
+
+.leather-restyle-toolkit #root :is(.pt-sh, .pt-tk) {
+  font-family: var(--leather-font-label);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+}
+
+.leather-restyle-toolkit
+  #root
+  :is(.pt-tile b, .pt-cnt b, .pt-ring b, .pt-pnum, .pt-dmid b, .pt-rvdone b) {
+  font-family: var(--leather-font-label);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.leather-restyle-toolkit #root .pt-strip {
+  font-family: var(--leather-font-label);
+  letter-spacing: 0.06em;
+}
+
+/* Fields are debossed into the leather, and focus runs a red stitch */
+.leather-restyle-toolkit
+  #root
+  :is(.pt-input, .pt-sel, .pt-acct select, .pt-seg select) {
+  background:
+    linear-gradient(rgb(0 0 0 / 50%), rgb(0 0 0 / 35%)),
+    var(--leather-tex) var(--leather-surface);
+  border: 1px solid #000;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 2px 4px rgb(0 0 0 / 85%),
+    0 1px 0 rgb(255 255 255 / 7%);
+  color: var(--leather-text);
+}
+
+.leather-restyle-toolkit #root :is(.pt-input, .pt-sel, .pt-acct select):focus {
+  border-color: #000;
+  box-shadow:
+    inset 0 2px 4px rgb(0 0 0 / 85%),
+    0 0 0 1px var(--leather-blood),
+    0 0 0 4px rgb(176 24 47 / 28%);
+  outline: 1.5px dashed var(--leather-thread-red);
+  outline-offset: -5px;
+}
+
+/* Chips, pills, steps and switches are debossed the same way */
+.leather-restyle-toolkit
+  #root
+  :is(.pt-chip, .pt-pill, .pt-tog, .pt-step, .pt-rc, .pt-cnt, .pt-box) {
+  background:
+    linear-gradient(rgb(0 0 0 / 50%), rgb(0 0 0 / 35%)),
+    var(--leather-tex) var(--leather-surface);
+  border: 1px solid #000;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 2px 4px rgb(0 0 0 / 85%),
+    0 1px 0 rgb(255 255 255 / 7%);
+}
+
+.leather-restyle-toolkit #root :is(.pt-chip, .pt-step) {
+  font-family: var(--leather-font-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Wells, and the cards that sit inside a panel, are flat and debossed, so
+   the grain never runs behind a picture or a number */
+.leather-restyle-toolkit
+  #root
+  :is(
+    .pt-frow,
+    .pt-way,
+    .pt-src1,
+    .pt-boxr,
+    .pt-tile,
+    .pt-edit,
+    .pt-none,
+    .pt-ct,
+    .pt-sc,
+    .pt-scard,
+    .pt-cand,
+    .pt-dcard,
+    .pt-prow,
+    .pt-banner,
+    .pt-wait
+  ) {
+  background-color: var(--leather-well);
+  border: 1px solid #000;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 2px 4px rgb(0 0 0 / 85%),
+    0 1px 0 rgb(255 255 255 / 7%);
+}
+
+.leather-restyle-toolkit #root :is(.pt-fbr, .pt-rec, .pt-dup) {
+  border-radius: 4px;
+}
+
+.leather-restyle-toolkit
+  #root
+  :is(.pt-sc, .pt-scard, .pt-cand, .pt-dcard, .pt-prow):hover {
+  background-color: var(--leather-raised);
+  border-color: #000;
+}
+
+/* The chosen chip or step is pressed into oxblood with a stitch, as in
+   Stash's button groups */
+.leather-restyle-toolkit #root :is(.pt-chip.on, .pt-step.on) {
+  background: var(--leather-grain), var(--leather-ox-dye);
+  border-color: #000;
+  box-shadow:
+    inset 0 2px 4px rgb(0 0 0 / 60%),
+    0 1px 0 rgb(255 255 255 / 6%);
+  color: #fff;
+  outline: 1px dashed rgb(255 214 220 / 50%);
+  outline-offset: -4px;
+}
+
+.leather-restyle-toolkit #root .pt-step b {
+  border-radius: 3px;
+  font-family: var(--leather-font-label);
+}
+
+/* The open step's number is a nickel stud */
+.leather-restyle-toolkit #root .pt-step.on b {
+  background: var(--leather-nickel-grad);
+  box-shadow: 0 0 0 1px #000;
+}
+
+/* A chosen card in a list takes a blood-red edge, as the chosen result
+   does in Stash's Tagger */
+.leather-restyle-toolkit
+  #root
+  :is(.pt-sc.on, .pt-cand.on, .pt-scard.on, .pt-dcard.on, .pt-prow.on) {
+  background: linear-gradient(90deg, rgb(176 24 47 / 16%), transparent 55%)
+    var(--leather-raised);
+  border-color: #000;
+  box-shadow: inset 3px 0 0 var(--leather-blood-hi);
+}
+
+.leather-restyle-toolkit
+  #root
+  :is(.pt-sc, .pt-scard, .pt-cand, .pt-dcard):focus-visible {
+  outline-color: var(--leather-blood-hi);
+}
+
+/* Pictures are set in like a window */
+.leather-restyle-toolkit
+  #root
+  :is(
+    .pt-shot,
+    .pt-pbig,
+    .pt-gcell,
+    .pt-pc,
+    .pt-thumb,
+    .pt-scimg,
+    .pt-sccov,
+    .pt-cimg,
+    .pt-mcov,
+    .pt-ava
+  ) {
+  background-color: #000;
+  border-color: #000;
+  border-radius: 3px;
+}
+
+.leather-restyle-toolkit #root :is(.pt kbd, .pt-sccov kbd, .pt-ckey kbd) {
+  border-color: #000;
+  border-radius: 3px;
+  font-family: var(--leather-font-label);
+  letter-spacing: 0.06em;
+}
+
+/* Buttons are dyed leather with an inner stitch, as Stash's: black leather,
+   blood red with two rivets for the one that goes ahead, bright red for the
+   one that deletes */
+.leather-restyle-toolkit #root .pt-btn {
+  background: var(--leather-tex) var(--leather-raised);
+  border: 1px solid #000;
+  border-radius: 5px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    inset 0 -2px 0 rgb(0 0 0 / 35%),
+    0 2px 3px rgb(0 0 0 / 55%);
+  color: var(--leather-text);
+  font-family: var(--leather-font-label);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  padding: 0.4rem 0.85rem;
+  position: relative;
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 55%);
+  text-transform: uppercase;
+  transition:
+    transform var(--leather-fast) var(--leather-ease),
+    filter var(--leather-fast) var(--leather-ease);
+}
+
+.leather-restyle-toolkit #root .pt-btn::after {
+  border: 5px solid transparent;
+  border-image: var(--leather-stitch) 10 round;
+  content: '';
+  inset: 1px;
+  opacity: 0.9;
+  pointer-events: none;
+  position: absolute;
+}
+
+.leather-restyle-toolkit #root .pt-btn.pt-sm {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.6rem;
+}
+
+.leather-restyle-toolkit #root .pt-btn.pt-big {
+  font-size: 0.86rem;
+  padding: 0.55rem 1rem;
+}
+
+.leather-restyle-toolkit #root .pt-btn:not(:disabled):hover {
+  color: #fff;
+}
+
+.leather-restyle-toolkit #root .pt-btn:not(:disabled):hover::after {
+  border-image-source: var(--leather-stitch-red);
+}
+
+.leather-restyle-toolkit #root .pt-btn:not(:disabled):active {
+  box-shadow:
+    inset 0 2px 5px rgb(0 0 0 / 80%),
+    inset 0 -1px 0 rgb(255 255 255 / 6%),
+    0 1px 0 rgb(255 255 255 / 6%);
+  transform: translateY(1px);
+}
+
+.leather-restyle-toolkit #root .pt-btn.pt-pri {
+  background:
+    radial-gradient(
+      circle at 10.2px calc(50% - 1px),
+      #fff 0 0.8px,
+      #e8e8ec 1.5px,
+      #a3a3aa 2.5px,
+      #55555c 3.4px,
+      #050405 4px,
+      transparent 4.5px
+    ),
+    radial-gradient(
+      circle at calc(100% - 11.8px) calc(50% - 1px),
+      #fff 0 0.8px,
+      #e8e8ec 1.5px,
+      #a3a3aa 2.5px,
+      #55555c 3.4px,
+      #050405 4px,
+      transparent 4.5px
+    ),
+    var(--leather-grain), var(--leather-blood-dye);
+  color: #fff;
+  padding-inline: 1.5rem;
+}
+
+.leather-restyle-toolkit #root .pt-btn.pt-pri kbd {
+  background: rgb(0 0 0 / 25%);
+  border-color: rgb(0 0 0 / 45%);
+  color: #fff;
+}
+
+.leather-restyle-toolkit #root .pt-btn.pt-danger {
+  background:
+    var(--leather-grain),
+    linear-gradient(180deg, #ec2f48 0%, #c41b33 50%, #911226 100%);
+  color: #fff;
+}
+
+.leather-restyle-toolkit
+  #root
+  :is(.pt-btn.pt-pri, .pt-btn.pt-danger):not(:disabled):hover {
+  filter: brightness(1.12);
+}
+
+.leather-restyle-toolkit #root .pt-btn.pt-dangerl {
+  color: var(--leather-danger);
+}
+
+.leather-restyle-toolkit #root .pt-btn.pt-dangerl:not(:disabled):hover {
+  color: #fff;
+}
+
+.leather-restyle-toolkit #root .pt-btn:disabled {
+  box-shadow: none;
+  filter: saturate(0.25) brightness(0.75);
+  opacity: 0.5;
+}
+
+/* Switches are a leather strap with a nickel snap */
+.leather-restyle-toolkit #root .pt-tog i {
+  background:
+    linear-gradient(rgb(0 0 0 / 45%), rgb(0 0 0 / 25%)),
+    var(--leather-tex) var(--leather-surface);
+  box-shadow:
+    inset 0 0 0 1px #000,
+    inset 0 1px 3px rgb(0 0 0 / 90%);
+}
+
+.leather-restyle-toolkit #root .pt-tog.on i {
+  background: var(--leather-grain), var(--leather-ox-dye);
+}
+
+.leather-restyle-toolkit #root .pt-tog i::after,
+.leather-restyle-toolkit #root .pt-tog.on i::after {
+  background: radial-gradient(
+    circle at 36% 30%,
+    #fff 0 8%,
+    #e1e1e6 24%,
+    #9a9aa1 60%,
+    #4a4a50 100%
+  );
+  box-shadow:
+    0 0 0 1px #000,
+    0 1px 2px rgb(0 0 0 / 80%);
+}
+
+/* Links read as Stash's: the text with a dashed red underline, red on
+   hover. O's are thread, like the flogger. */
+.leather-restyle-toolkit #root :is(.pt-link, button.pt-spmore, a.pt-pill),
+.leather-restyle-toolkit #pt-toast .pt-link {
+  color: var(--leather-text);
+  text-decoration: underline dashed var(--leather-blood-hi) 1px;
+  text-underline-offset: 4px;
+}
+
+.leather-restyle-toolkit #root :is(.pt-link, button.pt-spmore) .pt-ic {
+  color: var(--leather-blood-hi);
+}
+
+.leather-restyle-toolkit
+  #root
+  :is(
+    .pt-link:hover,
+    button.pt-spmore:hover,
+    a.pt-pill:hover,
+    a.pt-fname:hover,
+    .pt-mtitle a:hover,
+    .pt-sctitle:hover,
+    .pt-cctt:hover,
+    .pt-sct:hover .pt-sctt,
+    .pt-cop:hover .pt-cn
+  ),
+.leather-restyle-toolkit #pt-toast .pt-link:hover {
+  color: var(--leather-blood-hi);
+}
+
+.leather-restyle-toolkit #root .pt-c-bl {
+  color: var(--leather-steel);
+}
+
+.leather-restyle-toolkit #root :is(.pt-sp-o, .pt-sp-o .pt-ic) {
+  color: var(--leather-thread);
+}
+
+/* Good and bad in Leather's status tones */
+.leather-restyle-toolkit
+  #root
+  :is(
+    .pt-c-gr,
+    .pt-pill.pt-good,
+    .pt-why .ok,
+    .pt-delkeep,
+    .pt-fwc b,
+    .pt-banner.pt-b-gr,
+    .pt-frow b.pt-c-gr
+  ) {
+  color: var(--leather-success);
+}
+
+.leather-restyle-toolkit
+  #root
+  :is(.pt-err, .pt-c-re, .pt-why .no, .pt-rvstat.pt-s-error) {
+  color: var(--leather-danger);
+}
+
+/* Black type on the filled badges and tags. The count on the Catalog tab
+   is also a .pt-badge, but a Stash .badge in a Stash tab, which Leather's
+   tag rules already colour. */
+.leather-restyle-toolkit
+  #root
+  :is(
+    .pt-badge:not(.badge),
+    .pt-covtag,
+    .pt-sctag,
+    .pt-cpick,
+    .pt-dcard.on .pt-dtag,
+    .pt-scard.on .pt-scpick,
+    .pt-step.on b
+  ) {
+  color: var(--leather-bg);
+}
+
+/* Status edges in the review bar */
+.leather-restyle-toolkit #root .pt-rvstat {
+  --sk: var(--leather-steel);
+}
+
+.leather-restyle-toolkit #root .pt-rvstat.pt-s-done {
+  --sk: var(--leather-success);
+}
+
+.leather-restyle-toolkit #root .pt-rvstat.pt-s-warn {
+  --sk: var(--leather-warning);
+}
+
+.leather-restyle-toolkit #root .pt-rvstat.pt-s-error {
+  --sk: var(--leather-danger);
+}
+
+.leather-restyle-toolkit #root .pt-zoom input {
+  accent-color: var(--leather-blood);
+}
+
+.leather-restyle-toolkit #root :is(.pt-sheet, .pt-fbl, .pt-strip, .pt-hitems) {
+  scrollbar-color: #3b3034 transparent;
+}
+
+/* Its toast is stitched leather with its kind dyed along the left edge,
+   like Stash's toasts in Leather */
+.leather-restyle-toolkit #pt-toast {
+  --tk: var(--leather-steel);
+
+  background: var(--leather-tex) var(--leather-surface);
+  border: 1px solid #000;
+  border-radius: 6px;
+  box-shadow:
+    inset 5px 0 0 var(--tk),
+    inset 0 1px 0 rgb(255 255 255 / 7%),
+    0 14px 28px -12px #000;
+  color: var(--leather-text);
+  outline: 1px dashed rgb(185 174 169 / 45%);
+  outline-offset: -5px;
+  padding: 10px 16px 10px 20px;
+}
+
+.leather-restyle-toolkit #pt-toast.pt-t-done {
+  --tk: var(--leather-success);
+}
+
+.leather-restyle-toolkit #pt-toast.pt-t-warn {
+  --tk: var(--leather-warning);
+}
+
+.leather-restyle-toolkit #pt-toast.pt-t-error {
+  --tk: var(--leather-danger);
+}

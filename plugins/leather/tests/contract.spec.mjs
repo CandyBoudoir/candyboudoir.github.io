@@ -5,13 +5,19 @@ import {
   EMPTY_LIST,
   FLOWS,
   PAGES,
+  PLUGIN_ID,
   STRICT_EMPTY_LINE,
   demoIds,
   demoPath,
   onlyLeather,
+  openInsights,
+  openPerformerStats,
+  openPerformersToolkit,
   setPlugin,
   setSfw,
   unmatchedClasses,
+  unmatchedRestyledClasses,
+  usePlugins,
   visit,
 } from './stash.mjs'
 
@@ -239,6 +245,276 @@ test('SFW mode drops the voice and the collar', async ({ page }) => {
     expect(await maskOf(favourite)).toContain('glyph-stud')
   } finally {
     await setSfw(false)
+  }
+})
+
+// Insights, another author's stats dashboard on the Stats page (RESTYLED in
+// tests/stash/companions.mjs), keeps its own look until Restyle Insights is
+// on, and then takes Leather's palette, panels and type. Its sidebar clears Leather's taller navbar either way.
+test.describe('beside Insights', () => {
+  test.beforeAll(async () => {
+    await usePlugins(PLUGIN_ID, 'Insights')
+  })
+  test.afterAll(async () => {
+    await setPlugin({})
+    await onlyLeather()
+  })
+
+  test('Insights keeps its own look until the restyle is on', async ({
+    page,
+  }) => {
+    await setPlugin({})
+    await openInsights(page)
+    await expect(page.locator('html')).not.toHaveClass(
+      /\bleather-restyle-insights\b/,
+    )
+    await expect(page.locator('#insights')).toHaveCSS(
+      'background-color',
+      'rgb(16, 15, 15)',
+    )
+  })
+
+  test('the restyle puts Insights in black leather', async ({ page }) => {
+    try {
+      await setPlugin({ restyleInsights: true })
+      await openInsights(page, 'library')
+      await expect(page.locator('html')).toHaveClass(
+        /\bleather-restyle-insights\b/,
+      )
+      const root = page.locator('#insights')
+      await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      // Insights' own rules still paint from the palette Leather gives it
+      expect(
+        await root.evaluate((el) =>
+          getComputedStyle(el).getPropertyValue('--ui').trim(),
+        ),
+      ).toBe('#151113')
+      await expect(root.locator('.ins-sub').first()).toHaveCSS(
+        'color',
+        'rgb(148, 138, 139)',
+      )
+      const card = root.locator('.ins-card').first()
+      await expect(card).toHaveCSS('border-radius', '6px')
+      await expect(card).toHaveCSS('background-image', /leather-1x\.webp/)
+      await expect(root.locator('.ins-title')).toHaveCSS(
+        'font-family',
+        /Leather Grenze/,
+      )
+      // Numbers stay off the blackletter
+      await expect(root.locator('.ins-hero .big').first()).toHaveCSS(
+        'font-family',
+        /Leather Oswald/,
+      )
+      await root
+        .locator('.ins-bar[data-tip]')
+        .filter({ visible: true })
+        .first()
+        .hover()
+      const tip = page.locator('#ins-tip')
+      await expect(tip).toBeVisible()
+      await expect(tip).toHaveCSS('background-color', 'rgb(34, 27, 30)')
+      await expect(tip).toHaveCSS('color', 'rgb(236, 230, 227)')
+    } finally {
+      await setPlugin({})
+    }
+  })
+
+  test('the restyle takes effect on the next page', async ({ page }) => {
+    try {
+      await setPlugin({})
+      await page.goto(EMPTY_LIST)
+      await page.locator('.paginationIndex').waitFor()
+      await expect(page.locator('html')).not.toHaveClass(
+        /\bleather-restyle-insights\b/,
+      )
+      await setPlugin({ restyleInsights: true })
+      await page
+        .locator('a[href="/stats"]')
+        .filter({ visible: true })
+        .first()
+        .click()
+      await expect(page.locator('html')).toHaveClass(
+        /\bleather-restyle-insights\b/,
+      )
+      // Kept for the next visit, so Stats never opens in Insights' colours
+      expect(
+        await page.evaluate(
+          () => JSON.parse(localStorage.getItem('leather.restyle')).insights,
+        ),
+      ).toBe(true)
+    } finally {
+      await setPlugin({})
+    }
+  })
+
+  test("the What works sidebar clears Leather's navbar", async ({ page }) => {
+    await setPlugin({})
+    await openInsights(page, 'you')
+    await expect(page.locator('#insights .ins-side')).toHaveCSS(
+      'top',
+      '75.25px',
+    )
+  })
+
+  // The Insights classes in leather.css that no tab renders on the demo
+  // library, against the ones that matched nothing on the pinned Insights
+  // (plugins/leather/tests/insights-unmatched-baseline.txt). A class that
+  // newly matches nothing is one an Insights release renamed or removed.
+  test('every Insights class Leather styles still renders', async ({
+    page,
+  }) => {
+    expect(
+      await unmatchedRestyledClasses(page, {
+        css: 'dist/site/Theme-Leather/leather.css',
+        folder: 'leather',
+        plugin: 'insights',
+      }),
+    ).toEqual([])
+  })
+})
+
+// Performers Toolkit, from the same author and in the same look as
+// Insights, has a setting of its own, Restyle Performers Toolkit: its page,
+// the Stats tab it adds to a performer's page and its toast take Leather's
+// palette, panels and type.
+test.describe('beside Performers Toolkit', () => {
+  test.beforeAll(async () => {
+    await usePlugins(PLUGIN_ID, 'PerformersToolkit')
+  })
+  test.afterAll(async () => {
+    await setPlugin({})
+    await onlyLeather()
+  })
+
+  test('Performers Toolkit keeps its own look until the restyle is on', async ({
+    page,
+  }) => {
+    await setPlugin({})
+    await openPerformersToolkit(page)
+    await expect(page.locator('html')).not.toHaveClass(
+      /\bleather-restyle-toolkit\b/,
+    )
+    await expect(page.locator('.pt').first()).toHaveCSS(
+      'background-color',
+      'rgb(16, 15, 15)',
+    )
+  })
+
+  test('the restyle puts Performers Toolkit in black leather', async ({
+    page,
+  }) => {
+    try {
+      await setPlugin({ restylePerformersToolkit: true })
+      await openPerformersToolkit(page)
+      await expect(page.locator('html')).toHaveClass(
+        /\bleather-restyle-toolkit\b/,
+      )
+      const root = page.locator('.pt').first()
+      await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      await expect(root.locator('.pt-title')).toHaveCSS(
+        'font-family',
+        /Leather Grenze/,
+      )
+      await expect(root.locator('.pt-card').first()).toHaveCSS(
+        'border-radius',
+        '6px',
+      )
+      await expect(root.locator('.pt-btn.pt-pri').first()).toHaveCSS(
+        'background-image',
+        /rgb\(196, 34, 57\)/,
+      )
+      await openPerformerStats(page, ids.performer)
+      const stats = page.locator('.ptc').first()
+      // Its own rules still paint from the palette Leather gives it
+      expect(
+        await stats.evaluate((el) =>
+          getComputedStyle(el).getPropertyValue('--ui').trim(),
+        ),
+      ).toBe('#151113')
+      await expect(stats.locator('.pt-sec').first()).toHaveCSS(
+        'background-image',
+        /leather-1x\.webp/,
+      )
+    } finally {
+      await setPlugin({})
+    }
+  })
+
+  // The Catalog tab's count is a Stash badge in a Stash tab, which also
+  // carries Performers Toolkit's badge class. It shows once a stash-box has
+  // answered, which the mock stash-box does not, so the test shows it. It
+  // keeps Leather's type with the setting off too.
+  for (const restyle of [false, true]) {
+    test(`the Catalog tab's count keeps Leather's tag type, restyle ${restyle ? 'on' : 'off'}`, async ({
+      page,
+    }) => {
+      try {
+        await setPlugin(restyle ? { restylePerformersToolkit: true } : {})
+        await openPerformerStats(page, ids.performer)
+        const tab = page.locator('.pt-tablink[data-pt-tab="catalog"]')
+        const badge = tab.locator('.badge')
+        const show = () =>
+          badge.evaluate((el) => {
+            el.hidden = false
+            el.textContent = '12'
+          })
+        await show()
+        await expect(badge).toHaveCSS('color', 'rgb(236, 230, 227)')
+        await tab.click()
+        await expect(
+          page.locator('.pt-tablink[data-pt-tab="catalog"].active'),
+        ).toBeAttached()
+        await show()
+        await expect(badge).toHaveCSS('color', 'rgb(236, 230, 227)')
+      } finally {
+        await setPlugin({})
+      }
+    })
+  }
+
+  // As for Insights, against
+  // plugins/leather/tests/performerstoolkit-unmatched-baseline.txt
+  test('every Performers Toolkit class Leather styles still renders', async ({
+    page,
+  }) => {
+    expect(
+      await unmatchedRestyledClasses(page, {
+        css: 'dist/site/Theme-Leather/leather.css',
+        folder: 'leather',
+        plugin: 'performerstoolkit',
+      }),
+    ).toEqual([])
+  })
+})
+
+// Each restyle setting shows in Settings > Plugins only while its plugin
+// is on, since it has nothing to restyle otherwise. Leather hides its row
+// with display: none; the row's section may be collapsed (Stash develop
+// starts plugin settings closed), so the test reads the row's display.
+test('each restyle setting shows only while its plugin is on', async ({
+  page,
+}) => {
+  const row = (setting) =>
+    page.locator('.setting', {
+      has: page.locator(`[id="plugin-${PLUGIN_ID}-${setting}"]`),
+    })
+  const shown = (setting) =>
+    row(setting).evaluate((el) => getComputedStyle(el).display !== 'none')
+  const rows = async (insights, toolkit) => {
+    await page.goto('/settings?tab=plugins')
+    await row('calmMode').waitFor({ state: 'attached' })
+    await expect.poll(() => shown('calmMode')).toBe(true)
+    await expect.poll(() => shown('restyleInsights')).toBe(insights)
+    await expect.poll(() => shown('restylePerformersToolkit')).toBe(toolkit)
+  }
+  try {
+    await rows(false, false)
+    await usePlugins(PLUGIN_ID, 'Insights')
+    await rows(true, false)
+    await usePlugins(PLUGIN_ID, 'PerformersToolkit')
+    await rows(false, true)
+  } finally {
+    await onlyLeather()
   }
 })
 

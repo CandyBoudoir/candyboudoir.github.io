@@ -3,14 +3,19 @@
 // exports `incubating = true`, which is never released. Fails if the plugin's CHANGELOG.md
 // has no section for that version, so a version bump always ships with notes,
 // or when Cherry Pick's section does not name the companion plugin versions
-// its tests ran beside (tests/stash/tested-with.mjs checks the same on pull
-// requests).
+// its tests ran beside, or a theme's section the versions of the plugins it
+// restyles (tests/stash/tested-with.mjs checks the same on pull requests).
 // Run after `pnpm build`, on prod.
 import { execFileSync } from 'node:child_process'
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { listPlugins, root } from './site.mjs'
-import { TESTED_PLUGIN, testedBeside } from '../tests/stash/companions.mjs'
+import {
+  TESTED_PLUGIN,
+  restyledBeside,
+  restyledBy,
+  testedBeside,
+} from '../tests/stash/companions.mjs'
 
 const run = (cmd, ...args) =>
   execFileSync(cmd, args, { cwd: root, encoding: 'utf8' }).trim()
@@ -46,6 +51,11 @@ for (const { name, dir, mod } of await listPlugins()) {
   if (name === TESTED_PLUGIN && !notes.includes(testedBeside()))
     throw new Error(
       `plugins/${name}/CHANGELOG.md's "## ${version}" section does not say: ${testedBeside()}`,
+    )
+  const restyles = await restyledBy(name)
+  if (restyles.length && !notes.includes(restyledBeside(restyles)))
+    throw new Error(
+      `plugins/${name}/CHANGELOG.md's "## ${version}" section does not say: ${restyledBeside(restyles)}`,
     )
   const file = join(root, 'dist', `${name}-release-notes.md`)
   await writeFile(

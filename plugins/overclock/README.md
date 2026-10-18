@@ -2,7 +2,7 @@
 
 A heads-up display theme for [Stash](https://github.com/stashapp/stash), the self-hosted media organizer. Overclock installs as a Stash plugin, so you switch it on, off or update it from Settings > Plugins instead of pasting CSS into the Custom CSS box.
 
-Overclock turns Stash into the heads-up display of a hacker's control rig: matte black with a faint dot grid and a scanline, teal-black panels with clipped corners and frame brackets, hex readouts, tick marks and hazard stripes, in acid yellow and data cyan. Ratings are charge chevrons, the favourite is a targeting reticle that locks on, the O counter is an overload bolt, and hovering a button or a card glitches it for a moment. A short list of Stash's messages speaks in the cold voice of the system running the session. Calm mode and Plain labels settings turn the motion and the copy down, and Stash's SFW mode keeps the display and drops the voice. The [live preview](https://candyboudoir.github.io/overclock/) shows every component on Stash's own markup, and the design rules are in [docs/design.md](docs/design.md). Overclock 0.1.0 is built and tested on Stash v0.31.1, including the Tagger and scrape screens that a stash-box such as StashDB adds.
+Overclock turns Stash into the heads-up display of a hacker's control rig: matte black with a faint dot grid and a scanline, teal-black panels with clipped corners and frame brackets, hex readouts, tick marks and hazard stripes, in acid yellow and data cyan. Ratings are charge chevrons, the favourite is a targeting reticle that locks on, the O counter is an overload bolt, and hovering a button or a card glitches it for a moment. A short list of Stash's messages speaks in the cold voice of the system running the session. Calm mode and Plain labels settings turn the motion and the copy down, and Stash's SFW mode keeps the display and drops the voice. The [live preview](https://candyboudoir.github.io/overclock/) shows every component on Stash's own markup, and the design rules are in [docs/design.md](docs/design.md). Overclock 0.2.0 is built and tested on Stash v0.31.1, including the Tagger and scrape screens that a stash-box such as StashDB adds.
 
 ![The scenes page with Overclock: chamfered panels with corner brackets and a yellow rating tag on each card](docs/screenshots/scenes.png)
 
@@ -24,18 +24,24 @@ Stash lists new versions under Settings > Plugins > Installed Plugins when you c
 
 ## Settings
 
-Overclock's settings sit with the plugin under Settings > Plugins. Both start off.
+Overclock's settings sit with the plugin under Settings > Plugins. All of them start off, and each restyle setting shows only while its plugin is installed and on.
 
-| Setting      | Effect                                                                           |
-| ------------ | -------------------------------------------------------------------------------- |
-| Calm mode    | Turns off the hover glitches, the scan lines, the bursts and the ticking loader. |
-| Plain labels | Keeps Stash's own wording instead of Overclock's system voice.                   |
+| Setting                    | Effect                                                                                        |
+| -------------------------- | --------------------------------------------------------------------------------------------- |
+| Calm mode                  | Turns off the hover glitches, the scan lines, the bursts and the ticking loader.              |
+| Plain labels               | Keeps Stash's own wording instead of Overclock's system voice.                                |
+| Restyle Insights           | Puts the Insights plugin's dashboard on the Stats page on Overclock's display too.            |
+| Restyle Performers Toolkit | Puts the Performers Toolkit plugin's page and performer-page tabs on Overclock's display too. |
 
-![Overclock's two settings under Settings > Plugins](docs/screenshots/settings.png)
+![Overclock's settings under Settings > Plugins](docs/screenshots/settings.png)
 
 Overclock also follows your system's reduced-motion setting. In Stash's SFW content mode it keeps the display, drops the system voice and the red from the bursts, and shows the dead scope without a line on an empty list.
 
-Overclock makes no network requests beyond your own Stash server. Its fonts, Chakra Petch and Share Tech Mono, ship inside the plugin, which is about 100 KB.
+### Insights and Performers Toolkit
+
+Insights and Performers Toolkit are two [plugins by another author](https://gitlab.com/allisless0/stash-plugins). Insights is a stats dashboard on Stash's Stats page. Performers Toolkit adds a page at `/performerstoolkit`, a strip of figures under each performer's name and Stats and Catalog tabs on the performer's page. Both draw themselves in the Flexoki palette their sibling plugins share. With Restyle Insights or Restyle Performers Toolkit on, Overclock puts that plugin on its display: chamfered teal-black panels with frame lines and corner brackets, the names in Chakra Petch, Stash's tabs with a yellow underline under the open one, clipped buttons, cyan links, segmented bars, numbers and labels in Share Tech Mono and a yellow tooltip. Each tab keeps a colour of its own, taken from Overclock's yellow, cyan, red and magenta and four more signals in orange, green, blue and violet. Turn both on to keep the two alike. Insights' heatmaps and its codec, resolution and chart colours keep Insights' own tones. Each setting takes effect on the next page you open. Off, each keeps its own look with two changes: Insights' sidebar clears Overclock's taller navbar, and the count on Performers Toolkit's Catalog tab stays readable on Overclock's dark badge. Overclock is tested with Insights 2.11.0 and Performers Toolkit 0.4.2.
+
+Overclock makes no network requests beyond your own Stash server. It reads its own settings from your Stash, and keeps the two restyle settings in your browser so those plugins' pages never open in the wrong colours. Its fonts, Chakra Petch and Share Tech Mono, ship inside the plugin, which is about 100 KB.
 
 ## Screenshots
 

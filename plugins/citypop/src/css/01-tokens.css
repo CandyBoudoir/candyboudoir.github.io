@@ -31,6 +31,9 @@
   --citypop-pool-hi: #6ff0e6;
   --citypop-pool-deep: #1596b0;
 
+  /* Sky, the info colour */
+  --citypop-sky: #a3bbff;
+
   /* Type and paper */
   --citypop-ink: #1b1145;
   --citypop-cream: #fff6ea;

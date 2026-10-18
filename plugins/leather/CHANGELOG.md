@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0
+
+Insights and Performers Toolkit in leather, for Stash v0.31.1.
+
+- Restyle Insights and Restyle Performers Toolkit settings dress those two plugins by another author in Leather: stitched leather cards, their names in blackletter beside a stud, Stash's tabs with the open one a raised flap with a red edge, dyed leather buttons with blood red for the one that goes ahead, debossed fields and chips with the chosen one pressed into oxblood, leather-strap switches, links with a dashed red underline, and stitched leather tooltips, dialogs and toasts. Their tabs and charts take eight dyes that tell apart on black leather: nickel, blood red, cognac, amber, green, verdigris, steel and plum. Insights' heatmaps and its codec, resolution and chart colours keep their own tones.
+- Both settings start off, and each shows in Settings > Plugins only while its plugin is on. A change takes effect on the next page you open, without a reload, and so do Calm mode and Plain labels.
+- Insights' What works sidebar clears Leather's taller navbar, and the count on Performers Toolkit's Catalog tab stays readable, with the restyle on or off.
+- Tested beside Insights 2.11.0 and Performers Toolkit 0.4.2.
+
 ## 0.1.0
 
 First release, for Stash v0.31.1.
