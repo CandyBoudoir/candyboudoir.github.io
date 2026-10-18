@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Every card in Cherry Pick's front-page rows and in More like this ends at the same height, as in Stash's own rows. A card whose reason fit on one line ended about 20px above one whose reason took two, with its counts and ⋯ menu.
+
 ## 0.1.5
 
 - In a bracket's first round, the unrated ones meet across the bracket's halves: of 16, the one Cherry Pick rates highest meets the ninth, the second the tenth, and so on. They met their neighbour (first against second), so since 0.1.4 rates every entrant from where it finished, a strong scene or performer that lost to the next strongest in the first round was rated at about the middle of your scale.
