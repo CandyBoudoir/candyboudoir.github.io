@@ -6,7 +6,9 @@
 // rebuilds with them (runtime/engine.js).
 //
 // What a page costs StashDB on its first visit (the cache answers later
-// visits for 7 days):
+// visits; after 7 days, StashDB is asked again in the background once the
+// page's lookups are done, and the new answer shows the next time a page
+// asks for it, so a page never changes under the user):
 //   - a performer's Scenes tab: 1 request, their 100 most popular scenes;
 //   - a scene page: 1 request for the scene itself (its held-by count, its
 //     StashDB performers and studio), 1 per performer for up to 3 of them,
@@ -20,7 +22,7 @@ import { onLocation } from '../runtime/location.js'
 import { cache } from '../storage/tier3.js'
 import { PLUGIN_ID } from '../name.js'
 import { useAppState } from '../ui/hooks.js'
-import { CACHE_PREFIX, createStashdbClient, TTL_MS } from './client.js'
+import { CACHE_PREFIX, createStashdbClient, MAX_AGE_MS } from './client.js'
 import { mergeAll } from './merge.js'
 import { performerScenes, scenesById, studioScenes } from './lookups.js'
 import { stashdbIdOf } from './queries.js'
@@ -79,9 +81,10 @@ async function runPage(key, lookups) {
   const cur = s.stashdbLookups?.[key]
   if (cur === 'loading' || cur === 'done') return
   setStatus(key, 'loading')
+  const c = clientOf(s)
   let results = [null]
   try {
-    results = await lookups(clientOf(s))
+    results = await lookups(c)
   } catch (e) {
     console.warn(`${PLUGIN_ID}: StashDB lookup failed`, e)
   }
@@ -101,6 +104,10 @@ async function runPage(key, lookups) {
   setStatus(
     key,
     !got.length && results.length ? 'failed' : whole ? 'done' : 'partial',
+  )
+  // the stale answers the page used, asked for again and only kept
+  c.revalidate().catch((e) =>
+    console.debug(`${PLUGIN_ID}: StashDB refresh failed`, e),
   )
   setTimeout(pruneOnce, 5000)
 }
@@ -255,7 +262,7 @@ export async function clearStashdbCache() {
   store.set({ stashdbData: null, stashdbLookups: {} })
 }
 
-// Lookups older than 7 days go, once a session, after the first lookups.
+// Lookups older than 30 days go, once a session, after the first lookups.
 let pruned = false
 async function pruneOnce() {
   if (pruned) return
@@ -263,7 +270,7 @@ async function pruneOnce() {
   const keys = await cacheKeys()
   const values = await cache.getMany(keys)
   const old = keys.filter(
-    (k, i) => !(Date.now() - (values[i]?.at ?? 0) < TTL_MS),
+    (k, i) => !(Date.now() - (values[i]?.at ?? 0) < MAX_AGE_MS),
   )
   if (old.length) await cache.delMany(old)
 }
