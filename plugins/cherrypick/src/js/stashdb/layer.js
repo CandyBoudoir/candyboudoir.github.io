@@ -220,7 +220,7 @@ export function useFallbackLookups(items) {
   }, [ready, has, !!db])
 }
 
-// The StashDB scene as fetched (with its studio link), by StashDB id.
+// The StashDB scene as fetched (with its store link), by StashDB id.
 let index = { data: undefined, byId: new Map() }
 export function fetchedScene(s, id) {
   if (index.data !== s.stashdbData)

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- A scene you don't have links to where to get it on many more cards: its page on the clip store or tube StashDB lists it on (Clips4Sale, iWantClips, ManyVids, Pornhub and the like), with the store's name on the button. Cherry Pick took only the links StashDB files under Studio, which holds paysites; StashDB files a store's link under the store's own name, so about three in four clip-store scenes showed StashDB alone. A store's page comes before the studio's, and a Wayback Machine copy never counts. A scene already in the StashDB cache keeps its studio link until its answer is 7 days old, so nothing is fetched again at once.
+
 ## 0.1.6
 
 - Every card in Cherry Pick's front-page rows and in More like this ends at the same height, as in Stash's own rows. A card whose reason fit on one line ended about 20px above one whose reason took two, with its counts and ⋯ menu.
