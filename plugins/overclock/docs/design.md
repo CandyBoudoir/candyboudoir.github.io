@@ -84,7 +84,7 @@ Insights writes some colours from its JavaScript as inline styles and SVG attrib
 
 The setting starts off because the two plugins share Flexoki with their sibling plugins, which Overclock leaves alone, so someone who runs several of them keeps one look until they choose otherwise. `overclock.js` keeps the setting in the browser (`localStorage`, `overclock.restylePlugins`), so a page those plugins draw on never opens in Flexoki first. It reads the settings again on every page Stash opens, so changing one needs no reload.
 
-One rule applies with the setting off too: Insights' What works sidebar sticks under the navbar at Stash's height, so Overclock moves it below its own 58px bar. Performers Toolkit measures the navbar for its toast and its phone review bar, so it needs no such rule.
+Two rules apply with the setting off too. Insights' What works sidebar sticks under the navbar at Stash's height, so Overclock moves it below its own 58px bar; Performers Toolkit measures the navbar for its toast and its phone review bar, so it needs no such rule. The count on the toolkit's Catalog tab is a Stash badge that also carries `.pt-badge`, whose near-black type the toolkit sets for its own filled badges, so Overclock gives that count its own badge type, which reads on its dark badge.
 
 The design-system page shows neither plugin.
 

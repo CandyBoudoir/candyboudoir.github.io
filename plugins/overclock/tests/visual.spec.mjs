@@ -43,14 +43,12 @@ for (const entry of SHOTS) {
   })
 }
 
-// Insights and Performers Toolkit on the display, with Restyle Insights and
-// Performers Toolkit on. Insights' Library and Files tabs only; the others
-// count from today (O's this week, growth by month), so their pictures would
-// change by the day. The toolkit's Find tab, and a performer's Stats tab
-// without its charts, which count back from today.
-test.describe('Insights and Performers Toolkit', () => {
+// Insights on the display, with Restyle Insights and Performers Toolkit on.
+// Its Library and Files tabs only; the others count from today (O's this
+// week, growth by month), so their pictures would change by the day.
+test.describe('Insights', () => {
   test.beforeAll(async () => {
-    await usePlugins(PLUGIN_ID, 'Insights', 'PerformersToolkit')
+    await usePlugins(PLUGIN_ID, 'Insights')
     await setPlugin({ restylePlugins: true })
   })
   test.afterAll(async () => {
@@ -71,22 +69,35 @@ test.describe('Insights and Performers Toolkit', () => {
       })
     })
   }
+})
 
-  test("Performers Toolkit's find tab looks the same", async ({ page }) => {
+// Performers Toolkit on the display: its page, and a performer's page open on
+// its Stats tab (whose charts count back from today, so they are masked)
+test.describe('Performers Toolkit', () => {
+  test.beforeAll(async () => {
+    await usePlugins(PLUGIN_ID, 'PerformersToolkit')
+    await setPlugin({ restylePlugins: true })
+  })
+  test.afterAll(async () => {
+    await setPlugin({})
+    await onlyOverclock()
+  })
+
+  test("Performers Toolkit's page looks the same", async ({ page }) => {
     await openPerformersToolkit(page, 'find')
     await settle(page)
-    await expect(page).toHaveScreenshot('performerstoolkit-find.png', {
+    await expect(page).toHaveScreenshot('performers-toolkit.png', {
       mask: [page.locator('.pt-read')],
     })
   })
 
   test("a performer's Stats tab looks the same", async ({ page }) => {
     await openPerformerStats(page, ids.performer)
+    await page.evaluate(() => window.scrollTo(0, 0))
     await settle(page)
-    await expect(page.locator('.ptc')).toHaveScreenshot(
-      'performerstoolkit-stats.png',
-      { mask: [page.locator('.ptc .pt-bars')] },
-    )
+    await expect(page).toHaveScreenshot('performer-stats.png', {
+      mask: [page.locator('.ptc .pt-bars')],
+    })
   })
 })
 

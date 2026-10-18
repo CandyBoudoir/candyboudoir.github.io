@@ -221,6 +221,21 @@ test('SFW mode drops the voice', async ({ page }) => {
   }
 })
 
+// WCAG contrast between two computed colours, which must be opaque.
+function contrast(a, b) {
+  const luminance = (rgb) => {
+    const [r, g, bl] = rgb
+      .match(/[\d.]+/g)
+      .slice(0, 3)
+      .map(Number)
+    const linear = (c) =>
+      c / 255 <= 0.03928 ? c / 255 / 12.92 : ((c / 255 + 0.055) / 1.055) ** 2.4
+    return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(bl)
+  }
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x)
+  return (hi + 0.05) / (lo + 0.05)
+}
+
 // A custom property's computed value on an element
 const tokenOf = (locator, name) =>
   locator.evaluate(
@@ -401,6 +416,42 @@ test.describe('beside Performers Toolkit', () => {
       await setPlugin({})
     }
   })
+
+  // The Catalog tab's count is a Stash badge in a Stash tab, which also
+  // carries Performers Toolkit's badge class and its near-black type. It
+  // shows once a stash-box has answered, which the mock stash-box does not,
+  // so the test shows it, with the restyle off and on.
+  for (const restylePlugins of [false, true]) {
+    test(`the Catalog tab's count reads, closed and open, with the restyle ${restylePlugins ? 'on' : 'off'}`, async ({
+      page,
+    }) => {
+      try {
+        await setPlugin({ restylePlugins })
+        await openPerformerStats(page, (await demoIds()).performer)
+        const tab = page.locator('.pt-tablink[data-pt-tab="catalog"]')
+        const badge = tab.locator('.badge')
+        const reads = async () => {
+          await badge.evaluate((el) => {
+            el.hidden = false
+            el.textContent = '12'
+          })
+          const { color, background } = await badge.evaluate((el) => {
+            const style = getComputedStyle(el)
+            return { color: style.color, background: style.backgroundColor }
+          })
+          expect(contrast(color, background)).toBeGreaterThanOrEqual(4.5)
+        }
+        await reads()
+        await tab.click()
+        await expect(
+          page.locator('.pt-tablink[data-pt-tab="catalog"].active'),
+        ).toBeAttached()
+        await reads()
+      } finally {
+        await setPlugin({})
+      }
+    })
+  }
 
   // As for Insights, against
   // plugins/overclock/tests/performerstoolkit-unmatched-baseline.txt

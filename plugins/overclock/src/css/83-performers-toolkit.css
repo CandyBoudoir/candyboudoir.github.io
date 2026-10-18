@@ -9,11 +9,21 @@
  * It paints itself in the Flexoki palette from custom properties it sets on
  * those roots, from a stylesheet it adds after this one, with single-class
  * or id selectors, so these rules start at `#root` (the toast at its id).
- * All of it waits for the Restyle Insights and Performers Toolkit setting
- * (.overclock-restyle on <html>). Its bars and rings paint from the
+ * All of it but the Catalog tab's count waits for the Restyle Insights and
+ * Performers Toolkit setting (.overclock-restyle on <html>). Its bars and rings paint from the
  * palette, so they follow it; the colours it writes as hex are matched by
  * their rule and moved here.
  */
+
+/* The count on a performer's Catalog tab is a Stash badge that also carries
+   .pt-badge, whose near-black type the toolkit sets for its own filled
+   badges. On Overclock's dark badge that type would vanish, so the count
+   keeps Overclock's badge type and corners whether the setting is on or
+   not. */
+#root .badge.pt-badge {
+  border-radius: 0;
+  color: var(--overclock-text);
+}
 
 /* The palette Insights takes, from 82-insights.css. --acc stays the
    toolkit's: it picks one of these per tab. */
@@ -452,11 +462,13 @@
 }
 
 /* Tags on pictures and badges are clipped mono tags, black on their
-   signal; the tag on the one you picked is yellow */
+   signal; the tag on the one you picked is yellow. The count on the Catalog
+   tab is also a .pt-badge, but a Stash .badge in a Stash tab, which
+   Overclock's own rules already style. */
 .overclock-restyle
   #root
   :is(
-    .pt-badge,
+    .pt-badge:not(.badge),
     .pt-covtag,
     .pt-sctag,
     .pt-cpick,
@@ -480,7 +492,7 @@
   text-transform: uppercase;
 }
 
-.overclock-restyle #root :is(.pt-badge, .pt-covtag, .pt-sctag) {
+.overclock-restyle #root :is(.pt-badge:not(.badge), .pt-covtag, .pt-sctag) {
   color: var(--overclock-black);
 }
 
