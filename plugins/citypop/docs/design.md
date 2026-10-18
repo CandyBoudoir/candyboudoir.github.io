@@ -105,7 +105,7 @@ Stash's SFW content mode keeps the dusk, the suns, the hearts and the cassettes.
 
 [Insights](https://gitlab.com/allisless0/stash-plugins) (a stats dashboard on Stash's Stats page) and Performers Toolkit (a page at `/performerstoolkit`, a strip under a performer's name, Stats and Catalog tabs on the performer's page, a button on the Performers list and a toast) come from another author's suite of plugins. Each paints itself in the Flexoki palette through custom properties it sets on its own roots (`#insights`; `.pt`, `.ptc`, `.pt-strip`, `.pt-entry` and `#pt-toast`): `--bg`, `--bg2`, `--ui` to `--ui3`, `--tx3` to `--hi`, eight accents from `--re` to `--ma`, and in Insights `--up`, `--down` and `--o`. Each adds its stylesheet to the page after City Pop's, so `82-insights.css` and `83-performers-toolkit.css` start their rules at `#root` (or at the id of a root that sits on `<body>`), which outranks theirs.
 
-With the Restyle Insights and Performers Toolkit setting on, `citypop.js` puts `.citypop-restyle` on `<html>`, and both take the dusk:
+Each has a setting of its own, Restyle Insights and Restyle Performers Toolkit. With one on, `citypop.js` puts `.citypop-restyle-insights` or `.citypop-restyle-toolkit` on `<html>`, and that plugin takes the dusk:
 
 - **Their palette** becomes City Pop's: navy panels and night-blue wells, City Pop's text tones, and each tab's colour from the sunset and the pool. In Insights, You is the sunset, Actions pink, Library apricot, Files sky, Metadata health gold, Collection pool turquoise and Movies lilac; in Performers Toolkit, Find and Performers are deep pool blue, History lilac and Sources pool turquoise. O's are pool water, as on the O counter. Their own rules keep painting from these properties, so everything they colour through them follows, their charts and rings included.
 - **Their panels go**: Insights' dashboard and the toolkit's page drop their dark slab, and their cards sit on the dusk like Stash's own pages, where the sun stays down. Cards are navy panels on the hard shadow, with no glow on a tile's colour edge; a toolkit card's coloured top edge still says what it is.
@@ -115,7 +115,9 @@ With the Restyle Insights and Performers Toolkit setting on, `citypop.js` puts `
 
 Insights writes some colours from its JavaScript as inline styles and SVG attributes. Its heatmaps, its codec and resolution colours, the colours of the toolkit plugins' cards and the segments of its splits keep Insights' tones. The empty heatmap cells, the charts' grey grid lines and labels, the growth line and the tag picked in Top tags are matched by their exact inline colour and moved to the dusk; an Insights release that changes one of those values puts that one piece back in its own colour. Performers Toolkit sets its colours in its stylesheet, so its fixed colours (good, bad, link hovers, the navy type on its badges, its toast's kinds) are moved by class.
 
-The setting starts off because the two share their look with their sibling plugins (Movies Toolkit, Scene Toolkit and others), which City Pop leaves alone, so someone who runs several of them keeps one look until they choose otherwise; one setting covers both so they never split. `citypop.js` keeps it in the browser (`localStorage`, `citypop.restylePlugins`), so a page they draw on never opens in Flexoki first, and reads the settings again on every page Stash opens, so changing it needs no reload.
+The settings start off because the two share their look with their sibling plugins (Movies Toolkit, Scene Toolkit and others), which City Pop leaves alone, so someone who runs several of them keeps one look until they choose otherwise. They are two so either plugin can keep its own look; turning both on keeps the pair alike. `citypop.js` keeps them in the browser (`localStorage`, `citypop.restyle`), so a page the plugins draw on never opens in Flexoki first, and reads the settings again on every page Stash opens, so changing one needs no reload.
+
+Each setting shows in Settings > Plugins only while its plugin is installed and on, since it has nothing to restyle otherwise. Stash puts a script tag for each enabled plugin into the page's head (`/plugin/<id>/javascript`) and gives a setting's switch the id `plugin-<plugin>-<setting>`, so one CSS rule per setting hides its row (`:root:not(:has(script[src*='/plugin/Insights/'])) .setting:has([id='plugin-Theme-CityPop-restyleInsights'])`), with no request and no flash. A plugin switched on in Settings shows its setting after the next page load.
 
 One rule applies with the setting off too: Insights' What works sidebar sticks under the navbar at Stash's height, so City Pop moves it below its own 60px bar. Performers Toolkit measures Stash's navbar for its toast and its review bar on a phone, so it needs nothing.
 
@@ -123,13 +125,14 @@ The design-system page shows neither.
 
 ## Settings
 
-| Setting                                 | Key              | Effect                                    |
-| --------------------------------------- | ---------------- | ----------------------------------------- |
-| Calm mode                               | `calmMode`       | Turns off City Pop's animations           |
-| Plain labels                            | `plainCopy`      | Keeps Stash's own wording                 |
-| Restyle Insights and Performers Toolkit | `restylePlugins` | Puts those two plugins in City Pop's dusk |
+| Setting                    | Key                        | Effect                                     |
+| -------------------------- | -------------------------- | ------------------------------------------ |
+| Calm mode                  | `calmMode`                 | Turns off City Pop's animations            |
+| Plain labels               | `plainCopy`                | Keeps Stash's own wording                  |
+| Restyle Insights           | `restyleInsights`          | Puts Insights in City Pop's dusk           |
+| Restyle Performers Toolkit | `restylePerformersToolkit` | Puts Performers Toolkit in City Pop's dusk |
 
-All three default to off, so a fresh install gets the full theme and leaves the two plugins as their author drew them.
+All of them default to off, so a fresh install gets the full theme and leaves the two plugins as their author drew them. The two restyle settings show only while their plugin is on.
 
 ## Coupling to Stash
 
