@@ -3,6 +3,9 @@
 // Stash stores nothing for a setting the user never touched, so `def` is what
 // a missing value means.
 export const MANIFEST_SETTINGS = [
+  // off by default: Cherry Pick's front-page rows, unless the user asks for
+  // one scene ready to play in their place (features/watchThis.jsx)
+  { key: 'watchThis', type: 'BOOLEAN', def: false },
   { key: 'showForYou', type: 'BOOLEAN', def: true },
   { key: 'showFollowRows', type: 'BOOLEAN', def: true },
   { key: 'showHallOfFame', type: 'BOOLEAN', def: true },
