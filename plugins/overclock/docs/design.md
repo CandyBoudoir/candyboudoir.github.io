@@ -109,7 +109,7 @@ Some couplings are specific to Overclock:
 
 - The navbar is 58px (`--overclock-nav-height`) where Stash's is 48.75px. Stash spaces the page by its own height in several places, so `80-pages.css` moves the body padding, the filter sidebar, the sidebar toggle, the sticky detail header, the detail page's 98.75px offsets (the bar plus a 50px tab bar) and the task queue to match, and on an upright phone, where Stash docks the bar at the bottom, the bottom padding and the pagination footer. A Stash release that adds a rule using 48.75px needs the same.
 - Bootstrap and Stash colour buttons per variant and state with high specificity, so each variant sets `--overclock-fill`, `--overclock-edge` and `--overclock-ink` and one base rule applies them with `!important`.
-- Some menus and their items carry Bootstrap's `bg-secondary`, which sets their colour with `!important`, so the menu rules override it with `!important` too.
+- The list toolbars' Sort by and more menus and a scene's Operations menu carry Bootstrap's `bg-secondary` and `text-white` on the menu and each item, which set their colours with `!important`, so Overclock's colours for them, hover and pressed states included, are `!important` too.
 - Some Stash rules outrank a plain class (`div.dropdown-menu`, `div.react-select__control`, favourites, range sliders, the image zoom button), and modals render outside `#root`, so Overclock's rules for those use matching selectors, `#root`, or `:is(#root, .modal)`.
 - A toast's whole message sits in `.toast-header`, so the `STASH` band and message number are pseudo-elements.
 - Stash fades its loader in with an animation, so Calm mode, which stops every animation, sets the loader visible itself.

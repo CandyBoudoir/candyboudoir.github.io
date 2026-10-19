@@ -193,6 +193,54 @@ test.describe('on a touch screen', () => {
   })
 })
 
+// Stash puts Bootstrap's !important bg-secondary and text-white on the list
+// toolbars' Sort by and more menus, a scene's Operations menu and every item
+// in them, which once left those items white with no hover. Each opens on
+// Overclock's panel, its items hover yellow and press black on yellow like
+// every other menu's.
+const SECONDARY_MENUS = [
+  ...['scenes', 'performers', 'images', 'galleries', 'studios', 'tags'].flatMap(
+    (list) => [
+      [
+        `the ${list} list's Sort by menu`,
+        `/${list}`,
+        '.sort-by-select .dropdown-toggle',
+      ],
+      [`the ${list} list's more menu`, `/${list}`, '#more-menu'],
+    ],
+  ),
+  ["a scene's Operations menu", '/scenes/:scene', '#operation-menu'],
+]
+
+for (const [name, path, toggle] of SECONDARY_MENUS) {
+  test(`${name} hovers yellow and presses black on yellow`, async ({
+    page,
+  }) => {
+    await page.goto(url(path))
+    await page.locator(toggle).click()
+    const menu = page.locator('.dropdown-menu.show')
+    await expect(menu).toHaveCSS('background-color', 'rgb(13, 20, 22)')
+    const item = menu
+      .locator('.dropdown-item')
+      .filter({ visible: true })
+      .first()
+    await expect(item).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(item).toHaveCSS('color', 'rgb(232, 239, 238)')
+    await item.hover()
+    await expect(item).toHaveCSS('background-color', 'rgba(243, 230, 0, 0.09)')
+    await expect(item).toHaveCSS('color', 'rgb(243, 230, 0)')
+    // Released off the item, so the press never runs it
+    await page.mouse.down()
+    try {
+      await expect(item).toHaveCSS('background-color', 'rgb(243, 230, 0)')
+      await expect(item).toHaveCSS('color', 'rgb(10, 10, 12)')
+    } finally {
+      await page.mouse.move(0, 0)
+      await page.mouse.up()
+    }
+  })
+}
+
 test('Calm mode and Plain labels take effect', async ({ page }) => {
   try {
     await setPlugin({ calmMode: true, plainCopy: true })
