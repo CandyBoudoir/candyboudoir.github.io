@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.1
+
+Insights 2.12 and Performers Toolkit 0.13 on the display, for Stash v0.31.1.
+
+- Insights 2.12 and Performers Toolkit 0.13 pick up Overclock's colours by themselves, so with the restyle settings off they already sit on its black.
+- With Restyle Insights on, Insights' calendars and its codec and resolution colours take Overclock's signals too. Empty days sit in the dark field; on Insights 2.12 they had vanished into the panel.
+- With Restyle Performers Toolkit on, the toolkit's new Stats tab is on the display: its figures and charts are chamfered panels with corner brackets, titles in Chakra Petch and readouts in Share Tech Mono. Its Stats tab before 0.13 is no longer restyled.
+- Tested beside Insights 2.12.0 and Performers Toolkit 0.13.1.
+
 ## 0.2.0
 
 Insights and Performers Toolkit on the display, for Stash v0.31.1.

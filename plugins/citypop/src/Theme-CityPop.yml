@@ -1,6 +1,6 @@
 name: Theme - City Pop
 description: Airbrushed 1980s dusk from Japanese city pop album covers. Record-sleeve cards, striped sunset suns for ratings, cassettes for audio-only scenes and a late-night FM host's voice.
-version: 0.2.0
+version: 0.2.1
 url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/citypop
 ui:
   css:

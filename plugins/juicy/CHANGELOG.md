@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.1
+
+Insights 2.12 and Performers Toolkit 0.13 in candy, for Stash v0.31.1.
+
+- Insights 2.12 and Performers Toolkit 0.13 pick up Juicy's colours by themselves, so with the restyle settings off they already sit in its plum.
+- With Restyle Insights on, Insights' calendars and its codec and resolution colours take Juicy's palette too, and empty days sit in deep plum.
+- With Restyle Performers Toolkit on, the toolkit's new Stats tab is in candy: its figures and charts are plum stickers on a hard ink drop, with their titles and numbers in Fredoka, and O's stay bubblegum. Its Stats tab before 0.13 is no longer restyled.
+- Tested beside Insights 2.12.0 and Performers Toolkit 0.13.1.
+
 ## 0.5.0
 
 Insights and Performers Toolkit in candy, for Stash v0.31.1.
