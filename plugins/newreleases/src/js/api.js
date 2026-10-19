@@ -7,6 +7,7 @@ export const { Bootstrap, Apollo, ReactRouterDOM, FontAwesomeSolid } =
   api.libraries
 export const ReactSelect = api.libraries.ReactSelect
 export const components = api.components
+export const { loadableComponents } = api
 
 // Stash's own Apollo client: its auth and its address.
 const client = () => utils.StashService.getClient()

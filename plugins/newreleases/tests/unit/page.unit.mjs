@@ -1,11 +1,12 @@
 // The page's pure parts: naming releases with the user's own tags and
-// performers, marking the ones they have, the filters in the address, and
-// when the page starts a check.
+// performers, hiding the ones they have, the filters and page in the
+// address, the order releases arrive in, and when the page starts a check.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import {
   ago,
+  CATALOG_VERSION,
   linkedStudios,
   problems,
   shouldStart,
@@ -16,9 +17,11 @@ import {
   EMPTY,
   formatFilters,
   optionsOf,
+  pageOf,
   parseFilters,
 } from '../../src/js/data/filters.js'
 import {
+  arrange,
   nameKey,
   ownedIndex,
   performerIndex,
@@ -85,6 +88,7 @@ const catalog = {
       studio: '1',
       title: 'Newest',
       date: '2026-10-10',
+      description: 'The newest one.',
       url: 'https://www.lollipop.example/clips/newest/',
       performers: [
         { id: 'y', name: 'Bijou', also: ['Bonbon Bijou'] },
@@ -173,7 +177,7 @@ test('a release is owned by StashID or by its address', () => {
   assert.equal(nameKey('Crème-Brûlée!'), 'cremebrulee')
 })
 
-test('filters live in the address and come back the same', () => {
+test('filters and the page live in the address, as Stash keeps its lists', () => {
   const f = {
     studios: ['1', '2'],
     performers: [
@@ -181,54 +185,127 @@ test('filters live in the address and come back the same', () => {
       { key: '~nougat nova', exclude: true },
     ],
     tags: [{ key: '10', exclude: false }],
-    days: 30,
-    hideOwned: true,
+    page: 3,
+    perPage: 120,
   }
   const search = formatFilters(f, '?other=1')
   assert.equal(
     search,
-    '?other=1&studio=1&studio=2&performer=20&performer=-%7Enougat+nova&tag=10&days=30&owned=hide',
+    '?other=1&studio=1&studio=2&performer=20&performer=-%7Enougat+nova&tag=10&p=3&perPage=120',
   )
   assert.deepEqual(parseFilters(search), f)
   assert.deepEqual(parseFilters(''), EMPTY)
+  assert.deepEqual(EMPTY, {
+    studios: [],
+    performers: [],
+    tags: [],
+    page: 1,
+    perPage: 40,
+  })
   assert.equal(formatFilters(EMPTY), '')
-  // An unknown window is any time
-  assert.equal(parseFilters('?days=12').days, 0)
+  // Nonsense falls back to Stash's defaults, and a page size to at most 1000
+  assert.deepEqual(parseFilters('?p=0&perPage=x'), EMPTY)
+  assert.equal(parseFilters('?perPage=5000').perPage, 1000)
 })
 
-test('filters: any of the studios and performers, all of the tags, none left out', () => {
+test('filters: any of the studios and performers, all of the tags, none left out, none you have', () => {
   const list = present()
   const titles = (f) =>
-    applyFilters(list, { ...EMPTY, ...f }, Date.parse('2026-10-15')).map(
-      (r) => r.title,
-    )
-  assert.deepEqual(titles({}), ['Newest', 'Box one', 'Older'])
-  assert.deepEqual(titles({ studios: ['2'] }), ['Box one'])
-  assert.deepEqual(titles({ performers: [{ key: '20' }, { key: '21' }] }), [
+    applyFilters(list, { ...EMPTY, ...f }).map((r) => r.title)
+  // Older and Newest are held by scenes of yours
+  assert.deepEqual(titles({}), ['Box one'])
+  const all = list.map((r) => ({ ...r, owner: null }))
+  const anyOwner = (f) =>
+    applyFilters(all, { ...EMPTY, ...f }).map((r) => r.title)
+  assert.deepEqual(anyOwner({}), ['Newest', 'Box one', 'Older'])
+  assert.deepEqual(anyOwner({ studios: ['2'] }), ['Box one'])
+  assert.deepEqual(anyOwner({ performers: [{ key: '20' }, { key: '21' }] }), [
     'Newest',
     'Older',
   ])
-  assert.deepEqual(titles({ performers: [{ key: '20', exclude: true }] }), [
+  assert.deepEqual(anyOwner({ performers: [{ key: '20', exclude: true }] }), [
     'Newest',
     'Box one',
   ])
-  assert.deepEqual(titles({ tags: [{ key: '11' }, { key: '10' }] }), [
+  assert.deepEqual(anyOwner({ tags: [{ key: '11' }, { key: '10' }] }), [
     'Box one',
   ])
-  assert.deepEqual(titles({ tags: [{ key: '11', exclude: true }] }), ['Older'])
-  assert.deepEqual(titles({ days: 30 }), ['Newest', 'Box one'])
-  assert.deepEqual(titles({ hideOwned: true }), ['Box one'])
+  assert.deepEqual(anyOwner({ tags: [{ key: '11', exclude: true }] }), [
+    'Older',
+  ])
 })
 
-test('the filter options count their releases, most first', () => {
+test('a page of the list, past the last page showing the last', () => {
+  const list = Array.from({ length: 45 }, (_, i) => i)
+  assert.deepEqual(pageOf(list, { page: 1, perPage: 20 }).items.length, 20)
+  const third = pageOf(list, { page: 3, perPage: 20 })
   assert.deepEqual(
-    optionsOf(present(), 'tags').map((o) => [o.name, o.count]),
+    [third.items, third.page, third.pages],
+    [[40, 41, 42, 43, 44], 3, 3],
+  )
+  assert.equal(pageOf(list, { page: 9, perPage: 20 }).page, 3)
+  assert.deepEqual(pageOf([], { page: 2, perPage: 20 }), {
+    items: [],
+    page: 1,
+    pages: 1,
+  })
+})
+
+test('releases a running check adds go at the end, and nothing moves', () => {
+  const r = (key, date) => ({ key, date })
+  const first = arrange([r('b', '2026-10-18'), r('a', '2026-10-17')])
+  assert.deepEqual(
+    first.list.map((x) => x.key),
+    ['b', 'a'],
+  )
+  // Newer releases arrive: they follow, newest first among themselves
+  const next = arrange(
+    [
+      r('d', '2026-10-19'),
+      r('c', '2026-10-19'),
+      r('b', '2026-10-18'),
+      r('a', '2026-10-17'),
+    ],
+    first.ranks,
+  )
+  assert.deepEqual(
+    next.list.map((x) => x.key),
+    ['b', 'a', 'd', 'c'],
+  )
+  // A release that leaves takes nothing else's place
+  const after = arrange(
+    [r('d', '2026-10-19'), r('a', '2026-10-17'), r('e', '2026-10-16')],
+    next.ranks,
+  )
+  assert.deepEqual(
+    after.list.map((x) => x.key),
+    ['a', 'd', 'e'],
+  )
+})
+
+test('the filter options count the releases you do not have, most first', () => {
+  const all = present().map((r) => ({ ...r, owner: null }))
+  assert.deepEqual(
+    optionsOf(all, 'tags').map((o) => [o.name, o.count]),
     [
       ['Candy', 2],
       ['Glossy', 2],
       ['Fizz', 1],
     ],
   )
+  // Older and Newest are yours
+  assert.deepEqual(
+    optionsOf(present(), 'tags').map((o) => [o.name, o.count]),
+    [
+      ['Candy', 1],
+      ['Glossy', 1],
+    ],
+  )
+})
+
+test('a release carries its description', () => {
+  assert.equal(present()[0].description, 'The newest one.')
+  assert.equal(present()[1].description, null)
 })
 
 test('studios with no StashID on a stash-box Stash knows are listed apart', () => {
@@ -255,10 +332,15 @@ test('studios with no StashID on a stash-box Stash knows are listed apart', () =
   )
 })
 
-test('the page starts a check when the catalog is missing, a day old, unfinished or missing a new favourite', () => {
+test('the page starts a check when the catalog is missing, older, a day old, unfinished or missing a new favourite', () => {
   const now = Date.parse('2026-10-19T12:00:00Z')
   const linked = [{ id: '1' }, { id: '2' }]
-  const run = (finished, favourites = ['1', '2']) => ({
+  const run = (
+    finished,
+    favourites = ['1', '2'],
+    version = CATALOG_VERSION,
+  ) => ({
+    version,
     run: { finished, favourites },
   })
   const recent = new Date(now - 60_000).toISOString()
@@ -274,6 +356,11 @@ test('the page starts a check when the catalog is missing, a day old, unfinished
     true,
   )
   assert.equal(shouldStart({ catalog: run(recent, ['1']), linked, now }), true)
+  // A catalog from an earlier version of the plugin
+  assert.equal(
+    shouldStart({ catalog: run(recent, ['1', '2'], 1), linked, now }),
+    true,
+  )
   // Never with one already queued, or nothing to ask about
   assert.equal(shouldStart({ catalog: null, linked, queued: true, now }), false)
   assert.equal(shouldStart({ catalog: null, linked: [], now }), false)
@@ -328,4 +415,13 @@ test("the manifest runs the task with Stash's Python and serves the catalog fold
   )
   assert.match(name, /TASK_NAME = 'Check for new releases'/)
   assert.match(name, /assets\/catalog\/catalog\.json/)
+  // The page and the task agree on the catalog's version
+  const task = await readFile(
+    new URL('../../src/py/newreleases.py', import.meta.url),
+    'utf8',
+  )
+  assert.equal(
+    Number(/^CATALOG_VERSION = (\d+)$/m.exec(task)[1]),
+    CATALOG_VERSION,
+  )
 })

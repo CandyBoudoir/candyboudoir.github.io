@@ -1,8 +1,9 @@
 // New Releases' test helpers, on top of the ones every plugin shares. The
 // specs add a demo of their own to the shared test Stash and take it away
 // after: favourite studios linked to the mock ThePornDB (theporndb.mjs) and
-// to the mock stash-box's StashDB catalogue, one linked nowhere, two scenes
-// that already hold releases, and performers to name them. The mock
+// to the mock stash-box's StashDB catalogue (whose scenes are too old for
+// the 48-hour window, so it answers with nothing kept), one linked nowhere,
+// two scenes that already hold releases, and performers to name them. The mock
 // ThePornDB is registered as a second stash-box only while they run, so
 // the themes' stash-box screenshots never see it.
 import {
@@ -10,7 +11,7 @@ import {
   setPluginSettings,
   usePlugins,
 } from '../../../tests/stash/helpers.mjs'
-import { ENDPOINT, STASHDB } from '../../../tests/stash/stashbox-data.mjs'
+import { ENDPOINT } from '../../../tests/stash/stashbox-data.mjs'
 import {
   TPDB_API,
   TPDB_ENDPOINT,
@@ -18,6 +19,7 @@ import {
   TPDB_SCENES,
   TPDB_SITES,
   TPDB_STASH_BOX,
+  tpdbFresh,
 } from '../../../tests/stash/theporndb.mjs'
 
 export * from '../../../tests/stash/helpers.mjs'
@@ -27,9 +29,18 @@ export {
   TPDB_SCENES,
   TPDB_SITES,
   TPDB_STASH_BOX,
+  tpdbFresh,
 } from '../../../tests/stash/theporndb.mjs'
 
 export const PLUGIN_ID = 'NewReleases'
+
+// The undeclared settings that point the task at the mock ThePornDB and
+// shorten its pause, honoured only for services on this machine
+export const TEST_SETTINGS = {
+  tpdbEndpoint: TPDB_ENDPOINT,
+  tpdbApi: TPDB_API,
+  pauseSeconds: 0.5,
+}
 export const ROUTE = '/plugins/newreleases'
 export const CHECK = 'Check for new releases'
 
@@ -53,12 +64,18 @@ const DEMO_PERFORMERS = [
   ['Peppermint Patti', []],
 ]
 
-// The releases the demo's scenes hold: one by its ThePornDB StashID, one
-// by the address of its studio's page.
+// The releases the demo's scenes hold, both inside the 48-hour window: one
+// by its ThePornDB StashID, one by the address of its studio's page.
 export const HELD_BY_ID = TPDB_SCENES[TPDB_SITES.lollipop.id][1]
-export const HELD_BY_URL = STASHDB.scenes.find(
-  (s) => s.studio.id === 'sdb-st-fudge',
-)
+export const HELD_BY_URL = TPDB_SCENES[TPDB_SITES.gumball.id][1]
+export const heldUrl = (scene) => scene.url.replace(/\?.*$/, '')
+
+// The releases the page shows the demo: the last 48 hours' from ThePornDB,
+// less the two held
+export const SHOWN = [
+  ...tpdbFresh(TPDB_SITES.lollipop),
+  ...tpdbFresh(TPDB_SITES.gumball),
+].filter((s) => s !== HELD_BY_ID && s !== HELD_BY_URL)
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
@@ -160,11 +177,7 @@ export async function setUpNewReleases({ theme } = {}) {
   await removeDemo()
   const shared = await sharedBoxes()
   await setBoxes([...shared, TPDB_STASH_BOX])
-  await setPluginSettings(PLUGIN_ID, {
-    tpdbEndpoint: TPDB_ENDPOINT,
-    tpdbApi: TPDB_API,
-    pauseSeconds: 0.5,
-  })
+  await setPluginSettings(PLUGIN_ID, TEST_SETTINGS)
   const studios = {}
   for (const [name, links] of DEMO_STUDIOS) {
     const { studioCreate } = await gql(
@@ -196,8 +209,8 @@ export async function setUpNewReleases({ theme } = {}) {
       i: {
         title: HELD_BY_URL.title,
         details: MARK,
-        studio_id: studios['Fudge Factory'],
-        urls: [`https://example.com/scenes/${HELD_BY_URL.id}`],
+        studio_id: studios['Gumball Gallery'],
+        urls: [heldUrl(HELD_BY_URL)],
       },
     },
   )

@@ -1,7 +1,8 @@
 // New Releases under each CandyBoudoir theme. The page draws with Stash's
 // own components and classes, so a theme restyles it: these check that the
-// loader is the theme's loader for Stash, the cards take the theme's scene
-// cards, "In your library" reads over any cover, and no page error shows.
+// loader is the theme's loader for Stash, and that the cards' titles and
+// descriptions and the pagination look as they do on Stash's scene list
+// under the same theme, with no page error.
 import { expect, test } from '@playwright/test'
 import { listPlugins } from '../../../scripts/site.mjs'
 import {
@@ -42,41 +43,29 @@ const loaderLook = (el) => {
   }
 }
 
-// The lowest WCAG contrast between an element's text and the opaque colours
-// behind it: its background colour and every colour of its gradients. 0
-// when nothing behind it is opaque, since the cover would show through.
-const contrastOverCover = (el) => {
-  const rgb = (s) => s.match(/[\d.]+/g).map(Number)
-  const luminance = ([r, g, b]) => {
-    const lin = (c) =>
-      c / 255 <= 0.03928 ? c / 255 / 12.92 : ((c / 255 + 0.055) / 1.055) ** 2.4
-    return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+// How a piece of text or a button looks, as far as a theme decides it
+const look = (el) => {
+  const s = getComputedStyle(el)
+  return {
+    font: s.fontFamily,
+    color: s.color,
+    background: `${s.backgroundColor} ${s.backgroundImage}`,
   }
-  const ratio = (a, b) => {
-    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x)
-    return (hi + 0.05) / (lo + 0.05)
-  }
-  const style = getComputedStyle(el)
-  const opaque = [
-    style.backgroundColor,
-    ...(style.backgroundImage.match(/rgba?\([^)]*\)/g) || []),
-  ]
-    .map(rgb)
-    .filter((c) => (c[3] ?? 1) === 1)
-  if (!opaque.length) return 0
-  const text = rgb(style.color)
-  return Math.min(...opaque.map((c) => ratio(text, c)))
 }
 
+const PAGE_BUTTON =
+  '.pagination-index-container .pagination .btn:not(:disabled):not(.active)'
+
 for (const theme of themes) {
-  test(`with ${theme}: the page takes the theme’s loader, cards and badges`, async ({
+  test(`with ${theme}: the page takes the theme’s loader, cards and pagination`, async ({
     page,
   }) => {
     await usePlugins(PLUGIN_ID, theme)
     const errors = []
     page.on('pageerror', (e) => errors.push(e.message))
 
-    // Stash's own loader under the theme, on a list held back
+    // Stash's own loader under the theme, on a list held back, then the
+    // list itself, two scenes a page so it shows its pagination
     let releaseList
     let holding = false
     const listHeld = new Promise((r) => (releaseList = r))
@@ -87,7 +76,7 @@ for (const theme of themes) {
       }
       await route.continue()
     })
-    await page.goto('/scenes')
+    await page.goto('/scenes?perPage=2')
     await expect.poll(() => holding, { timeout: 15_000 }).toBe(true)
     const stashLoader = page
       .locator('.LoadingIndicator .spinner-border')
@@ -96,20 +85,26 @@ for (const theme of themes) {
     await expect(stashLoader).toBeVisible({ timeout: 15_000 })
     const stashLook = await stashLoader.evaluate(loaderLook)
     releaseList()
-    const stashTitle = await page
-      .locator('.scene-card .card-section-title')
-      .first()
-      .evaluate((el) => getComputedStyle(el).fontFamily)
+    const stashCard = page.locator('.scene-card').first()
+    await stashCard.waitFor()
+    await page.mouse.move(0, 0)
+    const stash = {
+      title: await stashCard.locator('.card-section-title').evaluate(look),
+      description: await stashCard
+        .locator('.scene-card__description')
+        .evaluate(look),
+      pageButton: await page.locator(PAGE_BUTTON).first().evaluate(look),
+    }
     await page.unroute('**/graphql')
 
-    // The page's, while its catalog is held back
+    // The page's loader, while its catalog is held back
     let releaseCatalog
     const catalogHeld = new Promise((r) => (releaseCatalog = r))
     await page.route('**/assets/catalog/catalog.json', async (route) => {
       await catalogHeld
       await route.continue()
     })
-    await page.goto(ROUTE)
+    await page.goto(`${ROUTE}?perPage=2`)
     const loader = page.locator(
       '.newreleases-page .LoadingIndicator .spinner-border',
     )
@@ -117,23 +112,19 @@ for (const theme of themes) {
     expect(await loader.evaluate(loaderLook)).toEqual(stashLook)
     releaseCatalog()
 
+    // Its cards and pagination are the theme's, as on Stash's scene list
     const card = page.locator('.newreleases-card').first()
     await expect(card).toBeVisible({ timeout: 15_000 })
-    // Its cards are the theme's scene cards
+    await page.mouse.move(0, 0)
+    expect(await card.locator('.card-section-title').evaluate(look)).toEqual(
+      stash.title,
+    )
     expect(
-      await card
-        .locator('.card-section-title')
-        .evaluate((el) => getComputedStyle(el).fontFamily),
-    ).toBe(stashTitle)
-
-    // "In your library" reads over any cover, hovered or not
-    const owned = page.locator('.newreleases-owned').first()
-    const badge = owned.locator('.newreleases-owned-badge .badge')
-    await expect(badge).toBeVisible()
-    expect(await badge.evaluate(contrastOverCover)).toBeGreaterThanOrEqual(4.5)
-    await owned.hover()
-    await expect(badge).toHaveCSS('opacity', '1')
-    await expect(badge).toBeVisible()
+      await card.locator('.scene-card__description').evaluate(look),
+    ).toEqual(stash.description)
+    expect(await page.locator(PAGE_BUTTON).first().evaluate(look)).toEqual(
+      stash.pageButton,
+    )
     expect(errors).toEqual([])
   })
 }

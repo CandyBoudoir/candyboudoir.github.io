@@ -1,10 +1,10 @@
 // A release as a card in Stash's own SceneCard markup (card grid-card
-// scene-card, thumbnail section, card section), so every theme styles it
-// like a scene card. The cover and title open the release on the studio's
-// own page in a new tab; the studio links to the user's studio, the badge to
-// the scene that holds the release, and the performers and tags add
-// themselves to the filters. Stash lets videos play only from Stash itself,
-// so there is no trailer: the studio's page has it.
+// scene-card, thumbnail section, card section, the date and a three-line
+// description), so every theme styles it like a scene card. The cover and
+// title open the release on the studio's own page in a new tab; the studio
+// links to the user's studio, and the performers and tags add themselves
+// to the filters. Stash lets videos play only from Stash itself, so there is
+// no trailer: the studio's page has it.
 import { components, ReactRouterDOM } from '../api.js'
 
 const { Link } = ReactRouterDOM
@@ -19,19 +19,6 @@ export function fmtDuration(seconds) {
   const m = Math.floor((s % 3600) / 60)
   const pad = (n) => String(n).padStart(2, '0')
   return h ? `${h}:${pad(m)}:${pad(s % 60)}` : `${m}:${pad(s % 60)}`
-}
-
-// A release date as the user's browser writes dates: Oct 18, 2026
-export function fmtDate(date) {
-  if (!date) return null
-  const t = Date.parse(`${date.slice(0, 10)}T00:00:00Z`)
-  if (!Number.isFinite(t)) return date
-  return new Date(t).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-  })
 }
 
 // Stash shows a studio's logo over the cover, or its name when it has none.
@@ -56,9 +43,22 @@ function StudioOverlay({ studio }) {
   )
 }
 
-function Title({ text }) {
+// Stash's TruncatedText, which shows the rest on hover, or the text
+// clamped to its lines where Stash has not registered it yet.
+function Truncated({ text, lineCount, className }) {
   const { TruncatedText } = components
-  return TruncatedText ? <TruncatedText text={text} lineCount={2} /> : text
+  if (TruncatedText)
+    return (
+      <TruncatedText text={text} lineCount={lineCount} className={className} />
+    )
+  return (
+    <div
+      className={`TruncatedText${className ? ` ${className}` : ''}`}
+      style={{ WebkitLineClamp: lineCount }}
+    >
+      {text}
+    </div>
+  )
 }
 
 const MAX_TAGS = 6
@@ -80,12 +80,12 @@ export function ReleaseCard({ release, width, zoom = 1, onPick }) {
   )
   const title = (
     <h5 className="card-section-title flex-aligned">
-      <Title text={r.title || 'Untitled'} />
+      <Truncated text={r.title || 'Untitled'} lineCount={2} />
     </h5>
   )
   return (
     <div
-      className={`card grid-card scene-card zoom-${zoom} newreleases-card${r.owner ? ' newreleases-owned' : ''}`}
+      className={`card grid-card scene-card zoom-${zoom} newreleases-card`}
       style={width ? { width: `${width}px` } : undefined}
       data-release={r.key}
     >
@@ -108,17 +108,6 @@ export function ReleaseCard({ release, width, zoom = 1, onPick }) {
           </div>
         ) : null}
         <StudioOverlay studio={r.studio} />
-        {r.owner ? (
-          <Link
-            className="newreleases-owned-badge"
-            to={`/scenes/${r.owner}`}
-            title="Open your scene"
-          >
-            {/* a badge of its own, so it takes the theme's badge colours
-                and not its link colour */}
-            <span className="badge badge-primary">In your library</span>
-          </Link>
-        ) : null}
       </div>
       <div className="card-section">
         {r.url ? (
@@ -129,7 +118,7 @@ export function ReleaseCard({ release, width, zoom = 1, onPick }) {
           title
         )}
         <div className="scene-card__details">
-          <span className="scene-card__date">{fmtDate(r.date)}</span>
+          <span className="scene-card__date">{r.date}</span>
           {r.performers.length ? (
             <div className="newreleases-performers">
               {r.performers.map((p, i) => (
@@ -146,6 +135,13 @@ export function ReleaseCard({ release, width, zoom = 1, onPick }) {
                 </span>
               ))}
             </div>
+          ) : null}
+          {r.description ? (
+            <Truncated
+              className="scene-card__description"
+              text={r.description}
+              lineCount={3}
+            />
           ) : null}
           {r.url ? null : (
             <div className="text-muted newreleases-no-link">

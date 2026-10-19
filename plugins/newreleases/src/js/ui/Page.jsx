@@ -1,18 +1,28 @@
 // The New Releases page, at /plugins/newreleases. It shows the catalog the
 // task keeps at once, starts the task when the catalog is a day old (or a
-// studio was favourited since), and fills in as the task saves each studio.
-// Loading waits behind Suspense boundaries with Stash's own loader: the
+// studio was favourited since), and fills in as the task saves each studio,
+// adding what arrives at the end of the list. Releases the user has never
+// show. It pages as Stash's lists do, with Stash's own pagination. Loading
+// waits behind Suspense boundaries with Stash's own loader: the
 // stash-boxes, favourites and catalog first, then the user's tags,
-// performers and scenes that name and mark the releases.
-import { Bootstrap, React, ReactRouterDOM } from '../api.js'
+// performers and scenes that name the releases and hide the ones they have.
+import {
+  components,
+  loadableComponents,
+  React,
+  ReactRouterDOM,
+  utils,
+} from '../api.js'
 import { ago, linkedStudios, problems, shouldStart } from '../data/catalog.js'
 import {
   applyFilters,
   formatFilters,
   optionsOf,
+  pageOf,
   parseFilters,
 } from '../data/filters.js'
 import {
+  arrange,
   ownedIndex,
   performerIndex,
   presentReleases,
@@ -34,11 +44,8 @@ import { ReleaseCard } from './ReleaseCard.jsx'
 import { Safe } from './Safe.jsx'
 import { Toolbar } from './Toolbar.jsx'
 
-const { Button } = Bootstrap
 const { Link, useHistory, useLocation } = ReactRouterDOM
 
-// Cards per step of Show more.
-const STEP = 60
 // How often the page reads the catalog again while the task runs.
 const POLL = 2500
 const DONE = new Set(['FINISHED', 'FAILED', 'CANCELLED'])
@@ -259,8 +266,10 @@ function useUrlFilters() {
   return [filters, set]
 }
 
-// The scenes that hold releases by StashID: read with the library at
-// first, then again in the background as the task adds releases.
+// The scenes that hold releases by StashID, and which releases that
+// covers: read with the library at first, then again in the background as
+// the task adds releases. A release waits until it is covered, so one the
+// user has never shows, even for a moment.
 function useHeld(visit, catalog) {
   const first = read(`${visit}held`, () => heldScenes(catalog))
   const [held, setHeld] = React.useState(first)
@@ -270,7 +279,7 @@ function useHeld(visit, catalog) {
     saved.current = catalog?.saved
     let live = true
     heldScenes(catalog)
-      .then((list) => live && setHeld(list))
+      .then((next) => live && setHeld(next))
       .catch(() => {})
     return () => {
       live = false
@@ -279,13 +288,73 @@ function useHeld(visit, catalog) {
   return held
 }
 
-const PaginationIndex = ({ shown, total }) => (
-  <span className="filter-container text-muted paginationIndex center-text">
-    {`${total ? 1 : 0}-${shown.toLocaleString()} of ${total.toLocaleString()}`}
-  </span>
-)
+// Stash's own Pagination and PaginationIndex (List/Pagination.tsx), which
+// Stash registers once its list code has loaded; Releases loads it first.
+// Where a Stash version has not registered them, the same markup.
+function Pager({ total, page, perPage, onPage, placement }) {
+  const { Pagination } = components
+  if (Pagination)
+    return (
+      <Pagination
+        itemsPerPage={perPage}
+        currentPage={page}
+        totalItems={total}
+        onChangePage={onPage}
+        pagePopupPlacement={placement}
+      />
+    )
+  const pages = Math.ceil(total / perPage)
+  if (pages <= 1) return <div />
+  const button = (label, to, disabled, title) => (
+    <button
+      type="button"
+      className="btn btn-secondary"
+      disabled={disabled}
+      title={title}
+      onClick={() => onPage(to)}
+    >
+      {label}
+    </button>
+  )
+  return (
+    <div className="pagination btn-group">
+      {button('«', 1, page === 1, 'First')}
+      {button('<', page - 1, page === 1, 'Previous')}
+      <button type="button" className="btn btn-secondary page-count" disabled>
+        {`${page} of ${pages}`}
+      </button>
+      {button('>', page + 1, page === pages, 'Next')}
+      {button('»', pages, page === pages, 'Last')}
+    </div>
+  )
+}
+
+function Index({ total, page, perPage }) {
+  const { PaginationIndex } = components
+  if (PaginationIndex)
+    return (
+      <PaginationIndex
+        itemsPerPage={perPage}
+        currentPage={page}
+        totalItems={total}
+      />
+    )
+  const first = Math.min((page - 1) * perPage + 1, total)
+  const last = Math.min(first + perPage - 1, total)
+  return (
+    <span className="filter-container text-muted paginationIndex center-text">
+      {`${first.toLocaleString()}-${last.toLocaleString()} of ${total.toLocaleString()}`}
+    </span>
+  )
+}
+
+// Stash's scene list code, which registers Pagination, PaginationIndex and
+// TruncatedText: a visit straight to this page has not loaded it.
+const loadStashLists = () =>
+  utils.loadComponents([loadableComponents.SceneList]).catch(() => {})
 
 function Releases({ visit, setup, catalog, running }) {
+  read(`${visit}lists`, loadStashLists)
   const library = read(`${visit}library`, () => loadLibrary(setup.favourites))
   const held = useHeld(visit, catalog)
   const indexes = React.useMemo(
@@ -296,18 +365,23 @@ function Releases({ visit, setup, catalog, running }) {
     [library],
   )
   const owned = React.useMemo(
-    () => ownedIndex([...library.scenes, ...held]),
+    () => ownedIndex([...library.scenes, ...held.scenes]),
     [library, held],
   )
-  const releases = React.useMemo(
-    () =>
+  // Newest first on arrival; what a running check adds goes at the end
+  const ranks = React.useRef(new Map())
+  const releases = React.useMemo(() => {
+    const { list, ranks: next } = arrange(
       presentReleases(catalog, {
         studios: setup.favourites,
         ...indexes,
         owned,
-      }),
-    [catalog, setup.favourites, indexes, owned],
-  )
+      }).filter((r) => held.keys.has(r.key)),
+      ranks.current,
+    )
+    ranks.current = next
+    return list
+  }, [catalog, setup.favourites, indexes, owned, held])
   const [filters, setFilters] = useUrlFilters()
   const shown = React.useMemo(
     () => applyFilters(releases, filters),
@@ -321,9 +395,7 @@ function Releases({ visit, setup, catalog, running }) {
     () => optionsOf(releases, 'tags'),
     [releases],
   )
-  const [limit, setLimit] = React.useState(STEP)
-  const filterKey = formatFilters(filters)
-  React.useEffect(() => setLimit(STEP), [filterKey])
+  const { items, page } = pageOf(shown, filters)
   const [gridRef, gridWidth] = useWidth()
   const width = cardWidth(gridWidth, 1)
 
@@ -332,12 +404,19 @@ function Releases({ visit, setup, catalog, running }) {
     if (filters[kind].some((p) => p.key === key && !p.exclude)) return
     setFilters({
       ...filters,
+      page: 1,
       [kind]: [
         ...filters[kind].filter((p) => p.key !== key),
         { key, exclude: false },
       ],
     })
   }
+  // As on Stash's lists, a new page starts at the top
+  const toPage = (to) => {
+    setFilters({ ...filters, page: to })
+    window.scrollTo(0, 0)
+  }
+  const paging = { total: shown.length, page, perPage: filters.perPage }
 
   if (!releases.length && running)
     return <Loading message="Asking your stash-boxes…" />
@@ -350,15 +429,15 @@ function Releases({ visit, setup, catalog, running }) {
         filters={filters}
         onChange={setFilters}
       />
-      <PaginationIndex
-        shown={Math.min(limit, shown.length)}
-        total={shown.length}
-      />
+      <div className="pagination-index-container">
+        <Pager {...paging} onPage={toPage} />
+        <Index {...paging} />
+      </div>
       <div
         className="row justify-content-center newreleases-grid"
         ref={gridRef}
       >
-        {shown.slice(0, limit).map((r) => (
+        {items.map((r) => (
           <ReleaseCard
             key={r.key}
             release={r}
@@ -368,11 +447,11 @@ function Releases({ visit, setup, catalog, running }) {
           />
         ))}
       </div>
-      {shown.length > limit ? (
-        <div className="newreleases-more">
-          <Button variant="secondary" onClick={() => setLimit((n) => n + STEP)}>
-            Show more
-          </Button>
+      {shown.length > filters.perPage ? (
+        <div className="pagination-footer-container">
+          <div className="pagination-footer">
+            <Pager {...paging} onPage={toPage} placement="top" />
+          </div>
         </div>
       ) : null}
     </>

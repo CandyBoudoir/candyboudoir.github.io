@@ -4,6 +4,7 @@
 // job queue. The one thing it writes is the task it starts.
 import { gql, mutate, query } from '../api.js'
 import { CATALOG_URL, PLUGIN_ID, TASK_NAME } from '../name.js'
+import { releaseKey } from './match.js'
 
 const SETUP = gql`
   query NewReleasesSetup {
@@ -154,15 +155,20 @@ function heldQuery(n) {
   return gql(`query NewReleasesHeld(${vars}) {\n${fields}\n}`)
 }
 
+// The scenes that hold any of a catalog's releases by StashID, and the
+// releases that answer covers, as release keys (match.js), so the page
+// shows a release only once it knows whether the user has it.
 export async function heldScenes(catalog) {
   const byEndpoint = new Map()
+  const keys = new Set()
   for (const r of catalog?.releases || []) {
     if (!r.endpoint || !r.id) continue
     const list = byEndpoint.get(r.endpoint) || []
     list.push(r.id)
     byEndpoint.set(r.endpoint, list)
+    keys.add(releaseKey(r))
   }
-  if (!byEndpoint.size) return []
+  if (!byEndpoint.size) return { scenes: [], keys }
   const entries = [...byEndpoint]
   const variables = {}
   entries.forEach(([endpoint, ids], i) => {
@@ -170,7 +176,10 @@ export async function heldScenes(catalog) {
     variables[`i${i}`] = ids
   })
   const data = await query(heldQuery(entries.length), variables)
-  return entries.flatMap((_, i) => data[`s${i}`]?.scenes || [])
+  return {
+    scenes: entries.flatMap((_, i) => data[`s${i}`]?.scenes || []),
+    keys,
+  }
 }
 
 // The user's tags and performers, and their scenes from the favourite

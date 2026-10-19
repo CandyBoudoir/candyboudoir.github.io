@@ -24,6 +24,7 @@ import { STASHDB } from '../../../../tests/stash/stashbox-data.mjs'
 import {
   TPDB_SCENES,
   TPDB_SITES,
+  tpdbFresh,
   TPDB_UNKNOWN,
   handleTpdb,
 } from '../../../../tests/stash/theporndb.mjs'
@@ -63,15 +64,29 @@ const readBody = (req) =>
     req.on('end', () => done(raw ? JSON.parse(raw) : {}))
   })
 
-// A stash-box answering queryScenes from the StashDB catalogue: scenes of
-// any of the studios asked for, newest first.
+const daysAgo = (n) =>
+  new Date(Date.now() - n * 24 * 3600_000).toISOString().slice(0, 10)
+
+// The StashDB catalogue's scenes, released today, yesterday, four and nine
+// days ago in turn, so a check keeps half of them
+const BOX_SCENES = STASHDB.scenes.map(
+  ({ popularity, ...s }, i) => (
+    void popularity,
+    { ...s, release_date: daysAgo([0, 1, 4, 9][i % 4]) }
+  ),
+)
+const boxFresh = (ids) =>
+  BOX_SCENES.filter(
+    (s) => ids.includes(s.studio.id) && s.release_date >= daysAgo(1),
+  )
+
+// A stash-box answering queryScenes from those: scenes of any of the
+// studios asked for, newest first.
 function boxScenes(input) {
   const ids = new Set(input?.studios?.value || [])
-  return STASHDB.scenes
-    .filter((s) => ids.has(s.studio?.id))
+  return BOX_SCENES.filter((s) => ids.has(s.studio?.id))
     .sort((a, b) => b.release_date.localeCompare(a.release_date))
     .slice(0, input?.per_page ?? 25)
-    .map(({ popularity, ...s }) => (void popularity, s))
 }
 
 before(async () => {
@@ -236,7 +251,7 @@ test(
     const { answer } = await runTask()
     assert.equal(answer.error, null)
     const catalog = await readCatalog()
-    assert.equal(catalog.version, 1)
+    assert.equal(catalog.version, 2)
     assert.equal(catalog.run.state, 'done')
     assert.deepEqual(catalog.run.favourites, [
       '1',
@@ -252,13 +267,13 @@ test(
     assert.equal(catalog.studios['1'].siteId, TPDB_SITES.lollipop.id)
     assert.equal(
       releasesOf(catalog, 1).length,
-      TPDB_SCENES[TPDB_SITES.lollipop.id].length,
+      tpdbFresh(TPDB_SITES.lollipop).length,
     )
     // Linked to both, Gumball Gallery comes from ThePornDB
     assert.equal(catalog.studios['2'].endpoint, `${base}/tpdb/graphql`)
     assert.equal(
       releasesOf(catalog, 2).length,
-      TPDB_SCENES[TPDB_SITES.gumball.id].length,
+      tpdbFresh(TPDB_SITES.gumball).length,
     )
     // An unknown site is noted and asked again in a week
     assert.match(catalog.studios['4'].error, /^not found on ThePornDB/)
@@ -283,7 +298,10 @@ test(
       lullaby.url,
       'https://lollipop-lounge.example/clips/lollipop-lullaby',
     )
-    assert.equal(lullaby.image, source.posters.medium)
+    // ThePornDB's landscape copy, never its portrait poster
+    assert.equal(lullaby.image, source.background.medium)
+    assert.notEqual(lullaby.image, source.posters.medium)
+    assert.equal(lullaby.description, source.description)
     assert.deepEqual(
       lullaby.performers.map((p) => [p.id, p.name]),
       source.performers.map((p) => [p.parent.id, p.name]),
@@ -314,12 +332,13 @@ test(
     assert.equal(boxRequests[0].apiKey, 'box-key')
     const toffee = releasesOf(catalog, 6)
     const fudge = releasesOf(catalog, 5)
+    // Only those of the last 48 hours
     assert.equal(
       toffee.length + fudge.length,
-      STASHDB.scenes.filter((s) =>
-        ['sdb-st-fudge', 'sdb-st-toffee'].includes(s.studio.id),
-      ).length,
+      boxFresh(['sdb-st-fudge', 'sdb-st-toffee']).length,
     )
+    assert.ok(toffee.length && fudge.length)
+    assert.ok(fudge.every((r) => r.description))
     assert.ok(
       toffee.every((r) =>
         /^https:\/\/clips\.example\/clip\/[\w-]+$/.test(r.url),
@@ -480,6 +499,89 @@ test(
     const catalog = await readCatalog()
     assert.equal(catalog.boxes[`${base}/tpdb/graphql`].error, 'no API key')
     assert.equal(boxRequests.length, 1)
+  },
+)
+
+test(
+  'a check keeps the last 48 hours, and the catalog holds each release until it is four days old',
+  { skip: !hasPython },
+  async () => {
+    await runTask()
+    const ids = (c, id) =>
+      releasesOf(c, id)
+        .map((r) => r.title)
+        .sort()
+    const first = await readCatalog()
+    // Taffy Pull is three days old: past 48 hours, never taken
+    assert.ok(!ids(first, 1).includes('Taffy Pull'))
+    assert.deepEqual(
+      ids(first, 1),
+      tpdbFresh(TPDB_SITES.lollipop)
+        .map((r) => r.title)
+        .sort(),
+    )
+    // Two releases a check took earlier: one three days old, held, and one
+    // five days old, dropped
+    const held = {
+      ...releasesOf(first, 1)[0],
+      id: 'held',
+      title: 'Held',
+      date: daysAgo(3),
+    }
+    const gone = {
+      ...releasesOf(first, 2)[0],
+      id: 'gone',
+      title: 'Gone',
+      date: daysAgo(5),
+    }
+    first.releases.push(held, gone)
+    await writeFile(catalogFile(), JSON.stringify(first))
+    await age(21)
+    await runTask()
+    const next = await readCatalog()
+    assert.ok(ids(next, 1).includes('Held'))
+    assert.ok(!ids(next, 2).includes('Gone'))
+    assert.equal(
+      next.studios['1'].count,
+      tpdbFresh(TPDB_SITES.lollipop).length + 1,
+    )
+  },
+)
+
+test(
+  'a catalog from version 1 keeps its site ids and nothing else',
+  { skip: !hasPython },
+  async () => {
+    await mkdir(join(dir, 'catalog'), { recursive: true })
+    await writeFile(
+      catalogFile(),
+      JSON.stringify({
+        version: 1,
+        boxes: {},
+        studios: {
+          1: {
+            name: 'Lollipop Lounge',
+            stashId: TPDB_SITES.lollipop.uuid,
+            siteId: TPDB_SITES.lollipop.id,
+            checked: new Date().toISOString().replace(/\.\d+Z$/, 'Z'),
+          },
+        },
+        releases: [{ id: 'ancient', studio: '1', date: '2020-01-01' }],
+        run: { finished: new Date().toISOString() },
+      }),
+    )
+    await runTask()
+    const catalog = await readCatalog()
+    assert.equal(catalog.version, 2)
+    assert.ok(!catalog.releases.some((r) => r.id === 'ancient'))
+    const paths = (await tpdbLog()).requests.map((r) => r.path)
+    // Its site id kept, Lollipop Lounge is asked about once
+    assert.ok(!paths.includes(`/sites/${TPDB_SITES.lollipop.uuid}`))
+    assert.ok(paths.includes(`/sites/${TPDB_SITES.gumball.uuid}`))
+    assert.equal(
+      releasesOf(catalog, 1).length,
+      tpdbFresh(TPDB_SITES.lollipop).length,
+    )
   },
 )
 

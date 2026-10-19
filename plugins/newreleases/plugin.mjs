@@ -14,7 +14,7 @@ export const id = 'NewReleases'
 export const title = 'New Releases'
 // The line about the plugin in the repo's README (scripts/readme.mjs).
 export const summary =
-  'The newest releases from your favourite studios, from ThePornDB and your other stash-boxes, filtered by tag, performer and studio, each linked to the studio to buy it.'
+  'What your favourite studios released in the last 48 hours, from ThePornDB and your other stash-boxes, filtered by tag, performer and studio, each linked to the studio to buy it, leaving out what you have.'
 // Still being built: built and tested, never published or released.
 export const incubating = true
 // Paths in this folder whose changes alter the plugin zip. Tests and docs are

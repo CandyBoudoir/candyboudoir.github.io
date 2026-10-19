@@ -15,6 +15,10 @@ the studio carries a ThePornDB StashID, since it is current for clip sites
 where StashDB lags; else the first other stash-box it is linked to, which
 answers for all of its studios in one queryScenes request.
 
+The catalog is a short window: a check keeps the releases dated within the
+last 48 hours, and each stays until it is four days old, so the page shows
+what came out this week and nothing older.
+
 Polite by design: one request at a time with a pause between them, the same
 address for the same studio on every install, an identifying User-Agent and
 the user's own key. A 429, a 5xx, a Cloudflare challenge or no answer stops
@@ -43,7 +47,9 @@ TPDB_HOST = 'theporndb.net'
 TPDB_API = 'https://api.theporndb.net'
 
 # Releases asked for: per ThePornDB studio, and per stash-box request, which
-# carries every studio linked to that box.
+# carries every studio linked to that box. The check keeps those of the
+# last 48 hours; asking for a fixed number keeps the address the same on
+# every install, day after day.
 PER_STUDIO = 25
 PER_BOX = 100
 
@@ -55,10 +61,19 @@ TIMEOUT = 30
 DAILY = timedelta(hours=20)
 WEEKLY = timedelta(days=7)
 QUIET = timedelta(days=90)
+# A check keeps releases dated within the last 48 hours, and the catalog
+# holds each for 48 more. Release dates are days, so each limit is the day
+# it falls on.
+FRESH = timedelta(hours=48)
+KEPT = timedelta(hours=96)
+# The longest description kept: the card shows three lines of it.
+DESCRIPTION = 1000
 # How long a lock from a run that never finished holds off the next one.
 STALE_LOCK = timedelta(hours=2)
 
-CATALOG_VERSION = 1
+# 2: the 48-hour window, descriptions and landscape covers. A catalog from
+# version 1 keeps its studios' site ids and nothing else.
+CATALOG_VERSION = 2
 
 # Undeclared settings, for the tests only: tpdbEndpoint names a stash-box to
 # treat as ThePornDB, with its REST API at tpdbApi, and pauseSeconds
@@ -401,6 +416,7 @@ query NewReleasesScenes($input: SceneQueryInput!) {
       title
       release_date
       duration
+      details
       images { url width height }
       studio { id name parent { id name } }
       performers { performer { id name disambiguation } }
@@ -484,18 +500,36 @@ def first(*values):
     return None
 
 
+def sizes(value):
+    return value if isinstance(value, dict) else {}
+
+
 def tpdb_image(scene):
-    """ThePornDB's own thumbnail, sized for a grid, before the studio's
-    full-size picture."""
-    posters = scene.get('posters')
-    sized = posters if isinstance(posters, dict) else {}
+    """The scene's landscape picture as ThePornDB resizes it for a grid,
+    then the studio's full-size one. ThePornDB's posters are portrait
+    (800 x 1200 at medium), which a scene card would crop to a strip."""
+    background = sizes(scene.get('background'))
+    posters = sizes(scene.get('posters'))
     return first(
-        sized.get('medium'),
-        sized.get('large'),
-        sized.get('small'),
-        scene.get('poster') if isinstance(scene.get('poster'), str) else None,
+        background.get('medium'),
+        background.get('large'),
+        background.get('full'),
         scene.get('image'),
+        posters.get('large'),
+        posters.get('medium'),
     )
+
+
+def description(text):
+    """A description as plain text, whitespace folded, at most DESCRIPTION
+    characters."""
+    if not isinstance(text, str):
+        return None
+    text = re.sub(r'<[^>]+>', ' ', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    if len(text) > DESCRIPTION:
+        text = text[: DESCRIPTION - 1].rstrip() + '\u2026'
+    return text or None
 
 
 def as_seconds(value):
@@ -535,6 +569,7 @@ def tpdb_release(scene, endpoint, studio_id):
         'title': scene.get('title') or '',
         'date': (scene.get('date') or '')[:10] or None,
         'duration': as_seconds(scene.get('duration')),
+        'description': description(scene.get('description')),
         'url': clean_url(scene.get('url')),
         'image': tpdb_image(scene),
         'performers': performers,
@@ -567,6 +602,7 @@ def box_release(scene, endpoint, studio_id):
         'date': (scene.get('release_date') or scene.get('date') or '')[:10]
         or None,
         'duration': as_seconds(scene.get('duration')),
+        'description': description(scene.get('details')),
         'url': store_link(scene.get('urls')),
         'image': box_image(scene.get('images')),
         'performers': performers,
@@ -576,6 +612,18 @@ def box_release(scene, endpoint, studio_id):
             if t and t.get('name')
         ],
     }
+
+
+def since(now, span):
+    """The first release date inside a span back from now, as YYYY-MM-DD."""
+    return (now - span).strftime('%Y-%m-%d')
+
+
+def fresh(releases, now):
+    """The releases dated within the last 48 hours (later dates count too:
+    a studio may list a release before its day)."""
+    cut = since(now, FRESH)
+    return [r for r in releases if r and (r.get('date') or '') >= cut]
 
 
 def newest(releases):
@@ -597,14 +645,23 @@ class Store:
         self.lock = os.path.join(self.dir, 'run.lock')
 
     def load(self):
+        empty = {'version': CATALOG_VERSION, 'boxes': {}, 'studios': {}, 'releases': []}
         try:
             with open(self.path, encoding='utf-8') as f:
                 catalog = json.load(f)
-            if catalog.get('version') == CATALOG_VERSION:
-                return catalog
         except (OSError, ValueError):
-            pass
-        return {'version': CATALOG_VERSION, 'boxes': {}, 'studios': {}, 'releases': []}
+            return empty
+        if catalog.get('version') == CATALOG_VERSION:
+            return catalog
+        # An older catalog: keep each studio's ThePornDB site id, so the
+        # next check asks once per studio, and ask about every studio again
+        for sid, old in (catalog.get('studios') or {}).items():
+            if old.get('siteId') is not None and old.get('stashId'):
+                empty['studios'][sid] = {
+                    'stashId': old['stashId'],
+                    'siteId': old['siteId'],
+                }
+        return empty
 
     def save(self, catalog, now):
         catalog['saved'] = iso(now)
@@ -710,8 +767,19 @@ class Run:
         log('w', '%s: %s; asking it again after %s' % (service.name, reason, state['pausedUntil']))
 
     def set_releases(self, studio_id, releases):
-        kept = [r for r in self.catalog['releases'] if r.get('studio') != studio_id]
-        self.catalog['releases'] = kept + [r for r in releases if r]
+        """A studio's fresh releases, plus those of its releases the catalog
+        still holds that the answer no longer lists."""
+        new = fresh(releases, self.clock())
+        ids = {r['id'] for r in new}
+        others = []
+        held = []
+        for r in self.catalog['releases']:
+            if r.get('studio') != studio_id:
+                others.append(r)
+            elif r.get('id') not in ids:
+                held.append(r)
+        self.catalog['releases'] = others + held + new
+        return len(held) + len(new)
 
     def check_tpdb(self, service, studio, stash_id):
         entry = self.catalog['studios'][studio['id']]
@@ -723,7 +791,7 @@ class Run:
         scenes = service.scenes(entry['siteId'])
         releases = [tpdb_release(s, service.endpoint, studio['id']) for s in scenes]
         releases = [r for r in releases if r]
-        self.set_releases(studio['id'], releases)
+        entry['count'] = self.set_releases(studio['id'], releases)
         return releases
 
     def refresh(self):
@@ -741,8 +809,12 @@ class Run:
         catalog['studios'] = {
             k: v for k, v in (catalog.get('studios') or {}).items() if k in ids
         }
+        # Releases of studios still favourited, until they are four days old
+        cut = since(now, KEPT)
         catalog['releases'] = [
-            r for r in catalog.get('releases') or [] if r.get('studio') in ids
+            r
+            for r in catalog.get('releases') or []
+            if r.get('studio') in ids and (r.get('date') or '') >= cut
         ]
         endpoints = {s.endpoint for s in services}
         catalog['boxes'] = {
@@ -814,7 +886,6 @@ class Run:
                         entry.pop('error', None)
                         latest = newest(releases)
                         entry['quiet'] = not latest or self.clock() - latest > QUIET
-                        entry['count'] = len(releases)
                     except Missing:
                         entry['error'] = 'not found on %s' % service.name
                         entry['quiet'] = True
@@ -865,9 +936,8 @@ class Run:
         now = iso(self.clock())
         for studio_id, releases in found.items():
             entry = self.catalog['studios'][studio_id]
-            self.set_releases(studio_id, releases)
+            entry['count'] = self.set_releases(studio_id, releases)
             entry['checked'] = now
-            entry['count'] = len([r for r in releases if r])
             entry.pop('error', None)
             entry.pop('quiet', None)
 

@@ -6,6 +6,10 @@ import { endpointKey } from './match.js'
 // the task asks each studio again after the same time.
 export const STALE = 20 * 60 * 60 * 1000
 
+// The catalog's shape, as the task writes it (CATALOG_VERSION in
+// src/py/newreleases.py). A catalog of another version is due a check.
+export const CATALOG_VERSION = 2
+
 /**
  * Which favourite studios Stash can ask about: those with a StashID on a
  * stash-box set up in Stash. The rest are listed with a pointer to the
@@ -26,11 +30,13 @@ export function linkedStudios(favourites, boxes) {
 
 /**
  * Whether to start a check now: none is queued, there is a studio to ask
- * about, and the catalog is missing, a day old, from a check that never
- * finished, or from before a studio was favourited.
+ * about, and the catalog is missing, from an older version of the plugin, a
+ * day old, from a check that never finished, or from before a studio was
+ * favourited.
  */
 export function shouldStart({ catalog, linked, queued, now = Date.now() }) {
   if (queued || !linked.length) return false
+  if (catalog && catalog.version !== CATALOG_VERSION) return true
   const run = catalog?.run
   if (!run?.finished) return true
   if (now - Date.parse(run.finished) >= STALE) return true

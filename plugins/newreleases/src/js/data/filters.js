@@ -1,26 +1,23 @@
-// The page's filters, kept in the address so a filtered page can be
-// bookmarked and shared: ?studio=12&performer=40&tag=-~feet&days=30&owned=hide.
-// A performer or tag is the user's id, or "~" and the stash-box's name; a
-// leading "-" leaves it out. Pure, so the unit tests run it in Node.
+// The page's filters and page, kept in the address as Stash keeps its
+// lists' (p and perPage), so a filtered page can be bookmarked and shared:
+// ?studio=12&performer=40&tag=-~feet&p=2&perPage=60. A performer or tag is
+// the user's id, or "~" and the stash-box's name; a leading "-" leaves it
+// out. Pure, so the unit tests run it in Node.
 //
-// A release shows when it is from any of the studios picked, has any of the
-// performers picked and all of the tags, none of those left out, and falls
-// in the date window.
+// A release shows when the user does not have it, is from any of the
+// studios picked, has any of the performers picked and all of the tags, and
+// none of those left out.
 
-export const DAY_WINDOWS = [
-  { days: 0, label: 'Any time' },
-  { days: 7, label: 'Last 7 days' },
-  { days: 30, label: 'Last 30 days' },
-  { days: 90, label: 'Last 90 days' },
-  { days: 365, label: 'Last year' },
-]
+// Stash's page sizes and its default (List/ListFilter.tsx, list-filter)
+export const PAGE_SIZES = [20, 40, 60, 120, 250, 500, 1000]
+export const PER_PAGE = 40
 
 export const EMPTY = {
   studios: [],
   performers: [],
   tags: [],
-  days: 0,
-  hideOwned: false,
+  page: 1,
+  perPage: PER_PAGE,
 }
 
 const picks = (values) =>
@@ -33,48 +30,43 @@ const picks = (values) =>
     )
     .filter((p) => p.key)
 
-/** The filters in a location's query string. */
+const positive = (value, fallback, max = Infinity) => {
+  const n = Number.parseInt(value, 10)
+  return Number.isFinite(n) && n > 0 ? Math.min(n, max) : fallback
+}
+
+/** The filters and page in a location's query string. */
 export function parseFilters(search) {
   const q = new URLSearchParams(search || '')
-  const days = Number(q.get('days'))
   return {
     studios: q.getAll('studio').filter(Boolean),
     performers: picks(q.getAll('performer')),
     tags: picks(q.getAll('tag')),
-    days: DAY_WINDOWS.some((w) => w.days === days) ? days : 0,
-    hideOwned: q.get('owned') === 'hide',
+    page: positive(q.get('p'), 1),
+    perPage: positive(q.get('perPage'), PER_PAGE, 1000),
   }
 }
 
 /** The query string for a set of filters, other parameters kept. */
 export function formatFilters(filters, search = '') {
   const q = new URLSearchParams(search)
-  for (const k of ['studio', 'performer', 'tag', 'days', 'owned']) q.delete(k)
+  for (const k of ['studio', 'performer', 'tag', 'p', 'perPage']) q.delete(k)
   for (const s of filters.studios) q.append('studio', s)
   for (const p of filters.performers)
     q.append('performer', `${p.exclude ? '-' : ''}${p.key}`)
   for (const t of filters.tags)
     q.append('tag', `${t.exclude ? '-' : ''}${t.key}`)
-  if (filters.days) q.set('days', String(filters.days))
-  if (filters.hideOwned) q.set('owned', 'hide')
+  if (filters.page > 1) q.set('p', String(filters.page))
+  if (filters.perPage !== PER_PAGE) q.set('perPage', String(filters.perPage))
   const s = q.toString()
   return s ? `?${s}` : ''
 }
 
 export const isFiltered = (f) =>
-  !!(
-    f.studios.length ||
-    f.performers.length ||
-    f.tags.length ||
-    f.days ||
-    f.hideOwned
-  )
-
-const DAY = 24 * 60 * 60 * 1000
+  !!(f.studios.length || f.performers.length || f.tags.length)
 
 /** The releases the filters let through, in the order given. */
-export function applyFilters(releases, f, now = Date.now()) {
-  const since = f.days ? now - f.days * DAY : null
+export function applyFilters(releases, f) {
   const studios = new Set(f.studios.map(String))
   const split = (list) => ({
     inc: list.filter((p) => !p.exclude).map((p) => p.key),
@@ -83,12 +75,8 @@ export function applyFilters(releases, f, now = Date.now()) {
   const perf = split(f.performers)
   const tag = split(f.tags)
   return releases.filter((r) => {
+    if (r.owner) return false
     if (studios.size && !studios.has(String(r.studio.id))) return false
-    if (since != null) {
-      const t = r.date ? Date.parse(r.date) : NaN
-      if (!(t >= since)) return false
-    }
-    if (f.hideOwned && r.owner) return false
     const pk = new Set(r.performers.map((p) => p.key))
     if (perf.inc.length && !perf.inc.some((k) => pk.has(k))) return false
     if ([...perf.exc].some((k) => pk.has(k))) return false
@@ -99,18 +87,29 @@ export function applyFilters(releases, f, now = Date.now()) {
   })
 }
 
+/** One page of a list, the page clamped to the last one there is. */
+export function pageOf(list, { page, perPage }) {
+  const pages = Math.max(1, Math.ceil(list.length / perPage))
+  const current = Math.min(page, pages)
+  const start = (current - 1) * perPage
+  return { items: list.slice(start, start + perPage), page: current, pages }
+}
+
 /**
- * The performers or tags across the releases, as { key, name, count },
- * most releases first, then by name. `pick` is 'performers' or 'tags'.
+ * The performers or tags across the releases the user does not have, as
+ * { key, name, count }, most releases first, then by name. `pick` is
+ * 'performers' or 'tags'.
  */
 export function optionsOf(releases, pick) {
   const byKey = new Map()
-  for (const r of releases)
+  for (const r of releases) {
+    if (r.owner) continue
     for (const x of r[pick]) {
       const o = byKey.get(x.key)
       if (o) o.count += 1
       else byKey.set(x.key, { key: x.key, name: x.name, count: 1 })
     }
+  }
   return [...byKey.values()].sort(
     (a, b) => b.count - a.count || a.name.localeCompare(b.name),
   )

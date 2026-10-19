@@ -79,6 +79,9 @@ const PERFORMERS = {
   coco: performer(5, 'Caramel Coco'),
 }
 
+// Portrait pictures the mock stash-box serves (stashbox-data.mjs), 400 x 600
+const POSTERS = ['gigi', 'bijou', 'sherbet', 'mae', 'trixie']
+
 const slug = (title) => title.toLowerCase().replace(/\W+/g, '-')
 
 const daysAgo = (n) =>
@@ -101,9 +104,21 @@ function scene(site, domain, [title, released, cover, cast, tags, duration]) {
     date,
     duration,
     description: `${title}, invented for New Releases' tests.`,
+    // The studio's picture and ThePornDB's landscape copies of it, and
+    // ThePornDB's portrait posters, which a scene card would crop
     image: image(cover),
-    poster: image(cover),
-    posters: { large: image(cover), medium: image(cover), small: image(cover) },
+    background: {
+      full: image(cover),
+      large: image(cover),
+      medium: image(cover),
+      small: image(cover),
+    },
+    poster: image(POSTERS[next % POSTERS.length]),
+    posters: {
+      large: image(POSTERS[next % POSTERS.length]),
+      medium: image(POSTERS[next % POSTERS.length]),
+      small: image(POSTERS[next % POSTERS.length]),
+    },
     trailer: `https://cdn.${domain}/trailers/${s}.mp4`,
     site: { id: site.id, uuid: site.uuid, name: site.name },
     tags: tags.map((t) => TAGS[t]),
@@ -112,32 +127,43 @@ function scene(site, domain, [title, released, cover, cast, tags, duration]) {
 }
 
 // [title, released (days ago, or a date), cover, performers, tags, seconds].
-// The two busy sites release every week or so, counted back from today, so
-// they never fall quiet; Sleepy Sweets' releases are years old.
+// New Releases keeps releases dated within the last 48 hours and holds them
+// until they are four days old. The two busy sites release today and
+// yesterday, counted back from today so they never fall out of the window,
+// plus one at three days (past 48 hours, inside four days) and older ones;
+// Sleepy Sweets' releases are years old.
 const SCENES = {
   [TPDB_SITES.lollipop.id]: [
     [
       'Lollipop Lullaby',
-      2,
+      0,
       'lollipop-lane',
       ['gigi', 'patti'],
       ['candy', 'pastel', 'sprinkles'],
       734,
     ],
-    ['Cherry Cordial', 6, 'cherry-pop', ['bijou'], ['glossy', 'candy'], 1211],
+    ['Cherry Cordial', 0, 'cherry-pop', ['bijou'], ['glossy', 'candy'], 1211],
     [
       'Rock Candy Rodeo',
-      13,
+      1,
       'sugar-rush',
       ['patti', 'belle'],
       ['retro', 'fizzy'],
       925,
     ],
-    ['Sherbet Sunrise', 20, 'sweet-tooth', ['gigi'], ['pastel'], 1520],
-    ['Taffy Pull', 28, 'cherry-pop', ['belle'], ['candy', 'sour'], 860],
+    ['Sherbet Sunrise', 1, 'sweet-tooth', ['gigi'], ['pastel'], 1520],
+    [
+      'Gummy Bear Garden',
+      1,
+      'lollipop-lane',
+      ['belle', 'coco'],
+      ['bubblegum', 'candy'],
+      1330,
+    ],
+    ['Taffy Pull', 3, 'cherry-pop', ['belle'], ['candy', 'sour'], 860],
     [
       'Candy Floss Clouds',
-      37,
+      9,
       'lollipop-lane',
       ['coco', 'gigi'],
       ['pastel', 'bubblegum'],
@@ -147,7 +173,7 @@ const SCENES = {
   [TPDB_SITES.gumball.id]: [
     [
       'Gumball Galaxy',
-      1,
+      0,
       'sugar-rush',
       ['coco'],
       ['bubblegum', 'glossy'],
@@ -155,7 +181,7 @@ const SCENES = {
     ],
     [
       'Bubble Trouble',
-      9,
+      0,
       'sweet-tooth',
       ['coco', 'patti'],
       ['bubblegum', 'fizzy'],
@@ -163,16 +189,17 @@ const SCENES = {
     ],
     [
       'Sour Patch Party',
-      17,
+      1,
       'cherry-pop',
       ['belle', 'bijou'],
       ['sour', 'candy'],
       1404,
     ],
-    ['Jawbreaker Jam', 24, 'lollipop-lane', ['patti'], ['retro'], 615],
+    ['Fizz Factor', 1, 'sugar-rush', ['patti'], ['fizzy', 'retro'], 980],
+    ['Jawbreaker Jam', 3, 'lollipop-lane', ['patti'], ['retro'], 615],
     [
       'Chewing Gum Choir',
-      33,
+      12,
       'sugar-rush',
       ['gigi', 'coco'],
       ['bubblegum'],
@@ -198,6 +225,15 @@ export const TPDB_SCENES = Object.fromEntries(
     return [id, rows.map((row) => scene(site, DOMAINS[id], row))]
   }),
 )
+
+// Release dates as New Releases' task compares them: the day 48 hours (or
+// 96) before now
+const dayBefore = (hours) =>
+  new Date(Date.now() - hours * 60 * 60 * 1000).toISOString().slice(0, 10)
+
+// A site's scenes a first check keeps: those dated within the last 48 hours
+export const tpdbFresh = (site) =>
+  (TPDB_SCENES[site.id] || []).filter((s) => s.date >= dayBefore(48))
 
 const requests = []
 let inFlight = 0

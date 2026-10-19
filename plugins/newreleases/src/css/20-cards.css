@@ -1,17 +1,5 @@
 /* A release's card: Stash's scene card, plus the badge, performers and tags. */
 
-/*
- * "In your library", bottom left of the cover, as far in as Stash sets the
- * length on the right, so a theme's frame round the picture clears both.
- */
-.newreleases-card .newreleases-owned-badge {
-  bottom: 1rem;
-  left: 0.7rem;
-  line-height: 1;
-  position: absolute;
-  z-index: 3;
-}
-
 .newreleases-performers {
   font-size: 0.875rem;
   margin-top: 0.15rem;
@@ -51,9 +39,4 @@
 
 .newreleases-no-link {
   font-size: 0.8rem;
-}
-
-.newreleases-more {
-  margin: 1rem 0 2rem;
-  text-align: center;
 }

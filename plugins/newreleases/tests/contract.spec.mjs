@@ -1,10 +1,12 @@
 // Checks New Releases in Stash with its demo (tests/stash.mjs): the first
-// visit starts the check and the page fills in as the task saves, the task
-// asks the mock ThePornDB politely, cards are Stash's scene cards linking
-// to the studios' own pages without tracking, releases carry the user's
-// names and say which they have, the filters work and live in the address,
-// a second visit asks nothing, a newly favourited studio gets a check of
-// its own, and the page explains studios with no link and a Stash with no
+// visit starts the check and the page fills in as the task saves, adding
+// each studio's releases at the end; the task asks the mock ThePornDB
+// politely and keeps the last 48 hours; cards are Stash's scene cards with
+// landscape covers and descriptions, linking to the studios' own pages
+// without tracking; releases carry the user's names and the ones they have
+// never show; the filters and Stash's pagination live in the address; a
+// second visit asks nothing, a newly favourited studio gets a check of its
+// own, and the page explains studios with no link and a Stash with no
 // stash-box.
 import { expect, test } from '@playwright/test'
 import {
@@ -12,7 +14,8 @@ import {
   HELD_BY_URL,
   PLUGIN_ID,
   ROUTE,
-  TPDB_SCENES,
+  SHOWN,
+  TEST_SETTINGS,
   TPDB_SITES,
   TPDB_STASH_BOX,
   clearTpdbRequests,
@@ -20,12 +23,14 @@ import {
   openFilled,
   queuedChecks,
   setBoxes,
+  setPluginSettings,
   setUpNewReleases,
   tearDownNewReleases,
+  tpdbFresh,
   tpdbRequests,
   waitForChecks,
 } from './stash.mjs'
-import { ENDPOINT, STASHDB } from '../../../tests/stash/stashbox-data.mjs'
+import { ENDPOINT } from '../../../tests/stash/stashbox-data.mjs'
 
 test.describe.configure({ mode: 'serial' })
 
@@ -43,39 +48,59 @@ const card = (page, title) =>
   page.locator('.newreleases-card', {
     has: page.locator('.card-section-title', { hasText: title }),
   })
+const titles = (page) =>
+  page.locator('.newreleases-card .card-section-title').allInnerTexts()
 
-const TOTAL =
-  TPDB_SCENES[TPDB_SITES.lollipop.id].length +
-  TPDB_SCENES[TPDB_SITES.gumball.id].length +
-  TPDB_SCENES[TPDB_SITES.sleepy.id].length +
-  STASHDB.scenes.filter((s) =>
-    ['sdb-st-fudge', 'sdb-st-toffee'].includes(s.studio.id),
-  ).length
+const newestFirst = (list) =>
+  [...list].sort(
+    (a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title),
+  )
+const fresh = (site) =>
+  newestFirst(
+    tpdbFresh(site).filter((s) => s !== HELD_BY_ID && s !== HELD_BY_URL),
+  ).map((s) => s.title)
 
-test('the first visit starts a check with Stash’s loader and fills in as it goes', async ({
+test('the first visit starts a check with Stash’s loader and adds each studio at the end', async ({
   page,
 }) => {
   const errors = []
   page.on('pageerror', (e) => errors.push(e.message))
+  // A pause long enough that the page, reading the catalog every 2.5 s,
+  // sees Gumball Gallery's releases before Lollipop Lounge's
+  await setPluginSettings(PLUGIN_ID, { ...TEST_SETTINGS, pauseSeconds: 1.5 })
   await page.goto(ROUTE)
   await expect(
     page.locator('.newreleases-status .LoadingIndicator .spinner-border'),
   ).toBeAttached({ timeout: 15_000 })
   expect(await queuedChecks()).toHaveLength(1)
   await expect(page.locator('.newreleases-status')).toContainText(/Checking/)
-  // Cards come in while the check still runs
-  await expect(page.locator('.newreleases-card').first()).toBeVisible({
-    timeout: 30_000,
-  })
-  await waitForChecks()
+  // Watch the list while the check runs: what is there never moves
+  const seen = []
+  while ((await queuedChecks()).length) {
+    seen.push(await titles(page))
+    await page.waitForTimeout(200)
+  }
   await expect(page.locator('.newreleases-status')).toHaveText(
     /^Checked just now from (CandyDB and ThePornDB|ThePornDB and CandyDB)\.$/,
     { timeout: 15_000 },
   )
-  await expect(page.locator('.newreleases-card')).toHaveCount(TOTAL)
+  await setPluginSettings(PLUGIN_ID, TEST_SETTINGS)
+  const final = await titles(page)
+  seen.push(final)
+  for (let i = 1; i < seen.length; i++)
+    expect(seen[i].slice(0, seen[i - 1].length)).toEqual(seen[i - 1])
+  // Stash lists favourites by name, so Gumball Gallery's came in first
+  expect(final).toEqual([
+    ...fresh(TPDB_SITES.gumball),
+    ...fresh(TPDB_SITES.lollipop),
+  ])
   await expect(page.locator('.paginationIndex')).toHaveText(
-    `1-${TOTAL} of ${TOTAL}`,
+    `1-${SHOWN.length} of ${SHOWN.length}`,
   )
+  // A new visit shows them newest first
+  await page.reload()
+  await expect(page.locator('.newreleases-card')).toHaveCount(SHOWN.length)
+  expect(await titles(page)).toEqual(newestFirst(SHOWN).map((s) => s.title))
   expect(errors).toEqual([])
 })
 
@@ -96,7 +121,7 @@ test('the check asked ThePornDB one request at a time, with its name and the use
     )
   }
   for (let i = 1; i < requests.length; i++)
-    expect(requests[i].start - requests[i - 1].end).toBeGreaterThanOrEqual(400)
+    expect(requests[i].start - requests[i - 1].end).toBeGreaterThanOrEqual(1400)
 })
 
 test('Stash renders the elements the page builds on', async ({ page }) => {
@@ -105,14 +130,16 @@ test('Stash renders the elements the page builds on', async ({ page }) => {
     '.top-nav .newreleases-nav .nav-menu-icon',
     '.filtered-list-toolbar',
     '.react-select__control',
-    '.paginationIndex',
+    '.page-size-selector select',
+    '.pagination-index-container .paginationIndex',
     '.newreleases-card.grid-card.scene-card',
     '.newreleases-card .thumbnail-section',
     '.newreleases-card .scene-card-preview-image',
     '.newreleases-card .studio-overlay a',
     '.newreleases-card .scene-specs-overlay .overlay-duration',
-    '.newreleases-card .card-section-title',
+    '.newreleases-card .card-section-title .TruncatedText',
     '.newreleases-card .scene-card__date',
+    '.newreleases-card .TruncatedText.scene-card__description',
     '.newreleases-card .tag-item.badge',
   ])
     await expect.soft(page.locator(selector).first(), selector).toBeAttached()
@@ -122,6 +149,27 @@ test('Stash renders the elements the page builds on', async ({ page }) => {
   const duration = await lullaby.locator('.overlay-duration').boundingBox()
   expect(duration.y + duration.height).toBeLessThanOrEqual(
     cover.y + cover.height,
+  )
+})
+
+test('cards have a landscape cover, the date and the description', async ({
+  page,
+}) => {
+  await openFilled(page)
+  await page.waitForFunction(() =>
+    [...document.querySelectorAll('.scene-card-preview-image')].every(
+      (i) => i.complete && i.naturalWidth,
+    ),
+  )
+  const shapes = await page
+    .locator('.newreleases-card .scene-card-preview-image')
+    .evaluateAll((list) => list.map((i) => i.naturalWidth > i.naturalHeight))
+  expect(shapes).toEqual(Array(SHOWN.length).fill(true))
+  const lullaby = SHOWN.find((s) => s.title === 'Lollipop Lullaby')
+  const c = card(page, 'Lollipop Lullaby')
+  await expect(c.locator('.scene-card__date')).toHaveText(lullaby.date)
+  await expect(c.locator('.scene-card__description')).toHaveText(
+    lullaby.description,
   )
 })
 
@@ -136,12 +184,6 @@ test('a card opens the release on the studio’s own page in a new tab, with no 
   )
   await expect(link).toHaveAttribute('target', '_blank')
   await expect(link).toHaveAttribute('rel', /noopener/)
-  // A stash-box scene sold on a clip store links to the store, minus its
-  // affiliate code
-  const toffee = STASHDB.scenes.find((s) => s.studio.id === 'sdb-st-toffee')
-  await expect(
-    card(page, toffee.title).locator('a.scene-card-link'),
-  ).toHaveAttribute('href', `https://clips.example/clip/${toffee.id}`)
   // The studio is the user's own
   await expect(
     card(page, 'Lollipop Lullaby').locator('.studio-overlay a'),
@@ -154,8 +196,8 @@ test('releases carry the user’s names for performers and tags', async ({
   await openFilled(page)
   // ThePornDB credits her as "Bijou" and files her under Bonbon Bijou
   await expect(
-    card(page, 'Cherry Cordial').locator('.newreleases-performer'),
-  ).toHaveText(['Bonbon Bijou'])
+    card(page, 'Sour Patch Party').locator('.newreleases-performer'),
+  ).toHaveText(['Butterscotch Belle', 'Bonbon Bijou'])
   await expect(
     card(page, 'Lollipop Lullaby').locator('.newreleases-performer'),
   ).toHaveText(['Gumdrop Gigi', 'Peppermint Patti'])
@@ -166,42 +208,55 @@ test('releases carry the user’s names for performers and tags', async ({
   ])
 })
 
-test('releases you have are marked, link to your scene and can be hidden', async ({
+test('releases you have never show, with no switch to show them', async ({
   page,
 }) => {
   await openFilled(page)
-  const owned = page.locator('.newreleases-owned')
-  await expect(owned).toHaveCount(2)
-  await expect(card(page, HELD_BY_ID.title)).toHaveClass(/newreleases-owned/)
-  await expect(card(page, HELD_BY_URL.title)).toHaveClass(/newreleases-owned/)
-  const { findScenes } = await gql(
-    '{ findScenes(filter: { per_page: -1 }) { scenes { id title } } }',
-  )
-  const held = findScenes.scenes.find((s) => s.title === HELD_BY_ID.title)
-  await expect(
-    card(page, HELD_BY_ID.title).locator('.newreleases-owned-badge'),
-  ).toHaveAttribute('href', `/scenes/${held.id}`)
+  await expect(card(page, HELD_BY_ID.title)).toHaveCount(0)
+  await expect(card(page, HELD_BY_URL.title)).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /what I have/ })).toHaveCount(0)
+  await expect(page.locator('.newreleases-card')).toHaveCount(SHOWN.length)
+})
 
-  await page.getByRole('button', { name: 'Hide what I have' }).click()
-  await expect(owned).toHaveCount(0)
-  await expect(page.locator('.newreleases-card')).toHaveCount(TOTAL - 2)
-  expect(new URL(page.url()).searchParams.get('owned')).toBe('hide')
-  await page.reload()
-  await expect(page.locator('.newreleases-card')).toHaveCount(TOTAL - 2)
+test('pages as Stash’s lists do, with its pagination and page sizes in the address', async ({
+  page,
+}) => {
+  await openFilled(page, `${ROUTE}?perPage=3`)
+  await expect(page.locator('.newreleases-card')).toHaveCount(3)
+  await expect(page.locator('.paginationIndex')).toHaveText(
+    `1-3 of ${SHOWN.length}`,
+  )
+  const top = page.locator('.pagination-index-container .pagination')
+  await expect(top).toBeVisible()
   await expect(
-    page.getByRole('button', { name: 'Hide what I have' }),
-  ).toHaveAttribute('aria-pressed', 'true')
+    page.locator('.pagination-footer-container .pagination'),
+  ).toBeVisible()
+  const firstPage = await titles(page)
+  await top.getByTitle('Next').click()
+  await expect(page.locator('.paginationIndex')).toHaveText(
+    `4-6 of ${SHOWN.length}`,
+  )
+  expect(new URL(page.url()).searchParams.get('p')).toBe('2')
+  expect(await titles(page)).not.toEqual(firstPage)
+  await page.reload()
+  await expect(page.locator('.paginationIndex')).toHaveText(
+    `4-6 of ${SHOWN.length}`,
+  )
+  // A page size from Stash's list starts again at the first page
+  await page.locator('.page-size-selector select').selectOption('20')
+  await expect(page.locator('.newreleases-card')).toHaveCount(SHOWN.length)
+  expect(new URL(page.url()).search).toBe('?perPage=20')
+  await expect(page.locator('.pagination-footer-container')).toHaveCount(0)
 })
 
 test('filters by studio, performer and tag, with and without, kept in the address', async ({
   page,
 }) => {
   await openFilled(page, `${ROUTE}?studio=${studios['Lollipop Lounge']}`)
-  await expect(page.locator('.newreleases-card')).toHaveCount(
-    TPDB_SCENES[TPDB_SITES.lollipop.id].length,
-  )
+  const lollipop = fresh(TPDB_SITES.lollipop)
+  await expect(page.locator('.newreleases-card')).toHaveCount(lollipop.length)
   await expect(page.locator('.studio-overlay')).toHaveText(
-    Array(TPDB_SCENES[TPDB_SITES.lollipop.id].length).fill('Lollipop Lounge'),
+    Array(lollipop.length).fill('Lollipop Lounge'),
   )
 
   // A performer on a card filters by them, by the user's own id
@@ -246,7 +301,7 @@ test('filters by studio, performer and tag, with and without, kept in the addres
     .click()
   await expect(page.locator('.newreleases-card')).toHaveCount(1)
   await page.getByRole('button', { name: 'Clear filters' }).click()
-  await expect(page.locator('.newreleases-card')).toHaveCount(TOTAL)
+  await expect(page.locator('.newreleases-card')).toHaveCount(SHOWN.length)
   expect(new URL(page.url()).search).toBe('')
 
   // An empty result is Stash's empty list
@@ -259,7 +314,7 @@ test('a second visit shows the catalog at once and asks nothing', async ({
 }) => {
   await clearTpdbRequests()
   await page.goto(ROUTE)
-  await expect(page.locator('.newreleases-card')).toHaveCount(TOTAL)
+  await expect(page.locator('.newreleases-card')).toHaveCount(SHOWN.length)
   await page.waitForTimeout(1500)
   expect(await queuedChecks()).toHaveLength(0)
   expect((await tpdbRequests()).requests).toEqual([])

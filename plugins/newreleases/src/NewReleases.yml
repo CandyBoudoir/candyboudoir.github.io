@@ -1,5 +1,5 @@
 name: New Releases
-description: The newest releases from your favourite studios, from ThePornDB and your other stash-boxes, each linked to the studio's own page to buy it. Needs Python, which Stash's Docker image includes.
+description: What your favourite studios released in the last 48 hours, from ThePornDB and your other stash-boxes, each linked to the studio's own page to buy it, leaving out what you have. Needs Python, which Stash's Docker image includes.
 version: 0.1.0
 url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/newreleases
 # The task asks the stash-boxes from Stash's own Python, since a plugin's
@@ -20,7 +20,7 @@ ui:
     /catalog: catalog
 tasks:
   - name: Check for new releases
-    description: Asks your stash-boxes for the newest releases from your favourite studios, one request every few seconds. The New Releases page starts it when its catalog is a day old.
+    description: Asks your stash-boxes for your favourite studios' releases of the last 48 hours, one request every few seconds. The New Releases page starts it when its catalog is a day old.
     defaultArgs:
       mode: refresh
   - name: Remove the catalog

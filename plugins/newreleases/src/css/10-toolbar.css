@@ -13,14 +13,6 @@
   min-width: 11rem;
 }
 
-.newreleases-window .form-control {
-  width: auto;
-}
-
-.newreleases-hide-owned svg {
-  margin-right: 0.25rem;
-}
-
 @media (width <= 576px) {
   .newreleases-filter {
     flex-basis: 100%;
