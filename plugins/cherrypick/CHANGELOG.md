@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.2.1
 
 - Cherry Pick counts a play only as far as the time behind it. Stash records a play from a scene's first second, so a scene swiped past in a feed such as Stash TV's counted like one watched all the way through: For you put its performers, studio and tags forward as what you had been watching, ranked it lower as recently watched, and counted it as a rewatch when it came by again on another day, and Your score read the short play as a sign you disliked the scene. Each tenth of a scene's length played now pays for one play. A scene played for less than that in all was only looked at: it teaches Cherry Pick nothing, and For you and More like this say "Not watched yet". When a scene's play time pays for fewer plays than Stash records, each play, and each day it was played on, counts for that share. A scene you start on its own page and leave within its first tenth no longer counts against it either. Plays with no play time, such as plays added by hand, count as before.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.40.4, Xenith 3.2.0 and Restash 0.3.0-55c1cb2.
 
 ## 0.2.0
 
