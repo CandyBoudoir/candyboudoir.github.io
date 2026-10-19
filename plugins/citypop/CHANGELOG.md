@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.1
+
+Insights 2.12 and Performers Toolkit 0.13 in the dusk, for Stash v0.31.1.
+
+- Insights 2.12 and Performers Toolkit 0.13 pick up City Pop's colours by themselves, so with the restyle settings off they already sit in its navy.
+- With Restyle Insights on, Insights' calendars and its codec and resolution colours take City Pop's palette too, and empty days sit in night blue.
+- With Restyle Performers Toolkit on, the toolkit's new Stats tab is in the dusk: its figures and charts are navy panels on the hard shadow, with their titles and numbers in Jost. Its Stats tab before 0.13 is no longer restyled.
+- A performer's page stays an open J-card when Performers Toolkit tidies the header or adds its full-body picture panel, with the restyle on or off. Before, the name strip came away from the cover.
+- Tested beside Insights 2.12.0 and Performers Toolkit 0.13.1.
+
 ## 0.2.0
 
 Insights and Performers Toolkit in the dusk, for Stash v0.31.1.

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+- New icons for Age Gap, Animation, April Fools, Average Dick, Bait, Big Black Cock (BBC), Big Clit, Big White Cock (BWC), Birthday, Biting Balls and 59 more.
+- Redrawn icons for Ass Denial, Ass Shaking, Bare Bottom, Booty and Soles, Chastity, Feet, Solo, Threesome, Tight Clothes, Trampling and 2 more.
+- Updated which tag names and StashDB tags match First Gay, Roleplay, Straight Stud and Superhero.
+
 ## 0.1.0
 
 First release, for Stash v0.31.1.

@@ -23,6 +23,7 @@ pt-dtag
 pt-dup
 pt-edit
 pt-err
+pt-fb
 pt-fbl
 pt-fbr
 pt-fname
@@ -55,6 +56,7 @@ pt-scpick
 pt-sctitle
 pt-seg
 pt-sel
+pt-sh
 pt-sheet
 pt-shot
 pt-t-done

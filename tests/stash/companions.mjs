@@ -150,52 +150,54 @@ export const COMPANIONS = {
 // of a theme that restyles one while a newer release of it is out, and with
 // --issues opens an issue for it; pin-restyled.mjs moves a pin to the latest
 // release.
-const INSIGHTS_COMMIT = '97171c133f1c7f5214a6d2950c51364b9a72787c'
-const PERFORMERS_TOOLKIT_COMMIT = 'e357be13a5ccc771b9b5b9d7ff4596d16aeaa31f'
+const INSIGHTS_COMMIT = '0bd01b2894f542653ea0c5118a8f978396156f7c'
+const PERFORMERS_TOOLKIT_COMMIT = '4e8ccbcea043418e32a046a3888c6811ee538f01'
 export const RESTYLED = {
-  // Insights 2.11.0, a stats dashboard on Stash's Stats page, from
+  // Insights 2.12.0, a stats dashboard on Stash's Stats page, from
   // https://gitlab.com/allisless0/stash-plugins (MIT): its plugin folder at
-  // the 2.11.0 commit, the same files as the zip its GitLab Pages source
+  // the 2.12.0 commit, the same files as the zip its GitLab Pages source
   // served for that release.
   insights: {
     id: 'Insights',
     name: 'Insights',
-    version: '2.11.0',
+    version: '2.12.0',
     commit: INSIGHTS_COMMIT,
     base: `https://gitlab.com/allisless0/stash-plugins/-/raw/${INSIGHTS_COMMIT}/plugins/Insights`,
     files: {
       'Insights.css':
         '959eab447780ef03db2c99cbf41e9fd0d86e424744e54715da493b93b9eabc6d',
       'Insights.js':
-        'ac1218f967c8549009b074ea99c2465cb03b49de0f7023de4b43b76bbc1d5b76',
+        '89da04bf20383e2828c7f5459e9fa0487d7b00455f5477b612ffc637d8b3e078',
       'Insights.yml':
-        '1684c6204f019144c308400d99bb464573327937cf3151a2067a3ac2019607f5',
+        'a24455921120fa6efd3c9944822b10c199e4ddba306750a2e81a0416628e6274',
       'README.md':
-        '3c85d7bac6f1bc7314da60695a0e587de4da122431b1b68421bb6c5bccb330af',
+        'bdee85d7c0933836d6cdf6f05e55779404b238b61a6e78cf6a34133df9ea92f9',
     },
     latest: {
       index: 'https://allisless0.gitlab.io/stash-plugins/main/index.yml',
     },
   },
-  // Performers Toolkit 0.4.2, a toolkit page at /performerstoolkit and a
+  // Performers Toolkit 0.13.1, a toolkit page at /performerstoolkit and a
   // strip and two tabs on performer pages, from the same repository and
   // in the same Flexoki look as Insights. Its scans and saves run in a
   // Python backend (standard library only), which the specs never start.
   performerstoolkit: {
     id: 'PerformersToolkit',
     name: 'Performers Toolkit',
-    version: '0.4.2',
+    version: '0.13.1',
     commit: PERFORMERS_TOOLKIT_COMMIT,
     base: `https://gitlab.com/allisless0/stash-plugins/-/raw/${PERFORMERS_TOOLKIT_COMMIT}/plugins/PerformersToolkit`,
     files: {
+      'PerformersToolkit-matte.js':
+        'fdd022c5b4653b6ade3ce88f57198abcc6d344769304164205247925a63f76f6',
       'PerformersToolkit.js':
-        '28c305412ad4f8e5e22a00b3eb3e8db091034543e293d1f78449e632abaaa955',
+        '904997794e031873e62467500880d94d647a91db6d5f069feb62c28b1f2aaeda',
       'PerformersToolkit.py':
-        'b1346251b90392c8aadd95cbf5d0ff64f4faf9a01822fc791a86d6c9325ef930',
+        'a596e2aebd16aaeee3c1f6621c22e86b279f2db698e2057202907c8a01aa312a',
       'PerformersToolkit.yml':
-        '8703d360e16a9f5464d0fd02f180952fef3f25b4fc1dd76dde6aee1fab72ff53',
+        '1b78a1bb069aa8155ec8c4cee2ca1f072514fe9fb9cbbb32cb4ee8d3bf4a855f',
       'README.md':
-        '97fe8edec0bdbda3107e541d3144e534f13488ff5919681dc9ddcc0b85c720c4',
+        '76750fcb0c4b64e22a05766959b92c82736d835a47d2e1981b3a21476d896dcd',
     },
     latest: {
       index: 'https://allisless0.gitlab.io/stash-plugins/main/index.yml',

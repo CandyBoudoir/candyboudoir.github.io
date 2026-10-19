@@ -140,6 +140,42 @@ test.describe('on a touch screen', () => {
   })
 })
 
+// Stash puts Bootstrap's !important bg-secondary and text-white on the list
+// toolbars' Sort by and more menus, a scene's Operations menu and every item
+// in them, which once left those menus slate. Each opens on Juicy's plum
+// panel, and its items hover pink like every other menu's.
+const SLATE_MENUS = [
+  ...['scenes', 'performers', 'images', 'galleries', 'studios', 'tags'].flatMap(
+    (list) => [
+      [
+        `the ${list} list's Sort by menu`,
+        `/${list}`,
+        '.sort-by-select .dropdown-toggle',
+      ],
+      [`the ${list} list's more menu`, `/${list}`, '#more-menu'],
+    ],
+  ),
+  ["a scene's Operations menu", '/scenes/:scene', '#operation-menu'],
+]
+
+for (const [name, path, toggle] of SLATE_MENUS) {
+  test(`${name} opens plum and hovers pink`, async ({ page }) => {
+    await page.goto(url(path))
+    await page.locator(toggle).click()
+    const menu = page.locator('.dropdown-menu.show')
+    await expect(menu).toHaveCSS('background-color', 'rgb(45, 24, 82)')
+    const item = menu
+      .locator('.dropdown-item')
+      .filter({ visible: true })
+      .first()
+    await expect(item).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(item).toHaveCSS('color', 'rgb(255, 242, 250)')
+    await item.hover()
+    await expect(item).toHaveCSS('background-color', 'rgba(252, 61, 159, 0.16)')
+    await expect(item).toHaveCSS('color', 'rgb(252, 104, 178)')
+  })
+}
+
 test('Calm mode and Plain labels take effect', async ({ page }) => {
   try {
     await setPlugin({ calmMode: true, plainCopy: true })
@@ -184,9 +220,9 @@ function contrast(a, b) {
 }
 
 // Insights, another author's stats dashboard on the Stats page (RESTYLED in
-// tests/stash/companions.mjs), keeps its own look until Restyle Insights is
-// on, and then takes Juicy's palette, stickers and type. Its sidebar clears
-// Juicy's pink rule either way.
+// tests/stash/companions.mjs), takes Juicy's colours by itself, and with
+// Restyle Insights on takes Juicy's palette, stickers and type. Its sidebar
+// clears Juicy's pink rule either way.
 test.describe('beside Insights', () => {
   test.beforeAll(async () => {
     await usePlugins(PLUGIN_ID, 'Insights')
@@ -196,7 +232,10 @@ test.describe('beside Insights', () => {
     await onlyJuicy()
   })
 
-  test('Insights keeps its own look until the restyle is on', async ({
+  // Insights 2.12 and later work out their colours from the page (in
+  // <style id="insights-sx">), so before the restyle is on Insights already
+  // sits on Juicy's page in Juicy's colours
+  test("Insights takes Juicy's colours by itself until the restyle is on", async ({
     page,
   }) => {
     await setPlugin({})
@@ -204,9 +243,12 @@ test.describe('beside Insights', () => {
     await expect(page.locator('html')).not.toHaveClass(
       /\bjuicy-restyle-insights\b/,
     )
+    await expect(page.locator('style#insights-sx')).toHaveCount(1)
     await expect(page.locator('#insights')).toHaveCSS(
       'background-color',
-      'rgb(16, 15, 15)',
+      await page.evaluate(
+        () => getComputedStyle(document.body).backgroundColor,
+      ),
     )
   })
 
@@ -225,6 +267,19 @@ test.describe('beside Insights', () => {
           getComputedStyle(el).getPropertyValue('--ui').trim(),
         ),
       ).toBe('#22123f')
+      // and so do its newer ones, from its own tokens, and its calendars,
+      // whose empty days sit in the well
+      for (const [name, value] of [
+        ['--sx-ui', '#0d0520'],
+        ['--ins-o4', '#fc68b2'],
+      ]) {
+        expect(
+          await root.evaluate(
+            (el, name) => getComputedStyle(el).getPropertyValue(name).trim(),
+            name,
+          ),
+        ).toBe(value)
+      }
       await expect(root.locator('.ins-sub').first()).toHaveCSS(
         'color',
         'rgb(149, 124, 176)',
@@ -313,7 +368,8 @@ test.describe('beside Performers Toolkit', () => {
     await onlyJuicy()
   })
 
-  test('Performers Toolkit keeps its own look until the restyle is on', async ({
+  // As Insights, from 0.13 (in <style id="performerstoolkit-sx">)
+  test("Performers Toolkit takes Juicy's colours by itself until the restyle is on", async ({
     page,
   }) => {
     await setPlugin({})
@@ -321,9 +377,12 @@ test.describe('beside Performers Toolkit', () => {
     await expect(page.locator('html')).not.toHaveClass(
       /\bjuicy-restyle-toolkit\b/,
     )
+    await expect(page.locator('style#performerstoolkit-sx')).toHaveCount(1)
     await expect(page.locator('.pt').first()).toHaveCSS(
       'background-color',
-      'rgb(16, 15, 15)',
+      await page.evaluate(
+        () => getComputedStyle(document.body).backgroundColor,
+      ),
     )
   })
 
@@ -352,7 +411,12 @@ test.describe('beside Performers Toolkit', () => {
           getComputedStyle(el).getPropertyValue('--ui').trim(),
         ),
       ).toBe('#22123f')
-      await expect(stats.locator('.pt-sec').first()).toHaveCSS(
+      expect(
+        await stats.evaluate((el) =>
+          getComputedStyle(el).getPropertyValue('--sx-ui').trim(),
+        ),
+      ).toBe('#22123f')
+      await expect(stats.locator('.pt-kpi').first()).toHaveCSS(
         'background-color',
         'rgb(34, 18, 63)',
       )

@@ -483,7 +483,11 @@
   stroke: var(--juicy-bg-deep);
 }
 
-.juicy-restyle-insights #root #insights svg line[stroke='#282726' i] {
+.juicy-restyle-insights
+  #root
+  #insights
+  svg
+  line:is([stroke='#282726' i], [stroke='var(--sx-ui)']) {
   stroke: var(--juicy-line);
 }
 

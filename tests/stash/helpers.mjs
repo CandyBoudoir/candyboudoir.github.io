@@ -504,7 +504,7 @@ export async function openPerformerStats(page, performer) {
   await page.goto(`/performers/${performer}`)
   await page.locator('#pt-strip').waitFor({ timeout: 30_000 })
   await page.locator('.pt-tablink[data-pt-tab="stats"]').click()
-  await page.locator('.ptc .pt-stats').waitFor({ timeout: 30_000 })
+  await page.locator('.ptc .pt-stats3').waitFor({ timeout: 30_000 })
 }
 
 // How each restyled plugin's rules and classes are told apart in a theme's
@@ -536,6 +536,20 @@ export const RESTYLED_CLASSES = {
       await visit()
       await openPerformerStats(page, (await demoIds()).performer)
       await visit()
+      // The Stats tab folds its later sections; open each in turn
+      const sections = page.locator('.ptc .pt-s3')
+      for (let i = 0; i < (await sections.count()); i++) {
+        const section = sections.nth(i)
+        if (!(await section.evaluate((el) => el.matches('.pt-fold')))) continue
+        await section.locator('.pt-s3h').click()
+        await section.locator('.pt-s3b').waitFor()
+        await visit()
+      }
+      // The strip's Picture button opens the pictures overlay
+      await page.locator('#pt-strip .pt-pb', { hasText: 'Picture' }).click()
+      await page.locator('.pt-ov').waitFor()
+      await visit()
+      await page.keyboard.press('Escape')
     },
   },
 }
