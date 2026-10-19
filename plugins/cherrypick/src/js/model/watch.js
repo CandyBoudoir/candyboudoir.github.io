@@ -14,6 +14,7 @@ import {
   tooSmall,
 } from './foryou.js'
 import { timeAgo } from './util.js'
+import { WATCHED_SHARE } from './behaviour.js'
 
 // A scene Watch This can play: its first file has video. An audio-only file
 // (no video codec, a width of 0) and a scene with no file have none.
@@ -76,11 +77,11 @@ export const IGNORED_DAYS = 3
 // play percent (docs/stash-seams.md). A play recorded this long after a
 // snooze last changed is a play of its own, and resets the ladder.
 export const LOOK_MS = 2 * 60 * 1000
-// A pick that played for this share of its length before its skip was
+// A pick that played for a tenth of its length before its skip
+// (WATCHED_SHARE, the line the model draws between a look and a play) was
 // watched, not looked at: the skip starts its ladder again, at the first
 // step. Play time counts the seconds the player spent playing, as Stash's
 // own play tracking does, not how far into the scene it got.
-export const WATCHED_SHARE = 0.1
 export const watchedEnough = (playedSeconds, duration) =>
   duration > 0 && playedSeconds >= WATCHED_SHARE * duration
 

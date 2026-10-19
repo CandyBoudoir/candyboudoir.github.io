@@ -91,7 +91,8 @@ export function moreLikeThis(M, state, scene) {
       reason = `Shares ${n} tags with this one`
       key = null
     }
-    if (!behaviourOf(s)) reason += ' · never played'
+    if (!s.local.play_count) reason += ' · never played'
+    else if (!behaviourOf(s)) reason += ' · not watched yet'
     inLib.push({ scene: s, score, reason, key })
   }
   inLib.sort((a, b) => b.score - a.score)
