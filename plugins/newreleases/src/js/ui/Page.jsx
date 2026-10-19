@@ -79,6 +79,10 @@ function useChecks(visit, setup, first) {
         if (!live) return
         if (next) setCatalog(next)
         if (!job || DONE.has(job.status)) {
+          // The read beside the job's may predate the task's last save
+          const last = await loadCatalog().catch(() => null)
+          if (!live) return
+          if (last) setCatalog(last)
           setCheck({
             running: false,
             error: job?.status === 'FAILED' ? job.error || 'failed' : null,
