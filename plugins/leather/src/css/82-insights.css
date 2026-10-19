@@ -569,7 +569,11 @@
   stroke: var(--leather-well);
 }
 
-.leather-restyle-insights #root #insights svg line[stroke='#282726' i] {
+.leather-restyle-insights
+  #root
+  #insights
+  svg
+  line:is([stroke='#282726' i], [stroke='var(--sx-ui)']) {
   stroke: var(--leather-line);
 }
 

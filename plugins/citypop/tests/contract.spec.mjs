@@ -457,9 +457,10 @@ test.describe('beside Insights', () => {
           getComputedStyle(el).getPropertyValue('--ui').trim(),
         ),
       ).toBe('#1a1848')
-      // and so do its newer ones, from its own tokens, and its calendars
+      // and so do its newer ones, from its own tokens, and its calendars,
+      // whose empty days sit in the well
       for (const [name, value] of [
-        ['--sx-ui', '#1a1848'],
+        ['--sx-ui', '#0e0f33'],
         ['--ins-o4', '#4fe3da'],
       ]) {
         expect(

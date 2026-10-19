@@ -655,7 +655,11 @@
   stroke: var(--overclock-field);
 }
 
-.overclock-restyle-insights #root #insights svg line[stroke='#282726' i] {
+.overclock-restyle-insights
+  #root
+  #insights
+  svg
+  line:is([stroke='#282726' i], [stroke='var(--sx-ui)']) {
   stroke: var(--overclock-rule);
 }
 

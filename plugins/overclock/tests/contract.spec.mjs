@@ -283,8 +283,9 @@ test.describe('beside Insights', () => {
       await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       // Insights' own rules still paint from the palette Overclock gives it
       expect(await tokenOf(root, '--ui')).toBe('#0d1416')
-      // and so do its newer ones, from its own tokens, and its calendars
-      expect(await tokenOf(root, '--sx-ui')).toBe('#0d1416')
+      // and so do its newer ones, from its own tokens, and its calendars,
+      // whose empty days sit in the field
+      expect(await tokenOf(root, '--sx-ui')).toBe('#070b0c')
       expect(await tokenOf(root, '--ins-o4')).toBe('#4a8dff')
       await expect(root.locator('.ins-sub').first()).toHaveCSS(
         'color',

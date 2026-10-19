@@ -81,10 +81,13 @@
   --sx-ma-d: color-mix(in srgb, var(--ma) 45%, var(--bg));
 }
 
-/* Insights' shades in between, from the same palette. Its calendars climb
-   from an empty panel to the hue in five steps: O's, watch time and hours
-   each in their own colour. */
+/* Insights draws its calendars' empty days, its rings' tracks and its
+   charts' grid lines in --sx-ui, sunk into the panel as its earlier inline
+   colours are in 82-insights.css. Its shades in between come from the same
+   palette, and its calendars climb from an empty day to the hue in five
+   steps: O's, watch time and hours each in their own colour. */
 .overclock-restyle-insights #root #insights {
+  --sx-ui: var(--overclock-field);
   --ins-err-bd: color-mix(in srgb, var(--down) 45%, var(--ui));
   --ins-err-bg: color-mix(in srgb, var(--down) 12%, var(--ui));
   --ins-err-tx: var(--down);
@@ -93,19 +96,19 @@
   --ins-up-bg: color-mix(in srgb, var(--up) 18%, var(--ui));
   --ins-down-bg: color-mix(in srgb, var(--down) 18%, var(--ui));
   --ins-warn-bg: color-mix(in srgb, var(--ye) 18%, var(--ui));
-  --ins-o1: color-mix(in srgb, var(--o) 22%, var(--ui));
-  --ins-o2: color-mix(in srgb, var(--o) 42%, var(--ui));
-  --ins-o3: color-mix(in srgb, var(--o) 66%, var(--ui));
+  --ins-o1: color-mix(in srgb, var(--o) 22%, var(--sx-ui));
+  --ins-o2: color-mix(in srgb, var(--o) 42%, var(--sx-ui));
+  --ins-o3: color-mix(in srgb, var(--o) 66%, var(--sx-ui));
   --ins-o4: var(--o);
   --ins-o5: color-mix(in srgb, var(--o) 55%, #fff);
-  --ins-watch1: color-mix(in srgb, var(--cy) 22%, var(--ui));
-  --ins-watch2: color-mix(in srgb, var(--cy) 42%, var(--ui));
-  --ins-watch3: color-mix(in srgb, var(--cy) 66%, var(--ui));
+  --ins-watch1: color-mix(in srgb, var(--cy) 22%, var(--sx-ui));
+  --ins-watch2: color-mix(in srgb, var(--cy) 42%, var(--sx-ui));
+  --ins-watch3: color-mix(in srgb, var(--cy) 66%, var(--sx-ui));
   --ins-watch4: var(--cy);
   --ins-watch5: color-mix(in srgb, var(--cy) 55%, #fff);
-  --ins-hour1: color-mix(in srgb, var(--pu) 22%, var(--ui));
-  --ins-hour2: color-mix(in srgb, var(--pu) 42%, var(--ui));
-  --ins-hour3: color-mix(in srgb, var(--pu) 66%, var(--ui));
+  --ins-hour1: color-mix(in srgb, var(--pu) 22%, var(--sx-ui));
+  --ins-hour2: color-mix(in srgb, var(--pu) 42%, var(--sx-ui));
+  --ins-hour3: color-mix(in srgb, var(--pu) 66%, var(--sx-ui));
   --ins-hour4: var(--pu);
   --ins-hour5: color-mix(in srgb, var(--pu) 55%, #fff);
 }
