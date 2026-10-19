@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.1
+
+Insights 2.12 and Performers Toolkit 0.13 in leather, for Stash v0.31.1.
+
+- Insights 2.12 and Performers Toolkit 0.13 pick up Leather's colours by themselves, so with the restyle settings off they already sit on its black.
+- With Restyle Insights on, Insights' calendars and its codec and resolution colours take Leather's dyes too, and empty days are debossed into the well.
+- With Restyle Performers Toolkit on, the toolkit's new Stats tab is dressed in leather: its figures and charts are stitched leather cards with blackletter titles, numbers in Oswald and O's in thread. Its Stats tab before 0.13 is no longer restyled.
+- Tested beside Insights 2.12.0 and Performers Toolkit 0.13.1.
+
 ## 0.2.0
 
 Insights and Performers Toolkit in leather, for Stash v0.31.1.
