@@ -1,0 +1,42 @@
+/* A release's card: Stash's scene card, plus the badge, performers and tags. */
+
+.newreleases-performers {
+  font-size: 0.875rem;
+  margin-top: 0.15rem;
+}
+
+/* A performer's name filters by them; it reads as text until hovered. */
+.newreleases-performer {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+}
+
+.newreleases-performer:hover,
+.newreleases-performer:focus-visible {
+  text-decoration: underline;
+}
+
+.newreleases-tags {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.4rem;
+}
+
+.newreleases-tags .tag-item {
+  border: 0;
+  cursor: pointer;
+  margin: 0;
+}
+
+.newreleases-more-tags {
+  font-size: 0.8rem;
+}
+
+.newreleases-no-link {
+  font-size: 0.8rem;
+}

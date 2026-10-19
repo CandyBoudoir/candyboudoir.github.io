@@ -1,0 +1,20 @@
+/* The filters, wrapping on narrow screens like Stash's own toolbar. */
+.newreleases-toolbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.newreleases-filter {
+  flex: 0 1 15rem;
+  min-width: 11rem;
+}
+
+@media (width <= 576px) {
+  .newreleases-filter {
+    flex-basis: 100%;
+  }
+}

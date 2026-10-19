@@ -4,14 +4,15 @@ Plugins for [Stash](https://github.com/stashapp/stash), the self-hosted media or
 
 <!-- plugins:start -->
 
-| Plugin                             | What it does                                                                                                                                     |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [Cherry Pick](plugins/cherrypick/) | Learns what you like from your ratings and plays: a For you row, Your score on unrated scenes, More like this, and performer and scene brackets. |
-| [City Pop](plugins/citypop/)       | An airbrushed 1980s dusk from city pop LPs: record-sleeve cards, striped suns for ratings, cassettes for audio scenes and a late-night FM voice. |
-| [Juicy](plugins/juicy/)            | A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording.                    |
-| [Leather](plugins/leather/)        | A black leather theme: saddle stitching, nickel studs for ratings, a collar for favourites and a strict voice in the wording.                    |
-| [Overclock](plugins/overclock/)    | A hacker's heads-up display in acid yellow: charge chevrons for ratings, a reticle that locks on for favourites and a cold system voice.         |
-| [Tag Candy](plugins/tagcandy/)     | Glossy sticker icons for your tags, matched by StashDB link or name. Your own tag images stay unless you ask.                                    |
+| Plugin                               | What it does                                                                                                                                                                                                 |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Cherry Pick](plugins/cherrypick/)   | Learns what you like from your ratings and plays: a For you row, Your score on unrated scenes, More like this, and performer and scene brackets.                                                             |
+| [City Pop](plugins/citypop/)         | An airbrushed 1980s dusk from city pop LPs: record-sleeve cards, striped suns for ratings, cassettes for audio scenes and a late-night FM voice.                                                             |
+| [Juicy](plugins/juicy/)              | A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording.                                                                                |
+| [Leather](plugins/leather/)          | A black leather theme: saddle stitching, nickel studs for ratings, a collar for favourites and a strict voice in the wording.                                                                                |
+| [New Releases](plugins/newreleases/) | What your favourite studios released in the last 48 hours, from ThePornDB and your other stash-boxes, filtered by tag, performer and studio, each linked to the studio to buy it, leaving out what you have. |
+| [Overclock](plugins/overclock/)      | A hacker's heads-up display in acid yellow: charge chevrons for ratings, a reticle that locks on for favourites and a cold system voice.                                                                     |
+| [Tag Candy](plugins/tagcandy/)       | Glossy sticker icons for your tags, matched by StashDB link or name. Your own tag images stay unless you ask.                                                                                                |
 
 <!-- plugins:end -->
 
@@ -70,7 +71,7 @@ pnpm test:compat contract
 
 Tag Candy's specs start a Stash of their own from the binary `stash.sh` downloaded into `WORK/bin` (`plugins/tagcandy/tests/stash.mjs`), on port 9961 with a stand-in for the icon site on 9962 (`TAGCANDY_PORT` moves both), so Apply icons never changes the tag images the themes' screenshots show. They check the port is free first, since `stash.sh`'s readiness check would accept any Stash already listening there.
 
-`prepare.mjs` also points Stash at a mock stash-box (`tests/stash/stashbox.mjs`) that Playwright starts with the tests, so the Tagger, scrape dialogs and StashID links are checked against invented scenes, performers and studios with no stash-box account.
+`prepare.mjs` also points Stash at a mock stash-box (`tests/stash/stashbox.mjs`) that Playwright starts with the tests, so the Tagger, scrape dialogs and StashID links are checked against invented scenes, performers and studios with no stash-box account. The same server stands in for ThePornDB's REST API under `/tpdb/` (`tests/stash/theporndb.mjs`), which New Releases' specs register as a second stash-box while they run, so no test calls ThePornDB. New Releases' unit tests run its Python task against that mock with `python3`, and skip it where there is none.
 
 The specs run in Chromium; `BROWSER=firefox` or `BROWSER=webkit` runs them in another engine, and the workflow has a leg for each that runs Cherry Pick's specs.
 

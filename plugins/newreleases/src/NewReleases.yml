@@ -1,0 +1,29 @@
+name: New Releases
+description: What your favourite studios released in the last 48 hours, from ThePornDB and your other stash-boxes, each linked to the studio's own page to buy it, leaving out what you have. Needs Python, which Stash's Docker image includes.
+version: 0.1.0
+url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/newreleases
+# The task asks the stash-boxes from Stash's own Python, since a plugin's
+# JavaScript in Stash has no web requests of its own. Stash replaces
+# `python` with the Python it finds (Settings > System > Python path, else
+# python3, else python). The task keeps what it finds in catalog/, which
+# the page reads through the assets below.
+exec:
+  - python
+  - '{pluginDir}/newreleases.py'
+interface: raw
+ui:
+  javascript:
+    - newreleases.js
+  css:
+    - newreleases.css
+  assets:
+    /catalog: catalog
+tasks:
+  - name: Check for new releases
+    description: Asks your stash-boxes for your favourite studios' releases of the last 48 hours, one request every few seconds. The New Releases page starts it when its catalog is a day old.
+    defaultArgs:
+      mode: refresh
+  - name: Remove the catalog
+    description: Deletes the releases New Releases keeps in its folder. Run it before you uninstall the plugin, or the folder stays behind.
+    defaultArgs:
+      mode: remove

@@ -26,7 +26,8 @@ for name in "$@"; do
   id=$(node -e 'const e = require("./dist/entries.json").find((e) => e.folder === process.argv[1]); if (!e) process.exit(1); console.log(e.id)' "$name") ||
     { echo "No built plugin in plugins/$name" >&2; exit 1; }
   ssh "$STASH_SSH_HOST" "mkdir -p '$STASH_PLUGINS_DIR/$id'"
-  rsync -a --delete --exclude manifest "dist/site/$id/" "$STASH_SSH_HOST:$STASH_PLUGINS_DIR/$id/"
+  # New Releases keeps its catalog in its folder, under catalog/
+  rsync -a --delete --exclude manifest --exclude /catalog/ "dist/site/$id/" "$STASH_SSH_HOST:$STASH_PLUGINS_DIR/$id/"
   echo "Deployed $id"
 done
 
