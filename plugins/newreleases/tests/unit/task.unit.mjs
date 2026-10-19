@@ -76,7 +76,9 @@ function boxScenes(input) {
 
 before(async () => {
   server = createServer(async (req, res) => {
-    if (handleTpdb(req, res, { delay: 5 })) return
+    // Answers take 30 ms, so pacing counted from each request's start
+    // would show as gaps shorter than the pause
+    if (handleTpdb(req, res, { delay: 30 })) return
     const { pathname } = new URL(req.url, 'http://x')
     if (pathname === '/graphql') {
       stashRequests.push({

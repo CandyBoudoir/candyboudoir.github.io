@@ -241,17 +241,21 @@ def fetch(url, headers, body=None, context=None):
 
 
 class Pacer:
-    """One request at a time, with a pause before each but the first."""
+    """One request at a time, each a full pause after the last answer, so a
+    slow answer never shortens the pause that follows it."""
 
     def __init__(self):
         self.last = None
 
-    def wait(self, pause):
+    def call(self, pause, request_fn):
         if self.last is not None:
             left = self.last + pause - time.monotonic()
             if left > 0:
                 time.sleep(left)
-        self.last = time.monotonic()
+        try:
+            return request_fn()
+        finally:
+            self.last = time.monotonic()
 
 
 # ---------------------------------------------------------------- Stash
@@ -368,10 +372,9 @@ class Tpdb(Service):
         return self.api
 
     def get(self, path):
-        self.pacer.wait(self.pause)
         headers = self.headers()
         headers['Authorization'] = 'Bearer %s' % self.key
-        return fetch(self.api + path, headers)
+        return self.pacer.call(self.pause, lambda: fetch(self.api + path, headers))
 
     def site_id(self, uuid):
         data = (self.get('/sites/%s' % parse.quote(uuid, safe='')) or {}).get(
@@ -417,25 +420,23 @@ class StashBox(Service):
     kind = 'stashbox'
 
     def scenes(self, studio_ids):
-        self.pacer.wait(self.pause)
         headers = self.headers()
         headers['Content-Type'] = 'application/json'
         headers['ApiKey'] = self.key
-        body = fetch(
-            self.endpoint,
-            headers,
-            {
-                'query': BOX_QUERY,
-                'variables': {
-                    'input': {
-                        'studios': {'value': studio_ids, 'modifier': 'INCLUDES'},
-                        'sort': 'DATE',
-                        'direction': 'DESC',
-                        'page': 1,
-                        'per_page': PER_BOX,
-                    }
-                },
+        query = {
+            'query': BOX_QUERY,
+            'variables': {
+                'input': {
+                    'studios': {'value': studio_ids, 'modifier': 'INCLUDES'},
+                    'sort': 'DATE',
+                    'direction': 'DESC',
+                    'page': 1,
+                    'per_page': PER_BOX,
+                }
             },
+        }
+        body = self.pacer.call(
+            self.pause, lambda: fetch(self.endpoint, headers, query)
         )
         if body.get('errors'):
             message = body['errors'][0].get('message') or 'an error'
