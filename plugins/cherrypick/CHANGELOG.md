@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.2.2
 
 - For you loads again after a scene you played in a scene bracket leaves Stash: deleted, merged into another scene, or removed by Stash's Clean task. Cherry Pick stopped at the bracket's pick on the missing scene and never finished learning your taste, so For you's header said "Learning your taste from … scenes" for good, and Your score, Watch This and the bracket buttons never came. Picks on a scene Stash no longer has now teach Cherry Pick nothing. A paused bracket still shows such a scene as "A removed scene".
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.40.6, Xenith 3.2.0 and Restash 0.3.0-55c1cb2.
 
 ## 0.2.1
 
