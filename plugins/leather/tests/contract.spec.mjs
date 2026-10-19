@@ -249,8 +249,9 @@ test('SFW mode drops the voice and the collar', async ({ page }) => {
 })
 
 // Insights, another author's stats dashboard on the Stats page (RESTYLED in
-// tests/stash/companions.mjs), keeps its own look until Restyle Insights is
-// on, and then takes Leather's palette, panels and type. Its sidebar clears Leather's taller navbar either way.
+// tests/stash/companions.mjs), takes Leather's colours by itself, and with
+// Restyle Insights on takes Leather's palette, panels and type. Its sidebar
+// clears Leather's taller navbar either way.
 test.describe('beside Insights', () => {
   test.beforeAll(async () => {
     await usePlugins(PLUGIN_ID, 'Insights')
@@ -260,7 +261,10 @@ test.describe('beside Insights', () => {
     await onlyLeather()
   })
 
-  test('Insights keeps its own look until the restyle is on', async ({
+  // Insights 2.12 and later work out their colours from the page (in
+  // <style id="insights-sx">), so before the restyle is on Insights already
+  // sits on Leather's page in Leather's colours
+  test("Insights takes Leather's colours by itself until the restyle is on", async ({
     page,
   }) => {
     await setPlugin({})
@@ -268,9 +272,12 @@ test.describe('beside Insights', () => {
     await expect(page.locator('html')).not.toHaveClass(
       /\bleather-restyle-insights\b/,
     )
+    await expect(page.locator('style#insights-sx')).toHaveCount(1)
     await expect(page.locator('#insights')).toHaveCSS(
       'background-color',
-      'rgb(16, 15, 15)',
+      await page.evaluate(
+        () => getComputedStyle(document.body).backgroundColor,
+      ),
     )
   })
 
@@ -289,6 +296,18 @@ test.describe('beside Insights', () => {
           getComputedStyle(el).getPropertyValue('--ui').trim(),
         ),
       ).toBe('#151113')
+      // and so do its newer ones, from its own tokens, and its calendars
+      for (const [name, value] of [
+        ['--sx-ui', '#151113'],
+        ['--ins-o4', '#b9aea9'],
+      ]) {
+        expect(
+          await root.evaluate(
+            (el, name) => getComputedStyle(el).getPropertyValue(name).trim(),
+            name,
+          ),
+        ).toBe(value)
+      }
       await expect(root.locator('.ins-sub').first()).toHaveCSS(
         'color',
         'rgb(148, 138, 139)',
@@ -386,7 +405,8 @@ test.describe('beside Performers Toolkit', () => {
     await onlyLeather()
   })
 
-  test('Performers Toolkit keeps its own look until the restyle is on', async ({
+  // As Insights, from 0.13 (in <style id="performerstoolkit-sx">)
+  test("Performers Toolkit takes Leather's colours by itself until the restyle is on", async ({
     page,
   }) => {
     await setPlugin({})
@@ -394,9 +414,12 @@ test.describe('beside Performers Toolkit', () => {
     await expect(page.locator('html')).not.toHaveClass(
       /\bleather-restyle-toolkit\b/,
     )
+    await expect(page.locator('style#performerstoolkit-sx')).toHaveCount(1)
     await expect(page.locator('.pt').first()).toHaveCSS(
       'background-color',
-      'rgb(16, 15, 15)',
+      await page.evaluate(
+        () => getComputedStyle(document.body).backgroundColor,
+      ),
     )
   })
 
@@ -431,7 +454,12 @@ test.describe('beside Performers Toolkit', () => {
           getComputedStyle(el).getPropertyValue('--ui').trim(),
         ),
       ).toBe('#151113')
-      await expect(stats.locator('.pt-sec').first()).toHaveCSS(
+      expect(
+        await stats.evaluate((el) =>
+          getComputedStyle(el).getPropertyValue('--sx-ui').trim(),
+        ),
+      ).toBe('#151113')
+      await expect(stats.locator('.pt-kpi').first()).toHaveCSS(
         'background-image',
         /leather-1x\.webp/,
       )

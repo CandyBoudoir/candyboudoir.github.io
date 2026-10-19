@@ -252,7 +252,10 @@ test.describe('beside Insights', () => {
     await onlyOverclock()
   })
 
-  test('Insights keeps its own look until the restyle is on', async ({
+  // Insights 2.12 and later work out their colours from the page (in
+  // <style id="insights-sx">), so before the restyle is on Insights already
+  // sits on Overclock's page in Overclock's colours
+  test("Insights takes Overclock's colours by itself until the restyle is on", async ({
     page,
   }) => {
     await setPlugin({})
@@ -260,9 +263,12 @@ test.describe('beside Insights', () => {
     await expect(page.locator('html')).not.toHaveClass(
       /\boverclock-restyle-insights\b/,
     )
+    await expect(page.locator('style#insights-sx')).toHaveCount(1)
     await expect(page.locator('#insights')).toHaveCSS(
       'background-color',
-      'rgb(16, 15, 15)',
+      await page.evaluate(
+        () => getComputedStyle(document.body).backgroundColor,
+      ),
     )
   })
 
@@ -277,6 +283,9 @@ test.describe('beside Insights', () => {
       await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       // Insights' own rules still paint from the palette Overclock gives it
       expect(await tokenOf(root, '--ui')).toBe('#0d1416')
+      // and so do its newer ones, from its own tokens, and its calendars
+      expect(await tokenOf(root, '--sx-ui')).toBe('#0d1416')
+      expect(await tokenOf(root, '--ins-o4')).toBe('#4a8dff')
       await expect(root.locator('.ins-sub').first()).toHaveCSS(
         'color',
         'rgb(134, 153, 154)',
@@ -370,7 +379,8 @@ test.describe('beside Performers Toolkit', () => {
     await onlyOverclock()
   })
 
-  test('Performers Toolkit keeps its own look until the restyle is on', async ({
+  // As Insights, from 0.13 (in <style id="performerstoolkit-sx">)
+  test("Performers Toolkit takes Overclock's colours by itself until the restyle is on", async ({
     page,
   }) => {
     await setPlugin({})
@@ -378,9 +388,12 @@ test.describe('beside Performers Toolkit', () => {
     await expect(page.locator('html')).not.toHaveClass(
       /\boverclock-restyle-toolkit\b/,
     )
+    await expect(page.locator('style#performerstoolkit-sx')).toHaveCount(1)
     await expect(page.locator('.pt')).toHaveCSS(
       'background-color',
-      'rgb(16, 15, 15)',
+      await page.evaluate(
+        () => getComputedStyle(document.body).backgroundColor,
+      ),
     )
   })
 
@@ -414,7 +427,8 @@ test.describe('beside Performers Toolkit', () => {
       const ids = await demoIds()
       await openPerformerStats(page, ids.performer)
       expect(await tokenOf(page.locator('.ptc'), '--ui')).toBe('#0d1416')
-      await expect(page.locator('.ptc .pt-card').first()).toHaveCSS(
+      expect(await tokenOf(page.locator('.ptc'), '--sx-ui')).toBe('#0d1416')
+      await expect(page.locator('.ptc .pt-kpi').first()).toHaveCSS(
         'background-color',
         'rgb(13, 20, 22)',
       )
