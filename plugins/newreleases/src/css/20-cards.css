@@ -1,9 +1,12 @@
 /* A release's card: Stash's scene card, plus the badge, performers and tags. */
 
-/* "In your library", bottom left of the cover. */
+/*
+ * "In your library", bottom left of the cover, as far in as Stash sets the
+ * length on the right, so a theme's frame round the picture clears both.
+ */
 .newreleases-card .newreleases-owned-badge {
-  bottom: 0.5rem;
-  left: 0.5rem;
+  bottom: 1rem;
+  left: 0.7rem;
   line-height: 1;
   position: absolute;
   z-index: 3;
