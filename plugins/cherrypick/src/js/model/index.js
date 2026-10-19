@@ -188,14 +188,16 @@ export function createEngine(db, shared = {}) {
         .map(([k]) => k)
         .filter((k) => k[0] === 'p' || k[0] === 's')
     // Other plugins' matches first, then the user's own picks. Clip picks
-    // involving a "Don't learn" scene teach nothing, whoever made them.
+    // involving a "Don't learn" scene teach nothing, whoever made them, nor
+    // do picks on a scene deleted (or merged away) in Stash since: the
+    // library no longer holds it. matches.js keeps other plugins' matches
+    // to the library already.
+    const learns = (id) => !!db.scenes.get(id)?.owned && !dontLearn.has(id)
     const decisions = [
       ...(input.learnFromMatches ? matchDecisions(db) : []),
       ...(input.decisions || []),
     ].filter(
-      (d) =>
-        d.kind === 'performer' ||
-        (!dontLearn.has(d.winner) && !dontLearn.has(d.loser)),
+      (d) => d.kind === 'performer' || (learns(d.winner) && learns(d.loser)),
     )
     const bt = replay(decisions, { baseScene, keys: btKeys, basePerformer })
     // The matches it learned from: how many, and from which plugins
