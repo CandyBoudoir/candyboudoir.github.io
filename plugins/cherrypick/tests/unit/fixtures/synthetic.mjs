@@ -590,7 +590,8 @@ export function syntheticStashdb(input, { missing = 40, seed = 7 } = {}) {
 // ---------------------------------------------------------------- edits for tests
 
 // A copy of the input with every play in the last `days` days removed and
-// these plays added ({ sceneId, at: ms }), each watched all the way through
+// these plays added ({ sceneId, at: ms, share }), each watched all the way
+// through unless `share` gives the part of the scene played
 export function withRecentPlays(input, plays, days = 14) {
   const cut = input.asOf - days * DAY
   const out = structuredClone(input)
@@ -611,7 +612,7 @@ export function withRecentPlays(input, plays, days = 14) {
     const s = byId.get(p.sceneId)
     s.play_history = [...s.play_history, iso(p.at)].sort()
     s.play_count++
-    s.play_duration += s.files[0].duration
+    s.play_duration += (p.share ?? 1) * s.files[0].duration
   }
   return out
 }

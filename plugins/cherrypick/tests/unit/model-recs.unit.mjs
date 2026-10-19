@@ -67,7 +67,11 @@ test('More like this, in your library: barely played scenes you own that are lik
         it.reason,
         /^(Also stars .+|Also from .+|Shares \d+ tags with this one)/,
       )
-      assert.equal(it.reason.endsWith(' · never played'), !behaviourOf(s))
+      assert.equal(it.reason.endsWith(' · never played'), !s.local.play_count)
+      assert.equal(
+        it.reason.endsWith(' · not watched yet'),
+        !!s.local.play_count && !behaviourOf(s),
+      )
       if (i) assert.ok(inLibrary[i - 1].score >= it.score, 'best first')
     }
   }

@@ -61,7 +61,7 @@ Audio-only files and scenes without a file never play. In a library under 30 sce
 
 ### Your score
 
-Your score is learned in your browser from your Stash ratings, from how you watch (how much of a scene you play, how often you come back to it, and its O count), and from your bracket picks. It shows only once it predicts your ratings better than your average rating does, which Cherry Pick checks on ratings it set aside. It is display only: it never changes your Stash ratings.
+Your score is learned in your browser from your Stash ratings, from how you watch (how much of a scene you play, how often you come back to it, and its O count), and from your bracket picks. A play counts as far as the time behind it: each tenth of a scene's length played pays for one play, so a scene played for less than a tenth in all, such as one swiped past in Stash TV, teaches Cherry Pick nothing, and For you treats it as not watched yet. Your score shows only once it predicts your ratings better than your average rating does, which Cherry Pick checks on ratings it set aside. It is display only: it never changes your Stash ratings.
 
 Your score needs 10 rated scenes before it can check itself. Until then, For you's header, the scene page beside the stars and Cherry Pick's page say how many ratings are left, and For you ranks by the performers you favorite or rate in Stash, your bracket picks and what you have played. The weight on favorites and performer ratings fades as your scene ratings arrive and is gone at 10.
 

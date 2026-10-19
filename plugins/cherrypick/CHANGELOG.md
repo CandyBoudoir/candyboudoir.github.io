@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Cherry Pick counts a play only as far as the time behind it. Stash records a play from a scene's first second, so a scene swiped past in a feed such as Stash TV's counted like one watched all the way through: For you put its performers, studio and tags forward as what you had been watching, ranked it lower as recently watched, and counted it as a rewatch when it came by again on another day, and Your score read the short play as a sign you disliked the scene. Each tenth of a scene's length played now pays for one play. A scene played for less than that in all was only looked at: it teaches Cherry Pick nothing, and For you and More like this say "Not watched yet". When a scene's play time pays for fewer plays than Stash records, each play, and each day it was played on, counts for that share. A scene you start on its own page and leave within its first tenth no longer counts against it either. Plays with no play time, such as plays added by hand, count as before.
+
 ## 0.2.0
 
 - Watch This, a new setting in Cherry Pick's settings, off until you turn it on, puts one scene on the front page in place of Cherry Pick's rows: the one Cherry Pick expects you most want to watch now, in Stash's own player at the page's full width. Stash's own rows stay below it. The player works as on the scene page: Stash records the play and where you stopped, Stash's Auto-start video setting decides whether the scene starts by itself, and Space plays it with no click first. A line under the player gives the scene's title, its performers and why Cherry Pick picked it, and steps out once the scene plays. Nothing happens when the scene ends. For you, the rows that follow your watching and the Hall of Fame row keep their switches for when you turn Watch This off; the Hall of Fame stays on Cherry Pick's page.

@@ -11,10 +11,12 @@
 //               (statedFor), fading as your ratings arrive
 //   momentum    performers, studios and tags you played in the last two weeks,
 //               each play decaying with a 7-day half-life ("now" is the
-//               library's asOf)
+//               library's asOf) and counting for the time behind it
+//               (behaviour.js playWeight)
 //   freshness   never watched or not watched in a long time: up; watched
 //               recently: down, less so for people who rewatch a lot; seen
-//               at all: down for people who rarely rewatch
+//               at all: down for people who rarely rewatch. A scene only
+//               looked at counts as never watched
 //   variety     at most 2 cards per performer, and a small minus for each card
 //               already in the row that shares one
 //   exploration 2 of the 12 cards are owned near-misses or forgotten favorites
@@ -33,7 +35,7 @@ import {
   fmtStars,
   sceneRating,
 } from './util.js'
-import { behaviourOf, barelyPlayed } from './behaviour.js'
+import { behaviourOf, barelyPlayed, playWeight } from './behaviour.js'
 import { popularity, popularityLine } from './signals.js'
 import { MIN_RATED } from './taste.js'
 
@@ -104,13 +106,16 @@ const MONTHS = [
 
 // ---------------------------------------------------------------- inputs
 
-// Every play the plugin can see: Stash's play_history. sceneId -> sorted ms timestamps
+// Every play the plugin can see: Stash's play_history, none for a scene only
+// looked at (playWeight). sceneId -> sorted ms timestamps
 export function playMap(db) {
   const out = new Map()
   for (const s of db.owned)
     out.set(
       s.id,
-      s.local.play_history.map((t) => Date.parse(t)).sort((a, b) => a - b),
+      playWeight(s)
+        ? s.local.play_history.map((t) => Date.parse(t)).sort((a, b) => a - b)
+        : [],
     )
   return out
 }
@@ -143,10 +148,11 @@ export function momentumOf(db, plays, skip, now) {
     if (s.studio) bumpLib('s:' + s.studio.id)
     if (s.studio?.parent) bumpLib('s:' + s.studio.parent.id)
     if (skip.has(s.id)) continue
+    const q = playWeight(s)
     for (const at of plays.get(s.id) || []) {
       const age = (now - at) / DAY
       if (age < 0 || age > FY.windowDays) continue
-      const w = 0.5 ** (age / FY.halfLifeDays)
+      const w = q * 0.5 ** (age / FY.halfLifeDays)
       total += w
       count++
       // in a big cast each performer gets a smaller share of the play
@@ -176,7 +182,9 @@ export function momentumOf(db, plays, skip, now) {
   return { feat, total, count }
 }
 
-// Share of played scenes you came back to on another day
+// Share of played scenes you came back to on another day, each day counting
+// for what its plays do (playWeight): a scene whose time pays for one and a
+// half days' plays is half a scene come back to
 export function rewatchRate(db, plays, skip) {
   let played = 0
   let again = 0
@@ -185,8 +193,8 @@ export function rewatchRate(db, plays, skip) {
     const ps = plays.get(s.id) || []
     if (!ps.length) continue
     played++
-    if (new Set(ps.map((t) => localDay(new Date(t).toISOString()))).size > 1)
-      again++
+    const days = new Set(ps.map((t) => localDay(new Date(t).toISOString())))
+    again += clamp(days.size * playWeight(s) - 1, 0, 1)
   }
   return played ? again / played : 0
 }
@@ -380,6 +388,8 @@ export function freshnessFor(ctx, s) {
       value: 0.3 + (isNew ? 0.15 : 0),
       kind: isNew ? 'new' : 'never',
       addedDays,
+      // Stash has plays of it, all looks
+      looked: !!s.local.play_count,
     }
   }
   const d = (ctx.now - last) / DAY
@@ -444,10 +454,9 @@ function freshPhrase(ctx, s, f) {
       : ''
   if (f.kind === 'new') return 'New in your library'
   if (f.kind === 'never') {
+    const never = f.looked ? 'Not watched yet' : 'Never played'
     const t = tastePhrase(ctx, s)
-    return t
-      ? `Never played · ${t[0].toLowerCase() + t.slice(1)}`
-      : 'Never played'
+    return t ? `${never} · ${t[0].toLowerCase() + t.slice(1)}` : never
   }
   if (f.kind === 'long')
     return `Not watched since ${monthOf(ctx, f.last)}` + rated
