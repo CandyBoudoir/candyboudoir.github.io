@@ -52,6 +52,8 @@ pnpm smoke                # after deploy:local cherrypick: a headless check of C
 
 Each plugin lives in `plugins/<name>/`: a `plugin.mjs` that tells the shared build (`scripts/build.mjs`) what goes into its plugin folder, its `CHANGELOG.md` and README, and its compatibility tests in `tests/`. `plugin.mjs` also exports the plugin's `title` and the `summary` that `scripts/readme.mjs` puts in the table above, and a theme exports `kind = 'theme'`, which runs Cherry Pick's theme spec under it. `tests/stash/` is the Stash test harness the plugins share.
 
+A plugin can also live in another CandyBoudoir repo and still publish through this source, listed in `plugins.external.json` with its `repo`, `folder`, `title` and `summary`. That repo must be public and keep this repo's layout and build (`plugins/<folder>/` and `scripts/build.mjs`), and its own Publish workflow tags and releases the plugin. The stable channel here builds it from its latest `<folder>-vX.Y.Z` tag in that repo and checks the zip against that repo's release, the develop channel builds that repo's `main`, and the README table and the site link to it. Publish also runs daily, since a release there pushes nothing here.
+
 A plugin still being built exports `incubating = true` from its `plugin.mjs`. `pnpm build`, the tests and `deploy:local` treat it like any other plugin, and the Publish workflow leaves it out of the develop channel and the site and never releases it. Removing the line lets it publish.
 
 ### Compatibility tests
