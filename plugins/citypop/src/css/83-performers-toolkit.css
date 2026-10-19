@@ -11,7 +11,8 @@
  * one. These rules start at `#root`, or at the toast's id, so they outrank
  * its own, and all of them wait for the Restyle Performers Toolkit setting
  * (.citypop-restyle-toolkit on <html>, from citypop.js), but for the one
- * that hides that setting while the plugin is off. It sizes its toast and
+ * that hides that setting while the plugin is off and the two that keep a
+ * performer's header a J-card. It sizes its toast and
  * its review bar on a phone from Stash's navbar, so City Pop's taller bar
  * needs nothing here.
  */
@@ -23,11 +24,45 @@
   display: none;
 }
 
+/* From 0.10 it tidies a performer's header into rows that wrap, and from
+   0.13 puts a side panel between the cover and the header, which would part
+   the spine from the cover. The J-card keeps its grid (the toolkit's order
+   still places its rows), and the panel moves past the flap, whether the
+   restyle is on or not. */
+#root #performer-page .detail-header .performer-head[data-pt-tidy] {
+  align-items: normal;
+  column-gap: 2rem;
+  display: grid;
+}
+
+#root #performer-page .detail-header .detail-container > .pt-side {
+  order: 1;
+}
+
+@media (width <= 720px) {
+  #root #performer-page .detail-header .performer-head[data-pt-tidy] {
+    display: block;
+  }
+}
+
 /* Its palette in City Pop's, as for Insights. Each tab's accent follows:
    pool blue for Find and Performers, lilac for History, pool turquoise for
-   Sources, apricot for Clean-up. */
-.citypop-restyle-toolkit #root :is(.pt, .ptc, .pt-strip, .pt-entry),
-.citypop-restyle-toolkit #pt-toast {
+   Sources, apricot for Clean-up. From 0.13 it also paints a performer's
+   header (when it tidies it), its full-body pictures, side panes and
+   overlays. */
+.citypop-restyle-toolkit
+  #root
+  :is(
+    .pt,
+    .ptc,
+    .pt-strip,
+    .pt-entry,
+    .pt-fb,
+    .pt-side,
+    .pt-pane,
+    .performer-head[data-pt-tidy]
+  ),
+.citypop-restyle-toolkit :is(#pt-toast, .pt-ov) {
   --bg: var(--citypop-night);
   --bg2: var(--citypop-well);
   --ui: var(--citypop-panel);
@@ -113,9 +148,12 @@
   color: #fff;
 }
 
-/* Cards, the review bar and the catalog's cards are navy panels on the hard
-   shadow; a card's coloured top edge still says what it is */
-.citypop-restyle-toolkit #root :is(.pt-card, .pt-mcard, .pt-ccard, .pt-rvbar) {
+/* Cards, the review bar, the catalog's cards and the Stats tab's figures
+   and charts are navy panels on the hard shadow; a card's coloured top edge
+   still says what it is */
+.citypop-restyle-toolkit
+  #root
+  :is(.pt-card, .pt-mcard, .pt-ccard, .pt-rvbar, .pt-kpi, .pt-cc) {
   background: var(--citypop-panel-grad);
   border: 1px solid var(--citypop-edge);
   border-radius: var(--citypop-radius);
@@ -159,13 +197,15 @@
 }
 
 /* Card titles and small caps in Jost; numbers too */
-.citypop-restyle-toolkit #root :is(.pt-ch b, .pt-flowt, .pt-herot b) {
+.citypop-restyle-toolkit
+  #root
+  :is(.pt-ch b, .pt-flowt, .pt-herot b, .pt-cct, .pt-s3t) {
   font-family: var(--citypop-font-label);
   font-weight: 500;
   letter-spacing: 0.02em;
 }
 
-.citypop-restyle-toolkit #root :is(.pt-sh, .pt-tk) {
+.citypop-restyle-toolkit #root :is(.pt-sh, .pt-kpik) {
   font-family: var(--citypop-font-label);
   font-weight: 500;
   letter-spacing: 0.14em;
@@ -173,7 +213,7 @@
 
 .citypop-restyle-toolkit
   #root
-  :is(.pt-tile b, .pt-cnt b, .pt-ring b, .pt-pnum, .pt-dmid b, .pt-rvdone b) {
+  :is(.pt-kpi b, .pt-ring b, .pt-pnum, .pt-dmid b, .pt-rvdone b) {
   font-family: var(--citypop-font-label);
   font-variant-numeric: tabular-nums;
   font-weight: 500;
@@ -195,8 +235,6 @@
     .pt-way,
     .pt-src1,
     .pt-boxr,
-    .pt-tile,
-    .pt-cnt,
     .pt-rc,
     .pt-edit,
     .pt-none,
@@ -219,7 +257,7 @@
 
 .citypop-restyle-toolkit
   #root
-  :is(.pt-input, .pt-sel, .pt-acct select, .pt-tile, .pt-cnt, .pt-ct) {
+  :is(.pt-input, .pt-sel, .pt-acct select, .pt-ct) {
   box-shadow:
     inset 0 2px 0 rgb(0 0 0 / 30%),
     0 1px 0 rgb(255 255 255 / 6%);
@@ -241,7 +279,8 @@
     .pt-gcell,
     .pt-pc,
     .pt-thumb,
-    .pt-scimg,
+    .pt-srimg,
+    .pt-picthumb,
     .pt-sccov,
     .pt-cimg,
     .pt-mcov,
@@ -385,12 +424,8 @@
 }
 
 /* Links read in coral, as everywhere in City Pop; O's are pool water */
-.citypop-restyle-toolkit #root :is(.pt-link, button.pt-spmore, a.pt-pill),
+.citypop-restyle-toolkit #root :is(.pt-link, a.pt-pill),
 .citypop-restyle-toolkit #pt-toast .pt-link {
-  color: var(--citypop-coral);
-}
-
-.citypop-restyle-toolkit #root button.pt-spmore .pt-ic {
   color: var(--citypop-coral);
 }
 
@@ -398,20 +433,18 @@
   #root
   :is(
     .pt-link:hover,
-    button.pt-spmore:hover,
     a.pt-pill:hover,
     a.pt-fname:hover,
     .pt-mtitle a:hover,
     .pt-sctitle:hover,
     .pt-cctt:hover,
-    .pt-sct:hover .pt-sctt,
-    .pt-cop:hover .pt-cn
+    .pt-srow:hover .pt-srt
   ),
 .citypop-restyle-toolkit #pt-toast .pt-link:hover {
   color: var(--citypop-apricot);
 }
 
-.citypop-restyle-toolkit #root :is(.pt-c-bl, .pt-sp-o) {
+.citypop-restyle-toolkit #root .pt-c-bl {
   color: var(--citypop-pool-hi);
 }
 
@@ -444,7 +477,6 @@
   :is(
     .pt-badge:not(.badge),
     .pt-covtag,
-    .pt-sctag,
     .pt-cpick,
     .pt-dcard.on .pt-dtag,
     .pt-scard.on .pt-scpick

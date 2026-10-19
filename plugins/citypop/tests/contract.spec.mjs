@@ -410,10 +410,9 @@ test('SFW mode drops the voice and the pool drops', async ({ page }) => {
 })
 
 // Insights, another author's stats dashboard on the Stats page (RESTYLED in
-// tests/stash/companions.mjs), keeps its own look until Restyle Insights and
-// Performers Toolkit is on, and then takes City Pop's palette, panels and
-// type. Its sidebar clears
-// City Pop's taller navbar either way.
+// tests/stash/companions.mjs), takes City Pop's colours by itself, and with
+// Restyle Insights on takes City Pop's palette, panels and type. Its sidebar
+// clears City Pop's taller navbar either way.
 test.describe('beside Insights', () => {
   test.beforeAll(async () => {
     await usePlugins(PLUGIN_ID, 'Insights')
@@ -423,7 +422,10 @@ test.describe('beside Insights', () => {
     await onlyCityPop()
   })
 
-  test('Insights keeps its own look until the restyle is on', async ({
+  // Insights 2.12 and later work out their colours from the page (in
+  // <style id="insights-sx">), so before the restyle is on Insights already
+  // sits on City Pop's page in City Pop's colours
+  test("Insights takes City Pop's colours by itself until the restyle is on", async ({
     page,
   }) => {
     await setPlugin({})
@@ -431,9 +433,12 @@ test.describe('beside Insights', () => {
     await expect(page.locator('html')).not.toHaveClass(
       /\bcitypop-restyle-insights\b/,
     )
+    await expect(page.locator('style#insights-sx')).toHaveCount(1)
     await expect(page.locator('#insights')).toHaveCSS(
       'background-color',
-      'rgb(16, 15, 15)',
+      await page.evaluate(
+        () => getComputedStyle(document.body).backgroundColor,
+      ),
     )
   })
 
@@ -452,6 +457,19 @@ test.describe('beside Insights', () => {
           getComputedStyle(el).getPropertyValue('--ui').trim(),
         ),
       ).toBe('#1a1848')
+      // and so do its newer ones, from its own tokens, and its calendars,
+      // whose empty days sit in the well
+      for (const [name, value] of [
+        ['--sx-ui', '#0e0f33'],
+        ['--ins-o4', '#4fe3da'],
+      ]) {
+        expect(
+          await root.evaluate(
+            (el, name) => getComputedStyle(el).getPropertyValue(name).trim(),
+            name,
+          ),
+        ).toBe(value)
+      }
       await expect(root.locator('.ins-sub').first()).toHaveCSS(
         'color',
         'rgb(163, 155, 211)',
@@ -544,7 +562,8 @@ test.describe('beside Performers Toolkit', () => {
     await onlyCityPop()
   })
 
-  test('Performers Toolkit keeps its own look until the restyle is on', async ({
+  // As Insights, from 0.13 (in <style id="performerstoolkit-sx">)
+  test("Performers Toolkit takes City Pop's colours by itself until the restyle is on", async ({
     page,
   }) => {
     await setPlugin({})
@@ -552,9 +571,12 @@ test.describe('beside Performers Toolkit', () => {
     await expect(page.locator('html')).not.toHaveClass(
       /\bcitypop-restyle-toolkit\b/,
     )
+    await expect(page.locator('style#performerstoolkit-sx')).toHaveCount(1)
     await expect(page.locator('.pt').first()).toHaveCSS(
       'background-color',
-      'rgb(16, 15, 15)',
+      await page.evaluate(
+        () => getComputedStyle(document.body).backgroundColor,
+      ),
     )
   })
 
@@ -583,7 +605,12 @@ test.describe('beside Performers Toolkit', () => {
           getComputedStyle(el).getPropertyValue('--ui').trim(),
         ),
       ).toBe('#1a1848')
-      await expect(stats.locator('.pt-sec').first()).toHaveCSS(
+      expect(
+        await stats.evaluate((el) =>
+          getComputedStyle(el).getPropertyValue('--sx-ui').trim(),
+        ),
+      ).toBe('#1a1848')
+      await expect(stats.locator('.pt-kpi').first()).toHaveCSS(
         'background-image',
         /rgb\(31, 28, 85\)/,
       )
@@ -591,6 +618,37 @@ test.describe('beside Performers Toolkit', () => {
       await setPlugin({})
     }
   })
+
+  // From 0.10 the toolkit tidies a performer's header into rows that wrap,
+  // and from 0.13 it sets a side panel between the cover and the header.
+  // The J-card keeps its spine against the cover, restyle on or off, and
+  // the panel sits past the flap.
+  for (const restyle of [false, true]) {
+    test(`the J-card holds when the toolkit tidies the header, restyle ${restyle ? 'on' : 'off'}`, async ({
+      page,
+    }) => {
+      try {
+        await setPlugin(restyle ? { restylePerformersToolkit: true } : {})
+        await page.goto(`/performers/${ids.performer}`)
+        const head = page.locator(
+          '#performer-page .performer-head[data-pt-tidy]',
+        )
+        await head.waitFor({ timeout: 30_000 })
+        await page.locator('#pt-side').waitFor()
+        await expect(head).toHaveCSS('display', 'grid')
+        const cover = await page
+          .locator('#performer-page .detail-header-image')
+          .boundingBox()
+        const spine = await head.locator('> h2').boundingBox()
+        const side = await page.locator('#pt-side').boundingBox()
+        expect(Math.abs(spine.x - (cover.x + cover.width))).toBeLessThan(2)
+        expect(Math.abs(spine.y - cover.y)).toBeLessThan(2)
+        expect(side.x).toBeGreaterThan(spine.x + spine.width)
+      } finally {
+        await setPlugin({})
+      }
+    })
+  }
 
   // The Catalog tab's count is a Stash badge in a Stash tab, which also
   // carries Performers Toolkit's badge class, with its own navy type. It

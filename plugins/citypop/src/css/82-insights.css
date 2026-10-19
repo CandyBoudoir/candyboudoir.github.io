@@ -431,7 +431,11 @@
   stroke: var(--citypop-well);
 }
 
-.citypop-restyle-insights #root #insights svg line[stroke='#282726' i] {
+.citypop-restyle-insights
+  #root
+  #insights
+  svg
+  line:is([stroke='#282726' i], [stroke='var(--sx-ui)']) {
   stroke: var(--citypop-edge);
 }
 
