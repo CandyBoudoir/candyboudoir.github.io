@@ -1,6 +1,9 @@
 /*
  * Dropdowns, modals, popovers, tooltips, toasts. Stash paints its menus slate
- * through div.dropdown-menu rules, so Juicy's menu rules name the div too.
+ * through div.dropdown-menu rules, so Juicy's menu rules name the div too. The
+ * list toolbars' Sort by and more menus and a scene's Operations menu also put
+ * Bootstrap's !important bg-secondary and text-white on the menu and every
+ * item, so their colours need !important as well.
  */
 .dropdown-menu,
 div.dropdown-menu,
@@ -32,6 +35,33 @@ div.dropdown-menu .dropdown-item.active,
 div.dropdown-menu .dropdown-item:active {
   background-image: var(--juicy-gloss-pink);
   color: var(--juicy-ink);
+}
+
+.dropdown-menu.bg-secondary {
+  background-color: var(--juicy-card-raised) !important;
+}
+
+.dropdown-menu .dropdown-item.bg-secondary {
+  background-color: transparent !important;
+}
+
+.dropdown-menu .dropdown-item.text-white {
+  color: var(--juicy-text) !important;
+}
+
+.dropdown-menu .dropdown-item.bg-secondary:hover,
+.dropdown-menu .dropdown-item.bg-secondary:focus {
+  background-color: var(--juicy-pink-soft) !important;
+}
+
+.dropdown-menu .dropdown-item.text-white:hover,
+.dropdown-menu .dropdown-item.text-white:focus {
+  color: var(--juicy-bubblegum) !important;
+}
+
+.dropdown-menu .dropdown-item.text-white.active,
+.dropdown-menu .dropdown-item.text-white:active {
+  color: var(--juicy-ink) !important;
 }
 
 .popover-body {

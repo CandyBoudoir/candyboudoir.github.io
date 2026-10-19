@@ -140,6 +140,42 @@ test.describe('on a touch screen', () => {
   })
 })
 
+// Stash puts Bootstrap's !important bg-secondary and text-white on the list
+// toolbars' Sort by and more menus, a scene's Operations menu and every item
+// in them, which once left those menus slate. Each opens on Juicy's plum
+// panel, and its items hover pink like every other menu's.
+const SLATE_MENUS = [
+  ...['scenes', 'performers', 'images', 'galleries', 'studios', 'tags'].flatMap(
+    (list) => [
+      [
+        `the ${list} list's Sort by menu`,
+        `/${list}`,
+        '.sort-by-select .dropdown-toggle',
+      ],
+      [`the ${list} list's more menu`, `/${list}`, '#more-menu'],
+    ],
+  ),
+  ["a scene's Operations menu", '/scenes/:scene', '#operation-menu'],
+]
+
+for (const [name, path, toggle] of SLATE_MENUS) {
+  test(`${name} opens plum and hovers pink`, async ({ page }) => {
+    await page.goto(url(path))
+    await page.locator(toggle).click()
+    const menu = page.locator('.dropdown-menu.show')
+    await expect(menu).toHaveCSS('background-color', 'rgb(45, 24, 82)')
+    const item = menu
+      .locator('.dropdown-item')
+      .filter({ visible: true })
+      .first()
+    await expect(item).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(item).toHaveCSS('color', 'rgb(255, 242, 250)')
+    await item.hover()
+    await expect(item).toHaveCSS('background-color', 'rgba(252, 61, 159, 0.16)')
+    await expect(item).toHaveCSS('color', 'rgb(252, 104, 178)')
+  })
+}
+
 test('Calm mode and Plain labels take effect', async ({ page }) => {
   try {
     await setPlugin({ calmMode: true, plainCopy: true })
