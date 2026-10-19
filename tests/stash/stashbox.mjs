@@ -6,8 +6,10 @@
 // its own queries from the browser (queryScenes by performer or studio in
 // popularity order, findScene by id with fingerprint submissions); those are
 // answered from the separate StashDB catalogue, with StashDB's CORS headers.
-// Playwright starts it (playwright.config.mjs); `node tests/stash/stashbox.mjs`
-// runs it by hand. Env: STASH_BOX_PORT (default 9998).
+// Under /tpdb/ it also stands in for ThePornDB's REST API (theporndb.mjs),
+// for New Releases. Playwright starts it (playwright.config.mjs); `node
+// tests/stash/stashbox.mjs` runs it by hand. Env: STASH_BOX_PORT (default
+// 9998).
 import { createServer } from 'node:http'
 import { renderStickers } from './stickers.mjs'
 import {
@@ -17,6 +19,7 @@ import {
   STASHDB,
   catalogue,
 } from './stashbox-data.mjs'
+import { handleTpdb } from './theporndb.mjs'
 
 const { scenes, performers, studios, tags } = catalogue
 const images = await renderStickers(IMAGES)
@@ -161,6 +164,7 @@ const CORS = {
 }
 
 const server = createServer((req, res) => {
+  if (handleTpdb(req, res)) return
   const { pathname } = new URL(req.url, 'http://x')
   if (req.method === 'OPTIONS' && pathname === '/graphql') {
     res.writeHead(204, CORS).end()
