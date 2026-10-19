@@ -1,0 +1,111 @@
+/*
+ * Insights from 2.12 and Performers Toolkit from 0.13 work out their own
+ * colours from the page and keep them in --sx-* tokens, which their newer
+ * rules and charts use directly. Insights keeps the shades in between (row
+ * dividers, its error box, tinted verdicts and its calendars' steps) in
+ * --ins-* tokens. With a restyle off, those already follow Leather. With
+ * one on, these rules point them at the palette 82-insights.css and
+ * 83-performers-toolkit.css give that plugin, so its older and newer rules
+ * agree. Earlier releases have no such tokens and ignore these.
+ */
+.leather-restyle-insights #root #insights,
+.leather-restyle-toolkit
+  #root
+  :is(
+    .pt,
+    .ptc,
+    .pt-strip,
+    .pt-entry,
+    .pt-fb,
+    .pt-side,
+    .pt-pane,
+    .performer-head[data-pt-tidy]
+  ),
+.leather-restyle-toolkit :is(#pt-toast, .pt-ov) {
+  --sx-bg: var(--bg);
+  --sx-bg2: var(--bg2);
+  --sx-ui: var(--ui);
+  --sx-ui2: var(--ui2);
+  --sx-ui3: var(--ui3);
+  --sx-raise: var(--ui2);
+  --sx-line: var(--ui3);
+  --sx-line2: var(--ui3);
+  --sx-edge: var(--leather-line);
+  --sx-deep: var(--leather-well);
+  --sx-slab: var(--leather-raised);
+  --sx-tx3: var(--tx3);
+  --sx-tx2b: var(--tx2b, var(--tx2));
+  --sx-tx2: var(--tx2);
+  --sx-tx1b: var(--tx1b);
+  --sx-tx: var(--tx);
+  --sx-hi: var(--hi);
+  --sx-grey: var(--tx2);
+  --sx-paper: var(--leather-text);
+  --sx-on: var(--leather-bg);
+  --sx-acc: var(--leather-blood-hi);
+  --sx-acc-tx: var(--leather-text);
+
+  /* Each hue reads on the panels as it is; its light and dark steps are
+     mixed toward white and toward the page */
+  --sx-re: var(--re);
+  --sx-re-tx: var(--re);
+  --sx-re-l: color-mix(in srgb, var(--re) 60%, #fff);
+  --sx-re-d: color-mix(in srgb, var(--re) 45%, var(--bg));
+  --sx-or: var(--or);
+  --sx-or-tx: var(--or);
+  --sx-or-l: color-mix(in srgb, var(--or) 60%, #fff);
+  --sx-or-d: color-mix(in srgb, var(--or) 45%, var(--bg));
+  --sx-ye: var(--ye);
+  --sx-ye-tx: var(--ye);
+  --sx-ye-l: color-mix(in srgb, var(--ye) 60%, #fff);
+  --sx-ye-d: color-mix(in srgb, var(--ye) 45%, var(--bg));
+  --sx-gr: var(--gr);
+  --sx-gr-tx: var(--gr);
+  --sx-gr-l: color-mix(in srgb, var(--gr) 60%, #fff);
+  --sx-gr-d: color-mix(in srgb, var(--gr) 45%, var(--bg));
+  --sx-cy: var(--cy);
+  --sx-cy-tx: var(--cy);
+  --sx-cy-l: color-mix(in srgb, var(--cy) 60%, #fff);
+  --sx-cy-d: color-mix(in srgb, var(--cy) 45%, var(--bg));
+  --sx-bl: var(--bl);
+  --sx-bl-tx: var(--bl);
+  --sx-bl-l: color-mix(in srgb, var(--bl) 60%, #fff);
+  --sx-bl-d: color-mix(in srgb, var(--bl) 45%, var(--bg));
+  --sx-pu: var(--pu);
+  --sx-pu-tx: var(--pu);
+  --sx-pu-l: color-mix(in srgb, var(--pu) 60%, #fff);
+  --sx-pu-d: color-mix(in srgb, var(--pu) 45%, var(--bg));
+  --sx-ma: var(--ma);
+  --sx-ma-tx: var(--ma);
+  --sx-ma-l: color-mix(in srgb, var(--ma) 60%, #fff);
+  --sx-ma-d: color-mix(in srgb, var(--ma) 45%, var(--bg));
+}
+
+/* Insights' shades in between, from the same palette. Its calendars climb
+   from an empty panel to the hue in five steps: O's, watch time and hours
+   each in their own colour. */
+.leather-restyle-insights #root #insights {
+  --ins-err-bd: color-mix(in srgb, var(--down) 45%, var(--ui));
+  --ins-err-bg: color-mix(in srgb, var(--down) 12%, var(--ui));
+  --ins-err-tx: var(--down);
+  --ins-div1: color-mix(in srgb, var(--ui3) 45%, var(--ui));
+  --ins-div2: color-mix(in srgb, var(--ui3) 75%, var(--ui));
+  --ins-up-bg: color-mix(in srgb, var(--up) 18%, var(--ui));
+  --ins-down-bg: color-mix(in srgb, var(--down) 18%, var(--ui));
+  --ins-warn-bg: color-mix(in srgb, var(--ye) 18%, var(--ui));
+  --ins-o1: color-mix(in srgb, var(--o) 22%, var(--ui));
+  --ins-o2: color-mix(in srgb, var(--o) 42%, var(--ui));
+  --ins-o3: color-mix(in srgb, var(--o) 66%, var(--ui));
+  --ins-o4: var(--o);
+  --ins-o5: color-mix(in srgb, var(--o) 55%, #fff);
+  --ins-watch1: color-mix(in srgb, var(--cy) 22%, var(--ui));
+  --ins-watch2: color-mix(in srgb, var(--cy) 42%, var(--ui));
+  --ins-watch3: color-mix(in srgb, var(--cy) 66%, var(--ui));
+  --ins-watch4: var(--cy);
+  --ins-watch5: color-mix(in srgb, var(--cy) 55%, #fff);
+  --ins-hour1: color-mix(in srgb, var(--pu) 22%, var(--ui));
+  --ins-hour2: color-mix(in srgb, var(--pu) 42%, var(--ui));
+  --ins-hour3: color-mix(in srgb, var(--pu) 66%, var(--ui));
+  --ins-hour4: var(--pu);
+  --ins-hour5: color-mix(in srgb, var(--pu) 55%, #fff);
+}

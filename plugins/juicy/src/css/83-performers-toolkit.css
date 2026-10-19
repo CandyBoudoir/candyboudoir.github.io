@@ -33,9 +33,22 @@
 
 /* Its palette in Juicy's, as for Insights. Each tab's accent follows:
    blueberry for Find, pink for Performers, purple for History, lime for
-   Sources and tangerine for Clean-up. */
-.juicy-restyle-toolkit #root :is(.pt, .ptc, .pt-strip, .pt-entry),
-.juicy-restyle-toolkit #pt-toast {
+   Sources and tangerine for Clean-up. From 0.13 it also paints a
+   performer's header (when it tidies it), its full-body pictures, side
+   panes and overlays. */
+.juicy-restyle-toolkit
+  #root
+  :is(
+    .pt,
+    .ptc,
+    .pt-strip,
+    .pt-entry,
+    .pt-fb,
+    .pt-side,
+    .pt-pane,
+    .performer-head[data-pt-tidy]
+  ),
+.juicy-restyle-toolkit :is(#pt-toast, .pt-ov) {
   --bg: var(--juicy-bg);
   --bg2: var(--juicy-bg-deep);
   --ui: var(--juicy-card);
@@ -128,10 +141,12 @@
   color: var(--juicy-ink);
 }
 
-/* Cards, the review bar and the catalog's cards are plum stickers on a hard
-   ink drop. A card's coloured top edge, which says what it is, becomes a
-   candy lip inside the outline. */
-.juicy-restyle-toolkit #root :is(.pt-card, .pt-mcard, .pt-ccard, .pt-rvbar) {
+/* Cards, the review bar, the catalog's cards and the Stats tab's figures
+   and charts are plum stickers on a hard ink drop. A card's coloured top
+   edge, which says what it is, becomes a candy lip inside the outline. */
+.juicy-restyle-toolkit
+  #root
+  :is(.pt-card, .pt-mcard, .pt-ccard, .pt-rvbar, .pt-kpi, .pt-cc) {
   background: var(--juicy-card);
   border: var(--juicy-outline) solid var(--juicy-ink);
   border-radius: var(--juicy-radius-lg);
@@ -190,12 +205,14 @@
 }
 
 /* Card titles, small caps and numbers in Fredoka */
-.juicy-restyle-toolkit #root :is(.pt-ch b, .pt-flowt, .pt-herot b) {
+.juicy-restyle-toolkit
+  #root
+  :is(.pt-ch b, .pt-flowt, .pt-herot b, .pt-cct, .pt-s3t) {
   font-family: var(--juicy-font-display);
   font-weight: 600;
 }
 
-.juicy-restyle-toolkit #root :is(.pt-sh, .pt-tk) {
+.juicy-restyle-toolkit #root :is(.pt-sh, .pt-kpik) {
   font-family: var(--juicy-font-display);
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -203,7 +220,7 @@
 
 .juicy-restyle-toolkit
   #root
-  :is(.pt-tile b, .pt-cnt b, .pt-ring b, .pt-pnum, .pt-dmid b, .pt-rvdone b) {
+  :is(.pt-kpi b, .pt-ring b, .pt-pnum, .pt-dmid b, .pt-rvdone b) {
   font-family: var(--juicy-font-display);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
@@ -226,8 +243,6 @@
     .pt-way,
     .pt-src1,
     .pt-boxr,
-    .pt-tile,
-    .pt-cnt,
     .pt-rc,
     .pt-edit,
     .pt-none,
@@ -250,9 +265,7 @@
 }
 
 /* Switches keep a field's corners, since their labels can wrap */
-.juicy-restyle-toolkit
-  #root
-  :is(.pt-chip, .pt-pill, .pt-step, .pt-rc, .pt-cnt) {
+.juicy-restyle-toolkit #root :is(.pt-chip, .pt-pill, .pt-step, .pt-rc) {
   border-radius: var(--juicy-radius-pill);
 }
 
@@ -413,8 +426,7 @@
 }
 
 /* Links read in cyan and turn bubblegum, as everywhere in Juicy */
-.juicy-restyle-toolkit #root :is(.pt-link, button.pt-spmore, a.pt-pill),
-.juicy-restyle-toolkit #root button.pt-spmore .pt-ic,
+.juicy-restyle-toolkit #root :is(.pt-link, a.pt-pill),
 .juicy-restyle-toolkit #pt-toast .pt-link {
   color: var(--juicy-cyan);
 }
@@ -423,14 +435,12 @@
   #root
   :is(
     .pt-link:hover,
-    button.pt-spmore:hover,
     a.pt-pill:hover,
     a.pt-fname:hover,
     .pt-mtitle a:hover,
     .pt-sctitle:hover,
     .pt-cctt:hover,
-    .pt-sct:hover .pt-sctt,
-    .pt-cop:hover .pt-cn
+    .pt-srow:hover .pt-srt
   ),
 .juicy-restyle-toolkit #pt-toast .pt-link:hover {
   color: var(--juicy-bubblegum);
@@ -441,10 +451,6 @@
 }
 
 /* O's are bubblegum, as on Juicy's O counter and in Insights */
-.juicy-restyle-toolkit #root :is(.pt-sp-o, .pt-sp-o .pt-ic) {
-  color: var(--juicy-bubblegum);
-}
-
 .juicy-restyle-toolkit #root :is(.pt-bb, .pt-kb) {
   background: var(--juicy-bubblegum);
 }
@@ -478,7 +484,6 @@
   :is(
     .pt-badge:not(.badge),
     .pt-covtag,
-    .pt-sctag,
     .pt-cpick,
     .pt-dcard.on .pt-dtag,
     .pt-scard.on .pt-scpick
