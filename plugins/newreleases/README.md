@@ -2,7 +2,19 @@
 
 What the studios you favourite in [Stash](https://github.com/stashapp/stash), the self-hosted media organizer, released in the last few days, on one page you can filter by studio, performer and tag, leaving out what you already have. Each release links to the studio's own page, where you can buy it. Studios linked to ThePornDB come from ThePornDB, which lists clip-site releases the day they come out, and the rest from your other stash-boxes, such as StashDB.
 
-New Releases is still being built. It is in this repository for testing and is not in the CandyBoudoir plugin source yet.
+## Install
+
+New Releases comes from the CandyBoudoir plugin source, which carries every CandyBoudoir plugin.
+
+1. In Stash, open Settings > Plugins > Available Plugins and click Add source.
+2. Fill in the source:
+   - Name: `CandyBoudoir`
+   - Source URL: `https://candyboudoir.github.io/index.yml`
+   - Local path: `candyboudoir`
+3. Expand the CandyBoudoir source, tick New Releases and click Install.
+4. Open New Releases from Stash's menu. Its first visit starts the first check, and the page fills in as each studio comes in.
+
+If you run a Stash develop build, use `https://candyboudoir.github.io/develop/index.yml` as the source URL instead. Add one of the two sources, never both: they carry the same plugins.
 
 ## What you need
 
