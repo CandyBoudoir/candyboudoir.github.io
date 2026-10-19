@@ -1,0 +1,47 @@
+/*
+ * New Releases draws with Stash's own markup and classes (the list toolbar,
+ * react-select, scene cards, the pagination index, the loader), so a theme
+ * restyles the page as it restyles Stash's lists. These rules only lay out
+ * what Stash has no class for, in Stash's own colours.
+ */
+
+.newreleases-page {
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+/* The line about the last check, with Stash's small spinner while it runs. */
+.newreleases-status {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin: 0.75rem 0 0.5rem;
+  min-height: 1.5rem;
+  text-align: center;
+}
+
+.newreleases-status .LoadingIndicator.inline {
+  margin: 0;
+  padding-top: 0;
+  width: auto;
+}
+
+.newreleases-failed {
+  color: var(--danger, #db3737);
+}
+
+/* Studios without a link, a stash-box without a key, and the like. */
+.newreleases-notes {
+  font-size: 0.875rem;
+  list-style: none;
+  margin: 0 auto 0.75rem;
+  max-width: 60rem;
+  padding: 0 1rem;
+  text-align: center;
+}
+
+.newreleases-notes li + li {
+  margin-top: 0.25rem;
+}

@@ -70,7 +70,7 @@ pnpm test:compat contract
 
 Tag Candy's specs start a Stash of their own from the binary `stash.sh` downloaded into `WORK/bin` (`plugins/tagcandy/tests/stash.mjs`), on port 9961 with a stand-in for the icon site on 9962 (`TAGCANDY_PORT` moves both), so Apply icons never changes the tag images the themes' screenshots show. They check the port is free first, since `stash.sh`'s readiness check would accept any Stash already listening there.
 
-`prepare.mjs` also points Stash at a mock stash-box (`tests/stash/stashbox.mjs`) that Playwright starts with the tests, so the Tagger, scrape dialogs and StashID links are checked against invented scenes, performers and studios with no stash-box account.
+`prepare.mjs` also points Stash at a mock stash-box (`tests/stash/stashbox.mjs`) that Playwright starts with the tests, so the Tagger, scrape dialogs and StashID links are checked against invented scenes, performers and studios with no stash-box account. The same server stands in for ThePornDB's REST API under `/tpdb/` (`tests/stash/theporndb.mjs`), which New Releases' specs register as a second stash-box while they run, so no test calls ThePornDB. New Releases' unit tests run its Python task against that mock with `python3`, and skip it where there is none.
 
 The specs run in Chromium; `BROWSER=firefox` or `BROWSER=webkit` runs them in another engine, and the workflow has a leg for each that runs Cherry Pick's specs.
 
