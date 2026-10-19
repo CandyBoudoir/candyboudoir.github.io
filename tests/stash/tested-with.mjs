@@ -213,7 +213,7 @@ if (issues) {
         [
           `${r.name} ${version} is out, and the themes that restyle it (${themes.join(', ')}) are still tested against ${r.version}.`,
           '',
-          `Pin its files at the release commit in \`tests/stash/companions.mjs\` (RESTYLED.${key}), run those themes' contract and visual specs, fix any class the release renamed (each theme's check against \`tests/${key}-unmatched-baseline.txt\` names them), refresh their baselines, and update the version their README names.`,
+          `Run \`node tests/stash/pin-restyled.mjs ${key}\`, which pins the files of the release commit in \`tests/stash/companions.mjs\` (RESTYLED.${key}) and moves the version those themes name. Then run their contract and visual specs, fix any class the release renamed (each theme's check against \`tests/${key}-unmatched-baseline.txt\` names them) and refresh their screenshot baselines.`,
         ].join('\n'),
       )
   }
