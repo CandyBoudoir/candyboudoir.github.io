@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- For you loads again after a scene you played in a scene bracket leaves Stash: deleted, merged into another scene, or removed by Stash's Clean task. Cherry Pick stopped at the bracket's pick on the missing scene and never finished learning your taste, so For you's header said "Learning your taste from … scenes" for good, and Your score, Watch This and the bracket buttons never came. Picks on a scene Stash no longer has now teach Cherry Pick nothing. A paused bracket still shows such a scene as "A removed scene".
+
 ## 0.2.1
 
 - Cherry Pick counts a play only as far as the time behind it. Stash records a play from a scene's first second, so a scene swiped past in a feed such as Stash TV's counted like one watched all the way through: For you put its performers, studio and tags forward as what you had been watching, ranked it lower as recently watched, and counted it as a rewatch when it came by again on another day, and Your score read the short play as a sign you disliked the scene. Each tenth of a scene's length played now pays for one play. A scene played for less than that in all was only looked at: it teaches Cherry Pick nothing, and For you and More like this say "Not watched yet". When a scene's play time pays for fewer plays than Stash records, each play, and each day it was played on, counts for that share. A scene you start on its own page and leave within its first tenth no longer counts against it either. Plays with no play time, such as plays added by hand, count as before.

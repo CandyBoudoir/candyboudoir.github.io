@@ -162,6 +162,35 @@ test('a pick feeds the model and Undo takes it back', () => {
   for (const id of ids) assert.equal(undone.estimate(id), before.estimate(id))
 })
 
+// A full read of the library drops a scene deleted in Stash (or merged into
+// another), while the brackets that played it keep its picks. The model
+// threw on the first such pick, and For you stayed on "Learning your taste"
+// for good.
+test('a pick on a scene deleted from Stash since teaches nothing', () => {
+  const ids = watchedScenes()
+    .slice(0, 8)
+    .map((s) => s.id)
+  const b = BR.createBracket(M, {
+    kind: 'clip',
+    poolLabel: 'Eight',
+    size: 8,
+    ids,
+    now: 11,
+  })
+  const cur = BR.bracketState(b).current
+  const picked = BR.pick(b, cur.b)
+  const without = buildDb({
+    ...input,
+    scenes: input.scenes.filter((s) => s.id !== cur.a),
+  })
+  const after = createEngine(without).compute({
+    decisions: BR.modelDecisions(picked),
+  })
+  const none = createEngine(without).compute({})
+  assert.equal(after.bt.count, 0)
+  assert.equal(after.estimate(cur.b), none.estimate(cur.b))
+})
+
 test('performer pools: in the library, with a photo and a scene, of one gender', () => {
   const pool = BR.performerPool(M, { gender: 'FEMALE', pool: 'library' })
   assert.ok(pool.length >= 16)
