@@ -1,0 +1,12 @@
+name: Styles for Stash UI
+description: City Pop and Overclock as styles for Stash UI, another author's replacement interface for Stash. Pick one under Stash UI's Settings > Appearance > Colors to give it that theme's colours and type. Needs Stash UI.
+version: 0.1.0
+url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/stylesforstashui
+ui:
+  assets:
+    /: assets
+settings:
+  colorsOnly:
+    displayName: Colors only
+    description: "Off: a style gives Stash UI its colours and its type, from the fonts to the lettering of titles and the wordmark. On: only its colours, and Stash UI keeps its own fonts and lettering. Also under the styles in Stash UI's Settings > Appearance > Colors; takes effect on the next page you open in Stash UI."
+    type: BOOLEAN
