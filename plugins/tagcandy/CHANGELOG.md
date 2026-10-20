@@ -2,7 +2,7 @@
 
 ## 0.1.2
 
-- New icons for 69, American Porn, Artistic, Average Body, Average Height, Award Winner, Ballerina Position, BBW, Behind the Scenes, Big Belly and 64 more.
+- New icons for 69, American Porn, Anal Demolition, Anal Gape, Anal Stretching, Artistic, Average Body, Average Height, Award Winner, Ballerina Position and 70 more.
 
 ## 0.1.1
 
