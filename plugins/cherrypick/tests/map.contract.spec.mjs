@@ -244,6 +244,9 @@ test.describe('reduced motion', () => {
   test('New bracket sets the finished bracket’s ratings and starts the next one in one click', async ({
     page,
   }) => {
+    // on, as Done needs it to set ratings; beside Ascension, HotOrNot or
+    // Xenith it starts off
+    await settings({ autoApply: true })
     await keepingRatings(async () => {
       const play = await openBracket(page)
       const candidates = demoCandidates()
