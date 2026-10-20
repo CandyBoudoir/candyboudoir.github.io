@@ -15,8 +15,6 @@ Styles for Stash UI is incubating: it is built and tested here and not yet in th
 2. Under Colors, click City Pop or Overclock, after Stash UI's own presets.
 3. To keep Stash UI's fonts, lettering and backdrop, turn on Colors only, which shows under the presets while a style is picked.
 
-Both styles and Colors only are also on the plugin's own screen in Stash UI, Settings > Plugins > Styles for Stash UI.
-
 Stash UI keeps the choice in your browser, like its own presets, and paints the style's colours from the first frame on later visits. The type follows a moment later, once Stash UI loads its extensions. Picking another preset, or Back to default colors, turns the style off. A colour changed with Stash UI's wheel keeps the rest of the style.
 
 ## Settings
@@ -27,7 +25,7 @@ Stash UI keeps the choice in your browser, like its own presets, and paints the 
 
 ## How it works
 
-Stash UI imports `assets/stashui.js` from every enabled plugin, its way of letting plugins extend it. The module adds a button per style to Stash UI's colour presets, registers its own settings screen through the API's `settings.section` slot, and stores the picked style's colours in Stash UI's own colour setting, so Stash UI paints them itself. `stashui.css` adds a second accent and the focus ring and, unless Colors only is on, the fonts, the lettering of titles and the wordmark, and the backdrop in place of Stash UI's halftone screen. City Pop's sun rises only in Settings, as in classic City Pop, since every other Stash UI page has a grid, a header or the player across the horizon. Either backdrop steps aside when Stash UI's own background image is on, and sits under the glow liquid glass puts behind the page. It reads Colors only from your Stash on each page Stash UI opens and makes no other requests. Its fonts, Jost, Mr Dafoe, Chakra Petch and Share Tech Mono, ship inside the plugin, and your browser fetches only those of the style you pick.
+Stash UI imports `assets/stashui.js` from every enabled plugin, its way of letting plugins extend it. The module adds a button per style to Stash UI's colour presets and stores the picked style's colours in Stash UI's own colour setting, so Stash UI paints them itself. `stashui.css` adds a second accent and the focus ring and, unless Colors only is on, the fonts, the lettering of titles and the wordmark, and the backdrop in place of Stash UI's halftone screen. City Pop's sun rises only in Settings, as in classic City Pop, since every other Stash UI page has a grid, a header or the player across the horizon. Either backdrop steps aside when Stash UI's own background image is on, and sits under the glow liquid glass puts behind the page. It reads Colors only from your Stash on each page Stash UI opens and makes no other requests. Its fonts, Jost, Mr Dafoe, Chakra Petch and Share Tech Mono, ship inside the plugin, and your browser fetches only those of the style you pick.
 
 With Styles for Stash UI switched off, the buttons go, and Stash UI keeps the last style's colours until you pick another preset.
 
