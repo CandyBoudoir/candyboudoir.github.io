@@ -11,7 +11,7 @@
  * one. These rules start at `#root`, or at the toast's id, so they outrank
  * its own, and all of them wait for the Restyle Performers Toolkit setting
  * (.citypop-restyle-toolkit on <html>, from citypop.js), but for the one
- * that hides that setting while the plugin is off and the two that keep a
+ * that hides that setting while the plugin is off and those that keep a
  * performer's header a J-card. It sizes its toast and
  * its review bar on a phone from Stash's navbar, so City Pop's taller bar
  * needs nothing here.
@@ -26,17 +26,34 @@
 
 /* From 0.10 it tidies a performer's header into rows that wrap, and from
    0.13 puts a side panel between the cover and the header, which would part
-   the spine from the cover. The J-card keeps its grid (the toolkit's order
-   still places its rows), and the panel moves past the flap, whether the
-   restyle is on or not. */
+   the spine from the cover. From 0.17 the panel is the third column of a
+   grid it makes of the header's container, whose gap would part them too.
+   The J-card keeps its grid (the toolkit's order still places its rows),
+   the cover meets the spine and the panel sits past the flap, whether the
+   restyle is on or not. The details in the tidied header are its grid of
+   cells, which City Pop's track listing leaves alone (80-pages.css); the
+   bio keeps the flap's measure. */
 #root #performer-page .detail-header .performer-head[data-pt-tidy] {
   align-items: normal;
   column-gap: 2rem;
   display: grid;
 }
 
+#root #performer-page .detail-header .detail-container {
+  column-gap: 0;
+}
+
 #root #performer-page .detail-header .detail-container > .pt-side {
+  margin-left: 2rem;
   order: 1;
+}
+
+#root
+  #performer-page
+  .detail-header
+  .performer-head[data-pt-tidy]
+  .detail-item-value.details {
+  max-width: 40rem;
 }
 
 @media (width <= 720px) {
@@ -219,6 +236,51 @@
   font-weight: 500;
 }
 
+/* In the tidied header, Stash's fields, the facts at a glance and the Also
+   row are named in the flap's spaced capitals, over values in its type */
+.citypop-restyle-toolkit
+  #root
+  #performer-page
+  .performer-head[data-pt-tidy]
+  :is(.detail-item-title, .pt-glk, .pt-alsok) {
+  color: var(--citypop-muted);
+  font-family: var(--citypop-font-label);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Hair and eyes share a cell under a name it writes in, as Stash's is
+   hidden by a font size of 0 */
+.citypop-restyle-toolkit
+  #root
+  #performer-page
+  .performer-head[data-pt-tidy]
+  .detail-item.hair_color[data-pt-he]
+  > .detail-item-title::after {
+  letter-spacing: 0.16em;
+}
+
+.citypop-restyle-toolkit
+  #root
+  #performer-page
+  .performer-head[data-pt-tidy]
+  .pt-gl
+  > b {
+  font-size: 0.95rem;
+}
+
+/* Their scenes' rating keeps the colour it takes when it is above or below
+   the user's average */
+.citypop-restyle-toolkit
+  #root
+  #performer-page
+  .performer-head[data-pt-tidy]
+  .pt-gl:not(.pt-gl-rating.pt-gl-up, .pt-gl-rating.pt-gl-down)
+  > b {
+  color: var(--citypop-text);
+}
+
 /* Wells, fields, chips and the cards inside a panel are sunk night blue */
 .citypop-restyle-toolkit
   #root
@@ -280,7 +342,6 @@
     .pt-pc,
     .pt-thumb,
     .pt-srimg,
-    .pt-picthumb,
     .pt-sccov,
     .pt-cimg,
     .pt-mcov,

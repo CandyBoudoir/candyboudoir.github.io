@@ -616,7 +616,10 @@ ul.selectable-list .exclude-button,
   color: #8a7fc4;
 }
 
-/* The flap: aliases and rating, then the details as a track listing */
+/* The flap: aliases and rating, then the details as a track listing. Where
+   Performers Toolkit has tidied the header ([data-pt-tidy]) it sets the
+   details out as a grid of cells, each name over its value, and the track
+   listing stands aside (83-performers-toolkit.css) */
 #performer-page .detail-header .alias-head {
   display: block;
   margin: 0.15rem 0 0.2rem;
@@ -627,12 +630,18 @@ ul.selectable-list .exclude-button,
   margin-top: 0.4rem;
 }
 
-#performer-page .detail-header .detail-group {
+#performer-page
+  .detail-header
+  :where(.performer-head:not([data-pt-tidy]))
+  .detail-group {
   max-width: 40rem;
   padding-top: 0.6rem;
 }
 
-#performer-page .detail-header .detail-item {
+#performer-page
+  .detail-header
+  :where(.performer-head:not([data-pt-tidy]))
+  .detail-item {
   align-items: baseline;
   column-gap: 1rem;
   display: flex;
@@ -640,7 +649,10 @@ ul.selectable-list .exclude-button,
   padding: 0.3rem 0;
 }
 
-#performer-page .detail-header .detail-item-title {
+#performer-page
+  .detail-header
+  :where(.performer-head:not([data-pt-tidy]))
+  .detail-item-title {
   align-items: baseline;
   display: flex;
   flex: none;
@@ -651,7 +663,10 @@ ul.selectable-list .exclude-button,
 }
 
 /* Dotted leaders, as a track listing runs to its times */
-#performer-page .detail-header .detail-item-title::after {
+#performer-page
+  .detail-header
+  :where(.performer-head:not([data-pt-tidy]))
+  .detail-item-title::after {
   border-bottom: 1px dotted rgb(185 166 240 / 42%);
   content: '';
   flex: 1;
@@ -745,15 +760,24 @@ ul.selectable-list .exclude-button,
     margin: 0 0 0 auto;
   }
 
-  #performer-page .detail-header .detail-item {
+  #performer-page
+    .detail-header
+    :where(.performer-head:not([data-pt-tidy]))
+    .detail-item {
     flex-wrap: wrap;
   }
 
-  #performer-page .detail-header .detail-item-title {
+  #performer-page
+    .detail-header
+    :where(.performer-head:not([data-pt-tidy]))
+    .detail-item-title {
     width: 100%;
   }
 
-  #performer-page .detail-header .detail-item-title::after {
+  #performer-page
+    .detail-header
+    :where(.performer-head:not([data-pt-tidy]))
+    .detail-item-title::after {
     display: none;
   }
 
