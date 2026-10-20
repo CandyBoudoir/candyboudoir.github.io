@@ -84,16 +84,31 @@ test('the bracket map takes each theme’s accent', async ({ page }) => {
       const btn = document.createElement('button')
       btn.className = 'btn btn-primary'
       el.closest('.modal-content').appendChild(btn)
-      const out = [
-        el.style.getPropertyValue('--cherrypick-accent'),
-        getComputedStyle(btn).backgroundColor,
-      ]
+      // the button's colour, or its first gradient's middle opaque stop
+      const cs = getComputedStyle(btn)
+      const solid = (c) => {
+        const a = c.match(/rgba?\(([^)]*)\)/)?.[1].split(',')[3]
+        return a == null || +a >= 0.9
+      }
+      let primary = solid(cs.backgroundColor) ? cs.backgroundColor : null
+      for (const g of cs.backgroundImage.split(
+        /(?=(?:linear|radial|conic)-gradient\()/,
+      )) {
+        if (primary) break
+        const stops = (g.match(/rgba?\([^)]*\)/g) || []).filter(solid)
+        if (stops.length) primary = stops[Math.floor(stops.length / 2)]
+      }
+      const out = [el.style.getPropertyValue('--cherrypick-accent'), primary]
       btn.remove()
       return out
     })
     const rgb = (c) => (c.match(/\d+(\.\d+)?/g) || []).slice(0, 3).map(Number)
     expect(rgb(accent), theme).toEqual(rgb(primary))
-    await page.keyboard.press('Escape')
+    // abandoned, so no paused bracket waits for the next theme
+    const play = page.locator('.cherrypick-play-modal')
+    await play.getByRole('button', { name: 'Abandon' }).click()
+    await play.getByRole('button', { name: 'Abandon' }).last().click()
+    await expect(play).toHaveCount(0)
   }
   await setPluginSettings(PLUGIN_ID, {})
 })

@@ -28,6 +28,26 @@ const parse = (c) => {
   return [+m[1], +m[2], +m[3]]
 }
 
+// The colour a background-image paints: the middle opaque stop of its
+// first gradient that has one, past glosses of translucent white (City
+// Pop's and Leather's primary buttons are gradients with no colour)
+export function imageColour(image) {
+  const gradients = (image || '').split(
+    /(?=(?:repeating-)?(?:linear|radial|conic)-gradient\()/,
+  )
+  for (const g of gradients) {
+    const stops = [...g.matchAll(/rgba?\(([^)]*)\)/g)]
+      .filter((m) => {
+        const a = m[1].split(',')[3]
+        return a == null || +a >= 0.9
+      })
+      .map((m) => parse(m[0]))
+      .filter(Boolean)
+    if (stops.length) return stops[Math.floor(stops.length / 2)]
+  }
+  return null
+}
+
 // The first painted background among these: Stash paints its dialogs'
 // header and body, not .modal-content
 const surfaceOf = (els) => {
@@ -49,8 +69,10 @@ export function theme(el) {
     'position:absolute;visibility:hidden;pointer-events:none'
   host.appendChild(probe)
   const cs = getComputedStyle(probe)
-  // a theme with a transparent primary button: its border, then its text
+  // a theme that paints its primary button with an image: the image's
+  // first colour, then its border, then its text
   const accent = parse(cs.backgroundColor) ||
+    imageColour(cs.backgroundImage) ||
     parse(cs.borderTopColor) ||
     parse(cs.color) || [255, 200, 0]
   const on = parse(cs.color) || [255, 255, 255]
