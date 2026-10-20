@@ -576,7 +576,7 @@
   pointer-events: none;
   position: absolute;
   top: 0;
-  transform: translate(-50%, -100%);
+  transform: translate(-100%, -50%);
   transition:
     left 340ms cubic-bezier(0.4, 0, 0.2, 1),
     top 340ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -761,10 +761,11 @@
   color: var(--cherrypick-on-accent);
 }
 
-/* the cherries drop in on the favorite the champion meets now */
+/* the cherries drop in over the favorite the champion meets now */
 .cherrypick-gauntlet .cherrypick-map-marker {
   animation: cherrypick-drop 420ms cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
   left: 50%;
+  transform: translate(-50%, -100%);
   transition: none;
 }
 

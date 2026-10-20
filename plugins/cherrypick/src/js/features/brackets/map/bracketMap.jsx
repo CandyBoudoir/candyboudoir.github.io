@@ -224,8 +224,9 @@ export function BracketMap({
       const delay = ev?.type === 'pick' ? 420 : 0
       const at = `${cur.round}-${cur.index}`
       m.style.transitionDelay = `${delay}ms`
-      m.style.left = `${node.x + node.w / 2}px`
-      m.style.top = `${node.y}px`
+      // beside the node, where it covers no other node's names
+      m.style.left = `${node.x - 4}px`
+      m.style.top = `${node.y + node.h / 2}px`
       if (m.dataset.at && m.dataset.at !== at && ev?.type === 'pick')
         m.firstChild?.animate(
           [
