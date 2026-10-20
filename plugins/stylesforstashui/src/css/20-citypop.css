@@ -115,3 +115,83 @@ html[data-sfs-style='citypop'][data-sfs-type].kb-fx .kb-mark:hover {
 html[data-sfs-style='citypop'][data-sfs-type].kb-fx .kb-mark:hover::before {
   transform: none;
 }
+
+/*
+ * The dusk behind the page, as in classic City Pop: night blue overhead,
+ * violet low down, a sunset glow along the bottom edge, stars, and palms in
+ * the bottom-left corner of the page, beside the menu that would hide them.
+ * It takes the place of Stash UI's halftone screen and goes under the glow
+ * liquid glass puts behind the page, and it steps aside for Stash UI's own
+ * background image. Colors only keeps Stash UI's halftone.
+ */
+html[data-sfs-style='citypop'][data-sfs-type]:not(:has(#kb-wall:not([hidden])))
+  body::before {
+  background:
+    url('icons/palms-backdrop.svg') left calc(var(--rail, 236px) - 2vh)
+      bottom -1px / auto min(44vh, 80vw) no-repeat,
+    url('icons/stars.svg') center top / 100% auto no-repeat,
+    radial-gradient(
+      40% 22% at 80% 100%,
+      rgb(255 150 110 / 34%),
+      rgb(245 80 138 / 14%) 55%,
+      transparent 100%
+    ),
+    linear-gradient(
+      180deg,
+      #0a0c2c 0%,
+      #111344 34%,
+      #1d185a 62%,
+      #2f1f66 82%,
+      #45215f 93%,
+      #552262 100%
+    );
+  mask-image: none;
+  opacity: 1;
+  z-index: -3;
+}
+
+/* On a phone the menu slides over the page, so the palms keep the corner */
+@media (width <= 860px) {
+  html[data-sfs-style='citypop'][data-sfs-type]:not(
+      :has(#kb-wall:not([hidden]))
+    )
+    body::before {
+    background-position:
+      left -2vh bottom -1px,
+      center top,
+      0 0,
+      0 0;
+  }
+}
+
+/*
+ * The setting sun, smaller and dimmer than the art, low in the right corner.
+ * Text over its disc would be hard to read, so it rises only where the
+ * horizon is free: in Settings, as in classic City Pop, since every other
+ * Stash UI page has a grid, a header or the player across it.
+ */
+html[data-sfs-style='citypop'][data-sfs-type]:not(:has(#kb-wall:not([hidden])))
+  body::after {
+  background: url('icons/sun-horizon.svg') right 6vw bottom -1px / auto
+    min(22vh, 30vw) no-repeat;
+  content: '';
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  transition: opacity 700ms cubic-bezier(0.2, 0.8, 0.25, 1);
+  z-index: -3;
+}
+
+html[data-sfs-style='citypop'][data-sfs-type]:has(.kb-settings):not(
+    :has(#kb-wall:not([hidden]))
+  )
+  body::after {
+  opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-sfs-style='citypop'] body::after {
+    transition: none;
+  }
+}

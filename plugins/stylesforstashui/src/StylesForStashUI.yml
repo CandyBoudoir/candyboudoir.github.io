@@ -8,5 +8,5 @@ ui:
 settings:
   colorsOnly:
     displayName: Colors only
-    description: "Off: a style gives Stash UI its colours and its type, from the fonts to the lettering of titles and the wordmark. On: only its colours, and Stash UI keeps its own fonts and lettering. Also under the styles in Stash UI's Settings > Appearance > Colors; takes effect on the next page you open in Stash UI."
+    description: "Off: a style gives Stash UI its colours, its type (the fonts and the lettering of titles and the wordmark) and its backdrop. On: only its colours, and Stash UI keeps its own fonts, lettering and backdrop. Also under the styles in Stash UI's Settings > Appearance > Colors; takes effect on the next page you open in Stash UI."
     type: BOOLEAN

@@ -109,3 +109,49 @@ html[data-sfs-style='overclock'][data-sfs-type].kb-fx .kb-mark:hover {
 html[data-sfs-style='overclock'][data-sfs-type].kb-fx .kb-mark:hover::before {
   transform: none;
 }
+
+/*
+ * The backdrop, as in classic Overclock: a faint cyan dot grid with a cyan
+ * haze at the top right and a yellow one at the bottom left, under a static
+ * scanline. Still layers behind the page, in place of Stash UI's halftone
+ * screen and under the glow liquid glass puts behind the page; they step
+ * aside for Stash UI's own background image. Colors only keeps Stash UI's
+ * halftone.
+ */
+html[data-sfs-style='overclock'][data-sfs-type]:not(
+    :has(#kb-wall:not([hidden]))
+  )
+  body::before {
+  background:
+    radial-gradient(circle, rgb(0 229 255 / 16%) 1px, transparent 1.3px) 0 0 /
+      22px 22px,
+    radial-gradient(
+      60vmax 40vmax at 100% 0%,
+      rgb(0 229 255 / 7%),
+      transparent 70%
+    ),
+    radial-gradient(
+      50vmax 40vmax at 0% 100%,
+      rgb(243 230 0 / 4%),
+      transparent 70%
+    );
+  mask-image: none;
+  opacity: 1;
+  z-index: -3;
+}
+
+html[data-sfs-style='overclock'][data-sfs-type]:not(
+    :has(#kb-wall:not([hidden]))
+  )
+  body::after {
+  background: repeating-linear-gradient(
+    0deg,
+    rgb(255 255 255 / 2.2%) 0 1px,
+    transparent 1px 3px
+  );
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: fixed;
+  z-index: -3;
+}
