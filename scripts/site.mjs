@@ -38,6 +38,28 @@ export async function listPlugins(base = root) {
   )
 }
 
+// A reproducible zip of a folder at zip: every file stamped with epoch (in
+// seconds) and added in sorted order, with no directory entries or extra
+// attributes. Returns its sha256. The tests zip the folder of another
+// author's plugin the same way (tests/stash/companion-zips.mjs).
+export async function zipFolder(folder, zip, epoch) {
+  const files = (
+    await readdir(folder, { recursive: true, withFileTypes: true })
+  )
+    .filter((e) => e.isFile())
+    .map((e) => relative(folder, join(e.parentPath, e.name)))
+    .sort()
+  const stamp = new Date(Number(epoch) * 1000)
+  await Promise.all(files.map((f) => utimes(join(folder, f), stamp, stamp)))
+  execFileSync('zip', ['-q', '-X', '-D', zip, ...files], {
+    cwd: folder,
+    env: { ...process.env, TZ: 'UTC' },
+  })
+  return createHash('sha256')
+    .update(await readFile(zip))
+    .digest('hex')
+}
+
 // Builds <site>/<id>/ and <site>/<id>.zip for one plugin and returns its entry
 // in the plugin source.
 export async function buildPlugin(site, { name, dir, mod }) {
@@ -68,24 +90,11 @@ export async function buildPlugin(site, { name, dir, mod }) {
     .trim()
     .split(' ')
 
-  // A reproducible zip: every file stamped with that commit's time and added
-  // in sorted order, with no directory entries or extra attributes. Any build
-  // of the same commit gives the same bytes, so the GitHub Release asset and
-  // the file the plugin source serves share one sha256.
-  const files = (await readdir(out, { recursive: true, withFileTypes: true }))
-    .filter((e) => e.isFile())
-    .map((e) => relative(out, join(e.parentPath, e.name)))
-    .sort()
-  const stamp = new Date(Number(epoch) * 1000)
-  await Promise.all(files.map((f) => utimes(join(out, f), stamp, stamp)))
+  // Any build of the same commit gives the same bytes, so the GitHub Release
+  // asset and the file the plugin source serves share one sha256.
   const zip = join(site, `${id}.zip`)
-  execFileSync('zip', ['-q', '-X', '-D', zip, ...files], {
-    cwd: out,
-    env: { ...process.env, TZ: 'UTC' },
-  })
-  const sha256 = createHash('sha256')
-    .update(await readFile(zip))
-    .digest('hex')
+  const sha256 = await zipFolder(out, zip, epoch)
+  const stamp = new Date(Number(epoch) * 1000)
 
   const manifest = await readFile(join(out, `${id}.yml`), 'utf8')
   const field = (key) => manifest.match(new RegExp(`^${key}: (.*)$`, 'm'))?.[1]

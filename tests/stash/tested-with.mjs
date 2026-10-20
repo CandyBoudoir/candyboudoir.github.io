@@ -1,35 +1,46 @@
 // Keeps Cherry Pick tested beside the latest release of each companion plugin
-// (companions.mjs), and each theme beside the latest release of each plugin
-// it restyles (RESTYLED), and saying so.
+// (companions.mjs), each theme beside the latest release of each plugin it
+// restyles (RESTYLED), and each plugin that extends another author's
+// (EXTENDED) beside the release that was latest when it released, and saying
+// so.
 //
 // Always: the Tested with table in Cherry Pick's README names the Stash
-// versions in stash-versions.json and the pinned companion versions, and a
-// restyling theme's README names the pinned version of each plugin it
-// restyles.
+// versions in stash-versions.json and the pinned companion versions, and the
+// README of a restyling theme or an extending plugin names the pinned version
+// of each plugin it restyles or extends.
 // While a plugin's version has no <folder>-vX.Y.Z tag yet (a release on its
 // way): that version's CHANGELOG section carries testedBeside() (Cherry Pick)
-// or restyledBeside() (a restyling theme), and every pin it names is its
-// author's latest release.
+// or restyledBeside() (a restyling theme or an extending plugin), and every
+// pin it names is its author's latest release. An extended plugin's pin may
+// trail by a release out for less than a day (EXTENDED_GRACE_HOURS), and an
+// incubating plugin, which never releases, is not checked against it.
 // With --issues (the nightly Compatibility run): instead of failing, keeps one
 // open "Test Cherry Pick beside <plugin> <version>" issue per companion with a
 // newer release, and one "Restyle <plugin> <version>" issue per plugin the
 // themes restyle (RESTYLED), and closes each once its pin catches up. Needs
-// GH_TOKEN.
+// GH_TOKEN. The extended plugins get none: Stash UI releases several times a
+// day, and each release of a plugin that extends it moves its pin.
 //
 // Reads the latest releases over the network, for a release and --issues
 // only; GITHUB_TOKEN raises GitHub's rate limit.
 import { execFileSync } from 'node:child_process'
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import {
   COMPANIONS,
   RESTYLED,
   TESTED_PLUGIN,
+  extendedBy,
   restyled,
   restyledBeside,
   restyledBy,
   testedBeside,
 } from './companions.mjs'
+
+// How long a release of an extended plugin can be out before a release of a
+// plugin that extends it must move the pin to it
+const EXTENDED_GRACE_HOURS = 24
 
 const root = join(import.meta.dirname, '..', '..')
 const dir = join(root, 'plugins', TESTED_PLUGIN)
@@ -82,6 +93,57 @@ async function latestRestyled(r) {
   const version = field(entry, 'version')
   return { version, current: version === r.version }
 }
+
+// How far an extended plugin's pin trails its author: the version of the
+// newest change to its folder, which the author's source serves, and when
+// the first change after the pin came out
+async function latestExtended(e) {
+  const since = `${e.date.replace(' ', 'T')}Z`
+  const commits = await (
+    await get(
+      `https://api.github.com/repos/${e.repo}/commits?path=${encodeURIComponent(e.folder)}&since=${since}&per_page=100`,
+      { headers },
+    )
+  ).json()
+  if (!commits.length)
+    throw new Error(
+      `${e.repo} lists no change to ${e.folder} since ${since}, the pinned commit's date`,
+    )
+  const at = commits.findIndex((c) => c.sha === e.commit)
+  if (at === 0) return { version: e.version, current: true }
+  const manifest = await (
+    await get(
+      `https://raw.githubusercontent.com/${e.repo}/${commits[0].sha}/${e.folder}/${e.id}.yml`,
+    )
+  ).text()
+  return {
+    version: manifest.match(/^version:\s*['"]?([^'"\s]+)/m)?.[1],
+    current: false,
+    // Unknown when the pin is not on the page, a hundred changes back
+    overtaken: at > 0 ? commits[at - 1].commit.committer.date : null,
+  }
+}
+
+// A plugin's version and tag, and whether the tag exists yet
+async function releaseOf(folder) {
+  const src = join(root, 'plugins', folder, 'src')
+  const yml = (await readdir(src)).find((f) => f.endsWith('.yml'))
+  const version = (await readFile(join(src, yml), 'utf8')).match(
+    /^version: (.+)$/m,
+  )[1]
+  const tag = `${folder}-v${version}`
+  const released = execFileSync('git', ['tag', '--list', tag], {
+    cwd: root,
+    encoding: 'utf8',
+  }).trim()
+  return { version, tag, released: Boolean(released) }
+}
+
+// A version's section of a plugin's CHANGELOG
+const changelogSection = async (folder, version) =>
+  (await readFile(join(root, 'plugins', folder, 'CHANGELOG.md'), 'utf8'))
+    .split(/^## /m)
+    .find((s) => s.startsWith(`${version}\n`) || s.startsWith(`${version} `))
 
 // Every companion with its latest release, read only when needed, so an
 // author's site being down fails a release or the nightly run, not every
@@ -287,26 +349,15 @@ for (const folder of (await readdir(join(root, 'plugins'))).sort()) {
       problems.push(
         `plugins/${folder}/README.md should name ${r.name} ${r.version}, the release its specs restyle`,
       )
-  const yml = (await readdir(join(themeDir, 'src'))).find((f) =>
-    f.endsWith('.yml'),
-  )
-  const themeVersion = (
-    await readFile(join(themeDir, 'src', yml), 'utf8')
-  ).match(/^version: (.+)$/m)[1]
-  const themeTag = `${folder}-v${themeVersion}`
-  const released = execFileSync('git', ['tag', '--list', themeTag], {
-    cwd: root,
-    encoding: 'utf8',
-  }).trim()
+  const {
+    version: themeVersion,
+    tag: themeTag,
+    released,
+  } = await releaseOf(folder)
   restyling.push({ themeTag, released, list })
   if (released) continue
   const sentence = restyledBeside(list)
-  const section = (await readFile(join(themeDir, 'CHANGELOG.md'), 'utf8'))
-    .split(/^## /m)
-    .find(
-      (s) =>
-        s.startsWith(`${themeVersion}\n`) || s.startsWith(`${themeVersion} `),
-    )
+  const section = await changelogSection(folder, themeVersion)
   if (!section?.includes(sentence))
     problems.push(
       `plugins/${folder}/CHANGELOG.md's "## ${themeVersion}" section should say:\n  ${sentence}`,
@@ -321,6 +372,53 @@ for (const folder of (await readdir(join(root, 'plugins'))).sort()) {
     if (!latest.current)
       problems.push(
         `${themeTag} would ship tested beside ${r.name} ${r.version}, but ${latest.version} is out: pin its files in tests/stash/companions.mjs (RESTYLED.${r.key}) and run the theme's specs`,
+      )
+  }
+}
+
+// The plugins that extend another author's plugin: the README names the
+// pinned version of each, and a release on its way says what it was tested
+// beside, which must have been the latest release within the day
+const extending = []
+for (const folder of (await readdir(join(root, 'plugins'))).sort()) {
+  const list = extendedBy(folder)
+  if (!list.length) continue
+  const pluginDir = join(root, 'plugins', folder)
+  const pluginReadme = await readFile(join(pluginDir, 'README.md'), 'utf8')
+  for (const e of list)
+    if (!pluginReadme.includes(`${e.name} ${e.version}`))
+      problems.push(
+        `plugins/${folder}/README.md should name ${e.name} ${e.version}, the release its specs run beside`,
+      )
+  const {
+    version: pluginVersion,
+    tag: pluginTag,
+    released,
+  } = await releaseOf(folder)
+  const { incubating } = await import(
+    pathToFileURL(join(pluginDir, 'plugin.mjs')).href
+  )
+  extending.push({ pluginTag, released, incubating, list })
+  if (released) continue
+  const sentence = restyledBeside(list)
+  if (!(await changelogSection(folder, pluginVersion))?.includes(sentence))
+    problems.push(
+      `plugins/${folder}/CHANGELOG.md's "## ${pluginVersion}" section should say:\n  ${sentence}`,
+    )
+  if (incubating) continue
+  for (const e of list) {
+    const latest = await latestExtended(e)
+    const late =
+      !latest.current &&
+      (!latest.overtaken ||
+        Date.now() - Date.parse(latest.overtaken) >
+          EXTENDED_GRACE_HOURS * 3600_000)
+    console.log(
+      `${e.name}: tested ${e.version}, latest ${latest.version}${latest.current ? '' : late ? ' (newer)' : ' (newer, out less than a day)'}`,
+    )
+    if (late)
+      problems.push(
+        `${pluginTag} would ship tested beside ${e.name} ${e.version}, but a newer release came out ${latest.overtaken ?? 'over a hundred changes ago'} and ${latest.version} is out: run node tests/stash/pin-extended.mjs ${e.key}, then the specs of ${e.extendedBy.join(', ')}`,
       )
   }
 }
@@ -340,3 +438,13 @@ for (const { themeTag, released, list } of restyling)
       ? `${themeTag} is released; its README names ${list.map((r) => `${r.name} ${r.version}`).join(' and ')}`
       : `${themeTag} is tested beside the latest ${list.map((r) => r.name).join(' and ')} and says so`,
   )
+for (const { pluginTag, released, incubating, list } of extending) {
+  const names = list.map((e) => `${e.name} ${e.version}`).join(' and ')
+  console.log(
+    released
+      ? `${pluginTag} is released; its README names ${names}`
+      : incubating
+        ? `${pluginTag} is incubating; it names ${names}, which its release will need to be the latest`
+        : `${pluginTag} is tested beside ${names}, the latest within the day, and says so`,
+  )
+}
