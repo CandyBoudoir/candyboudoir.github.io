@@ -251,4 +251,41 @@ test.describe('beside Stash UI', () => {
     )
     expect(await titleFont(page)).toContain(STYLES[0].title)
   })
+  test('its own screen under Settings > Plugins, which Stash UI counts', async ({
+    page,
+  }) => {
+    await page.goto(`${APP}#/settings/x:${PLUGIN_ID}:styles`)
+    const screen = page.locator('.sfs-screen')
+    await screen.waitFor()
+    await expect(page.locator('.kb-set-nav a.is-active')).toHaveText(
+      'Styles for Stash UI',
+    )
+    await screen.locator(`[data-preset="${PLUGIN_ID}:${STYLES[1].id}"]`).click()
+    expect(await rootVar(page, '--bg')).toBe(STYLES[1].bg)
+    expect(
+      await isOn(
+        screen.locator(`[data-preset="${PLUGIN_ID}:${STYLES[1].id}"]`),
+      ),
+    ).toBe(true)
+    await page.locator('.sfs-colors-only .kb-switch').click()
+    await expect
+      .poll(async () => {
+        const { configuration } = await gql(
+          `{ configuration { plugins(include: ["${PLUGIN_ID}"]) } }`,
+        )
+        return configuration.plugins[PLUGIN_ID]?.colorsOnly
+      })
+      .toBe(true)
+
+    // The Plugins page's Stash UI extension block lists the screen
+    await page.goto(`${APP}#/plugins`)
+    const block = page.locator(`[data-xdiag="${PLUGIN_ID}"]`)
+    await block.waitFor({ state: 'attached' })
+    await expect(block.locator('.kb-set-label small')).not.toContainText(
+      'nothing',
+    )
+    await expect(block.locator('.kb-xdiag-list')).toContainText(
+      'settings.section',
+    )
+  })
 })

@@ -2,9 +2,18 @@
  * The picker stashui.js adds under Stash UI's Settings > Appearance > Colors:
  * a button per style after Stash UI's own presets, in its own markup
  * (.kb-theme-preset), and the Colors only switch while a style is picked
- * (.kb-theme-glass, the row Stash UI's Liquid glass switch uses). Only each
- * button's swatch is ours.
+ * (.kb-theme-glass, the row Stash UI's Liquid glass switch uses), and the
+ * same buttons and switch on the plugin's own screen under Settings > Plugins
+ * (.sfs-screen and one of Stash UI's settings rows). Only each button's swatch
+ * and the screen's row of buttons are ours.
  */
+
+/* The screen's buttons, in a row like Stash UI's presets */
+.sfs-styles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 
 /* City Pop: the striped sun going down under the night sky */
 .kb-theme-preset[data-preset='StylesForStashUI:citypop'] i {

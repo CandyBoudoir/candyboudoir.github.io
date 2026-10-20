@@ -187,10 +187,13 @@ async function saveColorsOnly(on) {
 const colorsOnlyHint = (style) =>
   `Only ${style.name}'s colors: Stash UI keeps its own fonts, lettering and backdrop.`
 
-// The Colors only switch, in the row Stash UI's Liquid glass switch uses
-function colorsOnlySwitch(style) {
-  const row = document.createElement('label')
-  row.className = 'kb-theme-glass sfs-colors-only'
+// The Colors only switch: under the presets in the row Stash UI's Liquid
+// glass switch uses (kb-theme-glass, switch first), or on the plugin's
+// settings screen as one of Stash UI's settings rows (kb-set-bool, switch
+// last)
+function colorsOnlySwitch(hintText, row = 'kb-theme-glass') {
+  const line = document.createElement('label')
+  line.className = `${row === 'kb-set-bool' ? 'kb-set kb-set-bool' : row} sfs-colors-only`
   const toggle = document.createElement('span')
   toggle.className = 'kb-switch'
   const input = document.createElement('input')
@@ -199,13 +202,15 @@ function colorsOnlySwitch(style) {
   input.addEventListener('change', () => saveColorsOnly(input.checked))
   toggle.append(input, document.createElement('i'))
   const text = document.createElement('span')
+  if (row === 'kb-set-bool') text.className = 'kb-set-label'
   const title = document.createElement('b')
   title.textContent = 'Colors only'
   const hint = document.createElement('small')
-  hint.textContent = colorsOnlyHint(style)
+  hint.textContent = hintText
   text.append(title, hint)
-  row.append(toggle, text)
-  return row
+  if (row === 'kb-set-bool') line.append(text, toggle)
+  else line.append(toggle, text)
+  return line
 }
 
 // Stash UI redraws the colour settings whenever a preset changes, so the
@@ -228,9 +233,50 @@ function addControls() {
     }
     const row = box.querySelector('.sfs-colors-only')
     if (!style) row?.remove()
-    else if (!row) presets.after(colorsOnlySwitch(style))
+    else if (!row) presets.after(colorsOnlySwitch(colorsOnlyHint(style)))
     else row.querySelector('small').textContent = colorsOnlyHint(style)
   }
+}
+
+// The plugin's own screen under Stash UI's Settings > Plugins, through the
+// extension API's settings.section slot: both styles and Colors only, in Stash
+// UI's settings rows, with the way to Stash UI's own presets
+function settingsScreen(el) {
+  const styles = document.createElement('div')
+  styles.className = 'kb-set sfs-screen'
+  const label = document.createElement('div')
+  label.className = 'kb-set-label'
+  const title = document.createElement('b')
+  title.textContent = 'Style'
+  const hint = document.createElement('small')
+  hint.textContent =
+    "City Pop or Overclock for Stash UI's colors, type and backdrop. Saved in this browser, like Stash UI's own presets."
+  label.append(title, hint)
+  const buttons = document.createElement('div')
+  buttons.className = 'sfs-styles'
+  for (const style of STYLES) buttons.append(styleButton(style, el))
+  styles.append(label, buttons)
+
+  const more = document.createElement('p')
+  more.className = 'kb-hint'
+  const link = document.createElement('a')
+  link.href = '#/settings/look'
+  link.textContent = 'Settings > Appearance'
+  more.append(
+    "Stash UI's own presets, each color and Back to default colors are under ",
+    link,
+    '.',
+  )
+
+  el.append(
+    styles,
+    colorsOnlySwitch(
+      "Keeps Stash UI's own fonts, lettering and backdrop, so a style changes only the colors.",
+      'kb-set-bool',
+    ),
+    more,
+  )
+  return () => el.replaceChildren()
 }
 
 async function loadColorsOnly() {
@@ -260,6 +306,12 @@ export default function setup(stashui) {
 
   sync()
   addControls()
+  if (stashui.has?.('slot:settings.section'))
+    stashui.addSlot('settings.section', {
+      id: 'styles',
+      title: 'Styles for Stash UI',
+      mount: settingsScreen,
+    })
 
   let queued = false
   new MutationObserver(() => {
