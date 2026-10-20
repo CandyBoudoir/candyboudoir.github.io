@@ -55,6 +55,20 @@ async function startBracket(page, list) {
   return play
 }
 
+// The match on screen has arrived: its animations have ended, bar any that
+// loop. Its scenes pop up out of the map, and reduced motion cuts the pop to
+// 1 ms, but its first frame still draws them at 0.3 of their size and lower
+// down, so a measure taken as the cards appear can find one or both shrunk.
+const arrived = (play) =>
+  play.locator('.cherrypick-layer.live').evaluate((layer) =>
+    Promise.all(
+      layer
+        .getAnimations({ subtree: true })
+        .filter((a) => a.effect.getComputedTiming().endTime < Infinity)
+        .map((a) => a.finished.catch(() => {})),
+    ),
+  )
+
 const round = (play) => play.locator('.cherrypick-round')
 const sceneIds = (play) =>
   play
@@ -285,6 +299,7 @@ test.describe('at 390 px', () => {
   }) => {
     const play = await startBracket(page, CLIPS)
     const cards = play.locator('.cherrypick-judge')
+    await arrived(play)
     const [a, b] = [
       await cards.nth(0).boundingBox(),
       await cards.nth(1).boundingBox(),
