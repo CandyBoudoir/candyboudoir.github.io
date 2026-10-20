@@ -1,10 +1,11 @@
 // Checks the bracket map, the way a bracket plays unless Brackets Classic
 // Mode is on: a match arriving (a pick made while it arrives only skips the
 // arrival), the winner landing in the next round with the cherries moving
-// on, Undo, the Challenge round's road to the trophy, New bracket setting
-// the finished bracket's ratings and starting the next one in one click,
-// the map on a phone, and Classic Mode's plain match. Motion stays on here;
-// the other specs play brackets with reduced motion.
+// on, Undo, the Challenge round's road to the trophy, a pick with the map
+// hidden, New bracket setting the finished bracket's ratings and starting
+// the next one in one click, the map on a phone, and Classic Mode's plain
+// match. Motion stays on here; the other specs play brackets with reduced
+// motion.
 import { expect, test } from '@playwright/test'
 import {
   gql,
@@ -158,6 +159,30 @@ test('a pick lands the winner in the next round and moves the cherries on; a pic
   expect(errors).toEqual([])
 })
 
+test('with the map hidden a pick still plays out: the winner rises in sparks, and the next match arrives', async ({
+  page,
+}) => {
+  const errors = []
+  page.on('pageerror', (e) => errors.push(e.message))
+  await settings({ mapSize: JSON.stringify('line') })
+  const play = await openBracket(page)
+  await expect(play.locator('.cherrypick-map-vp')).toHaveCount(0)
+  await opened(play)
+  const names = await play
+    .locator('.cherrypick-layer.live .cherrypick-cont-title')
+    .allInnerTexts()
+  await page.keyboard.press('ArrowLeft')
+  // the match leaves with its winner rising, and sparks fly from it
+  await expect(play.locator('.cherrypick-layer.exit .is-won')).toContainText(
+    names[0],
+  )
+  await expect(page.locator('canvas.cherrypick-fx-canvas')).toBeAttached()
+  await expect(round(play)).toHaveText('Round of 16 · match 2 of 8')
+  await expect(play.locator('.cherrypick-layer.exit')).toHaveCount(0)
+  await expect(play.locator('.cherrypick-layer.live .is-enter')).toHaveCount(2)
+  expect(errors).toEqual([])
+})
+
 test('the Challenge round plays on its own road, and beating every favorite ends on the trophy', async ({
   page,
 }) => {
@@ -199,6 +224,11 @@ test('the Challenge round plays on its own road, and beating every favorite ends
     await opened(ch)
     for (let i = 0; i < 3; i++) {
       await expect(ch).toContainText(`Favorite ${i + 1} of 3`)
+      // the last pick with the road hidden: it still ends on the trophy
+      if (i === 2) {
+        await ch.getByRole('button', { name: 'No map' }).click()
+        await expect(road).toHaveCount(0)
+      }
       const sides = ch.locator('.cherrypick-layer.live .cherrypick-map-side')
       const crowned = await sides.evaluateAll((els) =>
         els.findIndex((el) => el.querySelector('.cherrypick-crown')),
@@ -286,6 +316,7 @@ test('Brackets Classic Mode plays the plain match, and keeps New bracket', async
     const play = await openBracket(page)
     await expect(play.locator('.cherrypick-map-vp')).toHaveCount(0)
     await expect(play.locator('.cherrypick-sound')).toHaveCount(0)
+    await expect(play.locator('.cherrypick-map-size')).toHaveCount(0)
     await expect(
       play.locator('.cherrypick-match .cherrypick-contender'),
     ).toHaveCount(2)
@@ -329,6 +360,8 @@ test.describe('phone', () => {
         )
       })
     expect(await overflow()).toBe(0)
+    // a phone keeps its own layout: no size to pick
+    await expect(play.locator('.cherrypick-map-size')).toHaveCount(0)
     // both cards and the map are on screen, above the footer
     const footer = await play.locator('.modal-footer').boundingBox()
     const map = await play.locator('.cherrypick-map-vp').boundingBox()

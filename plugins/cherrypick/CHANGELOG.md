@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1
+
+- Three buttons beside the speaker in a bracket's header set how much room the map takes: No map, Short map and Tall map. Tall map is 0.3.0's layout and stays the default. Short map gives the map a lower frame and the height it frees to the two cards. No map hides the map and plays the cards at Brackets Classic Mode's size, with the same animations, round title cards and sound, and Show bracket still opens the whole map. In a scene bracket, whose map is already short, Short map is a strip that shows the match being played. The Challenge round's road follows the same choice. Cherry Pick keeps it in Stash's plugin configuration, so it holds across brackets, reloads and browsers. A phone keeps its own layout and shows no buttons.
+- Cherry Pick's dialogs cover the page behind them with your theme's backdrop color at 85% opacity, up from Stash's 50%.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.41.0, Xenith 3.2.0 and Restash 0.3.0-55c1cb2.
+
 ## 0.3.0
 
 - Brackets play on a map of the whole bracket, under the match, or over it in a scene bracket. Each match pops up out of its place on the map; a pick flies the winner into its place in the next round, draws the path it took in your theme's accent color and moves Cherry Pick's cherries on to the next match. A new round opens with its name, Show bracket (or T) opens the whole map, and a map too big to read whole, on a phone or in a bracket of 32 or 64, shows at full size to scroll through. Winning a bracket lights up the champion's road to the trophy; a click or any key skips it. Sound starts off, and the speaker button or M turns it on. A game controller's d-pad picks too. A pick made while the next match is still arriving only ends its arrival, so you can't pick a match you haven't seen, and with reduced motion set on your device, matches change without moving. No card or map shows a rating or a seed.

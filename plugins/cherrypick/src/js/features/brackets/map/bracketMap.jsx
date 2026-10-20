@@ -107,6 +107,11 @@ function measure(world, st) {
 // The whole map shown smaller than this is hard to read: Show bracket
 // shows it at full size to scroll through instead
 const MIN_FIT = 0.6
+// The camera following a match shows about this much of the map's height,
+// and never at under half size, so a short frame shows less of the map
+// rather than smaller nodes
+const FOLLOW_H = 260
+const FOLLOW_MIN = 0.5
 // The champion's road lights up one round every STEP ms
 const STEP = 260
 export const roadMs = (st) => 300 + (st.rounds.length + 1) * STEP
@@ -203,7 +208,7 @@ export function BracketMap({
         cx = geo.w / 2
         cy = geo.h / 2
       } else {
-        s = Math.max(fit, Math.min(1, vh / 260))
+        s = Math.max(fit, Math.min(1, Math.max(FOLLOW_MIN, vh / FOLLOW_H)))
         cx = node.x + node.w / 2
         cy = node.y + node.h / 2
       }
@@ -341,7 +346,8 @@ export function BracketMap({
 
 // A pick's sounds and flight: the winner's picture flies into its place
 // in the next round (one in a new round skips the flight: the camera is
-// pulling back), the cherries hop on
+// pulling back), the cherries hop on. With the map hidden (the line size)
+// sparks fly from the winner instead.
 export function mapEffect(ev, { root, exit, theme }) {
   const accent = theme.accent
   if (ev.type === 'pick') {
@@ -357,6 +363,8 @@ export function mapEffect(ev, { root, exit, theme }) {
       fly(art, target).then(() => {
         if (target.isConnected) fx.puff(target, accent)
       })
+    else if (art && !root.querySelector('.cherrypick-map-vp'))
+      fx.burst(art, accent, { n: 22, speed: 360, life: 420 })
     sfx('pop', 160)
     sfx('hop', 420)
     if (ev.round) sfx('round', 300)

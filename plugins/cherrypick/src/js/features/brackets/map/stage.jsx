@@ -10,6 +10,8 @@
 // plays the same backwards. Under prefers-reduced-motion a match swaps at
 // once and nothing waits.
 import { FontAwesomeSolid, React } from '../../../runtime/api.js'
+import { store } from '../../../runtime/app.js'
+import { useAppState } from '../../../ui/hooks.js'
 import { Icon } from '../parts.jsx'
 import { calm, finishAll, useSound, useTheme } from './fx.js'
 
@@ -56,6 +58,102 @@ export function SoundButton() {
         icon={on ? faVolumeHigh || faVolumeUp : faVolumeXmark || faVolumeMute}
       />
     </button>
+  )
+}
+
+// ------------------------------------------------------------ map size
+
+// How much of the dialog the map takes, picked beside the speaker and kept
+// in tier 1, so it holds across brackets, reloads and browsers: tall (the
+// default) is 0.3.0's layout; short gives the map the scene brackets' frame
+// and the height it frees to the cards; line hides the map and plays
+// Brackets Classic Mode's cards. Show bracket opens the whole map at every
+// size. A phone keeps its own layout, so it shows no control.
+export const MAP_SIZES = ['line', 'short', 'tall']
+
+const SIZE_LABEL = { line: 'No map', short: 'Short map', tall: 'Tall map' }
+
+// Each size's mark on an 18 by 12 grid, centred and one width: a line, a
+// short frame and a tall one, in the button's colour. Strokes are 2 units
+// on whole units, so at Stash's 12.25px icon size they land on pixels.
+// They carry no FontAwesome class, so a theme's rules for FontAwesome
+// icons (City Pop colours those in a dialog's header) leave them alone.
+const frame = (y, h) => (
+  <rect
+    x="2"
+    y={y}
+    width="14"
+    height={h}
+    rx="1.5"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  />
+)
+const SIZE_MARK = {
+  line: <rect x="1" y="5" width="16" height="2" rx="1" fill="currentColor" />,
+  short: frame(3, 6),
+  tall: frame(1, 10),
+}
+
+const PHONE = '(max-width: 575.98px)'
+
+function usePhone() {
+  const [phone, setPhone] = React.useState(
+    () => window.matchMedia?.(PHONE).matches ?? false,
+  )
+  React.useEffect(() => {
+    const mq = window.matchMedia?.(PHONE)
+    if (!mq) return
+    const on = () => setPhone(mq.matches)
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [])
+  return phone
+}
+
+// The size a bracket dialog plays at: the one picked, tall until then and
+// always on a phone
+function useSize() {
+  const picked = useAppState((s) => s.mapSize)
+  const phone = usePhone()
+  const size = phone || !MAP_SIZES.includes(picked) ? 'tall' : picked
+  return { phone, size }
+}
+export const useMapSize = () => useSize().size
+
+// The three sizes as one toggle, built like Stash's own grid, list and wall
+// toggle on its lists (secondary buttons, the picked one active), so a
+// theme styles it as it styles that one
+export function MapSizeButtons() {
+  const { phone, size } = useSize()
+  if (phone) return null
+  return (
+    <div
+      className="btn-group cherrypick-map-size"
+      role="group"
+      aria-label="Map size"
+    >
+      {MAP_SIZES.map((k) => (
+        <button
+          key={k}
+          type="button"
+          className={`btn btn-sm btn-secondary${size === k ? ' active' : ''}`}
+          aria-pressed={size === k}
+          aria-label={SIZE_LABEL[k]}
+          title={SIZE_LABEL[k]}
+          onClick={() => store.set({ mapSize: k })}
+        >
+          <svg
+            className="cherrypick-size-icon"
+            viewBox="0 0 18 12"
+            aria-hidden="true"
+          >
+            {SIZE_MARK[k]}
+          </svg>
+        </button>
+      ))}
+    </div>
   )
 }
 

@@ -106,14 +106,19 @@ export function Gauntlet({ b, cs, celebrate = false }) {
   )
 }
 
-// A Challenge round pick: sparks on the favorite the champion got past;
-// the round's end opens the champion screen, which has its own moment
-export function gauntletEffect(ev, { root, theme }) {
+// A Challenge round pick: sparks on the favorite the champion got past,
+// or from the champion when the road is hidden (the line size); the
+// round's end opens the champion screen, which has its own moment
+export function gauntletEffect(ev, { root, exit, theme }) {
   if (ev.type === 'pick') {
     sfx('coin')
     haptic(12)
     const beaten = root.querySelectorAll('.cherrypick-gauntlet-node.beaten')
-    const last = beaten[beaten.length - 1]
+    const last =
+      beaten[beaten.length - 1] ||
+      exit?.querySelector(
+        '.is-won .cherrypick-map-art, .is-won .cherrypick-cont-img',
+      )
     if (last) fx.burst(last, theme.accent, { n: 18, speed: 300, life: 380 })
     sfx('pop', 160)
     sfx('hop', 300)

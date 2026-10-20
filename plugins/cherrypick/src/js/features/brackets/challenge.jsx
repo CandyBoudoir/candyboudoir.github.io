@@ -4,8 +4,8 @@
 // round has the scene bracket's Look closer and inspector. ←/→ or a tap
 // picks, U or Backspace undoes, Esc or × goes back to the champion screen
 // with the picks kept. On the bracket map the round has its own map, the
-// champion's road past each favorite to the trophy (map/gauntlet.jsx);
-// Brackets Classic Mode keeps the plain match.
+// champion's road past each favorite to the trophy (map/gauntlet.jsx), at
+// the map's size; Brackets Classic Mode keeps the plain match.
 import { FontAwesomeSolid } from '../../runtime/api.js'
 import { store } from '../../runtime/app.js'
 import * as BR from '../../model/brackets.js'
@@ -22,7 +22,13 @@ import { Contender, isUndoKey, usePickKeys, useSceneMatch } from './play.jsx'
 import { toggleSound, useGamepad } from './map/fx.js'
 import { ChallengeBanner, Gauntlet, gauntletEffect } from './map/gauntlet.jsx'
 import { MapPair } from './map/sides.jsx'
-import { gated, MatchStage, SoundButton } from './map/stage.jsx'
+import {
+  gated,
+  MapSizeButtons,
+  MatchStage,
+  SoundButton,
+  useMapSize,
+} from './map/stage.jsx'
 
 const { faRotateLeft, faUndo } = FontAwesomeSolid
 
@@ -45,6 +51,7 @@ export function ChallengeDialog({ id }) {
     pickChallenge(id, winner, BR.challengeState(bracketOf(id)).current),
   )
   const classic = useAppState((s) => !!s.settings.classicBrackets)
+  const size = useMapSize()
   const pickNow = (x) => (classic ? match.pick(x) : gated(() => match.pick(x)))
   // the sides on screen now, read from the store as keys and buttons come
   const sidesNow = () => {
@@ -112,7 +119,12 @@ export function ChallengeDialog({ id }) {
           <span className="cherrypick-round text-muted">
             {n > 1 ? `Favorite ${i + 1} of ${n}` : 'Your favorite'}
           </span>
-          {classic ? null : <SoundButton />}
+          {classic ? null : (
+            <>
+              <SoundButton />
+              <MapSizeButtons />
+            </>
+          )}
         </>
       }
       footer={
@@ -194,7 +206,7 @@ export function ChallengeDialog({ id }) {
             round={0}
             opening={!st.started}
             winnerOf={(k) => b.challenge.decisions[k - 1]?.winner}
-            className={`cherrypick-map-stage cherrypick-challenge-stage ${b.kind}`}
+            className={`cherrypick-map-stage cherrypick-challenge-stage ${b.kind} cherrypick-size-${size}`}
             pick={match.pick}
             onLook={(x, frame) => match.setLook({ id: x, frame })}
             renderPair={(layer, on) => (
@@ -206,10 +218,14 @@ export function ChallengeDialog({ id }) {
               />
             )}
             renderTop={() =>
-              b.kind === 'clip' ? <Gauntlet b={b} cs={st} /> : null
+              b.kind === 'clip' && size !== 'line' ? (
+                <Gauntlet b={b} cs={st} />
+              ) : null
             }
             renderBottom={() =>
-              b.kind === 'clip' ? null : <Gauntlet b={b} cs={st} />
+              b.kind === 'clip' || size === 'line' ? null : (
+                <Gauntlet b={b} cs={st} />
+              )
             }
             renderBanner={() => <ChallengeBanner n={n} />}
             effect={gauntletEffect}

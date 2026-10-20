@@ -49,6 +49,7 @@ test('toConfig and fromConfig round-trip', () => {
   const s = state({
     notInterested: [{ sceneId: '4' }],
     brackets: { active: { id: 'b1' }, history: [{ id: 'b0' }] },
+    mapSize: 'short',
   })
   assert.deepEqual(fromConfig(toConfig(s)), s)
 })

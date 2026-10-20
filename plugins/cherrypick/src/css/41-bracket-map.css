@@ -29,9 +29,26 @@
   width: 100%;
 }
 
-.cherrypick-sound.btn {
+.cherrypick-sound.btn,
+.cherrypick-map-size .btn {
   line-height: 1.2;
   padding: 0.2rem 0.5rem;
+}
+
+/* the size marks: as tall as the speaker's FontAwesome icon and on its
+   baseline, so the four buttons line up. The sizes not picked are dimmed,
+   so the picked one shows in a theme that draws an active button like any
+   other (Juicy). */
+.cherrypick-size-icon {
+  display: inline-block;
+  height: 1em;
+  overflow: visible;
+  vertical-align: -0.125em;
+  width: 1.5em;
+}
+
+.cherrypick-map-size .btn:not(.active) .cherrypick-size-icon {
+  opacity: 0.55;
 }
 
 .cherrypick-stage {
@@ -167,6 +184,11 @@
   animation: cherrypick-lost 300ms ease-in both;
 }
 
+/* with no map to fly to (the line size), the winner rises where it stood */
+.cherrypick-size-line .cherrypick-layer.exit .is-won {
+  animation: cherrypick-won 320ms ease-out both;
+}
+
 @keyframes cherrypick-pop {
   0% {
     opacity: 0;
@@ -176,6 +198,18 @@
   100% {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes cherrypick-won {
+  40% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-5%) scale(1.04);
   }
 }
 
@@ -339,6 +373,50 @@
 .cherrypick-map-stage.clip .cherrypick-map-vp {
   height: 9.5rem;
   margin: 0 0 0.75rem;
+}
+
+/* the map's size, picked in the dialog's header (map/stage.jsx): tall is
+   the frame above; short takes the scene brackets' frame and gives the
+   height it frees to the cards, which keep their shape; line has no map
+   and Brackets Classic Mode's cards. A phone stays tall. */
+.cherrypick-size-short {
+  /* the tall frame's height, less the short one's */
+  --cherrypick-freed: calc(clamp(11rem, 30vh, 18rem) - 9.5rem);
+}
+
+.cherrypick-size-short .cherrypick-map-vp {
+  height: 9.5rem;
+}
+
+/* a scene bracket's frame is short already: its short frame is a strip */
+.cherrypick-map-stage.clip.cherrypick-size-short .cherrypick-map-vp {
+  height: 5.5rem;
+}
+
+.cherrypick-size-short .cherrypick-match.cherrypick-map-encounter.performer {
+  grid-template-columns: repeat(
+    2,
+    minmax(0, calc(17rem + var(--cherrypick-freed) * 0.8))
+  );
+}
+
+.cherrypick-size-short
+  .cherrypick-map-side
+  .cherrypick-cont-img.cherrypick-map-art {
+  max-height: calc(42vh + var(--cherrypick-freed));
+}
+
+.cherrypick-size-line .cherrypick-match.cherrypick-map-encounter.performer {
+  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+.cherrypick-size-line
+  .cherrypick-map-side
+  .cherrypick-cont-img.cherrypick-map-art {
+  aspect-ratio: auto;
+  height: min(52vh, 34rem);
+  max-height: none;
 }
 
 .cherrypick-overview .cherrypick-map-vp,
