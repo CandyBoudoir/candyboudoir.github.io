@@ -4,6 +4,8 @@
 // pick is not pulled toward past ratings, and an anchor looks like any
 // other entrant. A scene match shows contact sheets; a frame, Look closer
 // or 1 and 2 open an inspector (judge.jsx), and no scene's own file plays.
+// The match plays on the bracket map (map/), with sound behind M and a
+// controller's d-pad picking; Brackets Classic Mode keeps the plain match.
 import { FontAwesomeSolid, React } from '../../runtime/api.js'
 import { store } from '../../runtime/app.js'
 import * as BR from '../../model/brackets.js'
@@ -36,6 +38,10 @@ import {
   plural,
 } from './parts.jsx'
 import { nextPair } from './sheet.js'
+import { BracketBanner, BracketMap, mapEffect } from './map/bracketMap.jsx'
+import { toggleSound, useGamepad } from './map/fx.js'
+import { MapPair } from './map/sides.jsx'
+import { gated, MatchStage, SoundButton } from './map/stage.jsx'
 
 const { faRotateLeft, faUndo } = FontAwesomeSolid
 
@@ -165,6 +171,20 @@ export function PlayDialog() {
     match.setLook(null)
     undoPick()
   }
+  const classic = useAppState((s) => !!s.settings.classicBrackets)
+  // on the map, a pick while the next match arrives finishes its arrival
+  const pickNow = (id) =>
+    classic ? match.pick(id) : gated(() => match.pick(id))
+  const side = (k) => {
+    const a = store.get().brackets.active
+    return a ? BR.bracketState(a).current?.[k] : null
+  }
+  useGamepad(!classic && !match.look && !tree, {
+    left: () => side('a') && pickNow(side('a')),
+    right: () => side('b') && pickNow(side('b')),
+    undo,
+    tree: () => setTree((x) => !x),
+  })
   usePickKeys(
     VIEWS.play,
     (k, e) => {
@@ -173,10 +193,11 @@ export function PlayDialog() {
       const a = store.get().brackets.active
       const now = a ? BR.bracketState(a).current : null
       if (!now) return false
-      if (k === 'ArrowLeft') match.pick(now.a)
-      else if (k === 'ArrowRight') match.pick(now.b)
+      if (k === 'ArrowLeft') pickNow(now.a)
+      else if (k === 'ArrowRight') pickNow(now.b)
       else if (isUndoKey(k)) undo()
       else if (k === 't' || k === 'T') setTree((x) => !x)
+      else if (!classic && (k === 'm' || k === 'M')) toggleSound()
       else return false
       return true
     },
@@ -239,6 +260,26 @@ export function PlayDialog() {
       </button>
     </>
   )
+  const hints =
+    b.kind === 'clip' ? (
+      <MatchHints esc="pause" sound={!classic} />
+    ) : (
+      <p className="cherrypick-hints small text-muted">
+        <span className="cherrypick-hints-keys">
+          <kbd>←</kbd> <kbd>→</kbd> pick · <kbd>U</kbd> undo · <kbd>Esc</kbd>{' '}
+          pause
+          {classic ? null : (
+            <>
+              {' '}
+              · <kbd>M</kbd> sound
+            </>
+          )}
+        </span>
+        <span className="cherrypick-hints-touch">
+          Tap a side to pick it. Close to pause.
+        </span>
+      </p>
+    )
   return (
     <Dialog
       title={`${b.poolLabel} · ${b.seeds.length} ${kind}`}
@@ -246,7 +287,10 @@ export function PlayDialog() {
       onHide={pauseBracket}
       className={`cherrypick-play-modal${look ? ' cherrypick-looking' : ''}`}
       headerExtra={
-        <span className="cherrypick-round text-muted">{st.label}</span>
+        <>
+          <span className="cherrypick-round text-muted">{st.label}</span>
+          {classic ? null : <SoundButton />}
+        </>
       }
       footer={footer}
     >
@@ -265,7 +309,7 @@ export function PlayDialog() {
       !look ? (
         <ByesNote n={b.seeds.length} className="cherrypick-play-byes" />
       ) : null}
-      {tree ? (
+      {tree && classic ? (
         <BracketTree b={b} st={st} />
       ) : look ? (
         <>
@@ -277,7 +321,7 @@ export function PlayDialog() {
           />
           <LookHints id={look.id} />
         </>
-      ) : (
+      ) : classic ? (
         <>
           <div className={`cherrypick-match ${b.kind}`}>
             <Contender
@@ -297,19 +341,37 @@ export function PlayDialog() {
               onLook={(frame) => match.setLook({ id: cur.b, frame })}
             />
           </div>
-          {b.kind === 'clip' ? (
-            <MatchHints esc="pause" />
-          ) : (
-            <p className="cherrypick-hints small text-muted">
-              <span className="cherrypick-hints-keys">
-                <kbd>←</kbd> <kbd>→</kbd> pick · <kbd>U</kbd> undo ·{' '}
-                <kbd>Esc</kbd> pause
-              </span>
-              <span className="cherrypick-hints-touch">
-                Tap a side to pick it. Close to pause.
-              </span>
-            </p>
-          )}
+          {hints}
+        </>
+      ) : (
+        <>
+          <MatchStage
+            run={b.id}
+            n={b.decisions.length}
+            pair={[cur.a, cur.b]}
+            round={cur.round}
+            opening={b.decisions.length === 0}
+            winnerOf={(n) => b.decisions[n - 1]?.winner}
+            className={`cherrypick-map-stage ${b.kind}${tree ? ' cherrypick-overview' : ''}`}
+            pick={match.pick}
+            onLook={(id, frame) => match.setLook({ id, frame })}
+            renderPair={(layer, on) => (
+              <MapPair kind={b.kind} layer={layer} {...on} />
+            )}
+            renderTop={(ev) =>
+              b.kind === 'clip' || tree ? (
+                <BracketMap b={b} st={st} cur={cur} ev={ev} overview={tree} />
+              ) : null
+            }
+            renderBottom={(ev) =>
+              b.kind === 'clip' || tree ? null : (
+                <BracketMap b={b} st={st} cur={cur} ev={ev} />
+              )
+            }
+            renderBanner={() => <BracketBanner st={st} cur={cur} />}
+            effect={mapEffect}
+          />
+          {tree ? null : hints}
         </>
       )}
     </Dialog>

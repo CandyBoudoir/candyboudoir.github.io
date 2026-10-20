@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0
+
+- Brackets play on a map of the whole bracket, under the match, or over it in a scene bracket. Each match pops up out of its place on the map; a pick flies the winner into its place in the next round, draws the path it took in your theme's accent color and moves Cherry Pick's cherries on to the next match. A new round opens with its name, Show bracket (or T) opens the whole map, and a map too big to read whole, on a phone or in a bracket of 32 or 64, shows at full size to scroll through. Winning a bracket lights up the champion's road to the trophy; a click or any key skips it. Sound starts off, and the speaker button or M turns it on. A game controller's d-pad picks too. A pick made while the next match is still arriving only ends its arrival, so you can't pick a match you haven't seen, and with reduced motion set on your device, matches change without moving. No card or map shows a rating or a seed.
+- The Challenge round has its own map: the champion's road past each favorite to the trophy, with each favorite hidden until the champion reaches them. Beating them all lights up the road to the trophy.
+- New bracket, on the champion screen, does what Done and then Bracket would do, in one click: with Apply bracket ratings automatically on, it sets the finished bracket's ratings first, then starts a bracket from the same pool, gender and size, in which the last bracket's entrants sit out while others can take their places.
+- Brackets Classic Mode, a new setting that starts off, plays brackets as Cherry Pick 0.2 did, with two cards, a pick and no map, animation or sound. New bracket works there too.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.40.6, Xenith 3.2.0 and Restash 0.3.0-55c1cb2.
+
 ## 0.2.2
 
 - For you loads again after a scene you played in a scene bracket leaves Stash: deleted, merged into another scene, or removed by Stash's Clean task. Cherry Pick stopped at the bracket's pick on the missing scene and never finished learning your taste, so For you's header said "Learning your taste from … scenes" for good, and Your score, Watch This and the bracket buttons never came. Picks on a scene Stash no longer has now teach Cherry Pick nothing. A paused bracket still shows such a scene as "A removed scene".

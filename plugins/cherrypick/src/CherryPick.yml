@@ -1,6 +1,6 @@
 name: Cherry Pick
 description: Learns what you like from your ratings and plays. A For you row, Your score on scenes you haven't rated, More like this and performer brackets.
-version: 0.2.2
+version: 0.3.0
 url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/cherrypick
 ui:
   javascript:
@@ -70,4 +70,8 @@ settings:
   autoApply:
     displayName: Apply bracket ratings automatically
     description: "On: closing a bracket's champion screen sets the ratings it found, with Undo on Cherry Pick's page. Off: Apply to my ratings shows them first. Starts off while Ascension, HotOrNot, Xenith or Restash's mirror manages your ratings."
+    type: BOOLEAN
+  classicBrackets:
+    displayName: Brackets Classic Mode
+    description: 'Brackets without the map, animations or sounds: two cards and a pick, as before 0.3.0.'
     type: BOOLEAN

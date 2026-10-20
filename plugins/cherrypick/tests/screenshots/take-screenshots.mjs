@@ -200,10 +200,13 @@ const browser = await chromium.launch({
     '--host-resolver-rules=MAP stashdb.org ~NOTFOUND, MAP *.stashdb.org ~NOTFOUND',
   ],
 })
+// Reduced motion: the bracket map's matches swap at once and its moments
+// don't play, so every shot is a still and every key picks
 const context = await browser.newContext({
   baseURL: STASH,
   viewport: { width: 1440, height: 900 },
   deviceScaleFactor: 1,
+  reducedMotion: 'reduce',
 })
 await routeStashdb(context)
 const page = await context.newPage()

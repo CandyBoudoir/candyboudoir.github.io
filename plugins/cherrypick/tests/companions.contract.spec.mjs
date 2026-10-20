@@ -33,6 +33,12 @@ import {
   tearDownCherryPick,
 } from './stash.mjs'
 
+// Brackets play on the bracket map, whose matches arrive with a short
+// animation that a pick made during it skips (map.contract.spec.mjs checks
+// that). With reduced motion a match swaps at once, so keys pressed in a
+// row each pick.
+test.use({ reducedMotion: 'reduce' })
+
 // What each plugin writes on a performer after a few matches, the pieces it
 // puts on the pages Cherry Pick also decorates, and where. `theirs` matches
 // everything of its own on the page; `seen` says what each page shows.

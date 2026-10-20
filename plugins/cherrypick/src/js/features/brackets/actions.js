@@ -128,6 +128,11 @@ export const forgetBracketGender = () =>
 
 // ------------------------------------------------------------ starting
 
+// How each bracket of this visit started, by its id, so New bracket on its
+// champion screen starts the same again: { performer: { choice,
+// listFilter, origin } } or { clip: { ids, poolLabel, origin, size } }
+const recipes = new Map()
+
 function begin(b) {
   store.set((s) => ({
     brackets: { ...s.brackets, active: b },
@@ -152,17 +157,17 @@ export function startPerformerBracket(choice, listFilter, remember, origin) {
         dominantNow(),
       ),
     })
-  begin(
-    BR.createBracket(s.M, {
-      kind: 'performer',
-      gender: choice.gender,
-      poolLabel: r.poolLabel,
-      size: r.size,
-      ids: r.ids,
-      origin: origin || '/performers',
-      recent: BR.recentEntrants(s.brackets.history, 'performer', choice.gender),
-    }),
-  )
+  const b = BR.createBracket(s.M, {
+    kind: 'performer',
+    gender: choice.gender,
+    poolLabel: r.poolLabel,
+    size: r.size,
+    ids: r.ids,
+    origin: origin || '/performers',
+    recent: BR.recentEntrants(s.brackets.history, 'performer', choice.gender),
+  })
+  recipes.set(b.id, { performer: { choice, listFilter, origin } })
+  begin(b)
   return true
 }
 
@@ -195,17 +200,17 @@ export function startClipBracket({ ids, poolLabel, origin, size }) {
   const entrants = M ? BR.clipEntrants(M, ids) : []
   const slots = M ? BR.clipSize(entrants.length, size) : null
   if (!slots) return false
-  begin(
-    BR.createBracket(M, {
-      kind: 'clip',
-      poolLabel,
-      size: slots,
-      ids: entrants,
-      pool: ids,
-      origin: origin || null,
-      recent: BR.recentEntrants(brackets.history, 'clip'),
-    }),
-  )
+  const b = BR.createBracket(M, {
+    kind: 'clip',
+    poolLabel,
+    size: slots,
+    ids: entrants,
+    pool: ids,
+    origin: origin || null,
+    recent: BR.recentEntrants(brackets.history, 'clip'),
+  })
+  recipes.set(b.id, { clip: { ids, poolLabel, origin, size } })
+  begin(b)
   return true
 }
 
@@ -232,6 +237,47 @@ export function startChampionsRound(gender) {
   )
 }
 
+// New bracket, on a champion screen: Done and the list's Bracket in one
+// click. Closing the screen would set the bracket's ratings (with Apply
+// bracket ratings automatically on), so they are set first and the next
+// bracket draws on them; then the same kind of bracket starts again: the
+// same pool, gender and size, with this one's entrants waiting while fresh
+// ones can fill it. A Champions round is followed by an ordinary bracket of
+// its gender. A pool that can no longer fill a bracket opens the setup
+// sheet, as the Bracket button does. After a reload the recipe is gone, and
+// the bracket's own record stands in: its gender over the whole library,
+// or its scene pool.
+export async function startNextBracket(id) {
+  const done = store.get().brackets.history.find((x) => x.id === id)
+  if (!done || store.get().brackets.active) return
+  await autoApplyBracket(id)
+  // closed while the ratings were set: Done won
+  const d = store.get().dialog
+  if (d?.view !== VIEWS.result || d.id !== id) return
+  const recipe = recipes.get(id)
+  if (done.kind === 'clip') {
+    const pool = recipe?.clip || {
+      ids: done.pool || done.seeds,
+      poolLabel: done.poolLabel,
+      origin: done.origin,
+      size: done.size,
+    }
+    if (!startClipBracket(pool)) openClipSetup(pool)
+    return
+  }
+  const r = done.champions ? null : recipe?.performer
+  const choice = r?.choice || {
+    ...quickChoice(store.get().bracketPrefs, dominantNow(), null),
+    gender: done.gender,
+    size: done.champions ? BR.DEFAULT_SIZE : done.size,
+  }
+  const listFilter = r?.listFilter || null
+  if (
+    !startPerformerBracket(choice, listFilter, null, r?.origin || done.origin)
+  )
+    openDialog({ view: VIEWS.setup, listFilter, choice })
+}
+
 // ------------------------------------------------------------ playing
 
 // Custom-field writes of finished brackets, by bracket id: the fields each
@@ -247,10 +293,11 @@ function finish(next, result) {
   }
   const challenge = BR.challengeFor(store.get().M, done, genderOf)
   const finished = challenge ? { ...done, challenge } : done
+  // moment: the champion screen opens with the champion's moment
   store.set((s) => ({
     brackets: { active: null, history: [...s.brackets.history, finished] },
     lastFinished: finished.id,
-    dialog: { view: VIEWS.result, id: finished.id },
+    dialog: { view: VIEWS.result, id: finished.id, moment: 'champion' },
   }))
   if (finished.kind === 'performer')
     fieldWrites.set(finished.id, writeFields(finished))
@@ -403,8 +450,9 @@ export function pickChallenge(id, winner, against) {
   const before = finishedBracket(id)
   updateFinished(id, (b) => BR.challengePick(b, winner, against))
   const after = finishedBracket(id)
-  if (after !== before && BR.challengeState(after)?.done)
-    openDialog({ view: VIEWS.result, id })
+  const st = BR.challengeState(after)
+  if (after !== before && st?.done)
+    openDialog({ view: VIEWS.result, id, moment: st.won ? 'trophy' : 'lost' })
 }
 
 export function undoChallengePick(id) {
