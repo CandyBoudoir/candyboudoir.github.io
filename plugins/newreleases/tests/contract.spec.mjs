@@ -478,6 +478,9 @@ test('a check while the page is open puts what it finds in Just in, New, and the
       { timeout: 15_000 },
     )
     const order = newestFirst(SHOWN).map((s) => s.title)
+    await expect(
+      page.locator('.newreleases-grid .newreleases-card'),
+    ).toHaveCount(SHOWN.length)
     expect(await titles(page)).toEqual(order)
     const justIn = page.locator('.newreleases-just-in')
     await expect(justIn.locator('.recommendation-row-head h2')).toHaveText(
