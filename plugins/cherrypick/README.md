@@ -87,13 +87,13 @@ In a performer bracket, a performer you haven't rated who is in two or more scen
 
 With Apply bracket ratings automatically on, under Settings > Plugins, the champion screen has no Apply button: closing it sets those ratings, and says how many first. Cherry Pick's page lists each batch with Undo. The switch starts on, and off while Ascension, HotOrNot, Xenith or Restash's mirror writes your ratings, since their rankings would take up every rating without a preview. It follows those plugins until you set it yourself.
 
-| Playing                                                                   | The champion                                                                                                                     |
-| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| ![Two performers side by side in a bracket](docs/screenshots/bracket.png) | ![A champion who beat your favorites in the Challenge round, with the finalist and semifinalists](docs/screenshots/champion.png) |
+| Playing                                                                                                                                         | The champion                                                                                                                                      |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Two performers in a bracket, over the map of the whole bracket with the cherries beside the match being played](docs/screenshots/bracket.png) | ![A champion who beat your favorites in the Challenge round, with the finalist, the semifinalists and New bracket](docs/screenshots/champion.png) |
 
-| A scene match                                                                                                                       | Look closer                                                                                                                                                           |
-| ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ![Two scenes side by side in a bracket, each with its cover, eight frames, performers and tags](docs/screenshots/scene-bracket.png) | ![Look closer on one scene: a frame from its sprite sheet, the scrub bar, sixteen frames, its performers, description and tags](docs/screenshots/scene-inspector.png) |
+| A scene match                                                                                                                                     | Look closer                                                                                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Two scenes side by side in a bracket under its map, each with its cover, eight frames, performers and tags](docs/screenshots/scene-bracket.png) | ![Look closer on one scene: a frame from its sprite sheet, the scrub bar, sixteen frames, its performers, description and tags](docs/screenshots/scene-inspector.png) |
 
 ### StashDB
 
