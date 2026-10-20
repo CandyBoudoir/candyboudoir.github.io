@@ -28,5 +28,5 @@ settings:
     type: BOOLEAN
   stashUIFonts:
     displayName: Stash UI fonts
-    description: "For Stash UI, the replacement interface. Off: picking City Pop under Stash UI's Colors changes only its colours. On: it also sets Stash UI in City Pop's type, Jost for headings and labels. Shows while Stash UI is on; takes effect on the next page you open in Stash UI."
+    description: "For Stash UI, the replacement interface. Off: picking City Pop under Stash UI's Colors changes only its colours. On: it also sets Stash UI in City Pop's type: the brush script for page and section titles and the wordmark, Jost for other headings and labels. Shows while Stash UI is on; takes effect on the next page you open in Stash UI."
     type: BOOLEAN

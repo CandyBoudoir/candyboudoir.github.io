@@ -7,8 +7,8 @@
  * too. Every url() here resolves against this file, in the plugin's assets.
  */
 
-/* Jost, as in 00-fonts.css. The browser fetches it only while the fonts
-   setting is on. */
+/* Jost and Mr Dafoe, as in 00-fonts.css. The browser fetches them only
+   while the fonts setting is on. */
 @font-face {
   font-display: swap;
   font-family: 'CityPop Jost';
@@ -34,6 +34,30 @@
     U+2215, U+FEFF, U+FFFD;
 }
 
+@font-face {
+  font-display: swap;
+  font-family: 'CityPop Dafoe';
+  font-style: normal;
+  font-weight: 400;
+  src: url('fonts/mr-dafoe/mr-dafoe-latin-ext-400-normal.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'CityPop Dafoe';
+  font-style: normal;
+  font-weight: 400;
+  src: url('fonts/mr-dafoe/mr-dafoe-latin-400-normal.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
 /* The second accent and the focus ring, which Stash UI's colour setting
    leaves out: pool water for focus, lilac for its violet touches */
 html.citypop-stashui {
@@ -53,6 +77,95 @@ html.citypop-stashui-fonts {
     'CityPop Jost', futura, 'Century Gothic', 'Microsoft YaHei', 'PingFang SC',
     'Noto Sans SC', 'Source Han Sans SC', sans-serif;
   --f-label: var(--f-display);
+}
+
+/*
+ * The brush script, where classic City Pop keeps it: page titles (which are
+ * also the names on performer, studio and tag pages), section titles and the
+ * wordmark. Stash UI sets scene titles, dialogs, drawers and empty states in
+ * its display face too, which stays Jost, so the script never carries small
+ * or long text.
+ */
+html.citypop-stashui-fonts :is(.kb-h1, .kb-h2) {
+  font-family: 'CityPop Dafoe', 'Brush Script MT', cursive;
+  font-stretch: normal;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-shadow:
+    2px 2px 0 #c23a8e,
+    4px 5px 0 rgb(4 3 22 / 55%);
+  word-spacing: 0.2em;
+}
+
+html.citypop-stashui-fonts .kb-h1 {
+  line-height: 1.1;
+}
+
+html.citypop-stashui-fonts .kb-h2 {
+  font-size: 34px;
+}
+
+/* What shares a title's line keeps Stash UI's own look: the links and buttons
+   beside a section title, a performer's disambiguation and tier */
+html.citypop-stashui-fonts .kb-h2 > :not(em, b, span, i),
+html.citypop-stashui-fonts .kb-h1 :is(small, .kb-tier) {
+  font-family: var(--f-label);
+  letter-spacing: normal;
+  text-shadow: none;
+  word-spacing: normal;
+}
+
+/* The wordmark: chrome script with a hard horizon, beside the striped sun,
+   upright instead of Stash UI's slanted lettering */
+html.citypop-stashui-fonts .kb-mark {
+  -webkit-text-stroke: 0;
+  filter: drop-shadow(2px 2px 0 #c23a8e)
+    drop-shadow(2px 2px 0 rgb(4 3 22 / 60%));
+  font-family: 'CityPop Dafoe', 'Brush Script MT', cursive;
+  font-stretch: normal;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  transform: none;
+}
+
+html.citypop-stashui-fonts .kb-mark span {
+  background: linear-gradient(
+    180deg,
+    #fff 0%,
+    #fff0fb 20%,
+    #ffc4e1 40%,
+    #ff8fb8 51%,
+    #fff 51.6%,
+    #fff 52.6%,
+    #341a73 53%,
+    #5b3aa8 64%,
+    #a98cf0 82%,
+    #f4e9ff 100%
+  );
+  background-clip: text;
+  color: transparent;
+}
+
+html.citypop-stashui-fonts:not([data-rail='mini']) .kb-mark {
+  font-size: 42px;
+  line-height: 1;
+  padding-left: 34px;
+}
+
+html.citypop-stashui-fonts:not([data-rail='mini']) .kb-mark::before {
+  background: url('icons/sun.svg') center / contain no-repeat;
+  height: 28px;
+  inset: calc(50% - 14px) auto auto 0;
+  width: 28px;
+}
+
+html.citypop-stashui-fonts.kb-fx .kb-mark:hover {
+  transform: scale(1.05);
+}
+
+html.citypop-stashui-fonts.kb-fx .kb-mark:hover::before {
+  transform: none;
 }
 
 /* The preset's swatch: the striped sun going down under the night sky */
