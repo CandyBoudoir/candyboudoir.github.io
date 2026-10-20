@@ -533,6 +533,37 @@
 }
 
 /*
+ * A guessed rating, such as Cherry Pick's Your score, is the same tag left
+ * hollow: black with a yellow frame and yellow type, opaque so it reads over
+ * any cover and never passes for a rating of Stash's. It carries no rating
+ * class, so the meter goes, and so does Cherry Pick's hidden line that holds
+ * Stash's ribbon at full width, which the tag never needs. Cherry Pick sets
+ * its own dim, outline and case at two classes, so this names the card too
+ * and wins in either stylesheet order.
+ */
+.grid-card .rating-banner.cherrypick-score-banner {
+  --overclock-edge: var(--overclock-yellow);
+
+  background:
+    linear-gradient(
+        315deg,
+        var(--overclock-edge) calc(var(--overclock-cut) * 0.7071 + 1px),
+        transparent 0
+      )
+      border-box,
+    var(--overclock-black);
+  border: 1px solid var(--overclock-edge);
+  box-shadow: none;
+  color: var(--overclock-yellow);
+  text-transform: uppercase;
+}
+
+.grid-card .rating-banner.cherrypick-score-banner::before,
+.grid-card .rating-banner.cherrypick-score-banner::after {
+  display: none;
+}
+
+/*
  * Stash shows the card's checkbox in the picture's top-left corner whenever a
  * card is hovered or selected, and always on touch screens, where it is
  * wider, so the tag hangs to its right and never covers it (and past a
