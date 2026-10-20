@@ -4,15 +4,17 @@ Plugins for [Stash](https://github.com/stashapp/stash), the self-hosted media or
 
 <!-- plugins:start -->
 
-| Plugin                               | What it does                                                                                                                                                                                                 |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [Cherry Pick](plugins/cherrypick/)   | Learns what you like from your ratings and plays: a For you row, Your score on unrated scenes, More like this, and performer and scene brackets.                                                             |
-| [City Pop](plugins/citypop/)         | An airbrushed 1980s dusk from city pop LPs: record-sleeve cards, striped suns for ratings, cassettes for audio scenes and a late-night FM voice.                                                             |
-| [Juicy](plugins/juicy/)              | A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording.                                                                                |
-| [Leather](plugins/leather/)          | A black leather theme: saddle stitching, nickel studs for ratings, a collar for favourites and a strict voice in the wording.                                                                                |
-| [New Releases](plugins/newreleases/) | What your favourite studios released in the last 48 hours, from ThePornDB and your other stash-boxes, filtered by tag, performer and studio, each linked to the studio to buy it, leaving out what you have. |
-| [Overclock](plugins/overclock/)      | A hacker's heads-up display in acid yellow: charge chevrons for ratings, a reticle that locks on for favourites and a cold system voice.                                                                     |
-| [Tag Candy](plugins/tagcandy/)       | Glossy sticker icons for your tags, matched by StashDB link or name. Your own tag images stay unless you ask.                                                                                                |
+| Plugin                                               | What it does                                                                                                                                                                                                 |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Cherry Pick](plugins/cherrypick/)                   | Learns what you like from your ratings and plays: a For you row, Your score on unrated scenes, More like this, and performer and scene brackets.                                                             |
+| [City Pop](plugins/citypop/)                         | An airbrushed 1980s dusk from city pop LPs: record-sleeve cards, striped suns for ratings, cassettes for audio scenes and a late-night FM voice.                                                             |
+| [City Pop for Stash UI](plugins/citypop-stashui/)    | Brings the Classic Stash theme, City Pop, to Stash UI: its dusk colours, brush-script titles and backdrop of stars and palms. Needs Stash UI.                                                                |
+| [Juicy](plugins/juicy/)                              | A pink, playful theme: glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording.                                                                                |
+| [Leather](plugins/leather/)                          | A black leather theme: saddle stitching, nickel studs for ratings, a collar for favourites and a strict voice in the wording.                                                                                |
+| [New Releases](plugins/newreleases/)                 | What your favourite studios released in the last 48 hours, from ThePornDB and your other stash-boxes, filtered by tag, performer and studio, each linked to the studio to buy it, leaving out what you have. |
+| [Overclock](plugins/overclock/)                      | A hacker's heads-up display in acid yellow: charge chevrons for ratings, a reticle that locks on for favourites and a cold system voice.                                                                     |
+| [Overclock for Stash UI](plugins/overclock-stashui/) | Brings the Classic Stash theme, Overclock, to Stash UI: its acid yellow, glitch-split titles and HUD backdrop. Needs Stash UI.                                                                               |
+| [Tag Candy](plugins/tagcandy/)                       | Glossy sticker icons for your tags, matched by StashDB link or name. Your own tag images stay unless you ask.                                                                                                |
 
 <!-- plugins:end -->
 

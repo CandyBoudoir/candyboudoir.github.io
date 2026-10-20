@@ -11,14 +11,17 @@
 // authors' plugins to install beside them, companions.mjs, from the copies of
 // their zips in COMPANION_ZIPS, companion-zips.mjs), PW_CHANNEL (optional
 // Playwright channel). The plugins the themes restyle (RESTYLED in
-// companions.mjs) are always installed, and left switched off.
+// companions.mjs) and those that plugins here extend (EXTENDED) are always
+// installed, and left switched off.
 import { createReadStream } from 'node:fs'
 import { cp, readFile, stat } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { extname, join, resolve } from 'node:path'
 import { BOX_NAME, ENDPOINT, LINKS } from './stashbox-data.mjs'
 import {
+  extendedPackages,
   fetchCompanionZips,
+  fetchExtendedZips,
   fetchRestyledFiles,
   restyledDir,
   zipFile,
@@ -254,19 +257,23 @@ const TYPES = { '.yml': 'text/yaml', '.zip': 'application/zip' }
 
 async function install() {
   const extra = companions()
+  // The extended plugins, served beside the companions and switched off
+  // once installed
+  const ext = await extendedPackages()
   const server = createServer(async (req, res) => {
     const path = decodeURIComponent(new URL(req.url, 'http://x').pathname)
     // The companions' source: their pinned packages, whose zips are the
-    // copies companion-zips.mjs keeps
+    // copies companion-zips.mjs keeps, and the extended plugins' zips it
+    // builds
     if (path === '/companions/index.yml') {
       res.writeHead(200, { 'Content-Type': TYPES['.yml'] })
-      res.end(companionIndex(`${origin}/companions`))
+      res.end(companionIndex(`${origin}/companions`, ext))
       return
     }
-    const zip = extra.find(
-      (c) => path === `/companions/${c.package.sha256}.zip`,
-    )
-    const file = zip ? zipFile(zip.package) : join(SITE, path)
+    const zip =
+      extra.find((c) => path === `/companions/${c.package.sha256}.zip`)
+        ?.package ?? ext.find((e) => path === `/companions/${e.sha256}.zip`)
+    const file = zip ? (zip.file ?? zipFile(zip)) : join(SITE, path)
     try {
       if (!(zip || file.startsWith(SITE)) || !(await stat(file)).isFile())
         throw new Error()
@@ -283,28 +290,43 @@ async function install() {
   const source = `${origin}/index.yml`
   const extraSource = `${origin}/companions/index.yml`
 
-  await gql(
-    `mutation ($s: [PackageSourceInput!]) {
-      configureGeneral(input: { pluginPackageSources: $s }) { pluginPackageSources { url } } }`,
-    {
-      s: [
-        { name: 'CandyBoudoir', url: source, local_path: 'candyboudoir' },
-        ...(extra.length
-          ? [{ name: 'Companions', url: extraSource, local_path: 'companions' }]
-          : []),
-      ],
-    },
-  )
+  const sources = (companionsSource) =>
+    gql(
+      `mutation ($s: [PackageSourceInput!]) {
+        configureGeneral(input: { pluginPackageSources: $s }) { pluginPackageSources { url } } }`,
+      {
+        s: [
+          { name: 'CandyBoudoir', url: source, local_path: 'candyboudoir' },
+          ...(companionsSource
+            ? [
+                {
+                  name: 'Companions',
+                  url: extraSource,
+                  local_path: 'companions',
+                },
+              ]
+            : []),
+        ],
+      },
+    )
+  await sources(extra.length || ext.length)
   await gql(
     'mutation ($p: [PackageSpecInput!]!) { installPackages(type: Plugin, packages: $p) }',
     {
       p: [
         ...PLUGIN_IDS.map((id) => ({ id, sourceURL: source })),
-        ...extra.map((c) => ({ id: c.package.id, sourceURL: extraSource })),
+        ...[...extra.map((c) => c.package), ...ext].map(({ id }) => ({
+          id,
+          sourceURL: extraSource,
+        })),
       ],
     },
   )
-  const wanted = [...PLUGIN_IDS, ...extra.flatMap((c) => c.enable)]
+  const wanted = [
+    ...PLUGIN_IDS,
+    ...extra.flatMap((c) => c.enable),
+    ...ext.map((e) => e.id),
+  ]
   let installed = []
   for (let i = 0; i < 90 && installed.length < wanted.length; i++) {
     await sleep(1000)
@@ -318,8 +340,12 @@ async function install() {
     throw new Error(
       `${wanted.join(', ')} did not install from the plugin source`,
     )
-  // Builds a companion ships that must not run beside the one under test
-  const off = extra.flatMap((c) => c.disable)
+  // On a leg without companions the source goes again, so Settings › Plugins
+  // lists the CandyBoudoir source alone, as in the screenshots
+  if (!extra.length) await sources(false)
+  // Builds a companion ships that must not run beside the one under test,
+  // and the extended plugins until a spec switches one on
+  const off = [...extra.flatMap((c) => c.disable), ...ext.map((e) => e.id)]
   if (off.length)
     await gql('mutation ($m: BoolMap!) { setPluginsEnabled(enabledMap: $m) }', {
       m: Object.fromEntries(off.map((id) => [id, false])),
@@ -358,6 +384,7 @@ async function installRestyled() {
 
 await fetchCompanionZips()
 await fetchRestyledFiles()
+await fetchExtendedZips()
 await setup()
 await seed()
 await stashBox()

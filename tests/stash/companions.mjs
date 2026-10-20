@@ -205,9 +205,54 @@ export const RESTYLED = {
   },
 }
 
+// Other authors' plugins that plugins here extend through an API of theirs.
+// Like the restyled plugins, prepare.mjs puts each into every test Stash,
+// switched off, and the specs of the plugins that extend it (extendedBy)
+// switch it on (usePlugins). Each is pinned to a commit in the author's git
+// repository and its plugin folder there: companion-zips.mjs fetches that
+// commit alone and zips the folder with the build's own zip code
+// (scripts/site.mjs), and prepare.mjs serves the zip from its package source
+// under the zip's sha256. The commit pins the content, where a zip pinned by
+// sha256 would last hours: the author's Pages source keeps only its newest
+// zip and republishes it with each change. `date` is the commit's (UTC),
+// which stamps the zip's files. A release of a plugin that extends one names
+// the pin and, since the author releases several times a day, needs it to
+// have been the latest within the day (tested-with.mjs);
+// `node tests/stash/pin-extended.mjs` moves a pin to the latest.
+export const EXTENDED = {
+  // Stash UI 3.115.1, a replacement interface for Stash that imports
+  // assets/stashui.js from each enabled plugin, from
+  // https://github.com/anonym88312/stash-pmv-plugins (MIT). Its GitHub Pages
+  // source zips plugins/stashui as committed, so the folder at the commit
+  // holds the files of the zip it served for that release. Its backend runs
+  // on `python`, which the specs never start.
+  stashui: {
+    id: 'stashui',
+    name: 'Stash UI',
+    version: '3.115.1',
+    repo: 'anonym88312/stash-pmv-plugins',
+    commit: 'ed9c93a44ad4b3660783110e672ad0bf393da76a',
+    folder: 'plugins/stashui',
+    date: '2026-10-20 15:04:32',
+    extendedBy: ['citypop-stashui', 'overclock-stashui'],
+    // The source index users add, whose zip pin-extended.mjs checks
+    latest: {
+      index: 'https://anonym88312.github.io/stash-pmv-plugins/index.yml',
+    },
+  },
+}
+
 // The restyled plugins, keyed like the companions
 export const restyled = () =>
   Object.entries(RESTYLED).map(([key, r]) => ({ key, ...r }))
+
+// The extended plugins, keyed like the companions
+export const extended = () =>
+  Object.entries(EXTENDED).map(([key, e]) => ({ key, ...e }))
+
+// The extended plugins a plugin of ours extends
+export const extendedBy = (folder) =>
+  extended().filter((e) => e.extendedBy.includes(folder))
 
 // The restyled plugins a plugin of ours restyles: those it keeps an
 // unmatched-class baseline for (plugins/<folder>/tests/<key>-unmatched-baseline.txt)
@@ -229,8 +274,9 @@ export async function restyledBy(folder) {
   return found
 }
 
-// The sentence each release of a theme that restyles them carries in its
-// CHANGELOG section, naming the versions its specs ran beside
+// The sentence each release of a theme that restyles them, or of a plugin
+// that extends them, carries in its CHANGELOG section, naming the versions
+// its specs ran beside
 export function restyledBeside(list) {
   const names = list.map((r) => `${r.name} ${r.version}`)
   const named =
@@ -254,11 +300,12 @@ export function companions() {
 // The companions' plugin ids, which stay enabled beside the plugin under test
 export const companionPluginIds = () => companions().flatMap((c) => c.enable)
 
-// The package source index.yml listing the companions, whose zips are served
+// The package source index.yml listing the companions and any other
+// packages given (id, name, version, date, sha256), whose zips are served
 // from base under their sha256
-export const companionIndex = (base) =>
-  companions()
-    .map(({ package: p }) =>
+export const companionIndex = (base, others = []) =>
+  [...companions().map((c) => c.package), ...others]
+    .map((p) =>
       [
         `- id: ${p.id}`,
         `  name: ${p.name}`,

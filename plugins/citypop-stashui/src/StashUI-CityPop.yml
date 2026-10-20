@@ -1,0 +1,12 @@
+name: City Pop for Stash UI
+description: City Pop for Stash UI brings the Classic Stash theme, City Pop, to your Stash UI. Pick City Pop under Stash UI's Settings > Appearance > Colors to give it City Pop's dusk colours, brush-script titles and backdrop of stars and palms. Needs Stash UI.
+version: 0.1.0
+url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/citypop-stashui
+ui:
+  assets:
+    /: assets
+settings:
+  colorsOnly:
+    displayName: Colors only
+    description: "Off: City Pop gives Stash UI its colours, its type (the fonts and the lettering of titles and the wordmark) and its backdrop. On: only its colours, and Stash UI keeps its own fonts, lettering and backdrop. Also under City Pop in Stash UI's Settings > Appearance > Colors; takes effect on the next page you open in Stash UI."
+    type: BOOLEAN

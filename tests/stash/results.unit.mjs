@@ -49,6 +49,32 @@ test('a failing spec fails only its own plugin, nested suites included', () => {
   )
 })
 
+test('a spec declared in a shared helper fails the plugin whose spec file ran it', () => {
+  const shared = {
+    suites: [
+      {
+        title: 'leather/tests/contract.spec.mjs',
+        file: 'leather/tests/contract.spec.mjs',
+        specs: [],
+        suites: [
+          {
+            title: 'beside Stash UI',
+            file: '../tests/stash/stashui-style.mjs',
+            specs: [spec('../tests/stash/stashui-style.mjs', false)],
+            suites: [],
+          },
+        ],
+      },
+    ],
+    errors: [],
+  }
+  assert.deepEqual(pluginOutcomes(shared, folders), {
+    cherrypick: 'success',
+    juicy: 'success',
+    leather: 'failure',
+  })
+})
+
 test('a file that fails to load fails its plugin; an error with no file fails all', () => {
   const loadError = {
     message: 'SyntaxError',

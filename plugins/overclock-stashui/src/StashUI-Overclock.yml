@@ -1,0 +1,12 @@
+name: Overclock for Stash UI
+description: Overclock for Stash UI brings the Classic Stash theme, Overclock, to your Stash UI. Pick Overclock under Stash UI's Settings > Appearance > Colors to give it Overclock's acid yellow, glitch-split titles and HUD backdrop. Needs Stash UI.
+version: 0.1.0
+url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/overclock-stashui
+ui:
+  assets:
+    /: assets
+settings:
+  colorsOnly:
+    displayName: Colors only
+    description: "Off: Overclock gives Stash UI its colours, its type (the fonts and the lettering of titles and the wordmark) and its backdrop. On: only its colours, and Stash UI keeps its own fonts, lettering and backdrop. Also under Overclock in Stash UI's Settings > Appearance > Colors; takes effect on the next page you open in Stash UI."
+    type: BOOLEAN

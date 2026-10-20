@@ -19,6 +19,12 @@ export default defineConfig(
     languageOptions: { sourceType: 'script', globals: globals.browser },
   },
   {
+    // The Stash UI style kit and each plugin's entry into it, which the build
+    // bundles into the ES module Stash UI imports.
+    files: ['shared/stashui/**/*.js', 'plugins/*-stashui/src/stashui.js'],
+    languageOptions: { sourceType: 'module', globals: globals.browser },
+  },
+  {
     // Plugins built from ES modules (Cherry Pick): JSX compiled by esbuild
     // against PluginApi.React, so React is a global the shim provides.
     files: modulePlugins.flatMap((name) => [

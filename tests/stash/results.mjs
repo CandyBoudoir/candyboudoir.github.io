@@ -15,16 +15,18 @@ function folderOf(file = '') {
 // One step's outcome for each plugin folder, from its Playwright JSON report:
 // 'failure' for a folder with a spec that did not pass (a flaky spec that
 // passed on retry counts as passed) or a file that failed to load, 'success'
-// otherwise. An error tied to no plugin's file, such as the mock stash-box
-// failing to start, fails every folder.
+// otherwise. A spec counts for the spec file it ran in, the report's top-level
+// suite: a spec declared in a shared helper (tests/stash/stashui-style.mjs)
+// carries the helper's path as its own file. An error tied to no plugin's
+// file, such as the mock stash-box failing to start, fails every folder.
 export function pluginOutcomes(report, folders) {
   const failed = new Set()
-  const walk = (suite) => {
+  const walk = (suite, file) => {
     for (const spec of suite.specs ?? [])
-      if (!spec.ok) failed.add(folderOf(spec.file))
-    for (const child of suite.suites ?? []) walk(child)
+      if (!spec.ok) failed.add(folderOf(file))
+    for (const child of suite.suites ?? []) walk(child, file)
   }
-  for (const suite of report.suites ?? []) walk(suite)
+  for (const suite of report.suites ?? []) walk(suite, suite.file)
   let all = false
   for (const error of report.errors ?? []) {
     const folder = folderOf(error.location?.file)

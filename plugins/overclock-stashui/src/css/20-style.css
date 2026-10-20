@@ -1,0 +1,152 @@
+/*
+ * Overclock: a hacker's heads-up display in acid yellow. Stash UI takes
+ * Overclock's ten colours through its own colour setting; these rules wait
+ * for html[data-cb-style='overclock'], which stashui.js sets while Overclock
+ * is the picked style, and for [data-cb-type] while Colors only is off.
+ */
+
+/* The focus ring in cyan and Stash UI's violet touches in magenta, the two
+   colours of Overclock's glitch split */
+html[data-cb-style='overclock'] {
+  --shine: #00e5ff;
+  --violet: #ff2fd0;
+}
+
+/* Overclock's type, split as in classic Stash: Chakra Petch for titles,
+   buttons, the menu and labels, and the system face for running text.
+   Stash UI's Chinese fonts stay last for the characters neither face has. */
+html[data-cb-style='overclock'][data-cb-type] {
+  --f-text:
+    system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial,
+    'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', 'Source Han Sans SC',
+    sans-serif;
+  --f-display:
+    'Overclock Chakra', bahnschrift, 'DIN Alternate', 'Arial Narrow',
+    'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', 'Source Han Sans SC',
+    sans-serif;
+  --f-label: var(--f-display);
+}
+
+/* Share Tech Mono for the readouts, where classic Overclock uses it: tags,
+   the menu's group headings and the trail above a page title */
+html[data-cb-style='overclock'][data-cb-type]
+  :is(.kb-chip, .kb-rail-group, .kb-crumbs) {
+  font-family:
+    'Overclock Mono', ui-monospace, 'SF Mono', menlo, consolas, monospace;
+}
+
+/* Page titles, which are also the names on performer, studio and tag pages:
+   yellow caps with the red and cyan split a glitch leaves on type. Chakra
+   Petch is wider than Stash UI's condensed face, so they run smaller. */
+html[data-cb-style='overclock'][data-cb-type] .kb-h1 {
+  color: #f3e600;
+  font-size: clamp(30px, 4vw, 50px);
+  font-stretch: normal;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow:
+    -1.5px 0 0 rgb(255 47 208 / 45%),
+    1.5px 0 0 rgb(0 229 255 / 45%);
+  text-transform: uppercase;
+}
+
+/* Section titles in caps, as classic Overclock sets its headings */
+html[data-cb-style='overclock'][data-cb-type] .kb-h2 {
+  font-size: 22px;
+  font-stretch: normal;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* What shares a title's line keeps its own case and no split: the links and
+   buttons beside a section title, a performer's disambiguation and tier */
+html[data-cb-style='overclock'][data-cb-type] .kb-h2 > :not(em, b, span, i),
+html[data-cb-style='overclock'][data-cb-type] .kb-h1 :is(small, .kb-tier) {
+  letter-spacing: normal;
+  text-shadow: none;
+  text-transform: none;
+}
+
+/* The wordmark: yellow caps with the split, beside a reticle, upright
+   instead of Stash UI's slanted lettering */
+html[data-cb-style='overclock'][data-cb-type] .kb-mark {
+  -webkit-text-stroke: 0;
+  color: #f3e600;
+  font-stretch: normal;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-shadow:
+    -1.5px 0 0 rgb(255 47 208 / 65%),
+    1.5px 0 0 rgb(0 229 255 / 65%);
+  transform: none;
+}
+
+html[data-cb-style='overclock'][data-cb-type] .kb-mark:hover {
+  color: #fff46b;
+}
+
+html[data-cb-style='overclock'][data-cb-type]:not([data-rail='mini']) .kb-mark {
+  font-size: 30px;
+  line-height: 1;
+  padding-left: 32px;
+}
+
+html[data-cb-style='overclock'][data-cb-type]:not([data-rail='mini'])
+  .kb-mark::before {
+  background: #f3e600;
+  height: 22px;
+  inset: calc(50% - 11px) auto auto 0;
+  mask: url('icons/reticle.svg') center / contain no-repeat;
+  width: 22px;
+}
+
+html[data-cb-style='overclock'][data-cb-type].kb-fx .kb-mark:hover {
+  transform: scale(1.05);
+}
+
+html[data-cb-style='overclock'][data-cb-type].kb-fx .kb-mark:hover::before {
+  transform: none;
+}
+
+/*
+ * The backdrop, as in classic Overclock: a faint cyan dot grid with a cyan
+ * haze at the top right and a yellow one at the bottom left, under a static
+ * scanline. Still layers behind the page, in place of Stash UI's halftone
+ * screen and under the glow liquid glass puts behind the page; they step
+ * aside for Stash UI's own background image. Colors only keeps Stash UI's
+ * halftone.
+ */
+html[data-cb-style='overclock'][data-cb-type]:not(:has(#kb-wall:not([hidden])))
+  body::before {
+  background:
+    radial-gradient(circle, rgb(0 229 255 / 16%) 1px, transparent 1.3px) 0 0 /
+      22px 22px,
+    radial-gradient(
+      60vmax 40vmax at 100% 0%,
+      rgb(0 229 255 / 7%),
+      transparent 70%
+    ),
+    radial-gradient(
+      50vmax 40vmax at 0% 100%,
+      rgb(243 230 0 / 4%),
+      transparent 70%
+    );
+  mask-image: none;
+  opacity: 1;
+  z-index: -3;
+}
+
+html[data-cb-style='overclock'][data-cb-type]:not(:has(#kb-wall:not([hidden])))
+  body::after {
+  background: repeating-linear-gradient(
+    0deg,
+    rgb(255 255 255 / 2.2%) 0 1px,
+    transparent 1px 3px
+  );
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: fixed;
+  z-index: -3;
+}
