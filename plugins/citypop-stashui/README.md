@@ -2,7 +2,19 @@
 
 City Pop for Stash UI brings [City Pop](../citypop/README.md), a CandyBoudoir theme for Stash, to [Stash UI](https://github.com/anonym88312/stash-pmv-plugins), another author's replacement interface for Stash. Stash UI draws its own pages, so the classic theme never reaches it; this plugin adds City Pop as a style beside Stash UI's own colour presets. City Pop gives Stash UI its airbrushed 1980s dusk: night blue panels, sunset coral and pool water. Page titles, the names on performer, studio and tag pages and section titles take its brush script on a magenta drop, and the wordmark turns to chrome script beside the striped sun. Behind the page sits its dusk of stars and palms, with the setting sun rising only in Settings, where no list crosses the horizon. Turn on Colors only to keep Stash UI's own fonts, lettering and backdrop. Stash UI keeps its own layout, cards and motifs.
 
-City Pop for Stash UI is incubating: it is built and tested here and not yet in the plugin source.
+## Install
+
+City Pop for Stash UI comes from the CandyBoudoir plugin source, which carries every CandyBoudoir plugin.
+
+1. In Stash, open Settings > Plugins > Available Plugins and click Add source.
+2. Fill in the source:
+   - Name: `CandyBoudoir`
+   - Source URL: `https://candyboudoir.github.io/index.yml`
+   - Local path: `candyboudoir`
+3. Expand the CandyBoudoir source, tick City Pop for Stash UI and click Install.
+4. Reload Stash UI and pick City Pop, as below.
+
+If you run a Stash develop build, use `https://candyboudoir.github.io/develop/index.yml` as the source URL instead. Add one of the two sources, never both: they carry the same plugins.
 
 ## What you need
 

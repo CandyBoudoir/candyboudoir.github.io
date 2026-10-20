@@ -18,9 +18,7 @@ export const id = 'StashUI-Overclock'
 export const title = 'Overclock for Stash UI'
 // The line about the plugin in the repo's README (scripts/readme.mjs).
 export const summary =
-  "Overclock in Stash UI, another author's replacement interface: its acid yellow, glitch-split titles and HUD backdrop, picked under Stash UI's Colors."
-// Built and tested, never published or released, until it is ready.
-export const incubating = true
+  'Brings the Classic Stash theme, Overclock, to Stash UI: its acid yellow, glitch-split titles and HUD backdrop. Needs Stash UI.'
 // Paths whose changes alter the plugin zip: this folder's sources and the
 // shared kit. Tests and docs are left out so changing them offers users no
 // update.

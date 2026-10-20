@@ -18,9 +18,7 @@ export const id = 'StashUI-CityPop'
 export const title = 'City Pop for Stash UI'
 // The line about the plugin in the repo's README (scripts/readme.mjs).
 export const summary =
-  "City Pop in Stash UI, another author's replacement interface: its dusk colours, brush-script titles and backdrop, picked under Stash UI's Colors."
-// Built and tested, never published or released, until it is ready.
-export const incubating = true
+  'Brings the Classic Stash theme, City Pop, to Stash UI: its dusk colours, brush-script titles and backdrop of stars and palms. Needs Stash UI.'
 // Paths whose changes alter the plugin zip: this folder's sources and the
 // shared kit. Tests and docs are left out so changing them offers users no
 // update.
