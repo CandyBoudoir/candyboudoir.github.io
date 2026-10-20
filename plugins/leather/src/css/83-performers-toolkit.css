@@ -409,7 +409,6 @@
     .pt-pc,
     .pt-thumb,
     .pt-srimg,
-    .pt-picthumb,
     .pt-sccov,
     .pt-cimg,
     .pt-mcov,
@@ -575,7 +574,7 @@
 }
 
 /* Links read as Stash's: the text with a dashed red underline, red on
-   hover. O's are thread, like the flogger. */
+   hover */
 .leather-restyle-toolkit #root :is(.pt-link, a.pt-pill),
 .leather-restyle-toolkit #pt-toast .pt-link {
   color: var(--leather-text);
@@ -604,10 +603,6 @@
 
 .leather-restyle-toolkit #root .pt-c-bl {
   color: var(--leather-steel);
-}
-
-.leather-restyle-toolkit #root :is(.pt-bb, .pt-kb) {
-  background: var(--leather-thread);
 }
 
 /* Good and bad in Leather's status tones */
