@@ -8,6 +8,7 @@ import {
   openLook,
   pickedStyle,
   rootVar,
+  savedColorsOnly,
   stashUIStyleSpecs,
   styleButton,
   titleFont,
@@ -64,6 +65,7 @@ test.describe('beside Overclock for Stash UI', () => {
     // City Pop's Colors only leaves Overclock's type alone
     await styleButton(page, CITY_POP).click()
     await colorsOnlySwitch(page, CITY_POP).locator('.kb-switch').click()
+    await expect.poll(() => savedColorsOnly(CITY_POP)).toBe(true)
     await styleButton(page, OVERCLOCK).click()
     expect(await titleFont(page)).toContain(OVERCLOCK.title)
   })
