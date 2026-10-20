@@ -25,11 +25,15 @@ If you run a Stash develop build, use `https://candyboudoir.github.io/develop/in
 
 ## The page
 
-New Releases adds an entry to Stash's menu, after Tags, and its page lives at `/plugins/newreleases`. Releases show as Stash's scene cards: the cover, the studio, the length, the date, the performers, the description and up to six tags. The cover and the title open the release on the studio's page in a new tab. The page pages as Stash's lists do, with Stash's pagination above and below the cards and its page sizes, 40 to a page unless you pick another.
+New Releases adds an entry to Stash's menu, after Tags, and its page lives at `/plugins/newreleases`. Releases show as Stash's scene cards: the cover, the studio, the length, the date, the performers, the description and up to six tags. The cover and the title open the release on the studio's page in a new tab. The page sorts and pages as Stash's lists do, with Stash's sort menu and direction button, Stash's pagination above and below the cards, and its page sizes, 40 to a page unless you pick another.
+
+The sorts are Stash's scene sorts that a release has: Date, Duration, Performer Count, Random, Studio, Tag Count and Title. Found sorts by when a check first found each release, which orders releases within a day, since release dates carry no time. Date, newest first, is the default. Releases with no length, and those found before New Releases 0.2.0 kept the time, go last under Duration and Found in either direction. Random keeps its seed in the address, as Stash's lists do, and Reshuffle picks another.
+
+A release its studio's latest check found carries a New badge until the next check of that studio. A studio's first check, such as after you favourite it, finds releases that may be days old, so they carry no badge.
 
 Releases you already have never show. A release counts as yours when a scene in your library has its stash-box StashID, or has its address and belongs to one of your favourite studios.
 
-The filters pick studios, performers and tags. A release shows when it is from any of the studios you pick, has any of the performers and all of the tags, and has none of the performers or tags you leave out: each name appears twice in its list, under With and Without. A performer or tag on a card adds itself to the filters when you click it. The filters and the page live in the page's address, as Stash's lists keep theirs, so a filtered page can be bookmarked.
+The filters pick studios, performers and tags. A release shows when it is from any of the studios you pick, has any of the performers and all of the tags, and has none of the performers or tags you leave out: each name appears twice in its list, under With and Without. A performer or tag on a card adds itself to the filters when you click it. The filters, the sort and the page live in the page's address, as Stash's lists keep theirs, so a filtered page can be bookmarked. While a performer or tag menu is open, its names hold still as a check adds releases.
 
 Performers and tags carry your names for them where you have them. New Releases matches each one by its StashID on that stash-box, then by its name or one of its aliases, ignoring case, accents and punctuation. The rest keep the stash-box's name.
 
@@ -37,7 +41,7 @@ Cards show no trailer. Stash plays video only from its own address, and plugins 
 
 ## The check
 
-A task, Check for new releases, asks the stash-boxes for each favourite studio's newest releases and keeps those dated within the last 48 hours. Each stays in the catalog for 48 hours more and leaves it once it is four days old, so the page holds what came out this week and nothing older. The page starts the check when its catalog is a day old or when you have favourited a studio since the last one, shows what it has meanwhile, and adds what each studio brings at the end of the list, so nothing you are looking at moves. The check appears in Stash's job list, and Settings > Tasks can start it too.
+A task, Check for new releases, asks the stash-boxes for each favourite studio's newest releases and keeps those dated within the last 48 hours. Each stays in the catalog for 48 hours more and leaves it once it is four days old, so the page holds what came out this week and nothing older. The page starts the check when its catalog is a day old or when you have favourited a studio since the last one, and shows what it has meanwhile. Releases the check finds while the page is open go to a Just in row above the list, newest first, in the row Stash's front page uses, and the filters apply to it too. The list keeps the releases and the order it opened with, and takes the new ones on your next visit. When the page opens with nothing to show, as on its first visit, the list takes each release as it arrives, in order. The check appears in Stash's job list, and Settings > Tasks can start it too.
 
 The check goes slowly and asks as little as it can:
 
@@ -59,4 +63,4 @@ The check keeps what it finds in `catalog/catalog.json`, in the plugin's own fol
 
 ## Themes
 
-The page uses Stash's own markup: its scene cards, list toolbar, selects, badges and loading indicator. Each CandyBoudoir theme restyles it the way it restyles Stash, with its own loader while the page loads.
+The page uses Stash's own markup: its scene cards, list toolbar, selects, sort menu, front-page row, badges and loading indicator. Each CandyBoudoir theme restyles it the way it restyles Stash, with its own loader while the page loads.

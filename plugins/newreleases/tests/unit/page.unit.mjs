@@ -1,6 +1,7 @@
 // The page's pure parts: naming releases with the user's own tags and
-// performers, hiding the ones they have, the filters and page in the
-// address, the order releases arrive in, and when the page starts a check.
+// performers, hiding the ones they have, the filters, order and page in the
+// address, the sorts, which releases are New, where a running check's
+// arrivals go, and when the page starts a check.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
@@ -21,7 +22,14 @@ import {
   parseFilters,
 } from '../../src/js/data/filters.js'
 import {
-  arrange,
+  isNew,
+  newestFirst,
+  newSince,
+  sortReleases,
+  SORTS,
+  splitArrivals,
+} from '../../src/js/data/sort.js'
+import {
   nameKey,
   ownedIndex,
   performerIndex,
@@ -185,13 +193,16 @@ test('filters and the page live in the address, as Stash keeps its lists', () =>
       { key: '~nougat nova', exclude: true },
     ],
     tags: [{ key: '10', exclude: false }],
+    sortBy: 'title',
+    sortDir: 'asc',
+    seed: null,
     page: 3,
     perPage: 120,
   }
   const search = formatFilters(f, '?other=1')
   assert.equal(
     search,
-    '?other=1&studio=1&studio=2&performer=20&performer=-%7Enougat+nova&tag=10&p=3&perPage=120',
+    '?other=1&studio=1&studio=2&performer=20&performer=-%7Enougat+nova&tag=10&sortby=title&sortdir=asc&p=3&perPage=120',
   )
   assert.deepEqual(parseFilters(search), f)
   assert.deepEqual(parseFilters(''), EMPTY)
@@ -199,6 +210,9 @@ test('filters and the page live in the address, as Stash keeps its lists', () =>
     studios: [],
     performers: [],
     tags: [],
+    sortBy: 'date',
+    sortDir: 'desc',
+    seed: null,
     page: 1,
     perPage: 40,
   })
@@ -206,6 +220,181 @@ test('filters and the page live in the address, as Stash keeps its lists', () =>
   // Nonsense falls back to Stash's defaults, and a page size to at most 1000
   assert.deepEqual(parseFilters('?p=0&perPage=x'), EMPTY)
   assert.equal(parseFilters('?perPage=5000').perPage, 1000)
+})
+
+test('the order lives in the address as Stash writes it', () => {
+  const sort = (search) => {
+    const { sortBy, sortDir, seed } = parseFilters(search)
+    return [sortBy, sortDir, seed]
+  }
+  // Newest first is the default and leaves the address alone
+  assert.deepEqual(sort(''), ['date', 'desc', null])
+  assert.equal(formatFilters({ ...EMPTY }), '')
+  assert.equal(
+    formatFilters({ ...EMPTY, sortDir: 'asc' }),
+    '?sortby=date&sortdir=asc',
+  )
+  // Stash's rule: no sortdir is ascending, except for the date
+  assert.deepEqual(sort('?sortby=title'), ['title', 'asc', null])
+  assert.deepEqual(sort('?sortby=date'), ['date', 'desc', null])
+  assert.deepEqual(sort('?sortby=duration&sortdir=desc'), [
+    'duration',
+    'desc',
+    null,
+  ])
+  // Random carries its seed in sortby
+  assert.deepEqual(sort('?sortby=random_12345678&sortdir=asc'), [
+    'random',
+    'asc',
+    12345678,
+  ])
+  assert.equal(
+    formatFilters({ ...EMPTY, sortBy: 'random', sortDir: 'asc', seed: 42 }),
+    '?sortby=random_42&sortdir=asc',
+  )
+  // A sort the page does not offer is the default one
+  assert.deepEqual(sort('?sortby=o_counter'), ['date', 'desc', null])
+})
+
+// Releases as sort() sees them, with what each sort compares
+const rel = (key, f = {}) => ({
+  key,
+  title: key,
+  date: '2026-10-18',
+  found: null,
+  duration: null,
+  studio: { name: 'Studio' },
+  performers: [],
+  tags: [],
+  ...f,
+})
+const keys = (list) => list.map((r) => r.key)
+
+test('sorts as Stash names them, listed by name, plus Found', () => {
+  assert.deepEqual(
+    SORTS.map((s) => s.label),
+    [
+      'Date',
+      'Duration',
+      'Found',
+      'Performer Count',
+      'Random',
+      'Studio',
+      'Tag Count',
+      'Title',
+    ],
+  )
+  const list = [
+    rel('a', {
+      title: 'Apple 10',
+      date: '2026-10-17',
+      duration: 600,
+      found: '2026-10-19T08:00:00Z',
+      studio: { name: 'Zebra' },
+      performers: [{}],
+      tags: [{}, {}, {}],
+    }),
+    rel('b', {
+      title: 'apple 9',
+      date: '2026-10-19',
+      duration: 1200,
+      found: '2026-10-18T08:00:00Z',
+      studio: { name: 'Mango' },
+      performers: [{}, {}, {}],
+      tags: [{}],
+    }),
+    rel('c', {
+      title: 'Cherry',
+      date: '2026-10-18',
+      duration: 900,
+      found: '2026-10-20T08:00:00Z',
+      studio: { name: 'apple' },
+      performers: [{}, {}],
+      tags: [{}, {}],
+    }),
+  ]
+  const by = (sortBy, sortDir = 'asc') =>
+    keys(sortReleases(list, { sortBy, sortDir, seed: null }))
+  assert.deepEqual(by('date', 'desc'), ['b', 'c', 'a'])
+  assert.deepEqual(by('date'), ['a', 'c', 'b'])
+  assert.deepEqual(by('duration'), ['a', 'c', 'b'])
+  assert.deepEqual(by('found', 'desc'), ['c', 'a', 'b'])
+  assert.deepEqual(by('performer_count'), ['a', 'c', 'b'])
+  assert.deepEqual(by('tag_count', 'desc'), ['a', 'c', 'b'])
+  // Names by Stash's natural order: case aside, 9 before 10
+  assert.deepEqual(by('studio'), ['c', 'b', 'a'])
+  assert.deepEqual(by('title'), ['b', 'a', 'c'])
+  assert.deepEqual(by('title', 'desc'), ['c', 'a', 'b'])
+})
+
+test('ties go newest first, then by title; nothing to sort by goes last', () => {
+  const list = [
+    rel('old', { date: '2026-10-17', duration: 300 }),
+    rel('none-b', { title: 'B', date: '2026-10-19' }),
+    rel('new', { date: '2026-10-19', duration: 300 }),
+    rel('none-a', { title: 'A', date: '2026-10-18' }),
+  ]
+  for (const sortDir of ['asc', 'desc'])
+    assert.deepEqual(
+      keys(sortReleases(list, { sortBy: 'duration', sortDir })),
+      ['new', 'old', 'none-b', 'none-a'],
+    )
+  // Found before the plugin kept it: last either way
+  const found = [
+    rel('kept'),
+    rel('later', { found: '2026-10-20T00:00:00Z' }),
+    rel('sooner', { found: '2026-10-19T00:00:00Z' }),
+  ]
+  assert.deepEqual(
+    keys(sortReleases(found, { sortBy: 'found', sortDir: 'desc' })),
+    ['later', 'sooner', 'kept'],
+  )
+  assert.deepEqual(
+    keys(sortReleases(found, { sortBy: 'found', sortDir: 'asc' })),
+    ['sooner', 'later', 'kept'],
+  )
+  assert.equal(newestFirst(rel('x'), rel('x')), 0)
+})
+
+test('random holds its order for a seed and shuffles for another', () => {
+  const list = Array.from({ length: 30 }, (_, i) => rel(`k${i}`))
+  const order = (seed, sortDir = 'asc') =>
+    keys(sortReleases(list, { sortBy: 'random', sortDir, seed }))
+  assert.deepEqual(order(1234), order(1234))
+  assert.notDeepEqual(order(1234), order(5678))
+  assert.notDeepEqual(order(1234), keys(list))
+  assert.deepEqual(order(1234, 'desc'), [...order(1234)].reverse())
+  assert.deepEqual([...order(1234)].sort(), [...keys(list)].sort())
+})
+
+test('New: found by its studio’s latest check when the page opened, or since; never by a studio’s first check', () => {
+  const since = newSince({
+    run: { started: '2026-10-20T09:00:00Z' },
+    studios: {
+      1: { asked: '2026-10-20T10:00:00Z' },
+      // Asked before the plugin kept the time
+      2: { checked: '2026-10-20T09:05:00Z' },
+    },
+  })
+  const at = (studio, found, first) =>
+    isNew(rel('a', { studio: { id: studio }, found, first }), since)
+  assert.equal(at('1', '2026-10-20T10:00:00Z'), true)
+  assert.equal(at('1', '2026-10-20T10:30:00Z'), true)
+  assert.equal(at('1', '2026-10-19T10:00:00Z'), false)
+  // Another studio's check does not end this one's New
+  assert.equal(at('2', '2026-10-20T09:01:00Z'), true)
+  assert.equal(at('2', '2026-10-20T08:59:00Z'), false)
+  // A studio's first check, and releases found before the plugin kept it
+  assert.equal(at('1', '2026-10-20T10:30:00Z', true), false)
+  assert.equal(at('1', null), false)
+  // No catalog when the page opened
+  assert.equal(
+    isNew(
+      rel('a', { studio: { id: '1' }, found: '2026-10-20T10:30:00Z' }),
+      newSince(null),
+    ),
+    false,
+  )
 })
 
 test('filters: any of the studios and performers, all of the tags, none left out, none you have', () => {
@@ -251,36 +440,41 @@ test('a page of the list, past the last page showing the last', () => {
   })
 })
 
-test('releases a running check adds go at the end, and nothing moves', () => {
-  const r = (key, date) => ({ key, date })
-  const first = arrange([r('b', '2026-10-18'), r('a', '2026-10-17')])
-  assert.deepEqual(
-    first.list.map((x) => x.key),
-    ['b', 'a'],
-  )
-  // Newer releases arrive: they follow, newest first among themselves
-  const next = arrange(
+test('the list keeps what the page opened with; what arrives after goes to Just in, newest first', () => {
+  const opened = new Set(['a', 'b'])
+  const first = splitArrivals([rel('b'), rel('a')], opened)
+  assert.deepEqual(keys(first.list), ['b', 'a'])
+  assert.deepEqual(first.justIn, [])
+  // Two arrive together: newest release first between them
+  const next = splitArrivals(
     [
-      r('d', '2026-10-19'),
-      r('c', '2026-10-19'),
-      r('b', '2026-10-18'),
-      r('a', '2026-10-17'),
+      rel('a'),
+      rel('c', { date: '2026-10-18' }),
+      rel('b'),
+      rel('d', { date: '2026-10-19' }),
     ],
-    first.ranks,
+    opened,
+    first.arrived,
   )
-  assert.deepEqual(
-    next.list.map((x) => x.key),
-    ['b', 'a', 'd', 'c'],
+  assert.deepEqual(keys(next.list), ['a', 'b'])
+  assert.deepEqual(keys(next.justIn), ['d', 'c'])
+  // A later arrival goes in front, and the earlier ones keep their places
+  const after = splitArrivals(
+    [
+      rel('c', { date: '2026-10-18' }),
+      rel('e', { date: '2026-10-01' }),
+      rel('d', { date: '2026-10-19' }),
+      rel('a'),
+      rel('b'),
+    ],
+    opened,
+    next.arrived,
   )
-  // A release that leaves takes nothing else's place
-  const after = arrange(
-    [r('d', '2026-10-19'), r('a', '2026-10-17'), r('e', '2026-10-16')],
-    next.ranks,
-  )
-  assert.deepEqual(
-    after.list.map((x) => x.key),
-    ['a', 'd', 'e'],
-  )
+  assert.deepEqual(keys(after.justIn), ['e', 'd', 'c'])
+  // A page that opened with nothing takes everything into its list
+  const empty = splitArrivals([rel('a'), rel('b')], null)
+  assert.deepEqual(keys(empty.list), ['a', 'b'])
+  assert.deepEqual(empty.justIn, [])
 })
 
 test('the filter options count the releases you do not have, most first', () => {
@@ -306,6 +500,25 @@ test('the filter options count the releases you do not have, most first', () => 
 test('a release carries its description', () => {
   assert.equal(present()[0].description, 'The newest one.')
   assert.equal(present()[1].description, null)
+})
+
+test('a release carries when a check found it, and whether that was its studio’s first', () => {
+  const stamped = {
+    releases: [
+      { ...catalog.releases[1], found: '2026-10-20T10:00:00Z', first: true },
+      { ...catalog.releases[2] },
+    ],
+  }
+  const [newest, box] = presentReleases(stamped, {
+    studios,
+    tags,
+    performers,
+    owned,
+  })
+  assert.deepEqual(
+    [newest.found, newest.first, box.found, box.first],
+    ['2026-10-20T10:00:00Z', true, null, false],
+  )
 })
 
 test('studios with no StashID on a stash-box Stash knows are listed apart', () => {

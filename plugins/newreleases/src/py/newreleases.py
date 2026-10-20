@@ -17,7 +17,8 @@ answers for all of its studios in one queryScenes request.
 
 The catalog is a short window: a check keeps the releases dated within the
 last 48 hours, and each stays until it is four days old, so the page shows
-what came out this week and nothing older.
+what came out this week and nothing older. Each release keeps when a check
+first found it, which the page sorts by and marks New from.
 
 Polite by design: one request at a time with a pause between them, the same
 address for the same studio on every install, an identifying User-Agent and
@@ -766,18 +767,44 @@ class Run:
         state['error'] = 'stopped: %s' % reason
         log('w', '%s: %s; asking it again after %s' % (service.name, reason, state['pausedUntil']))
 
-    def set_releases(self, studio_id, releases):
+    def set_releases(self, studio_id, releases, asked=None):
         """A studio's fresh releases, plus those of its releases the catalog
-        still holds that the answer no longer lists."""
+        still holds that the answer no longer lists.
+
+        Each release keeps when a check first found it (`found`: when that
+        check asked its studio, `asked`), which the page sorts by and marks
+        New from. Those a studio's first check finds carry `first`, since
+        they are new to the catalog, not new releases. A release kept from
+        before the plugin stamped them has neither. With `asked`, the studio
+        keeps it too: the page marks New what its latest check found."""
+        entry = self.catalog['studios'][studio_id]
+        # A studio's first answer: no check has kept a count for it
+        first = 'count' not in entry and 'asked' not in entry
+        now = asked or iso(self.clock())
+        if asked:
+            entry['asked'] = asked
         new = fresh(releases, self.clock())
         ids = {r['id'] for r in new}
         others = []
         held = []
+        before = {}
         for r in self.catalog['releases']:
             if r.get('studio') != studio_id:
                 others.append(r)
             elif r.get('id') not in ids:
                 held.append(r)
+            else:
+                before[r['id']] = r
+        for r in new:
+            old = before.get(r['id'])
+            if old is None:
+                r['found'] = now
+                if first:
+                    r['first'] = True
+            else:
+                for k in ('found', 'first'):
+                    if k in old:
+                        r[k] = old[k]
         self.catalog['releases'] = others + held + new
         return len(held) + len(new)
 
@@ -788,10 +815,11 @@ class Run:
         entry['stashId'] = stash_id
         if entry.get('siteId') is None:
             entry['siteId'] = service.site_id(stash_id)
+        asked = iso(self.clock())
         scenes = service.scenes(entry['siteId'])
         releases = [tpdb_release(s, service.endpoint, studio['id']) for s in scenes]
         releases = [r for r in releases if r]
-        entry['count'] = self.set_releases(studio['id'], releases)
+        entry['count'] = self.set_releases(studio['id'], releases, asked)
         return releases
 
     def refresh(self):
@@ -924,6 +952,7 @@ class Run:
         by_id = {}
         for studio, stash_id in items:
             by_id[stash_id] = studio['id']
+        asked = iso(self.clock())
         scenes = service.scenes(sorted(by_id))
         found = {sid: [] for sid in by_id.values()}
         for scene in scenes:
@@ -936,7 +965,7 @@ class Run:
         now = iso(self.clock())
         for studio_id, releases in found.items():
             entry = self.catalog['studios'][studio_id]
-            entry['count'] = self.set_releases(studio_id, releases)
+            entry['count'] = self.set_releases(studio_id, releases, asked)
             entry['checked'] = now
             entry.pop('error', None)
             entry.pop('quiet', None)
