@@ -1,12 +1,28 @@
 // The filters, in Stash's list toolbar with Stash's own react-select styling
 // (className and classNamePrefix "react-select", as Stash's selects use), so
 // each theme styles them as it styles Stash's. Performers and tags offer each
-// name twice, under With and Without. The page size is Stash's select, with
-// Stash's sizes.
-import { Bootstrap, ReactSelect } from '../api.js'
+// name twice, under With and Without. The order is Stash's sort menu and
+// direction button, and the page size is Stash's select, with Stash's sizes.
+import {
+  Bootstrap,
+  components,
+  FontAwesomeSolid,
+  React,
+  ReactSelect,
+} from '../api.js'
 import { EMPTY, isFiltered, PAGE_SIZES } from '../data/filters.js'
+import { newSeed, SORTS } from '../data/sort.js'
 
-const { Button, Form } = Bootstrap
+const {
+  Button,
+  ButtonGroup,
+  Dropdown,
+  Form,
+  InputGroup,
+  OverlayTrigger,
+  Tooltip,
+} = Bootstrap
+const { faCaretDown, faCaretUp, faRandom } = FontAwesomeSolid
 const Select = ReactSelect.default ?? ReactSelect
 
 // Stash's own option colour: its menus are white whatever the theme.
@@ -46,8 +62,12 @@ function StudioFilter({ favourites, value, onChange }) {
 }
 
 // One select for a performer or tag filter: With and Without groups, and a
-// pick in one group drops the same name from the other.
+// pick in one group drops the same name from the other. While its menu is
+// open it keeps the names it opened with, so a running check's arrivals
+// never move them under the pointer.
 function PickFilter({ id, label, options, value, onChange }) {
+  const [opened, setOpened] = React.useState(null)
+  const listed = opened ?? options
   const byKey = new Map(options.map((o) => [o.key, o]))
   const option = (o, exclude) => ({
     value: `${exclude ? '-' : ''}${o.key}`,
@@ -57,8 +77,8 @@ function PickFilter({ id, label, options, value, onChange }) {
     count: o.count,
   })
   const groups = [
-    { label: 'With', options: options.map((o) => option(o, false)) },
-    { label: 'Without', options: options.map((o) => option(o, true)) },
+    { label: 'With', options: listed.map((o) => option(o, false)) },
+    { label: 'Without', options: listed.map((o) => option(o, true)) },
   ]
   const selected = value.map((p) =>
     option(
@@ -73,6 +93,8 @@ function PickFilter({ id, label, options, value, onChange }) {
       aria-label={label}
       placeholder={label}
       options={groups}
+      onMenuOpen={() => setOpened(options)}
+      onMenuClose={() => setOpened(null)}
       value={selected}
       getOptionLabel={(o) => o.name}
       formatOptionLabel={(o, { context }) =>
@@ -99,6 +121,70 @@ function PickFilter({ id, label, options, value, onChange }) {
         onChange(out)
       }}
     />
+  )
+}
+
+// Stash's sort menu and direction button (List/ListFilter.tsx's
+// SortBySelect, which Stash does not hand to plugins), with its reshuffle
+// button under Random. As in Stash, a new sort keeps the direction, and
+// Random and Reshuffle take a new seed.
+function SortBy({ sortBy, sortDir, onChange }) {
+  const { Icon } = components
+  const icon = (i) => (Icon ? <Icon icon={i} /> : null)
+  const current = SORTS.find((s) => s.value === sortBy)
+  const ascending = sortDir === 'asc'
+  const pick = (value) =>
+    onChange({
+      sortBy: value,
+      seed: value === 'random' ? newSeed() : null,
+    })
+  return (
+    <Dropdown as={ButtonGroup} className="sort-by-select">
+      <InputGroup.Prepend>
+        <Dropdown.Toggle variant="secondary">{current?.label}</Dropdown.Toggle>
+      </InputGroup.Prepend>
+      <Dropdown.Menu className="bg-secondary text-white">
+        {SORTS.map((s) => (
+          <Dropdown.Item
+            key={s.value}
+            className="bg-secondary text-white"
+            eventKey={s.value}
+            data-value={s.value}
+            onSelect={() => pick(s.value)}
+          >
+            {s.label}
+          </Dropdown.Item>
+        ))}
+      </Dropdown.Menu>
+      <OverlayTrigger
+        overlay={
+          <Tooltip id="newreleases-sort-direction">
+            {ascending ? 'Ascending' : 'Descending'}
+          </Tooltip>
+        }
+      >
+        <Button
+          variant="secondary"
+          aria-label={ascending ? 'Ascending' : 'Descending'}
+          onClick={() => onChange({ sortDir: ascending ? 'desc' : 'asc' })}
+        >
+          {icon(ascending ? faCaretUp : faCaretDown)}
+        </Button>
+      </OverlayTrigger>
+      {sortBy === 'random' ? (
+        <OverlayTrigger
+          overlay={<Tooltip id="newreleases-sort-reshuffle">Reshuffle</Tooltip>}
+        >
+          <Button
+            variant="secondary"
+            aria-label="Reshuffle"
+            onClick={() => onChange({ seed: newSeed() })}
+          >
+            {icon(faRandom)}
+          </Button>
+        </OverlayTrigger>
+      ) : null}
+    </Dropdown>
   )
 }
 
@@ -134,7 +220,8 @@ export function Toolbar({
   filters,
   onChange,
 }) {
-  // A new filter starts again at its first page; the page size stays
+  // A new filter or order starts again at its first page; the page size
+  // stays
   const set = (part) => onChange({ ...filters, ...part, page: 1 })
   return (
     <div className="filtered-list-toolbar newreleases-toolbar">
@@ -163,6 +250,11 @@ export function Toolbar({
           onChange={(tags) => set({ tags })}
         />
       </div>
+      <SortBy
+        sortBy={filters.sortBy}
+        sortDir={filters.sortDir}
+        onChange={set}
+      />
       <PageSize
         value={filters.perPage}
         onChange={(perPage) => set({ perPage })}
@@ -171,7 +263,15 @@ export function Toolbar({
         <Button
           variant="secondary"
           className="newreleases-clear"
-          onClick={() => onChange({ ...EMPTY, perPage: filters.perPage })}
+          onClick={() =>
+            onChange({
+              ...EMPTY,
+              sortBy: filters.sortBy,
+              sortDir: filters.sortDir,
+              seed: filters.seed,
+              perPage: filters.perPage,
+            })
+          }
         >
           Clear filters
         </Button>

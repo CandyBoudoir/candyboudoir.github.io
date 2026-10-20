@@ -1,13 +1,14 @@
 // Checks New Releases in Stash with its demo (tests/stash.mjs): the first
-// visit starts the check and the page fills in as the task saves, adding
-// each studio's releases at the end; the task asks the mock ThePornDB
-// politely and keeps the last 48 hours; cards are Stash's scene cards with
-// landscape covers and descriptions, linking to the studios' own pages
-// without tracking; releases carry the user's names and the ones they have
-// never show; the filters and Stash's pagination live in the address; a
-// second visit asks nothing, a newly favourited studio gets a check of its
-// own, and the page explains studios with no link and a Stash with no
-// stash-box.
+// visit starts the check and the list fills in, in order, as the task saves
+// each studio; the task asks the mock ThePornDB politely and keeps the last
+// 48 hours; cards are Stash's scene cards with landscape covers and
+// descriptions, linking to the studios' own pages without tracking;
+// releases carry the user's names and the ones they have never show; the
+// filters, Stash's sorts and pagination live in the address; a second visit
+// asks nothing, a newly favourited studio gets a check of its own, a check
+// while the page is open puts what it finds in Just in, New, and leaves the
+// list still, and the page explains studios with no link and a Stash with
+// no stash-box.
 import { expect, test } from '@playwright/test'
 import {
   HELD_BY_ID,
@@ -18,9 +19,12 @@ import {
   TEST_SETTINGS,
   TPDB_SITES,
   TPDB_STASH_BOX,
+  ageCatalog,
   clearTpdbRequests,
   gql,
+  lateRelease,
   openFilled,
+  publishLate,
   queuedChecks,
   setBoxes,
   setPluginSettings,
@@ -29,7 +33,15 @@ import {
   tpdbFresh,
   tpdbRequests,
   waitForChecks,
+  withdrawLate,
 } from './stash.mjs'
+import { readFile } from 'node:fs/promises'
+import { SORTS } from '../src/js/data/sort.js'
+
+// The version the manifest gives, which the task names itself with
+const VERSION = /^version: (.+)$/m.exec(
+  await readFile(new URL('../src/NewReleases.yml', import.meta.url), 'utf8'),
+)[1]
 import { ENDPOINT } from '../../../tests/stash/stashbox-data.mjs'
 
 test.describe.configure({ mode: 'serial' })
@@ -44,23 +56,36 @@ test.afterAll(async () => {
   await tearDownNewReleases()
 })
 
+// The list's cards, below Just in
 const card = (page, title) =>
-  page.locator('.newreleases-card', {
+  page.locator('.newreleases-grid .newreleases-card', {
     has: page.locator('.card-section-title', { hasText: title }),
   })
 const titles = (page) =>
-  page.locator('.newreleases-card .card-section-title').allInnerTexts()
+  page
+    .locator('.newreleases-grid .newreleases-card .card-section-title')
+    .allInnerTexts()
+// Just in's cards, without the copies Stash's slider makes to loop
+const justInTitles = (page) =>
+  page
+    .locator(
+      '.newreleases-just-in .slick-slide:not(.slick-cloned) .card-section-title',
+    )
+    .allInnerTexts()
 
+// Names in Stash's natural order, case aside
+const byName = (a, b) =>
+  a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
 const newestFirst = (list) =>
   [...list].sort(
-    (a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title),
+    (a, b) => b.date.localeCompare(a.date) || byName(a.title, b.title),
   )
 const fresh = (site) =>
   newestFirst(
     tpdbFresh(site).filter((s) => s !== HELD_BY_ID && s !== HELD_BY_URL),
   ).map((s) => s.title)
 
-test('the first visit starts a check with Stash’s loader and adds each studio at the end', async ({
+test('the first visit starts a check with Stash’s loader and fills the list in order as each studio arrives', async ({
   page,
 }) => {
   const errors = []
@@ -74,10 +99,12 @@ test('the first visit starts a check with Stash’s loader and adds each studio 
   ).toBeAttached({ timeout: 15_000 })
   expect(await queuedChecks()).toHaveLength(1)
   await expect(page.locator('.newreleases-status')).toContainText(/Checking/)
-  // Watch the list while the check runs: what is there never moves
+  // Watch the list while the check runs: a page that opened with nothing
+  // takes every arrival into its list, in order, and has no Just in
   const seen = []
   while ((await queuedChecks()).length) {
     seen.push(await titles(page))
+    await expect(page.locator('.newreleases-just-in')).toHaveCount(0)
     await page.waitForTimeout(200)
   }
   await expect(page.locator('.newreleases-status')).toHaveText(
@@ -85,22 +112,28 @@ test('the first visit starts a check with Stash’s loader and adds each studio 
     { timeout: 15_000 },
   )
   await setPluginSettings(PLUGIN_ID, TEST_SETTINGS)
-  const final = await titles(page)
-  seen.push(final)
-  for (let i = 1; i < seen.length; i++)
-    expect(seen[i].slice(0, seen[i - 1].length)).toEqual(seen[i - 1])
   // Stash lists favourites by name, so Gumball Gallery's came in first
-  expect(final).toEqual([
-    ...fresh(TPDB_SITES.gumball),
-    ...fresh(TPDB_SITES.lollipop),
-  ])
+  const gumball = new Set(fresh(TPDB_SITES.gumball))
+  expect(
+    seen.some((list) => list.length && list.every((t) => gumball.has(t))),
+  ).toBe(true)
+  for (const list of seen)
+    expect(list).toEqual(
+      newestFirst(SHOWN.filter((s) => list.includes(s.title))).map(
+        (s) => s.title,
+      ),
+    )
+  const order = newestFirst(SHOWN).map((s) => s.title)
+  expect(await titles(page)).toEqual(order)
   await expect(page.locator('.paginationIndex')).toHaveText(
     `1-${SHOWN.length} of ${SHOWN.length}`,
   )
-  // A new visit shows them newest first
+  // A studio's first check finds what is new to the catalog, not new
+  // releases: nothing is New
+  await expect(page.locator('.newreleases-new-badge')).toHaveCount(0)
   await page.reload()
   await expect(page.locator('.newreleases-card')).toHaveCount(SHOWN.length)
-  expect(await titles(page)).toEqual(newestFirst(SHOWN).map((s) => s.title))
+  expect(await titles(page)).toEqual(order)
   expect(errors).toEqual([])
 })
 
@@ -117,7 +150,9 @@ test('the check asked ThePornDB one request at a time, with its name and the use
   for (const r of requests) {
     expect(r.authorization).toBe(`Bearer ${TPDB_STASH_BOX.api_key}`)
     expect(r.userAgent).toMatch(
-      /^NewReleases\/0\.1\.0 \(Stash plugin; \+https:\/\/github\.com\/CandyBoudoir\//,
+      new RegExp(
+        `^NewReleases/${VERSION.replaceAll('.', '\\.')} \\(Stash plugin; \\+https://github\\.com/CandyBoudoir/`,
+      ),
     )
   }
   for (let i = 1; i < requests.length; i++)
@@ -129,6 +164,7 @@ test('Stash renders the elements the page builds on', async ({ page }) => {
   for (const selector of [
     '.top-nav .newreleases-nav .nav-menu-icon',
     '.filtered-list-toolbar',
+    '.filtered-list-toolbar .sort-by-select .dropdown-toggle',
     '.react-select__control',
     '.page-size-selector select',
     '.pagination-index-container .paginationIndex',
@@ -354,6 +390,150 @@ test('a newly favourited studio gets a check on the next visit', async ({
   } finally {
     await favourite(false)
   }
+})
+
+test('sorts as Stash’s lists do, with its sort menu and direction, kept in the address', async ({
+  page,
+}) => {
+  await openFilled(page)
+  const search = () => new URL(page.url()).search
+  const select = page.locator('.filtered-list-toolbar .sort-by-select')
+  const toggle = select.locator('.dropdown-toggle')
+  const sortBy = async (label) => {
+    await toggle.click()
+    await page
+      .locator('.sort-by-select .dropdown-item', { hasText: label })
+      .click()
+  }
+  await expect(toggle).toHaveText('Date')
+  await expect(select.getByRole('button', { name: 'Descending' })).toBeVisible()
+  await toggle.click()
+  await expect(page.locator('.sort-by-select .dropdown-item')).toHaveText(
+    SORTS.map((s) => s.label),
+  )
+  await toggle.click()
+
+  // As in Stash, a new sort keeps the direction: Title from Z
+  const names = SHOWN.map((s) => s.title).sort(byName)
+  await sortBy('Title')
+  await expect.poll(search).toBe('?sortby=title&sortdir=desc')
+  await expect(toggle).toHaveText('Title')
+  expect(await titles(page)).toEqual([...names].reverse())
+  await select.getByRole('button', { name: 'Descending' }).click()
+  await expect.poll(search).toBe('?sortby=title&sortdir=asc')
+  expect(await titles(page)).toEqual(names)
+  await page.reload()
+  await expect(page.locator('.newreleases-grid .newreleases-card')).toHaveCount(
+    SHOWN.length,
+  )
+  expect(await titles(page)).toEqual(names)
+
+  // Shortest first
+  await sortBy('Duration')
+  await expect.poll(search).toBe('?sortby=duration&sortdir=asc')
+  expect(await titles(page)).toEqual(
+    [...SHOWN].sort((a, b) => a.duration - b.duration).map((s) => s.title),
+  )
+
+  // Random keeps its seed in the address, and Reshuffle takes a new one
+  await sortBy('Random')
+  await expect.poll(search).toMatch(/^\?sortby=random_\d+&sortdir=asc$/)
+  const seed = search()
+  const shuffled = await titles(page)
+  expect([...shuffled].sort(byName)).toEqual(names)
+  await page.reload()
+  await expect(page.locator('.newreleases-grid .newreleases-card')).toHaveCount(
+    SHOWN.length,
+  )
+  expect(await titles(page)).toEqual(shuffled)
+  await select.getByRole('button', { name: 'Reshuffle' }).click()
+  await expect.poll(search).not.toBe(seed)
+  await expect.poll(search).toMatch(/^\?sortby=random_\d+&sortdir=asc$/)
+
+  // A filter and Clear filters keep the order
+  await sortBy('Title')
+  await card(page, 'Lollipop Lullaby')
+    .getByRole('button', { name: 'Candy' })
+    .click()
+  await expect.poll(search).toMatch(/sortby=title&sortdir=asc/)
+  await page.getByRole('button', { name: 'Clear filters' }).click()
+  await expect.poll(search).toBe('?sortby=title&sortdir=asc')
+  expect(await titles(page)).toEqual(names)
+})
+
+test('a check while the page is open puts what it finds in Just in, New, and the list holds still', async ({
+  page,
+}) => {
+  const errors = []
+  page.on('pageerror', (e) => errors.push(e.message))
+  const late = lateRelease(TPDB_SITES.lollipop)
+  await waitForChecks()
+  // A day later, Lollipop Lounge has a new release
+  await ageCatalog(21)
+  await publishLate(TPDB_SITES.lollipop)
+  try {
+    await page.goto(ROUTE)
+    await expect(page.locator('.newreleases-status')).toContainText(
+      /Checking/,
+      { timeout: 15_000 },
+    )
+    const order = newestFirst(SHOWN).map((s) => s.title)
+    expect(await titles(page)).toEqual(order)
+    const justIn = page.locator('.newreleases-just-in')
+    await expect(justIn.locator('.recommendation-row-head h2')).toHaveText(
+      'Just in',
+      { timeout: 30_000 },
+    )
+    await waitForChecks()
+    await expect(page.locator('.newreleases-status')).toHaveText(
+      /^Checked just now/,
+      { timeout: 15_000 },
+    )
+    expect(await justInTitles(page)).toEqual([late.title])
+    await expect(
+      justIn.locator(
+        '.slick-slide:not(.slick-cloned) .newreleases-new-badge .badge',
+      ),
+    ).toHaveText('New')
+    // The list never moved, and what the first check found is not New
+    expect(await titles(page)).toEqual(order)
+    await expect(
+      page.locator('.newreleases-grid .newreleases-new-badge'),
+    ).toHaveCount(0)
+    await expect(page.locator('.paginationIndex')).toHaveText(
+      `1-${SHOWN.length} of ${SHOWN.length}`,
+    )
+    // Filters reach Just in too: Caramel Coco is not in it
+    await card(page, 'Gumball Galaxy')
+      .getByRole('button', { name: 'Caramel Coco' })
+      .click()
+    await expect(justIn).toHaveCount(0)
+    await page.getByRole('button', { name: 'Clear filters' }).click()
+    expect(await justInTitles(page)).toEqual([late.title])
+
+    // The next visit puts it in the list, still New, until the next check
+    await page.goto(ROUTE)
+    await expect(
+      page.locator('.newreleases-grid .newreleases-card'),
+    ).toHaveCount(SHOWN.length + 1)
+    await expect(page.locator('.newreleases-just-in')).toHaveCount(0)
+    expect(await titles(page)).toEqual(
+      newestFirst([...SHOWN, late]).map((s) => s.title),
+    )
+    await expect(
+      card(page, late.title).locator('.newreleases-new-badge'),
+    ).toHaveText('New')
+    await expect(
+      page.locator('.newreleases-grid .newreleases-new-badge'),
+    ).toHaveCount(1)
+    // Found, newest first, puts it at the top
+    await page.goto(`${ROUTE}?sortby=found&sortdir=desc`)
+    await expect(card(page, late.title)).toBeVisible()
+    expect((await titles(page))[0]).toBe(late.title)
+  } finally {
+    await withdrawLate()
+  }
+  expect(errors).toEqual([])
 })
 
 test('favourites with no stash-box link point to the studio Tagger', async ({

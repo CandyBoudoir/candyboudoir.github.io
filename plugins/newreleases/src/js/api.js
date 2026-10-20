@@ -6,6 +6,7 @@ export const { React, patch, register, utils } = api
 export const { Bootstrap, Apollo, ReactRouterDOM, FontAwesomeSolid } =
   api.libraries
 export const ReactSelect = api.libraries.ReactSelect
+export const Slider = api.libraries.ReactSlick.default
 export const components = api.components
 export const { loadableComponents } = api
 

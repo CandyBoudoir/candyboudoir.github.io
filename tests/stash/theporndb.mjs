@@ -13,6 +13,10 @@
 // started and ended, for the tests to check the task's manners:
 //   GET /_requests     the log, and how many requests were ever in flight at once
 //   DELETE /_requests  clears it
+// A site's late release (TPDB_LATE) shows only once a test publishes it, as
+// a studio's newest release turns up between two checks:
+//   PUT /_late?site_id=<id>  lists it first among that site's scenes
+//   DELETE /_late            takes every one back
 import { STASH_BOX } from './stashbox-data.mjs'
 
 export const TPDB_PREFIX = '/tpdb'
@@ -226,6 +230,35 @@ export const TPDB_SCENES = Object.fromEntries(
   }),
 )
 
+// Released today, and listed only after a PUT /_late for its site.
+export const TPDB_LATE = {
+  [TPDB_SITES.lollipop.id]: scene(
+    TPDB_SITES.lollipop,
+    DOMAINS[TPDB_SITES.lollipop.id],
+    [
+      'Licorice Latecomer',
+      0,
+      'sweet-tooth',
+      ['patti'],
+      ['candy', 'glossy'],
+      777,
+    ],
+  ),
+  [TPDB_SITES.gumball.id]: scene(
+    TPDB_SITES.gumball,
+    DOMAINS[TPDB_SITES.gumball.id],
+    [
+      'Bubblegum Bonus',
+      0,
+      'cherry-pop',
+      ['coco', 'bijou'],
+      ['bubblegum', 'sour'],
+      845,
+    ],
+  ),
+}
+const late = new Set()
+
 // Release dates as New Releases' task compares them: the day 48 hours (or
 // 96) before now
 const dayBefore = (hours) =>
@@ -271,13 +304,13 @@ function answer(req, res, url) {
     }
     if (failing) return json(res, failing, { message: 'Too Many Attempts.' })
     const perPage = Number(url.searchParams.get('per_page') || 15)
+    const scenes = [
+      ...(late.has(id) ? [TPDB_LATE[id]] : []),
+      ...(TPDB_SCENES[id] || []),
+    ]
     return json(res, 200, {
-      data: (TPDB_SCENES[id] || []).slice(0, perPage),
-      meta: {
-        current_page: 1,
-        per_page: perPage,
-        total: (TPDB_SCENES[id] || []).length,
-      },
+      data: scenes.slice(0, perPage),
+      meta: { current_page: 1, per_page: perPage, total: scenes.length },
     })
   }
   return json(res, 404, { message: 'Not Found' })
@@ -295,6 +328,13 @@ export function handleTpdb(req, res, { delay = 30 } = {}) {
     !url.pathname.startsWith(`${TPDB_PREFIX}/`)
   )
     return false
+  if (url.pathname === `${TPDB_PREFIX}/_late`) {
+    const id = url.searchParams.get('site_id')
+    if (req.method === 'PUT' && TPDB_LATE[id]) late.add(id)
+    else if (req.method === 'DELETE') late.clear()
+    res.writeHead(204).end()
+    return true
+  }
   if (url.pathname === `${TPDB_PREFIX}/_requests`) {
     if (req.method === 'DELETE') {
       requests.length = 0

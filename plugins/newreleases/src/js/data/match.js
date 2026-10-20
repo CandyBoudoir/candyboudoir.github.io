@@ -153,6 +153,8 @@ export function presentReleases(catalog, { studios, tags, performers, owned }) {
       endpoint: r.endpoint,
       title: r.title || '',
       date: r.date || null,
+      found: r.found || null,
+      first: !!r.first,
       duration: r.duration ?? null,
       description: r.description || null,
       url: r.url || null,
@@ -168,19 +170,4 @@ export function presentReleases(catalog, { studios, tags, performers, owned }) {
       (b.date || '').localeCompare(a.date || '') ||
       a.title.localeCompare(b.title),
   )
-}
-
-/**
- * The releases in the order they reached the page: those it showed before
- * keep their places, and the ones a running check adds join at the end,
- * newest first among themselves, so nothing moves under the reader.
- * `ranks` is what the previous call returned; a new visit starts with none.
- * @returns {{ list: any[], ranks: Map<string, number> }}
- */
-export function arrange(releases, ranks = new Map()) {
-  const next = new Map(ranks)
-  let last = next.size ? Math.max(...next.values()) : -1
-  for (const r of releases) if (!next.has(r.key)) next.set(r.key, ++last)
-  const list = [...releases].sort((a, b) => next.get(a.key) - next.get(b.key))
-  return { list, ranks: next }
 }

@@ -22,6 +22,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { STASHDB } from '../../../../tests/stash/stashbox-data.mjs'
 import {
+  TPDB_LATE,
   TPDB_SCENES,
   TPDB_SITES,
   tpdbFresh,
@@ -31,6 +32,10 @@ import {
 
 const here = dirname(fileURLToPath(import.meta.url))
 const SRC = join(here, '..', '..', 'src')
+// The version the manifest gives, which the task names itself with
+const VERSION = /^version: (.+)$/m.exec(
+  await readFile(join(SRC, 'NewReleases.yml'), 'utf8'),
+)[1]
 
 // Importing the script from src/ must leave no __pycache__ there.
 const NO_PYC = { ...process.env, PYTHONDONTWRITEBYTECODE: '1' }
@@ -177,6 +182,9 @@ function favourites() {
 }
 
 const clearTpdb = () => fetch(`${base}/tpdb/_requests`, { method: 'DELETE' })
+const publishLate = (site) =>
+  fetch(`${base}/tpdb/_late?site_id=${site.id}`, { method: 'PUT' })
+const withdrawLate = () => fetch(`${base}/tpdb/_late`, { method: 'DELETE' })
 const tpdbLog = async () => (await fetch(`${base}/tpdb/_requests`)).json()
 
 beforeEach(async () => {
@@ -376,9 +384,9 @@ test(
     )
     for (const r of requests) {
       assert.equal(r.authorization, 'Bearer tpdb-key')
-      assert.match(
+      assert.equal(
         r.userAgent,
-        /^NewReleases\/0\.1\.0 \(Stash plugin; \+https:\/\/github\.com\/CandyBoudoir\/candyboudoir\.github\.io\/tree\/main\/plugins\/newreleases\)$/,
+        `NewReleases/${VERSION} (Stash plugin; +https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/newreleases)`,
       )
     }
     for (let i = 1; i < requests.length; i++)
@@ -386,7 +394,10 @@ test(
         requests[i].start - requests[i - 1].end >= 40,
         `request ${i} waited ${requests[i].start - requests[i - 1].end} ms`,
       )
-    assert.match(boxRequests[0].userAgent, /^NewReleases\/0\.1\.0 /)
+    assert.match(
+      boxRequests[0].userAgent,
+      new RegExp(`^NewReleases/${VERSION.replaceAll('.', '\\.')} `),
+    )
     // Stash with the session cookie Stash handed the task, at 127.0.0.1 for 0.0.0.0
     assert.equal(stashRequests[0].cookie, 'session=cookie-value')
   },
@@ -545,6 +556,59 @@ test(
       next.studios['1'].count,
       tpdbFresh(TPDB_SITES.lollipop).length + 1,
     )
+  },
+)
+
+test(
+  'each release keeps when a check first found it, and a studio’s first check marks what it finds',
+  { skip: !hasPython },
+  async () => {
+    await runTask()
+    const first = await readCatalog()
+    // A studio's first check: everything it finds is new to the catalog
+    for (const id of [1, 2, 5, 6]) {
+      assert.ok(releasesOf(first, id).length)
+      for (const r of releasesOf(first, id)) {
+        assert.ok(r.found >= first.run.started, r.title)
+        assert.equal(r.first, true, r.title)
+      }
+    }
+    const before = new Map(first.releases.map((r) => [r.id, r]))
+
+    // A day later ThePornDB lists a new release for Lollipop Lounge
+    const late = TPDB_LATE[TPDB_SITES.lollipop.id]
+    await age(21)
+    await publishLate(TPDB_SITES.lollipop)
+    try {
+      await runTask()
+    } finally {
+      await withdrawLate()
+    }
+    const next = await readCatalog()
+    const found = releasesOf(next, 1).find((r) => r.id === late.id)
+    assert.ok(found.found >= next.run.started)
+    assert.equal(found.first, undefined)
+    // Found when the check asked its studio, which the studio keeps
+    assert.equal(found.found, next.studios['1'].asked)
+    assert.ok(next.studios['5'].asked >= next.run.started)
+    // What the first check found keeps its time and its mark
+    for (const r of next.releases.filter((x) => x.id !== late.id)) {
+      assert.equal(r.found, before.get(r.id).found, r.title)
+      assert.equal(r.first, true, r.title)
+    }
+
+    // Releases kept from before the plugin stamped them stay unstamped
+    for (const r of next.releases) {
+      delete r.found
+      delete r.first
+    }
+    await writeFile(catalogFile(), JSON.stringify(next))
+    await age(21)
+    await runTask()
+    for (const r of (await readCatalog()).releases) {
+      assert.equal(r.found, undefined, r.title)
+      assert.equal(r.first, undefined, r.title)
+    }
   },
 )
 
