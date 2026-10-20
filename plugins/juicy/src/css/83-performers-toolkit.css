@@ -450,11 +450,6 @@
   color: var(--juicy-cyan);
 }
 
-/* O's are bubblegum, as on Juicy's O counter and in Insights */
-.juicy-restyle-toolkit #root :is(.pt-bb, .pt-kb) {
-  background: var(--juicy-bubblegum);
-}
-
 /* Good and bad in Juicy's lime and coral */
 .juicy-restyle-toolkit
   #root
