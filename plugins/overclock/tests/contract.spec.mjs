@@ -20,6 +20,10 @@ import {
   usePlugins,
   visit,
 } from './stash.mjs'
+import {
+  setUpCherryPick,
+  tearDownCherryPick,
+} from '../../cherrypick/tests/stash.mjs'
 
 let ids
 test.beforeAll(async () => {
@@ -236,12 +240,47 @@ function contrast(a, b) {
   return (hi + 0.05) / (lo + 0.05)
 }
 
+const alpha = (rgb) => Number(rgb.match(/[\d.]+/g)[3] ?? 1)
+
 // A custom property's computed value on an element
 const tokenOf = (locator, name) =>
   locator.evaluate(
     (el, name) => getComputedStyle(el).getPropertyValue(name).trim(),
     name,
   )
+
+// Cherry Pick's Your score sits where the rating tag does, on scenes you
+// haven't rated. Overclock draws it as the tag left hollow: an opaque black
+// panel with a yellow frame, whose type reads over any cover.
+test.describe('beside Cherry Pick', () => {
+  test.beforeAll(async () => {
+    await setUpCherryPick()
+    await usePlugins('CherryPick', PLUGIN_ID)
+  })
+  test.afterAll(async () => {
+    await tearDownCherryPick()
+    await onlyOverclock()
+  })
+
+  test("Your score's tag reads over any cover", async ({ page }) => {
+    await page.goto('/scenes?sortby=title&perPage=120')
+    const card = page
+      .locator('.scene-card:has(.cherrypick-score-banner)')
+      .first()
+    const tag = card.locator('.cherrypick-score-banner')
+    await expect(tag).toBeVisible({ timeout: 20_000 })
+    const { color, background } = await tag.evaluate((el) => {
+      const style = getComputedStyle(el)
+      return { color: style.color, background: style.backgroundColor }
+    })
+    expect(alpha(background), 'an opaque panel').toBe(1)
+    expect(contrast(color, background)).toBeGreaterThanOrEqual(4.5)
+    await expect(tag).toHaveCSS('border-top-style', 'solid')
+    await card.hover()
+    await expect(tag).toHaveCSS('opacity', '1')
+    await tagClearsCheckbox(card)
+  })
+})
 
 test.describe('beside Insights', () => {
   test.beforeAll(async () => {

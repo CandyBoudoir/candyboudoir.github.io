@@ -45,3 +45,8 @@
 .newreleases-notes li + li {
   margin-top: 0.25rem;
 }
+
+/* Just in: Stash's front-page row, clear of the list's page index below. */
+.newreleases-just-in-container {
+  margin-bottom: 1rem;
+}

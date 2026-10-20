@@ -6,6 +6,8 @@
 // two scenes that already hold releases, and performers to name them. The mock
 // ThePornDB is registered as a second stash-box only while they run, so
 // the themes' stash-box screenshots never see it.
+import { readdir, readFile, rename, writeFile } from 'node:fs/promises'
+import { basename, dirname, join } from 'node:path'
 import {
   gql,
   setPluginSettings,
@@ -15,6 +17,7 @@ import { ENDPOINT } from '../../../tests/stash/stashbox-data.mjs'
 import {
   TPDB_API,
   TPDB_ENDPOINT,
+  TPDB_LATE,
   TPDB_NAME,
   TPDB_SCENES,
   TPDB_SITES,
@@ -26,6 +29,7 @@ export * from '../../../tests/stash/helpers.mjs'
 export {
   TPDB_API,
   TPDB_ENDPOINT,
+  TPDB_LATE,
   TPDB_SCENES,
   TPDB_SITES,
   TPDB_STASH_BOX,
@@ -136,12 +140,75 @@ export async function queuedChecks() {
   )
 }
 
+// A site's late release: ThePornDB lists it once published, as a release
+// turns up between two checks.
+export const lateRelease = (site) => TPDB_LATE[site.id]
+export const publishLate = (site) =>
+  fetch(`${TPDB_API}/_late?site_id=${site.id}`, { method: 'PUT' })
+export const withdrawLate = () =>
+  fetch(`${TPDB_API}/_late`, { method: 'DELETE' })
+
+// The plugin's folder in the test Stash, which runs on this machine.
+async function pluginDir() {
+  const { configuration } = await gql(
+    '{ configuration { general { pluginsPath } } }',
+  )
+  const root = configuration.general.pluginsPath
+  const files = await readdir(root, { recursive: true })
+  const manifest = files.find((f) => basename(f) === `${PLUGIN_ID}.yml`)
+  if (!manifest) throw new Error(`no ${PLUGIN_ID}.yml under ${root}`)
+  return join(root, dirname(manifest))
+}
+
+const earlier = (iso, hours) =>
+  iso &&
+  new Date(Date.parse(iso) - hours * 3600_000)
+    .toISOString()
+    .replace(/\.\d+Z$/, 'Z')
+
+/**
+ * Moves the catalog's checks and finds back by `hours`, as if that long had
+ * passed, so the page and the task find the studios due again.
+ */
+export async function ageCatalog(hours) {
+  const file = join(await pluginDir(), 'catalog', 'catalog.json')
+  const catalog = JSON.parse(await readFile(file, 'utf8'))
+  catalog.run.started = earlier(catalog.run.started, hours)
+  catalog.run.finished = earlier(catalog.run.finished, hours)
+  for (const s of Object.values(catalog.studios))
+    if (s.checked) s.checked = earlier(s.checked, hours)
+  for (const r of catalog.releases)
+    if (r.found) r.found = earlier(r.found, hours)
+  await writeFile(`${file}.part`, JSON.stringify(catalog))
+  await rename(`${file}.part`, file)
+}
+
+/**
+ * Makes the page's first read of the catalog a day old and without
+ * `release`, so the page starts a check (which finds nothing due) and its
+ * next read brings the release in while the page is open, as a check's
+ * arrival.
+ */
+export async function arriveWhileOpen(page, release) {
+  let first = true
+  await page.route('**/assets/catalog/catalog.json', async (route) => {
+    if (!first) return route.continue()
+    first = false
+    const response = await route.fetch()
+    const catalog = await response.json()
+    catalog.releases = catalog.releases.filter((r) => r.id !== release.id)
+    catalog.run.finished = earlier(catalog.run.finished, 21)
+    await route.fulfill({ response, json: catalog })
+  })
+}
+
 export const tpdbRequests = async () =>
   (await fetch(`${TPDB_API}/_requests`)).json()
 export const clearTpdbRequests = () =>
   fetch(`${TPDB_API}/_requests`, { method: 'DELETE' })
 
 async function removeDemo() {
+  await withdrawLate()
   const { findScenes, findStudios, findPerformers } = await gql(`{
     findScenes(filter: { per_page: -1 }) { scenes { id details } }
     findStudios(filter: { per_page: -1 }) { studios { id details } }

@@ -1,7 +1,8 @@
 // When a bracket ends: the champion screen (podium, where the results went,
 // the optional Challenge round, the champion's stars given by hand, Undo of
-// the final pick, a Champions round when one is due) and the optional,
-// previewed "Apply to my ratings".
+// the final pick, a Champions round when one is due, New bracket) and the
+// optional, previewed "Apply to my ratings". On the bracket map the screen
+// opens with the moment it was won (map/intro.jsx).
 import {
   components,
   FontAwesomeSolid,
@@ -25,6 +26,7 @@ import {
   skipChallenge,
   startChallenge,
   startChampionsRound,
+  startNextBracket,
   undoApplied,
   undoChallengePick,
   undoPick,
@@ -38,9 +40,48 @@ import {
   plural,
   useEntrant,
 } from './parts.jsx'
+import { BracketMap, MapFrame } from './map/bracketMap.jsx'
+import { calm, sfx } from './map/fx.js'
+import { Intro } from './map/intro.jsx'
 
 const { Link } = ReactRouterDOM
 const { faCrown, faCheck, faRotateLeft, faTrophy, faUndo } = FontAwesomeSolid
+
+// The champion screen's moment has played: it stays as the screen it opened
+const momentPlayed = (id) =>
+  store.set((s) =>
+    s.dialog?.view === VIEWS.result && s.dialog.id === id && s.dialog.moment
+      ? { dialog: { view: VIEWS.result, id } }
+      : null,
+  )
+
+// Done and the list's Bracket in one click (startNextBracket)
+function NewBracketButton({ b, applying }) {
+  const [busy, setBusy] = React.useState(false)
+  const live = React.useRef(true)
+  React.useEffect(
+    () => () => {
+      live.current = false
+    },
+    [],
+  )
+  return (
+    <button
+      type="button"
+      className="btn btn-secondary cherrypick-new-bracket"
+      disabled={busy}
+      onClick={() => {
+        setBusy(true)
+        startNextBracket(b.id).finally(() => live.current && setBusy(false))
+      }}
+    >
+      <BracketIcon />
+      <span>
+        {busy ? (applying ? 'Setting ratings…' : 'Starting…') : 'New bracket'}
+      </span>
+    </button>
+  )
+}
 
 const FIELD_LIST = `${BR.FIELDS.titles}, ${BR.FIELDS.best} and ${BR.FIELDS.last}`
 export const WINNERS_URL = customFieldUrl(BR.FIELDS.titles)
@@ -282,7 +323,9 @@ function ChallengeCard({ b, st, name, them, proposal, auto }) {
   )
 }
 
-export function ResultDialog({ id }) {
+// moment: 'champion' straight after the final, 'trophy' or 'lost' straight
+// after a Challenge round
+export function ResultDialog({ id, moment }) {
   const M = useAppState((s) => s.M)
   const history = useAppState((s) => s.brackets.history)
   const active = useAppState((s) => s.brackets.active)
@@ -299,6 +342,18 @@ export function ResultDialog({ id }) {
     () => (b && M ? BR.ratingProposals(M, b) : null),
     [b, M],
   )
+  const classic = useAppState((s) => !!s.settings.classicBrackets)
+  // the moment is motion: with reduced motion the screen opens as it is
+  const [intro, setIntro] = React.useState(
+    () => !classic && !calm() && (moment === 'champion' || moment === 'trophy'),
+  )
+  // a lost Challenge round has no moment, only its sound
+  React.useEffect(() => {
+    if (moment === 'lost' && !classic) sfx('lose')
+    if (moment && !intro) momentPlayed(id)
+    // once, as the screen opens
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   if (!b || !M) return null
   const r = b.result
   const isP = b.kind === 'performer'
@@ -343,7 +398,7 @@ export function ResultDialog({ id }) {
       title={b.champions ? 'Champion of champions' : 'Champion'}
       size="xl"
       onHide={closeDialog}
-      className="cherrypick-result-modal"
+      className={`cherrypick-result-modal${classic ? '' : ' cherrypick-map-result'}${intro ? ' cherrypick-intro-on' : ''}`}
       headerExtra={
         <span className="text-muted cherrypick-round">
           {b.poolLabel} · {b.seeds.length} {isP ? 'performers' : 'scenes'}
@@ -378,6 +433,9 @@ export function ResultDialog({ id }) {
               {isP ? 'Apply to my performer ratings…' : 'Apply to my ratings…'}
             </button>
           )}
+          {active ? null : (
+            <NewBracketButton b={b} applying={auto && toSet > 0} />
+          )}
           <button
             type="button"
             className="btn btn-primary"
@@ -388,6 +446,16 @@ export function ResultDialog({ id }) {
         </>
       }
     >
+      {intro && b.result ? (
+        <Intro
+          b={b}
+          moment={moment}
+          onDone={() => {
+            setIntro(false)
+            momentPlayed(id)
+          }}
+        />
+      ) : null}
       <div className={`cherrypick-champion ${isP ? 'performer' : 'clip'}`}>
         <Link
           className="cherrypick-champ-img"
@@ -512,7 +580,18 @@ export function ResultDialog({ id }) {
           </div>
         </div>
       ) : null}
-      {tree ? <BracketTree b={b} st={BR.bracketState(b)} /> : null}
+      {tree && classic ? <BracketTree b={b} st={BR.bracketState(b)} /> : null}
+      {tree && !classic ? (
+        <MapFrame className={`cherrypick-overview ${b.kind}`}>
+          <BracketMap
+            b={b}
+            st={BR.bracketState(b)}
+            cur={null}
+            ev={null}
+            overview
+          />
+        </MapFrame>
+      ) : null}
     </Dialog>
   )
 }

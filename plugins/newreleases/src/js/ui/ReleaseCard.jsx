@@ -1,6 +1,7 @@
 // A release as a card in Stash's own SceneCard markup (card grid-card
 // scene-card, thumbnail section, card section, the date and a three-line
-// description), so every theme styles it like a scene card. The cover and
+// description), so every theme styles it like a scene card. A release its
+// studio's latest check found carries a New badge. The cover and
 // title open the release on the studio's own page in a new tab; the studio
 // links to the user's studio, and the performers and tags add themselves
 // to the filters. Stash lets videos play only from Stash itself, so there is
@@ -63,7 +64,7 @@ function Truncated({ text, lineCount, className }) {
 
 const MAX_TAGS = 6
 
-export function ReleaseCard({ release, width, zoom = 1, onPick }) {
+export function ReleaseCard({ release, width, zoom = 1, isNew, onPick }) {
   const r = release
   const duration = fmtDuration(r.duration)
   const cover = (
@@ -108,6 +109,11 @@ export function ReleaseCard({ release, width, zoom = 1, onPick }) {
           </div>
         ) : null}
         <StudioOverlay studio={r.studio} />
+        {isNew ? (
+          <div className="newreleases-new-badge">
+            <span className="badge badge-primary">New</span>
+          </div>
+        ) : null}
       </div>
       <div className="card-section">
         {r.url ? (

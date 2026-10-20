@@ -24,6 +24,12 @@ import {
   tearDownCherryPick,
 } from './stash.mjs'
 
+// Brackets play on the bracket map, whose matches arrive with a short
+// animation that a pick made during it skips (map.contract.spec.mjs checks
+// that). With reduced motion a match swaps at once, so keys pressed in a
+// row each pick.
+test.use({ reducedMotion: 'reduce' })
+
 test.beforeAll(async () => {
   await setUpCherryPick()
 })
@@ -317,9 +323,9 @@ test.describe('at 390 px', () => {
     const first = await sceneIds(play)
     await cards.nth(1).locator('.cherrypick-cover-pick').tap()
     await expect.poll(() => sceneIds(play)).not.toEqual(first)
+    // Show bracket shows the whole map, at full size to scroll on a phone
     await play.getByRole('button', { name: 'Show bracket' }).click()
-    await expect(
-      play.locator('.cherrypick-tree .font-weight-bold'),
-    ).toHaveCount(1)
+    await expect(play.locator('.cherrypick-map-vp.scroll')).toBeVisible()
+    await expect(play.locator('.cherrypick-map-slot.in')).toHaveCount(1)
   })
 })

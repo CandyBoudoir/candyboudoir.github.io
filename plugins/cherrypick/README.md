@@ -2,7 +2,7 @@
 
 A [Stash](https://github.com/stashapp/stash) plugin that learns what you like from your own ratings and plays, and shows it inside Stash's pages: a For you row on the front page, or one scene ready to play in its place, Your score on scenes you haven't rated, More like this on scene pages, and performer and scene brackets that sharpen what it learns. It needs no account and no setup. A StashDB key, if you have one in Stash, adds popularity and the scenes you don't have.
 
-Cherry Pick 0.2.2 is built and tested on Stash v0.31.1.
+Cherry Pick 0.3.0 is built and tested on Stash v0.31.1.
 
 ![The front page with Cherry Pick: For you first, each card saying why it is there, then a row of one performer's scenes](docs/screenshots/front.png)
 
@@ -73,6 +73,10 @@ Each side of a scene match shows the scene's cover and eight frames spread over 
 
 Pick with a click, a tap or the arrow keys: U undoes, Esc pauses, and a paused bracket waits for you, even after a reload. Every pick teaches the model. When a performer bracket ends, the champion, finalist, semifinalists and quarterfinalists get three custom fields on their Stash record (`cherrypick_titles`, `cherrypick_best_finish`, `cherrypick_last_bracket`), which Stash shows on the performer page and can filter on. Four different champions of one gender unlock a Champions round.
 
+A bracket plays on a map of the whole bracket, under the match, or over it in a scene bracket, whose contact sheets are tall. Each match pops up out of its place on the map. A pick flies the winner into its place in the next round, draws the path it took in your theme's accent color and moves Cherry Pick's cherries on to the next match. A new round opens with its name, and Show bracket (or T) opens the whole map, at full size to scroll through on a phone or for a bracket of 32 or 64. The Challenge round has its own map: the champion's road past each favorite to the trophy, with each favorite hidden until the champion reaches them. Winning a bracket, or the Challenge round, lights up the champion's road, and a click or any key skips it. Sound starts off; the speaker button or M turns it on, and this browser remembers it. A game controller's d-pad picks too. A pick made while the next match is still arriving only ends its arrival, so you can't pick a match you haven't seen. With reduced motion set on your device, matches change without moving and nothing waits. Brackets Classic Mode, under Settings > Plugins, plays brackets as Cherry Pick 0.2 did, with two cards, a pick and no map, animation or sound.
+
+New bracket, on the champion screen, does what Done and then Bracket would do, in one click. With Apply bracket ratings automatically on, it sets the finished bracket's ratings first, then starts a bracket from the same pool, gender and size, in which the last bracket's entrants sit out while others can take their places. After a Champions round it starts an ordinary bracket of that gender.
+
 A bracket's job is to add ratings for Cherry Pick to learn from and to turn up performers and scenes you don't know well yet. Its places go to the ones you haven't rated, picked across the range of what Cherry Pick expects you to think of them. People rate their favorites, and a rated favorite would win its way to most finals, so the ones you have rated play only when there aren't enough unrated ones to fill the bracket; each then meets an unrated one in the first round. The others meet across the bracket's halves in the first round: of 16, the one Cherry Pick rates highest meets the ninth, the second the tenth, and so on, so the strongest don't knock each other out before every one is rated from where it finished. Performers and scenes from your last three brackets of the same kind (and gender) sit out while others can take their places. No card shows a rating, a seed or a reason drawn from your ratings, so your earlier ratings don't steer your picks.
 
 When the champion has no rating of yours, the champion screen offers an optional Challenge round, Test the champion. The champion meets up to three performers or scenes you have rated that didn't play in the bracket (of the same gender, for performers), the ones from the list the bracket came from first, picked across your stars and met lowest rated first, so your highest rated comes last. A loss ends the round. A champion that beats every one gets a trophy in place of the crown on its performer card, "beat your favorites" in its For you line and a mark in the Hall of Fame. Rate them myself skips the round and asks for the champion's stars instead.
@@ -83,13 +87,13 @@ In a performer bracket, a performer you haven't rated who is in two or more scen
 
 With Apply bracket ratings automatically on, under Settings > Plugins, the champion screen has no Apply button: closing it sets those ratings, and says how many first. Cherry Pick's page lists each batch with Undo. The switch starts on, and off while Ascension, HotOrNot, Xenith or Restash's mirror writes your ratings, since their rankings would take up every rating without a preview. It follows those plugins until you set it yourself.
 
-| Playing                                                                   | The champion                                                                                                                     |
-| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| ![Two performers side by side in a bracket](docs/screenshots/bracket.png) | ![A champion who beat your favorites in the Challenge round, with the finalist and semifinalists](docs/screenshots/champion.png) |
+| Playing                                                                                                                                         | The champion                                                                                                                                      |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Two performers in a bracket, over the map of the whole bracket with the cherries beside the match being played](docs/screenshots/bracket.png) | ![A champion who beat your favorites in the Challenge round, with the finalist, the semifinalists and New bracket](docs/screenshots/champion.png) |
 
-| A scene match                                                                                                                       | Look closer                                                                                                                                                           |
-| ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ![Two scenes side by side in a bracket, each with its cover, eight frames, performers and tags](docs/screenshots/scene-bracket.png) | ![Look closer on one scene: a frame from its sprite sheet, the scrub bar, sixteen frames, its performers, description and tags](docs/screenshots/scene-inspector.png) |
+| A scene match                                                                                                                                     | Look closer                                                                                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Two scenes side by side in a bracket under its map, each with its cover, eight frames, performers and tags](docs/screenshots/scene-bracket.png) | ![Look closer on one scene: a frame from its sprite sheet, the scrub bar, sixteen frames, its performers, description and tags](docs/screenshots/scene-inspector.png) |
 
 ### StashDB
 
@@ -122,13 +126,13 @@ Cherry Pick's tests run on these Stash versions and on Stash's latest develop bu
 | Stash         | v0.31.1       |
 | Ascension     | 1.4.1         |
 | HotOrNot      | 1.0.0-c4106bf |
-| Stash Curator | 0.40.6        |
+| Stash Curator | 0.41.0        |
 | Xenith        | 3.2.0         |
 | Restash       | 0.3.0-55c1cb2 |
 
 ## Settings
 
-Settings > Plugins > Cherry Pick switches each piece on or off. All start on except Watch This and Relative badge style, and Apply bracket ratings automatically starts off beside a plugin that writes your ratings.
+Settings > Plugins > Cherry Pick switches each piece on or off. All start on except Watch This, Relative badge style and Brackets Classic Mode, and Apply bracket ratings automatically starts off beside a plugin that writes your ratings.
 
 ![Cherry Pick's switches under Settings > Plugins](docs/screenshots/settings.png)
 
@@ -148,6 +152,7 @@ Settings > Plugins > Cherry Pick switches each piece on or off. All start on exc
 | Tags to keep out of my picks                      | Comma-separated tag names. Scenes with any of them never appear in Cherry Pick's rows.                                                     |
 | Learn from Ascension, HotOrNot and Xenith matches | Each match those plugins recorded counts as half a bracket pick.                                                                           |
 | Apply bracket ratings automatically               | Closing a bracket's champion screen sets the ratings it found, with Undo on Cherry Pick's page. Off, Apply to my ratings shows them first. |
+| Brackets Classic Mode                             | Brackets as in Cherry Pick 0.2: two cards and a pick, with no map, animation or sound. New bracket stays.                                  |
 
 ## Where your data lives
 
@@ -157,7 +162,7 @@ Cherry Pick runs in Stash's web interface and keeps its data in your Stash:
 - **Custom fields**: the three bracket fields above on performers, written once when a bracket ends, and `cherrypick_provisional` on performers and scenes whose rating Apply set from where they finished in a bracket.
 - **Your Stash ratings**: only through Apply to my ratings, or when you close a bracket's champion screen with Apply bracket ratings automatically on; never on a record you rated yourself, another plugin ranks or whose rating Restash mirrors. Undo puts them back, except a rating you changed since Apply, which stays yours.
 
-Your browser keeps only what Cherry Pick can do without: a copy of your library for a fast start and the StashDB cache in IndexedDB, and which For you cards you opened or passed over and a copy of the plugin configuration in local storage. A new browser fetches the library and the StashDB answers again, and its record of For you's cards starts empty. The taste model is never stored. Cherry Pick fits it again from what your Stash holds each time Stash loads.
+Your browser keeps only what Cherry Pick can do without: a copy of your library for a fast start and the StashDB cache in IndexedDB, and which For you cards you opened or passed over, whether bracket sounds are on and a copy of the plugin configuration in local storage. A new browser fetches the library and the StashDB answers again, and its record of For you's cards starts empty. The taste model is never stored. Cherry Pick fits it again from what your Stash holds each time Stash loads.
 
 ### Network requests
 

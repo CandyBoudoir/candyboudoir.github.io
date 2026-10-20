@@ -1,16 +1,21 @@
 // The New Releases page, at /plugins/newreleases. It shows the catalog the
 // task keeps at once, starts the task when the catalog is a day old (or a
-// studio was favourited since), and fills in as the task saves each studio,
-// adding what arrives at the end of the list. Releases the user has never
-// show. It pages as Stash's lists do, with Stash's own pagination. Loading
-// waits behind Suspense boundaries with Stash's own loader: the
-// stash-boxes, favourites and catalog first, then the user's tags,
-// performers and scenes that name the releases and hide the ones they have.
+// studio was favourited since), and fills in as the task saves each studio.
+// The list keeps what the page opened with, so nothing in it moves; what a
+// running check adds goes to a Just in row above it until the next visit. A
+// page that opened with nothing fills its list as releases arrive. Releases
+// the user has never show, and those their studio's latest check found are
+// New. It sorts and pages as Stash's lists do, with Stash's own sort menu
+// and pagination. Loading waits behind Suspense boundaries with Stash's own
+// loader: the stash-boxes, favourites and catalog first, then the user's
+// tags, performers and scenes that name the releases and hide the ones they
+// have.
 import {
   components,
   loadableComponents,
   React,
   ReactRouterDOM,
+  Slider,
   utils,
 } from '../api.js'
 import { ago, linkedStudios, problems, shouldStart } from '../data/catalog.js'
@@ -22,12 +27,18 @@ import {
   parseFilters,
 } from '../data/filters.js'
 import {
-  arrange,
   ownedIndex,
   performerIndex,
   presentReleases,
   tagIndex,
 } from '../data/match.js'
+import {
+  isNew,
+  newSeed,
+  newSince,
+  sortReleases,
+  splitArrivals,
+} from '../data/sort.js'
 import { forget, read } from '../data/resource.js'
 import {
   findJob,
@@ -263,28 +274,40 @@ function useUrlFilters() {
       }),
     [history, location.pathname, location.search],
   )
+  // Random with no seed takes one into the address, as Stash's lists do,
+  // so the order holds across a reload
+  React.useEffect(() => {
+    if (filters.sortBy === 'random' && filters.seed == null)
+      set({ ...filters, seed: newSeed() })
+  }, [filters, set])
   return [filters, set]
 }
 
 // The scenes that hold releases by StashID, and which releases that
-// covers: read with the library at first, then again in the background as
-// the task adds releases. A release waits until it is covered, so one the
-// user has never shows, even for a moment.
+// covers: read with the library at first, then again in the background each
+// time the task saves the catalog. A release waits until it is covered, so
+// one the user has never shows, even for a moment. Keyed on the save, not
+// the catalog read: two reads of one save (the last tick of a check reads
+// twice) must not cancel the lookup.
 function useHeld(visit, catalog) {
   const first = read(`${visit}held`, () => heldScenes(catalog))
   const [held, setHeld] = React.useState(first)
-  const saved = React.useRef(catalog?.saved)
+  const [opening] = React.useState(catalog?.saved)
+  const latest = React.useRef(catalog)
   React.useEffect(() => {
-    if (catalog?.saved === saved.current) return
-    saved.current = catalog?.saved
+    latest.current = catalog
+  })
+  const saved = catalog?.saved
+  React.useEffect(() => {
+    if (saved === opening) return
     let live = true
-    heldScenes(catalog)
+    heldScenes(latest.current)
       .then((next) => live && setHeld(next))
       .catch(() => {})
     return () => {
       live = false
     }
-  }, [catalog])
+  }, [saved, opening])
   return held
 }
 
@@ -349,11 +372,97 @@ function Index({ total, page, perPage }) {
 }
 
 // Stash's scene list code, which registers Pagination, PaginationIndex and
-// TruncatedText: a visit straight to this page has not loaded it.
+// TruncatedText, and its front page's, which registers RecommendationRow: a
+// visit straight to this page has loaded neither.
 const loadStashLists = () =>
-  utils.loadComponents([loadableComponents.SceneList]).catch(() => {})
+  utils
+    .loadComponents([
+      loadableComponents.SceneList,
+      loadableComponents.FrontPage,
+    ])
+    .catch(() => {})
 
-function Releases({ visit, setup, catalog, running }) {
+// Stash's own slider settings for its front-page rows
+// (src/core/recommendations.ts), which plugins cannot import.
+function sliderSettings(cards, isTouch) {
+  const at = (show) => ({
+    infinite: !isTouch && cards > show,
+    slidesToShow: cards > show ? show : cards,
+    slidesToScroll: isTouch ? 1 : cards > show ? show : cards,
+  })
+  return {
+    dots: !isTouch,
+    arrows: !isTouch,
+    speed: 300,
+    variableWidth: true,
+    swipeToSlide: true,
+    ...at(5),
+    responsive: [
+      { breakpoint: 1909, settings: at(4) },
+      { breakpoint: 1542, settings: at(3) },
+      { breakpoint: 1170, settings: at(2) },
+      { breakpoint: 801, settings: at(1) },
+    ],
+  }
+}
+const isTouch = () => window.matchMedia('(pointer: coarse)').matches
+
+// Stash's RecommendationRow, or its markup where Stash has not registered
+// it yet.
+function Row({ className, header, link, children }) {
+  const { RecommendationRow } = components
+  if (RecommendationRow)
+    return (
+      <RecommendationRow className={className} header={header} link={link}>
+        {children}
+      </RecommendationRow>
+    )
+  return (
+    <div className={`recommendation-row ${className}`}>
+      <div className="recommendation-row-head">
+        <div>
+          <h2>{header}</h2>
+        </div>
+        {link}
+      </div>
+      {children}
+    </div>
+  )
+}
+
+// What a running check found while the page was open, newest first, in a
+// row like Stash's front page's, in its container, so the list below never
+// moves.
+function JustIn({ releases, since, onPick }) {
+  if (!releases.length) return null
+  return (
+    <div className="recommendations-container newreleases-just-in-container">
+      <Row
+        className="newreleases-just-in"
+        header="Just in"
+        link={
+          <span className="text-muted newreleases-just-in-note">
+            In the list on your next visit
+          </span>
+        }
+      >
+        <Slider {...sliderSettings(releases.length, isTouch())}>
+          {releases.map((r) => (
+            <ReleaseCard
+              key={r.key}
+              release={r}
+              zoom={1}
+              isNew={isNew(r, since)}
+              onPick={onPick}
+            />
+          ))}
+        </Slider>
+      </Row>
+    </div>
+  )
+}
+
+function Releases({ visit, setup, catalog, since, running }) {
   read(`${visit}lists`, loadStashLists)
   const library = read(`${visit}library`, () => loadLibrary(setup.favourites))
   const held = useHeld(visit, catalog)
@@ -368,24 +477,35 @@ function Releases({ visit, setup, catalog, running }) {
     () => ownedIndex([...library.scenes, ...held.scenes]),
     [library, held],
   )
-  // Newest first on arrival; what a running check adds goes at the end
-  const ranks = React.useRef(new Map())
-  const releases = React.useMemo(() => {
-    const { list, ranks: next } = arrange(
+  const releases = React.useMemo(
+    () =>
       presentReleases(catalog, {
         studios: setup.favourites,
         ...indexes,
         owned,
       }).filter((r) => held.keys.has(r.key)),
-      ranks.current,
-    )
-    ranks.current = next
-    return list
-  }, [catalog, setup.favourites, indexes, owned, held])
+    [catalog, setup.favourites, indexes, owned, held],
+  )
+  // The list keeps what the page opened with; later arrivals go to Just in
+  const opened = React.useRef(undefined)
+  if (opened.current === undefined)
+    opened.current = releases.length
+      ? new Set(releases.map((r) => r.key))
+      : null
+  const arrived = React.useRef(new Map())
+  const { list, justIn } = React.useMemo(() => {
+    const split = splitArrivals(releases, opened.current, arrived.current)
+    arrived.current = split.arrived
+    return split
+  }, [releases])
   const [filters, setFilters] = useUrlFilters()
   const shown = React.useMemo(
-    () => applyFilters(releases, filters),
-    [releases, filters],
+    () => sortReleases(applyFilters(list, filters), filters),
+    [list, filters],
+  )
+  const justInShown = React.useMemo(
+    () => applyFilters(justIn, filters),
+    [justIn, filters],
   )
   const performerOptions = React.useMemo(
     () => optionsOf(releases, 'performers'),
@@ -429,6 +549,7 @@ function Releases({ visit, setup, catalog, running }) {
         filters={filters}
         onChange={setFilters}
       />
+      <JustIn releases={justInShown} since={since} onPick={pick} />
       <div className="pagination-index-container">
         <Pager {...paging} onPage={toPage} />
         <Index {...paging} />
@@ -443,6 +564,7 @@ function Releases({ visit, setup, catalog, running }) {
             release={r}
             width={width}
             zoom={1}
+            isNew={isNew(r, since)}
             onPick={pick}
           />
         ))}
@@ -467,6 +589,9 @@ function Store({ visit }) {
     return { catalog, job }
   })
   const { catalog, check } = useChecks(visit, setup, first)
+  // New: what each studio's latest check found when the page opened, and
+  // anything found since
+  const since = React.useMemo(() => newSince(first.catalog), [first])
   const ready = setup.boxes.length && setup.favourites.length
   return (
     <>
@@ -478,6 +603,7 @@ function Store({ visit }) {
             visit={visit}
             setup={setup}
             catalog={catalog}
+            since={since}
             running={check.running}
           />
         </React.Suspense>
