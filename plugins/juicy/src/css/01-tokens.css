@@ -60,6 +60,7 @@
     #f0b81c 100%
   );
   --juicy-gloss-plum: linear-gradient(180deg, #3a2066 0%, #2d1852 100%);
+  --juicy-gloss-magenta: linear-gradient(180deg, #c92088 0%, #dd2a97 100%);
 
   /* Shape */
   --juicy-radius-sm: 8px;
@@ -72,6 +73,7 @@
   --juicy-drop: 0 3px 0 var(--juicy-ink);
   --juicy-drop-lg: 0 5px 0 var(--juicy-ink);
   --juicy-shine: inset 0 2px 0 rgb(255 255 255 / 45%);
+  --juicy-press: inset 0 3px 0 rgb(1 2 36 / 35%); /* the shine of a pressed button */
   --juicy-ring: 0 0 0 3px var(--juicy-lime);
 
   /* Type */

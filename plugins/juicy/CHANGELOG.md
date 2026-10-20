@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.2
+
+The picked button of a group shows, for Stash v0.31.1.
+
+- The display mode picked in a list's toolbar (grid, list, wall or tagger) is pink candy pressed into the plum, on every list and at every width. It had looked like the modes not picked.
+- The current page in a short list's page numbers is pressed in pink, and the picked Overwrite, Add or Remove in a bulk edit is pressed to magenta among the pink. Both had looked like the rest.
+- Tested beside Insights 2.12.1 and Performers Toolkit 0.17.1.
+
 ## 0.5.1
 
 Insights 2.12 and Performers Toolkit 0.13 in candy, for Stash v0.31.1.
