@@ -16,6 +16,12 @@ import {
   tearDownCherryPick,
 } from './stash.mjs'
 
+// Brackets play on the bracket map, whose matches arrive with a short
+// animation that a pick made during it skips (map.contract.spec.mjs checks
+// that). With reduced motion a match swaps at once, so keys pressed in a
+// row each pick.
+test.use({ reducedMotion: 'reduce' })
+
 let demo
 test.beforeAll(async () => {
   ;({ demo } = await setUpCherryPick())

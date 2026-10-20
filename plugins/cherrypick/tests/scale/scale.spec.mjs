@@ -16,6 +16,12 @@ import { expect, test } from '@playwright/test'
 import { readFile, writeFile } from 'node:fs/promises'
 import { gql, setAutoApply } from '../stash.mjs'
 
+// Brackets play on the bracket map, whose matches arrive with a short
+// animation that a pick made during it skips (map.contract.spec.mjs checks
+// that). With reduced motion a match swaps at once, so keys pressed in a
+// row each pick.
+test.use({ reducedMotion: 'reduce' })
+
 const summary = process.env.SCALE_SUMMARY
   ? JSON.parse(await readFile(process.env.SCALE_SUMMARY, 'utf8'))
   : null

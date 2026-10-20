@@ -20,6 +20,8 @@ export const MANIFEST_SETTINGS = [
   { key: 'learnFromMatches', type: 'BOOLEAN', def: true },
   // written at first load by autoApplyToWrite, which can make it false
   { key: 'autoApply', type: 'BOOLEAN', def: true },
+  // brackets as before 0.3.0: no map, animation or sound
+  { key: 'classicBrackets', type: 'BOOLEAN', def: false },
 ]
 export const SETTING_KEYS = MANIFEST_SETTINGS.map((s) => s.key)
 export const SETTING_DEFAULTS = Object.fromEntries(

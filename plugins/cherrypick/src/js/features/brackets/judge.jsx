@@ -671,12 +671,19 @@ export function LookHints({ id }) {
   )
 }
 
-export function MatchHints({ esc }) {
+// sound: the bracket map's M for sound
+export function MatchHints({ esc, sound = false }) {
   return (
     <p className="cherrypick-hints small text-muted">
       <span className="cherrypick-hints-keys">
         <kbd>←</kbd> <kbd>→</kbd> pick · <kbd>1</kbd> <kbd>2</kbd> look closer ·{' '}
         <kbd>U</kbd> undo · <kbd>Esc</kbd> {esc}
+        {sound ? (
+          <>
+            {' '}
+            · <kbd>M</kbd> sound
+          </>
+        ) : null}
       </span>
       <span className="cherrypick-hints-touch">
         Tap a cover to pick it, or a frame to look closer. Close to{' '}
