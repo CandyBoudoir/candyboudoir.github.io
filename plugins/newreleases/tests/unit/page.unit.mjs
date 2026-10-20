@@ -34,7 +34,9 @@ import {
   ownedIndex,
   performerIndex,
   presentReleases,
+  releaseKey,
   tagIndex,
+  uncovered,
   urlKey,
 } from '../../src/js/data/match.js'
 
@@ -475,6 +477,23 @@ test('the list keeps what the page opened with; what arrives after goes to Just 
   const empty = splitArrivals([rel('a'), rel('b')], null)
   assert.deepEqual(keys(empty.list), ['a', 'b'])
   assert.deepEqual(empty.justIn, [])
+})
+
+test('the page looks up who holds the releases a save added, whatever its stamp says', () => {
+  const tpdb = (id) => releaseKey({ endpoint: TPDB, id })
+  const box = (id) => releaseKey({ endpoint: BOX, id })
+  const opened = { saved: '2026-10-20T15:35:00Z', releases: catalog.releases }
+  const covered = new Set([tpdb('a'), tpdb('b'), box('c'), box('d')])
+  assert.equal(uncovered(opened, covered), '')
+  // A check saved within the same second: same stamp, one release more
+  const next = {
+    ...opened,
+    releases: [...catalog.releases, { id: 'e', endpoint: TPDB }],
+  }
+  assert.equal(uncovered(next, covered), tpdb('e'))
+  // A release with no StashID has nothing to look up
+  assert.equal(uncovered({ releases: [{ id: 'f' }] }, covered), '')
+  assert.equal(uncovered(null, covered), '')
 })
 
 test('the filter options count the releases you do not have, most first', () => {
