@@ -24,7 +24,7 @@ Stash lists new versions under Settings > Plugins > Installed Plugins when you c
 
 ## Settings
 
-City Pop's settings sit with the plugin under Settings > Plugins. All of them start off, and each restyle setting shows only while its plugin is installed and on.
+City Pop's settings sit with the plugin under Settings > Plugins. All of them start off, and the restyle and Stash UI settings each show only while their plugin is installed and on.
 
 | Setting                    | Effect                                                                                    |
 | -------------------------- | ----------------------------------------------------------------------------------------- |
@@ -32,6 +32,7 @@ City Pop's settings sit with the plugin under Settings > Plugins. All of them st
 | Plain labels               | Keeps Stash's own wording instead of the FM host's lines.                                 |
 | Restyle Insights           | Puts the Insights plugin's dashboard on the Stats page in City Pop's dusk too.            |
 | Restyle Performers Toolkit | Puts the Performers Toolkit plugin's page and performer-page tabs in City Pop's dusk too. |
+| Stash UI fonts             | Sets Stash UI in City Pop's type too when you pick City Pop under its Colors.             |
 
 ![City Pop's settings under Settings > Plugins](docs/screenshots/settings.png)
 
@@ -41,7 +42,11 @@ City Pop also follows your system's reduced-motion setting. In Stash's SFW conte
 
 [Insights](https://gitlab.com/allisless0/stash-plugins) (a stats dashboard on Stash's Stats page) and Performers Toolkit (a page at `/performerstoolkit`, and a strip and Stats and Catalog tabs on each performer's page) come from another author's suite of plugins. From Insights 2.12 and Performers Toolkit 0.13, each picks up its colours from the page, so it already matches City Pop's. With Restyle Insights or Restyle Performers Toolkit on, City Pop gives that plugin the dusk: navy panels on the hard shadow, their names in the brush script, Stash's tabs with the sunset under the open one, sunset and enamel buttons, night-blue fields and chips, pool-water switches, coral links, and cream tooltips and navy toasts under the stripe band, with each tab's colour taken from City Pop's palette. Turn both on to keep the two alike. Insights' heatmaps and its codec and resolution colours take City Pop's palette too. Each setting takes effect on the next page you open. Off, each keeps the colours it picks up, and City Pop changes two things: Insights' sidebar clears City Pop's taller navbar, and a performer's page stays an open J-card when Performers Toolkit tidies its header. City Pop is tested with Insights 2.12.1 and Performers Toolkit 0.17.1.
 
-To find audio-only scenes, City Pop asks your Stash once for each new batch of scene cards on screen which of them have no video stream and no cover of their own, and keeps the answers until you reload the page. It also reads its own settings from your Stash on each page, and keeps the two restyle settings in your browser so those pages never open in the wrong colours. It makes no other requests and none beyond your own Stash server. Its fonts, Mr Dafoe, Jost and a subset of Zen Maru Gothic holding only the 16 Japanese characters the theme draws, ship inside the plugin. The plugin is about 320 KB.
+### Stash UI
+
+[Stash UI](https://github.com/anonym88312/stash-pmv-plugins) is another author's replacement interface for Stash, with its own pages and its own colour presets. With City Pop and Stash UI both on, City Pop joins the presets under Stash UI's Settings > Appearance > Colors. Pick it to give Stash UI City Pop's night blue, panels, sunset coral and pool water; Stash UI keeps the choice in your browser and paints it from the first frame on later visits. Turn on Stash UI fonts to give it City Pop's Jost for headings and labels too. Stash UI keeps its own layout, cards and motifs, so the record sleeves, suns and FM host stay in classic Stash. Stash UI also restyles classic Stash; turn on its Keep classic Stash plain setting to see City Pop there.
+
+To find audio-only scenes, City Pop asks your Stash once for each new batch of scene cards on screen which of them have no video stream and no cover of their own, and keeps the answers until you reload the page. It also reads its own settings from your Stash on each page, in classic Stash and in Stash UI, and keeps the two restyle settings and Stash UI fonts in your browser so pages never open in the wrong colours or type. It makes no other requests and none beyond your own Stash server. Its fonts, Mr Dafoe, Jost and a subset of Zen Maru Gothic holding only the 16 Japanese characters the theme draws, ship inside the plugin. The plugin is about 320 KB.
 
 ## Screenshots
 

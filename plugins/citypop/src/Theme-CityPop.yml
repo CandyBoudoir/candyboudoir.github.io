@@ -26,3 +26,7 @@ settings:
     displayName: Restyle Performers Toolkit
     description: "Off: the Performers Toolkit plugin keeps its own Flexoki look on its page and on performer pages. On: it takes City Pop's dusk, panels, buttons and type. Shows while Performers Toolkit is on; takes effect on the next page you open."
     type: BOOLEAN
+  stashUIFonts:
+    displayName: Stash UI fonts
+    description: "For Stash UI, the replacement interface. Off: picking City Pop under Stash UI's Colors changes only its colours. On: it also sets Stash UI in City Pop's type, Jost for headings and labels. Shows while Stash UI is on; takes effect on the next page you open in Stash UI."
+    type: BOOLEAN

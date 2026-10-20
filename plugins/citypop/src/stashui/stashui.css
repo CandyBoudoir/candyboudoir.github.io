@@ -1,0 +1,71 @@
+/*
+ * City Pop in Stash UI, another author's replacement interface for Stash.
+ * stashui.js loads this file into Stash UI's page. Stash UI takes City Pop's
+ * ten colours through its own colour setting; the rules here wait for the
+ * classes stashui.js puts on <html>: .citypop-stashui while City Pop is the
+ * picked preset, .citypop-stashui-fonts when the Stash UI fonts setting is on
+ * too. Every url() here resolves against this file, in the plugin's assets.
+ */
+
+/* Jost, as in 00-fonts.css. The browser fetches it only while the fonts
+   setting is on. */
+@font-face {
+  font-display: swap;
+  font-family: 'CityPop Jost';
+  font-style: normal;
+  font-weight: 100 900;
+  src: url('fonts/jost/jost-latin-ext-wght-normal.woff2')
+    format('woff2-variations');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'CityPop Jost';
+  font-style: normal;
+  font-weight: 100 900;
+  src: url('fonts/jost/jost-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+/* The second accent and the focus ring, which Stash UI's colour setting
+   leaves out: pool water for focus, lilac for its violet touches */
+html.citypop-stashui {
+  --shine: #4fe3da;
+  --violet: #b9a6f0;
+}
+
+/* City Pop's type: Jost for headings, titles and labels, and the system face
+   for running text, as in classic Stash. Stash UI's Chinese fonts stay last
+   for the characters neither face has. */
+html.citypop-stashui-fonts {
+  --f-text:
+    system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial,
+    'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', 'Source Han Sans SC',
+    sans-serif;
+  --f-display:
+    'CityPop Jost', futura, 'Century Gothic', 'Microsoft YaHei', 'PingFang SC',
+    'Noto Sans SC', 'Source Han Sans SC', sans-serif;
+  --f-label: var(--f-display);
+}
+
+/* The preset's swatch: the striped sun going down under the night sky */
+.citypop-preset i {
+  background: linear-gradient(
+    180deg,
+    #0c0e30 0 34%,
+    #ffe08a 34% 48%,
+    #0c0e30 48% 52%,
+    #ff9a6e 52% 66%,
+    #0c0e30 66% 70%,
+    #f5508a 70% 84%,
+    #0c0e30 84% 88%,
+    #c23a8e 88%
+  );
+}

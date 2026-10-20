@@ -133,8 +133,17 @@ The design-system page shows neither.
 | Plain labels               | `plainCopy`                | Keeps Stash's own wording                  |
 | Restyle Insights           | `restyleInsights`          | Puts Insights in City Pop's dusk           |
 | Restyle Performers Toolkit | `restylePerformersToolkit` | Puts Performers Toolkit in City Pop's dusk |
+| Stash UI fonts             | `stashUIFonts`             | Sets Stash UI in City Pop's type           |
 
-All of them default to off, so a fresh install gets the full theme and leaves the two plugins as their author drew them. The two restyle settings show only while their plugin is on.
+All of them default to off, so a fresh install gets the full theme and leaves the two plugins as their author drew them. The two restyle settings show only while their plugin is on, and Stash UI fonts only while Stash UI is on (`84-stash-ui.css`, by the same script-tag rule).
+
+## Stash UI
+
+Stash UI (github.com/anonym88312/stash-pmv-plugins) is another author's replacement interface. It is a page of its own at `/plugin/stashui/assets/index.html` that loads no plugin's `ui.css` or `ui.javascript`, so none of City Pop's classic CSS reaches it. Its extension API imports `assets/stashui.js` from every enabled plugin and calls the default export; City Pop's module and stylesheet live in `src/stashui/` and the build copies them into the plugin's assets.
+
+Stash UI paints itself from ten colour slots (`--pink` for its accent, `--bg`, `--bg-2`, `--bg-3`, `--base`, `--text`, `--text-2`, `--faint`, `--ok`, `--danger`), keeps the chosen colours in `localStorage` (`stashui.theme`) and writes them inline on `<html>` before it draws anything. The module adds a City Pop button after the built-in presets under Settings > Appearance > Colors, in Stash UI's own markup, and puts it back each time Stash UI redraws the presets. Picking it stores City Pop's colours in that same setting with the preset id `Theme-CityPop:citypop`, so from the next load Stash UI paints the dusk itself, before the module arrives. Until then the module sets the colours and the shades Stash UI works out from them, the way its `applyTheme` does. City Pop's slots: the sun for the accent, night for the page, the panel for surfaces, the line for borders and hover, the well for the menu and fields, cream, muted and dim for the three text levels, pool water for success and City Pop's danger pink for errors.
+
+`stashui.css` waits for two classes the module keeps on `<html>`: `.citypop-stashui` while City Pop is the picked preset, which adds pool water for the focus ring (`--shine`) and lilac for Stash UI's violet, and `.citypop-stashui-fonts` while the Stash UI fonts setting is on too, which points Stash UI's `--f-display` and `--f-label` at Jost and its `--f-text` at the system face City Pop keeps for running text. The brush script stays out: Stash UI sets scene titles and long headings in its display face. The module reads the setting on every page Stash UI opens and keeps it in `localStorage` (`citypop.stashui.fonts`). A colour changed with Stash UI's wheel keeps City Pop picked and unmarks its button, as Stash UI does for its own presets. With City Pop switched off, the module never loads, the button goes, and Stash UI keeps the stored colours until another preset is picked.
 
 ## Coupling to Stash
 

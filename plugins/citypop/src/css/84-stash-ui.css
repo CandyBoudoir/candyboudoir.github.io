@@ -1,0 +1,13 @@
+/*
+ * Stash UI (github.com/anonym88312/stash-pmv-plugins), another author's
+ * replacement interface, draws its own pages and loads none of this file.
+ * City Pop reaches it through assets/stashui.js (src/stashui/). Classic Stash
+ * needs one rule: the Stash UI fonts setting shows in Settings > Plugins only
+ * while Stash UI is on. Stash puts a script tag for each enabled plugin into
+ * the page's head, and gives the setting's switch the id
+ * plugin-<plugin>-<setting>.
+ */
+:root:not(:has(script[src*='/plugin/stashui/']))
+  .setting:has([id='plugin-Theme-CityPop-stashUIFonts']) {
+  display: none;
+}

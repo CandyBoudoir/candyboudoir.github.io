@@ -61,6 +61,10 @@ export async function build(out) {
   await cp(join(src, 'icons'), join(out, 'assets', 'icons'), {
     recursive: true,
   })
+  // Stash UI, another author's replacement interface, imports assets/stashui.js
+  // from every enabled plugin; src/stashui/ holds City Pop's module for it.
+  for (const file of ['stashui.js', 'stashui.css'])
+    await cp(join(src, 'stashui', file), join(out, 'assets', file))
 
   for (const font of FONTS) {
     const dir = join(out, 'assets', 'fonts', font.dir)

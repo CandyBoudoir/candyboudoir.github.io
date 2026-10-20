@@ -753,7 +753,8 @@ test.describe('beside Performers Toolkit', () => {
 })
 
 // Each restyle setting shows in Settings > Plugins only while its plugin
-// is on, since it has nothing to restyle otherwise. City Pop hides its row
+// is on, since it has nothing to restyle otherwise, and so does Stash UI
+// fonts, which this Stash never has. City Pop hides its row
 // with display: none; the row's section may be collapsed (Stash develop
 // starts plugin settings closed), so the test reads the row's display.
 test('each restyle setting shows only while its plugin is on', async ({
@@ -771,6 +772,7 @@ test('each restyle setting shows only while its plugin is on', async ({
     await expect.poll(() => shown('calmMode')).toBe(true)
     await expect.poll(() => shown('restyleInsights')).toBe(insights)
     await expect.poll(() => shown('restylePerformersToolkit')).toBe(toolkit)
+    await expect.poll(() => shown('stashUIFonts')).toBe(false)
   }
   try {
     await rows(false, false)
