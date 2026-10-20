@@ -8,10 +8,11 @@
 // all year: Stash compares its timestamp filters with the server's local
 // time, which a server in UTC never shows. A companion leg's `zips` keys the
 // cache of its pinned zip (companion-zips.mjs) on the pin's sha256. Every leg
-// also installs the plugins the themes restyle (RESTYLED), whose pinned
-// files `restyled` keys on their commits, in a cache of their own.
+// also installs the plugins the themes restyle (RESTYLED) and those that
+// plugins here extend (EXTENDED), whose pinned files and zips `pinned` keys
+// on their commits, in a cache of their own.
 import { readFile } from 'node:fs/promises'
-import { COMPANIONS, RESTYLED } from './companions.mjs'
+import { COMPANIONS, EXTENDED, RESTYLED } from './companions.mjs'
 
 const versions = JSON.parse(
   await readFile(new URL('../stash-versions.json', import.meta.url), 'utf8'),
@@ -82,10 +83,10 @@ if (versions.develop) {
   })
 }
 
-const restyled = Object.values(RESTYLED)
-  .map((r) => r.commit)
+const pinned = [...Object.values(RESTYLED), ...Object.values(EXTENDED)]
+  .map((p) => p.commit)
   .join('-')
-for (const leg of legs) leg.restyled = restyled
+for (const leg of legs) leg.pinned = pinned
 
 console.log(`legs=${JSON.stringify(legs)}`)
 console.log(`new_stable=${newStable}`)

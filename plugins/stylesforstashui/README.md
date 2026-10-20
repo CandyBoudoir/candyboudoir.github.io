@@ -6,7 +6,7 @@ Styles for Stash UI is incubating: it is built and tested here and not yet in th
 
 ## What you need
 
-- Stash UI, installed and on. Styles for Stash UI does nothing without it, and Stash cannot install it for you, since it comes from another plugin source.
+- Stash UI, installed and on. Styles for Stash UI does nothing without it, and Stash cannot install it for you, since it comes from another plugin source. Styles for Stash UI is tested beside Stash UI 3.115.1.
 - Neither theme: the styles work beside any look in classic Stash.
 
 ## Pick a style
@@ -41,7 +41,7 @@ The repo's [README](../../README.md) covers building, testing and releasing. Sty
 - `src/stashui.js` is the module Stash UI imports: the styles' colours, their buttons, the Colors only switch and the attributes the stylesheet waits for.
 - `src/css/` holds numbered partials that the build joins into one `stashui.css`: the fonts, the buttons' swatches and one partial per style.
 - `src/icons/` holds City Pop's sun, its backdrop's palms, stars and setting sun, and Overclock's reticle.
-- `tests/` holds the compatibility checks, which run only on a Stash with Stash UI installed.
+- `tests/` holds the compatibility checks, which run beside the Stash UI release pinned in `tests/stash/companions.mjs` (EXTENDED).
 - `plugin.mjs` tells the shared build what goes into the plugin folder.
 
 ## License

@@ -1,9 +1,7 @@
 // Styles for Stash UI's contract with Stash UI, another author's replacement
-// interface. These run only on a Stash with Stash UI installed (plugin id
-// stashui): the test Stash prepare.mjs builds has no Stash UI, so they skip
-// there. To run them, install Stash UI into a throwaway Stash from its source
-// (https://anonym88312.github.io/stash-pmv-plugins/index.yml) and point
-// STASH_URL at it.
+// interface. prepare.mjs installs Stash UI (plugin id stashui) into every test
+// Stash, switched off, from the commit EXTENDED.stashui in
+// tests/stash/companions.mjs pins, and these switch it on.
 import { expect, test } from '@playwright/test'
 import {
   gql,
@@ -34,9 +32,6 @@ const STYLES = [
   },
 ]
 
-const hasStashUI = async () =>
-  (await gql('{ plugins { id } }')).plugins.some((p) => p.id === 'stashui')
-
 const button = (page, style) =>
   page.locator(`.kb-theme-presets [data-preset="${PLUGIN_ID}:${style.id}"]`)
 const colorsOnlySwitch = (page) => page.locator('.sfs-colors-only')
@@ -63,7 +58,6 @@ test.describe('beside Stash UI', () => {
   let errors = []
 
   test.beforeAll(async () => {
-    test.skip(!(await hasStashUI()), 'Stash UI is not installed in this Stash')
     // Neither theme: the styles stand on their own
     await usePlugins(PLUGIN_ID, 'stashui')
     await setPluginSettings(PLUGIN_ID, {})
