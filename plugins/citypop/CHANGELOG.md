@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.2
+
+Performers Toolkit 0.17 on a performer's page, for Stash v0.31.1.
+
+- A performer's details read again when Performers Toolkit tidies the header. The toolkit sets them out as a grid with each name over its value, and City Pop's track listing squeezed each value to a letter a line. With the restyle on or off, the details now follow the toolkit's grid. With Restyle Performers Toolkit on, the names, the toolkit's facts at a glance and its Also row are in City Pop's spaced capitals.
+- The cover meets the spine again when Performers Toolkit 0.17 shows its Body panel beside the header, with the restyle on or off.
+- Tested beside Insights 2.12.1 and Performers Toolkit 0.17.1.
+
 ## 0.2.1
 
 Insights 2.12 and Performers Toolkit 0.13 in the dusk, for Stash v0.31.1.
