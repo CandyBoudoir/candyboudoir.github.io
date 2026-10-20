@@ -9,7 +9,7 @@
 import { FontAwesomeSolid, React } from '../../../runtime/api.js'
 import { Cherries } from '../../../ui/Cherries.jsx'
 import { Icon } from '../parts.jsx'
-import { fly, fx, haptic, sfx, useTheme } from './fx.js'
+import { calm, fly, fx, haptic, sfx, useTheme } from './fx.js'
 import { useFacts } from './sides.jsx'
 
 const { faTrophy } = FontAwesomeSolid
@@ -133,7 +133,8 @@ export function BracketMap({
   const world = React.useRef(null)
   const marker = React.useRef(null)
   const [geo, setGeo] = React.useState(null)
-  const [wide, setWide] = React.useState(!!ev?.round)
+  const [wide, setWide] = React.useState(false)
+  const wideTimer = React.useRef(0)
   const fresh = decided(st, ev)
   const champion = st.result?.champion
   const last = st.rounds.length - 1
@@ -153,13 +154,16 @@ export function BracketMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // a new round pulls the camera back over the whole map for a moment
+  // a new round pulls the camera back over the whole map for a moment. A
+  // pick in that moment leaves the timer running, so the camera always
+  // comes back to the match.
   React.useEffect(() => {
-    if (!ev?.round || celebrate) return
+    if (!ev?.round || celebrate || calm()) return
     setWide(true)
-    const id = setTimeout(() => setWide(false), 1000)
-    return () => clearTimeout(id)
+    clearTimeout(wideTimer.current)
+    wideTimer.current = setTimeout(() => setWide(false), 1000)
   }, [ev, celebrate])
+  React.useEffect(() => () => clearTimeout(wideTimer.current), [])
 
   const fitOf = (g, v) => Math.min(v.clientWidth / g.w, v.clientHeight / g.h, 1)
   const scroll =

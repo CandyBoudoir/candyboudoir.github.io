@@ -224,6 +224,23 @@ test('the Challenge round plays on its own road, and beating every favorite ends
 test.describe('reduced motion', () => {
   test.use({ reducedMotion: 'reduce' })
 
+  test('picks made at once leave the camera on the match being played', async ({
+    page,
+  }) => {
+    const play = await openBracket(page)
+    for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowLeft')
+    await expect(round(play)).toHaveText('Round of 16 · match 4 of 8')
+    // at full size, as the camera shows the match it follows (the whole
+    // map would show it at under half)
+    await expect
+      .poll(() =>
+        play
+          .locator('.cherrypick-map-node.now')
+          .evaluate((el) => el.getBoundingClientRect().width / el.offsetWidth),
+      )
+      .toBeGreaterThan(0.9)
+  })
+
   test('New bracket sets the finished bracket’s ratings and starts the next one in one click', async ({
     page,
   }) => {
