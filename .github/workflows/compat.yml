@@ -163,6 +163,17 @@ jobs:
         run: pnpm exec playwright test ${{ steps.baselines.outputs.specs && format('{0} --update-snapshots=all', steps.baselines.outputs.specs) || 'visual' }}
         env:
           PW_STEP: visual
+      # A Stash that stops answering (once so far, mid-run, with nothing in
+      # its log) writes every goroutine's stack to its log on SIGQUIT, which
+      # the report artifact keeps
+      - name: Stash's stacks if it stopped answering
+        if: always() && steps.prepare.outcome == 'success'
+        run: |
+          curl -fsS -m 15 -o /dev/null -H 'Content-Type: application/json' \
+            -d '{"query":"{ version { version } }"}' "$STASH_URL/graphql" && exit 0
+          echo "::warning::Stash stopped answering; its goroutines are in stash.log"
+          kill -QUIT "$(cat "$WORK/stash.pid")"
+          sleep 2
       - name: Record result
         if: always()
         run: node tests/stash/status.mjs

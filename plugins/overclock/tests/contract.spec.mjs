@@ -242,13 +242,6 @@ function contrast(a, b) {
 
 const alpha = (rgb) => Number(rgb.match(/[\d.]+/g)[3] ?? 1)
 
-// A custom property's computed value on an element
-const tokenOf = (locator, name) =>
-  locator.evaluate(
-    (el, name) => getComputedStyle(el).getPropertyValue(name).trim(),
-    name,
-  )
-
 // Cherry Pick's Your score sits where the rating tag does, on scenes you
 // haven't rated. Overclock draws it as the tag left hollow: an opaque black
 // panel with a yellow frame, whose type reads over any cover.
@@ -321,11 +314,11 @@ test.describe('beside Insights', () => {
       const root = page.locator('#insights')
       await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       // Insights' own rules still paint from the palette Overclock gives it
-      expect(await tokenOf(root, '--ui')).toBe('#0d1416')
+      await expect(root).toHaveCSS('--ui', '#0d1416')
       // and so do its newer ones, from its own tokens, and its calendars,
       // whose empty days sit in the field
-      expect(await tokenOf(root, '--sx-ui')).toBe('#070b0c')
-      expect(await tokenOf(root, '--ins-o4')).toBe('#4a8dff')
+      await expect(root).toHaveCSS('--sx-ui', '#070b0c')
+      await expect(root).toHaveCSS('--ins-o4', '#4a8dff')
       await expect(root.locator('.ins-sub').first()).toHaveCSS(
         'color',
         'rgb(134, 153, 154)',
@@ -450,7 +443,7 @@ test.describe('beside Performers Toolkit', () => {
       await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       // The toolkit's own rules still paint from the palette Overclock
       // gives it
-      expect(await tokenOf(root, '--ui')).toBe('#0d1416')
+      await expect(root).toHaveCSS('--ui', '#0d1416')
       await expect(root.locator('.pt-card').first()).toHaveCSS(
         'background-color',
         'rgb(13, 20, 22)',
@@ -464,10 +457,12 @@ test.describe('beside Performers Toolkit', () => {
         'rgb(243, 230, 0)',
       )
       // On a performer's page, the Stats tab and the strip under the name
+      // (read at each try: the toolkit draws the tab anew as each of its
+      // lookups returns, and the one it just replaced reads empty)
       const ids = await demoIds()
       await openPerformerStats(page, ids.performer)
-      expect(await tokenOf(page.locator('.ptc'), '--ui')).toBe('#0d1416')
-      expect(await tokenOf(page.locator('.ptc'), '--sx-ui')).toBe('#0d1416')
+      await expect(page.locator('.ptc')).toHaveCSS('--ui', '#0d1416')
+      await expect(page.locator('.ptc')).toHaveCSS('--sx-ui', '#0d1416')
       await expect(page.locator('.ptc .pt-kpi').first()).toHaveCSS(
         'background-color',
         'rgb(13, 20, 22)',

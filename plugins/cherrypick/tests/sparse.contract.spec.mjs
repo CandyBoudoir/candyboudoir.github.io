@@ -212,6 +212,10 @@ test('a bracket of performers you never rated rates all sixteen from their finis
   await result.locator('.cherrypick-rate-own').click()
   const ask = result.locator('.cherrypick-champ-rate')
   await expect(ask).toContainText('How many stars for')
+  // The stars take the link's place, under the pointer that clicked it,
+  // and Stash's stars fill up to the one the pointer rests on: move it off
+  // so they show the rating alone
+  await page.mouse.move(0, 0)
   await expect(ask.locator('.rating-stars .star-fill-100')).toHaveCount(0)
   await ask.locator('.rating-stars button').nth(3).click()
   await expect(ask).toContainText('4.0★')

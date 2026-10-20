@@ -262,24 +262,14 @@ test.describe('beside Insights', () => {
       const root = page.locator('#insights')
       await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       // Insights' own rules still paint from the palette Juicy gives it
-      expect(
-        await root.evaluate((el) =>
-          getComputedStyle(el).getPropertyValue('--ui').trim(),
-        ),
-      ).toBe('#22123f')
+      await expect(root).toHaveCSS('--ui', '#22123f')
       // and so do its newer ones, from its own tokens, and its calendars,
       // whose empty days sit in the well
       for (const [name, value] of [
         ['--sx-ui', '#0d0520'],
         ['--ins-o4', '#fc68b2'],
-      ]) {
-        expect(
-          await root.evaluate(
-            (el, name) => getComputedStyle(el).getPropertyValue(name).trim(),
-            name,
-          ),
-        ).toBe(value)
-      }
+      ])
+        await expect(root).toHaveCSS(name, value)
       await expect(root.locator('.ins-sub').first()).toHaveCSS(
         'color',
         'rgb(149, 124, 176)',
@@ -406,16 +396,10 @@ test.describe('beside Performers Toolkit', () => {
       await openPerformerStats(page, ids.performer)
       const stats = page.locator('.ptc').first()
       // Its own rules still paint from the palette Juicy gives it
-      expect(
-        await stats.evaluate((el) =>
-          getComputedStyle(el).getPropertyValue('--ui').trim(),
-        ),
-      ).toBe('#22123f')
-      expect(
-        await stats.evaluate((el) =>
-          getComputedStyle(el).getPropertyValue('--sx-ui').trim(),
-        ),
-      ).toBe('#22123f')
+      // (read at each try: the toolkit draws the tab anew as each of its
+      // lookups returns, and the one it just replaced reads empty)
+      await expect(stats).toHaveCSS('--ui', '#22123f')
+      await expect(stats).toHaveCSS('--sx-ui', '#22123f')
       await expect(stats.locator('.pt-kpi').first()).toHaveCSS(
         'background-color',
         'rgb(34, 18, 63)',

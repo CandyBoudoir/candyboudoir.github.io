@@ -19,6 +19,19 @@ const idKey = (endpoint, id) => `${endpointKey(endpoint)}|${id}`
 // A release's key: its stash-box and its id there.
 export const releaseKey = (release) => idKey(release.endpoint, release.id)
 
+/**
+ * The catalog's releases that a lookup of the scenes holding them
+ * (heldScenes in stash.js) has not covered, as one string of their keys:
+ * empty once `covered` holds them all. Two reads of one save give the same
+ * string.
+ * @param {Set<string>} covered
+ */
+export const uncovered = (catalog, covered) =>
+  (catalog?.releases || [])
+    .filter((r) => r.endpoint && r.id && !covered.has(releaseKey(r)))
+    .map(releaseKey)
+    .join(' ')
+
 export function nameKey(name) {
   return String(name || '')
     .normalize('NFKD')

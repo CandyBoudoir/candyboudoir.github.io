@@ -31,6 +31,7 @@ import {
   performerIndex,
   presentReleases,
   tagIndex,
+  uncovered,
 } from '../data/match.js'
 import {
   isNew,
@@ -284,22 +285,25 @@ function useUrlFilters() {
 }
 
 // The scenes that hold releases by StashID, and which releases that
-// covers: read with the library at first, then again in the background each
-// time the task saves the catalog. A release waits until it is covered, so
-// one the user has never shows, even for a moment. Keyed on the save, not
-// the catalog read: two reads of one save (the last tick of a check reads
-// twice) must not cancel the lookup.
+// covers: read with the library at first, then again in the background
+// whenever the catalog holds a release the last lookup did not cover. A
+// release waits until it is covered, so one the user has never shows, even
+// for a moment. Keyed on the releases left to cover and the save, not the
+// catalog read: two reads of one save (the last tick of a check reads
+// twice) must not cancel the lookup. The save's stamp alone is not enough:
+// it counts whole seconds, so a check that saves within the second of the
+// catalog the page opened with would add releases that never show.
 function useHeld(visit, catalog) {
   const first = read(`${visit}held`, () => heldScenes(catalog))
   const [held, setHeld] = React.useState(first)
-  const [opening] = React.useState(catalog?.saved)
   const latest = React.useRef(catalog)
   React.useEffect(() => {
     latest.current = catalog
   })
+  const missing = uncovered(catalog, held.keys)
   const saved = catalog?.saved
   React.useEffect(() => {
-    if (saved === opening) return
+    if (!missing) return
     let live = true
     heldScenes(latest.current)
       .then((next) => live && setHeld(next))
@@ -307,7 +311,7 @@ function useHeld(visit, catalog) {
     return () => {
       live = false
     }
-  }, [saved, opening])
+  }, [missing, saved])
   return held
 }
 

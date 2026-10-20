@@ -291,24 +291,14 @@ test.describe('beside Insights', () => {
       const root = page.locator('#insights')
       await expect(root).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       // Insights' own rules still paint from the palette Leather gives it
-      expect(
-        await root.evaluate((el) =>
-          getComputedStyle(el).getPropertyValue('--ui').trim(),
-        ),
-      ).toBe('#151113')
+      await expect(root).toHaveCSS('--ui', '#151113')
       // and so do its newer ones, from its own tokens, and its calendars,
       // whose empty days sit in the well
       for (const [name, value] of [
         ['--sx-ui', '#0a0809'],
         ['--ins-o4', '#b9aea9'],
-      ]) {
-        expect(
-          await root.evaluate(
-            (el, name) => getComputedStyle(el).getPropertyValue(name).trim(),
-            name,
-          ),
-        ).toBe(value)
-      }
+      ])
+        await expect(root).toHaveCSS(name, value)
       await expect(root.locator('.ins-sub').first()).toHaveCSS(
         'color',
         'rgb(148, 138, 139)',
@@ -450,16 +440,10 @@ test.describe('beside Performers Toolkit', () => {
       await openPerformerStats(page, ids.performer)
       const stats = page.locator('.ptc').first()
       // Its own rules still paint from the palette Leather gives it
-      expect(
-        await stats.evaluate((el) =>
-          getComputedStyle(el).getPropertyValue('--ui').trim(),
-        ),
-      ).toBe('#151113')
-      expect(
-        await stats.evaluate((el) =>
-          getComputedStyle(el).getPropertyValue('--sx-ui').trim(),
-        ),
-      ).toBe('#151113')
+      // (read at each try: the toolkit draws the tab anew as each of its
+      // lookups returns, and the one it just replaced reads empty)
+      await expect(stats).toHaveCSS('--ui', '#151113')
+      await expect(stats).toHaveCSS('--sx-ui', '#151113')
       await expect(stats.locator('.pt-kpi').first()).toHaveCSS(
         'background-image',
         /leather-1x\.webp/,

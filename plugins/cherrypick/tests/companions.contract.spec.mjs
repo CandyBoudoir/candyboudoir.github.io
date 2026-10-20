@@ -325,9 +325,20 @@ async function performerRatings() {
 }
 
 // The pairs of the other plugin's pieces and Cherry Pick's, on the same
-// page, that overlap
+// page, that overlap once their transitions end. Under reduced motion,
+// Xenith gives every element on the page a 0.01 ms transition, so the
+// crown moves above the badge Xenith adds a frame after Xenith marks the
+// card, and a measure in that frame finds it still on the badge.
 const overlaps = (page, theirs) =>
-  page.evaluate((theirs) => {
+  page.evaluate(async (theirs) => {
+    const pieces =
+      '.cherrypick-score-banner, .cherrypick-honours, .cherrypick-performer-line, .cherrypick-bracket-slot, .rating-banner'
+    await Promise.all(
+      [...document.querySelectorAll(`${pieces}, ${theirs}`)]
+        .flatMap((el) => el.getAnimations())
+        .filter((a) => a instanceof CSSTransition)
+        .map((a) => a.finished.catch(() => {})),
+    )
     const box = (el) => {
       const b = el.getBoundingClientRect()
       return b.width && b.height && getComputedStyle(el).visibility !== 'hidden'
@@ -339,11 +350,7 @@ const overlaps = (page, theirs) =>
       b.left < a.right &&
       a.top < b.bottom &&
       b.top < a.bottom
-    const ours = [
-      ...document.querySelectorAll(
-        '.cherrypick-score-banner, .cherrypick-honours, .cherrypick-performer-line, .cherrypick-bracket-slot, .rating-banner',
-      ),
-    ]
+    const ours = [...document.querySelectorAll(pieces)]
       .map((el) => [el.className, box(el)])
       .filter(([, b]) => b)
     const out = []
