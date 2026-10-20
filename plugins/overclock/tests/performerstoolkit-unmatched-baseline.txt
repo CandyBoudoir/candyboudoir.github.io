@@ -34,6 +34,7 @@ pt-frow
 pt-fwc
 pt-gcell
 pt-hitems
+pt-lbar
 pt-mcard
 pt-mcov
 pt-msg
