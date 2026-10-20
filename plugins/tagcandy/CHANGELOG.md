@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2
+
+- New icons for 69, American Porn, Artistic, Average Body, Average Height, Award Winner, Ballerina Position, BBW, Behind the Scenes, Big Belly and 64 more.
+
 ## 0.1.1
 
 - New icons for Age Gap, Animation, April Fools, Average Dick, Bait, Big Black Cock (BBC), Big Clit, Big White Cock (BWC), Birthday, Biting Balls and 59 more.
