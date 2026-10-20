@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2
+
+Cherry Pick's Your score reads on Overclock, for Stash v0.31.1.
+
+- Cherry Pick's Your score, its guess at how you'd rate a scene, is the rating tag left hollow: black with a yellow frame and yellow type. It had taken the tag's black type over Cherry Pick's dark dim and could not be read.
+- Tested beside Insights 2.12.1 and Performers Toolkit 0.17.1.
+
 ## 0.2.1
 
 Insights 2.12 and Performers Toolkit 0.13 on the display, for Stash v0.31.1.
