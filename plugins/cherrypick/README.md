@@ -126,7 +126,7 @@ Cherry Pick's tests run on these Stash versions and on Stash's latest develop bu
 | Stash         | v0.31.1       |
 | Ascension     | 1.4.1         |
 | HotOrNot      | 1.0.0-c4106bf |
-| Stash Curator | 0.40.6        |
+| Stash Curator | 0.41.0        |
 | Xenith        | 3.2.0         |
 | Restash       | 0.3.0-55c1cb2 |
 

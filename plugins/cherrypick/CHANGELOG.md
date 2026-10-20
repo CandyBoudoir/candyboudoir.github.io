@@ -7,7 +7,7 @@
 - New bracket, on the champion screen, does what Done and then Bracket would do, in one click: with Apply bracket ratings automatically on, it sets the finished bracket's ratings first, then starts a bracket from the same pool, gender and size, in which the last bracket's entrants sit out while others can take their places.
 - Brackets Classic Mode, a new setting that starts off, plays brackets as Cherry Pick 0.2 did, with two cards, a pick and no map, animation or sound. New bracket works there too.
 
-Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.40.6, Xenith 3.2.0 and Restash 0.3.0-55c1cb2.
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.41.0, Xenith 3.2.0 and Restash 0.3.0-55c1cb2.
 
 ## 0.2.2
 
