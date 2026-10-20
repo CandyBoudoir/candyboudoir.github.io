@@ -7,7 +7,8 @@
 // Colors. Picking one stores its colours in Stash UI's own colour setting,
 // which Stash UI paints before it draws anything, so from the next load on the
 // colours show from the first frame. stashui.css adds what Stash UI's ten
-// colours leave out and, unless Colors only is on, the style's type.
+// colours leave out and, unless Colors only is on, the style's type and
+// backdrop.
 
 const PLUGIN_ID = 'StylesForStashUI'
 
@@ -184,7 +185,7 @@ async function saveColorsOnly(on) {
 }
 
 const colorsOnlyHint = (style) =>
-  `Only ${style.name}'s colors: Stash UI keeps its own fonts and lettering.`
+  `Only ${style.name}'s colors: Stash UI keeps its own fonts, lettering and backdrop.`
 
 // The Colors only switch, in the row Stash UI's Liquid glass switch uses
 function colorsOnlySwitch(style) {

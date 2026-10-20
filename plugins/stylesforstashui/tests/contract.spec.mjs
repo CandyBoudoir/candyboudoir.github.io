@@ -191,4 +191,58 @@ test.describe('beside Stash UI', () => {
     ).toBeUndefined()
     expect(await titleFont(page)).not.toContain(STYLES[0].title)
   })
+  const layer = (page, pseudo, property) =>
+    page.evaluate(
+      ([pseudo, property]) => getComputedStyle(document.body, pseudo)[property],
+      [pseudo, property],
+    )
+
+  test('each style’s backdrop, and the sun up only in Settings', async ({
+    page,
+  }) => {
+    await openLook(page)
+    await button(page, STYLES[0]).click()
+    expect(await layer(page, '::before', 'backgroundImage')).toContain(
+      'palms-backdrop.svg',
+    )
+    await expect.poll(() => layer(page, '::after', 'opacity')).toBe('0.5')
+    await page.goto(`${APP}#/scenes`)
+    await expect.poll(() => layer(page, '::after', 'opacity')).toBe('0')
+
+    await openLook(page)
+    await button(page, STYLES[1]).click()
+    expect(await layer(page, '::before', 'backgroundImage')).toContain(
+      'rgba(0, 229, 255, 0.16)',
+    )
+    expect(await layer(page, '::after', 'backgroundImage')).toContain(
+      'repeating-linear-gradient',
+    )
+
+    // Colors only keeps Stash UI's halftone screen
+    await colorsOnlySwitch(page).locator('.kb-switch').click()
+    await expect
+      .poll(() => layer(page, '::before', 'backgroundImage'))
+      .not.toContain('rgba(0, 229, 255, 0.16)')
+    expect(await layer(page, '::after', 'backgroundImage')).toBe('none')
+  })
+
+  test('Stash UI’s own background image takes the backdrop’s place', async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('stashui.wallpaper', 'true')
+      localStorage.setItem('stashui.wallMode', '"fixed"')
+      localStorage.setItem(
+        'stashui.wallFixed',
+        '"/plugin/StylesForStashUI/assets/icons/stars.svg"',
+      )
+    })
+    await openLook(page)
+    await button(page, STYLES[0]).click()
+    await expect(page.locator('#kb-wall')).toBeAttached()
+    expect(await layer(page, '::before', 'backgroundImage')).not.toContain(
+      'palms-backdrop.svg',
+    )
+    expect(await titleFont(page)).toContain(STYLES[0].title)
+  })
 })
