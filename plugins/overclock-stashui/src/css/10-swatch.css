@@ -1,0 +1,13 @@
+/*
+ * Overclock's button among Stash UI's presets under Settings > Appearance >
+ * Colors, in Stash UI's own markup (.kb-theme-preset), and the Colors only
+ * switch under them while Overclock is picked (.kb-theme-glass, the row Stash
+ * UI's Liquid glass switch uses). Only the button's swatch is ours.
+ */
+
+/* Overclock: acid yellow hazard stripes on the void */
+.kb-theme-preset[data-preset='StashUI-Overclock:overclock'] i {
+  background:
+    linear-gradient(135deg, transparent 0 58%, #0a0a0c 58%),
+    repeating-linear-gradient(-45deg, #f3e600 0 4px, #0a0a0c 4px 8px);
+}

@@ -234,7 +234,7 @@ export const EXTENDED = {
     commit: 'ed9c93a44ad4b3660783110e672ad0bf393da76a',
     folder: 'plugins/stashui',
     date: '2026-10-20 15:04:32',
-    extendedBy: ['stylesforstashui'],
+    extendedBy: ['citypop-stashui', 'overclock-stashui'],
     // The source index users add, whose zip pin-extended.mjs checks
     latest: {
       index: 'https://anonym88312.github.io/stash-pmv-plugins/index.yml',

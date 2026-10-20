@@ -1,13 +1,13 @@
 /*
  * Overclock: a hacker's heads-up display in acid yellow. Stash UI takes
  * Overclock's ten colours through its own colour setting; these rules wait
- * for html[data-sfs-style='overclock'], which stashui.js sets while Overclock
- * is the picked style, and for [data-sfs-type] while Colors only is off.
+ * for html[data-cb-style='overclock'], which stashui.js sets while Overclock
+ * is the picked style, and for [data-cb-type] while Colors only is off.
  */
 
 /* The focus ring in cyan and Stash UI's violet touches in magenta, the two
    colours of Overclock's glitch split */
-html[data-sfs-style='overclock'] {
+html[data-cb-style='overclock'] {
   --shine: #00e5ff;
   --violet: #ff2fd0;
 }
@@ -15,7 +15,7 @@ html[data-sfs-style='overclock'] {
 /* Overclock's type, split as in classic Stash: Chakra Petch for titles,
    buttons, the menu and labels, and the system face for running text.
    Stash UI's Chinese fonts stay last for the characters neither face has. */
-html[data-sfs-style='overclock'][data-sfs-type] {
+html[data-cb-style='overclock'][data-cb-type] {
   --f-text:
     system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial,
     'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', 'Source Han Sans SC',
@@ -29,7 +29,7 @@ html[data-sfs-style='overclock'][data-sfs-type] {
 
 /* Share Tech Mono for the readouts, where classic Overclock uses it: tags,
    the menu's group headings and the trail above a page title */
-html[data-sfs-style='overclock'][data-sfs-type]
+html[data-cb-style='overclock'][data-cb-type]
   :is(.kb-chip, .kb-rail-group, .kb-crumbs) {
   font-family:
     'Overclock Mono', ui-monospace, 'SF Mono', menlo, consolas, monospace;
@@ -38,7 +38,7 @@ html[data-sfs-style='overclock'][data-sfs-type]
 /* Page titles, which are also the names on performer, studio and tag pages:
    yellow caps with the red and cyan split a glitch leaves on type. Chakra
    Petch is wider than Stash UI's condensed face, so they run smaller. */
-html[data-sfs-style='overclock'][data-sfs-type] .kb-h1 {
+html[data-cb-style='overclock'][data-cb-type] .kb-h1 {
   color: #f3e600;
   font-size: clamp(30px, 4vw, 50px);
   font-stretch: normal;
@@ -51,7 +51,7 @@ html[data-sfs-style='overclock'][data-sfs-type] .kb-h1 {
 }
 
 /* Section titles in caps, as classic Overclock sets its headings */
-html[data-sfs-style='overclock'][data-sfs-type] .kb-h2 {
+html[data-cb-style='overclock'][data-cb-type] .kb-h2 {
   font-size: 22px;
   font-stretch: normal;
   font-weight: 600;
@@ -61,8 +61,8 @@ html[data-sfs-style='overclock'][data-sfs-type] .kb-h2 {
 
 /* What shares a title's line keeps its own case and no split: the links and
    buttons beside a section title, a performer's disambiguation and tier */
-html[data-sfs-style='overclock'][data-sfs-type] .kb-h2 > :not(em, b, span, i),
-html[data-sfs-style='overclock'][data-sfs-type] .kb-h1 :is(small, .kb-tier) {
+html[data-cb-style='overclock'][data-cb-type] .kb-h2 > :not(em, b, span, i),
+html[data-cb-style='overclock'][data-cb-type] .kb-h1 :is(small, .kb-tier) {
   letter-spacing: normal;
   text-shadow: none;
   text-transform: none;
@@ -70,7 +70,7 @@ html[data-sfs-style='overclock'][data-sfs-type] .kb-h1 :is(small, .kb-tier) {
 
 /* The wordmark: yellow caps with the split, beside a reticle, upright
    instead of Stash UI's slanted lettering */
-html[data-sfs-style='overclock'][data-sfs-type] .kb-mark {
+html[data-cb-style='overclock'][data-cb-type] .kb-mark {
   -webkit-text-stroke: 0;
   color: #f3e600;
   font-stretch: normal;
@@ -82,18 +82,17 @@ html[data-sfs-style='overclock'][data-sfs-type] .kb-mark {
   transform: none;
 }
 
-html[data-sfs-style='overclock'][data-sfs-type] .kb-mark:hover {
+html[data-cb-style='overclock'][data-cb-type] .kb-mark:hover {
   color: #fff46b;
 }
 
-html[data-sfs-style='overclock'][data-sfs-type]:not([data-rail='mini'])
-  .kb-mark {
+html[data-cb-style='overclock'][data-cb-type]:not([data-rail='mini']) .kb-mark {
   font-size: 30px;
   line-height: 1;
   padding-left: 32px;
 }
 
-html[data-sfs-style='overclock'][data-sfs-type]:not([data-rail='mini'])
+html[data-cb-style='overclock'][data-cb-type]:not([data-rail='mini'])
   .kb-mark::before {
   background: #f3e600;
   height: 22px;
@@ -102,11 +101,11 @@ html[data-sfs-style='overclock'][data-sfs-type]:not([data-rail='mini'])
   width: 22px;
 }
 
-html[data-sfs-style='overclock'][data-sfs-type].kb-fx .kb-mark:hover {
+html[data-cb-style='overclock'][data-cb-type].kb-fx .kb-mark:hover {
   transform: scale(1.05);
 }
 
-html[data-sfs-style='overclock'][data-sfs-type].kb-fx .kb-mark:hover::before {
+html[data-cb-style='overclock'][data-cb-type].kb-fx .kb-mark:hover::before {
   transform: none;
 }
 
@@ -118,9 +117,7 @@ html[data-sfs-style='overclock'][data-sfs-type].kb-fx .kb-mark:hover::before {
  * aside for Stash UI's own background image. Colors only keeps Stash UI's
  * halftone.
  */
-html[data-sfs-style='overclock'][data-sfs-type]:not(
-    :has(#kb-wall:not([hidden]))
-  )
+html[data-cb-style='overclock'][data-cb-type]:not(:has(#kb-wall:not([hidden])))
   body::before {
   background:
     radial-gradient(circle, rgb(0 229 255 / 16%) 1px, transparent 1.3px) 0 0 /
@@ -140,9 +137,7 @@ html[data-sfs-style='overclock'][data-sfs-type]:not(
   z-index: -3;
 }
 
-html[data-sfs-style='overclock'][data-sfs-type]:not(
-    :has(#kb-wall:not([hidden]))
-  )
+html[data-cb-style='overclock'][data-cb-type]:not(:has(#kb-wall:not([hidden])))
   body::after {
   background: repeating-linear-gradient(
     0deg,

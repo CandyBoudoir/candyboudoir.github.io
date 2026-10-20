@@ -1,13 +1,13 @@
 /*
  * City Pop: an airbrushed 1980s dusk. Stash UI takes City Pop's ten colours
  * through its own colour setting; these rules wait for
- * html[data-sfs-style='citypop'], which stashui.js sets while City Pop is the
- * picked style, and for [data-sfs-type] while Colors only is off.
+ * html[data-cb-style='citypop'], which stashui.js sets while City Pop is the
+ * picked style, and for [data-cb-type] while Colors only is off.
  */
 
 /* The second accent and the focus ring, which Stash UI's colour setting
    leaves out: pool water for focus, lilac for its violet touches */
-html[data-sfs-style='citypop'] {
+html[data-cb-style='citypop'] {
   --shine: #4fe3da;
   --violet: #b9a6f0;
 }
@@ -15,7 +15,7 @@ html[data-sfs-style='citypop'] {
 /* City Pop's type: Jost for headings, titles and labels, and the system face
    for running text, as in classic Stash. Stash UI's Chinese fonts stay last
    for the characters neither face has. */
-html[data-sfs-style='citypop'][data-sfs-type] {
+html[data-cb-style='citypop'][data-cb-type] {
   --f-text:
     system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial,
     'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', 'Source Han Sans SC',
@@ -33,7 +33,7 @@ html[data-sfs-style='citypop'][data-sfs-type] {
  * its display face too, which stays Jost, so the script never carries small
  * or long text.
  */
-html[data-sfs-style='citypop'][data-sfs-type] :is(.kb-h1, .kb-h2) {
+html[data-cb-style='citypop'][data-cb-type] :is(.kb-h1, .kb-h2) {
   font-family: 'CityPop Dafoe', 'Brush Script MT', cursive;
   font-stretch: normal;
   font-weight: 400;
@@ -44,18 +44,18 @@ html[data-sfs-style='citypop'][data-sfs-type] :is(.kb-h1, .kb-h2) {
   word-spacing: 0.2em;
 }
 
-html[data-sfs-style='citypop'][data-sfs-type] .kb-h1 {
+html[data-cb-style='citypop'][data-cb-type] .kb-h1 {
   line-height: 1.1;
 }
 
-html[data-sfs-style='citypop'][data-sfs-type] .kb-h2 {
+html[data-cb-style='citypop'][data-cb-type] .kb-h2 {
   font-size: 34px;
 }
 
 /* What shares a title's line keeps the label face and no shadow: the links
    and buttons beside a section title, a performer's disambiguation and tier */
-html[data-sfs-style='citypop'][data-sfs-type] .kb-h2 > :not(em, b, span, i),
-html[data-sfs-style='citypop'][data-sfs-type] .kb-h1 :is(small, .kb-tier) {
+html[data-cb-style='citypop'][data-cb-type] .kb-h2 > :not(em, b, span, i),
+html[data-cb-style='citypop'][data-cb-type] .kb-h1 :is(small, .kb-tier) {
   font-family: var(--f-label);
   letter-spacing: normal;
   text-shadow: none;
@@ -64,7 +64,7 @@ html[data-sfs-style='citypop'][data-sfs-type] .kb-h1 :is(small, .kb-tier) {
 
 /* The wordmark: chrome script with a hard horizon, beside the striped sun,
    upright instead of Stash UI's slanted lettering */
-html[data-sfs-style='citypop'][data-sfs-type] .kb-mark {
+html[data-cb-style='citypop'][data-cb-type] .kb-mark {
   -webkit-text-stroke: 0;
   filter: drop-shadow(2px 2px 0 #c23a8e)
     drop-shadow(2px 2px 0 rgb(4 3 22 / 60%));
@@ -76,7 +76,7 @@ html[data-sfs-style='citypop'][data-sfs-type] .kb-mark {
   transform: none;
 }
 
-html[data-sfs-style='citypop'][data-sfs-type] .kb-mark span {
+html[data-cb-style='citypop'][data-cb-type] .kb-mark span {
   background: linear-gradient(
     180deg,
     #fff 0%,
@@ -94,13 +94,13 @@ html[data-sfs-style='citypop'][data-sfs-type] .kb-mark span {
   color: transparent;
 }
 
-html[data-sfs-style='citypop'][data-sfs-type]:not([data-rail='mini']) .kb-mark {
+html[data-cb-style='citypop'][data-cb-type]:not([data-rail='mini']) .kb-mark {
   font-size: 42px;
   line-height: 1;
   padding-left: 34px;
 }
 
-html[data-sfs-style='citypop'][data-sfs-type]:not([data-rail='mini'])
+html[data-cb-style='citypop'][data-cb-type]:not([data-rail='mini'])
   .kb-mark::before {
   background: url('icons/sun.svg') center / contain no-repeat;
   height: 28px;
@@ -108,11 +108,11 @@ html[data-sfs-style='citypop'][data-sfs-type]:not([data-rail='mini'])
   width: 28px;
 }
 
-html[data-sfs-style='citypop'][data-sfs-type].kb-fx .kb-mark:hover {
+html[data-cb-style='citypop'][data-cb-type].kb-fx .kb-mark:hover {
   transform: scale(1.05);
 }
 
-html[data-sfs-style='citypop'][data-sfs-type].kb-fx .kb-mark:hover::before {
+html[data-cb-style='citypop'][data-cb-type].kb-fx .kb-mark:hover::before {
   transform: none;
 }
 
@@ -124,7 +124,7 @@ html[data-sfs-style='citypop'][data-sfs-type].kb-fx .kb-mark:hover::before {
  * liquid glass puts behind the page, and it steps aside for Stash UI's own
  * background image. Colors only keeps Stash UI's halftone.
  */
-html[data-sfs-style='citypop'][data-sfs-type]:not(:has(#kb-wall:not([hidden])))
+html[data-cb-style='citypop'][data-cb-type]:not(:has(#kb-wall:not([hidden])))
   body::before {
   background:
     url('icons/palms-backdrop.svg') left calc(var(--rail, 236px) - 2vh)
@@ -152,9 +152,7 @@ html[data-sfs-style='citypop'][data-sfs-type]:not(:has(#kb-wall:not([hidden])))
 
 /* On a phone the menu slides over the page, so the palms keep the corner */
 @media (width <= 860px) {
-  html[data-sfs-style='citypop'][data-sfs-type]:not(
-      :has(#kb-wall:not([hidden]))
-    )
+  html[data-cb-style='citypop'][data-cb-type]:not(:has(#kb-wall:not([hidden])))
     body::before {
     background-position:
       left -2vh bottom -1px,
@@ -170,7 +168,7 @@ html[data-sfs-style='citypop'][data-sfs-type]:not(:has(#kb-wall:not([hidden])))
  * horizon is free: in Settings, as in classic City Pop, since every other
  * Stash UI page has a grid, a header or the player across it.
  */
-html[data-sfs-style='citypop'][data-sfs-type]:not(:has(#kb-wall:not([hidden])))
+html[data-cb-style='citypop'][data-cb-type]:not(:has(#kb-wall:not([hidden])))
   body::after {
   background: url('icons/sun-horizon.svg') right 6vw bottom -1px / auto
     min(22vh, 30vw) no-repeat;
@@ -183,7 +181,7 @@ html[data-sfs-style='citypop'][data-sfs-type]:not(:has(#kb-wall:not([hidden])))
   z-index: -3;
 }
 
-html[data-sfs-style='citypop'][data-sfs-type]:has(.kb-settings):not(
+html[data-cb-style='citypop'][data-cb-type]:has(.kb-settings):not(
     :has(#kb-wall:not([hidden]))
   )
   body::after {
@@ -191,7 +189,7 @@ html[data-sfs-style='citypop'][data-sfs-type]:has(.kb-settings):not(
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-sfs-style='citypop'] body::after {
+  html[data-cb-style='citypop'] body::after {
     transition: none;
   }
 }

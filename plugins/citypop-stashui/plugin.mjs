@@ -1,8 +1,10 @@
-// Styles for Stash UI's part of the build: what goes into the StylesForStashUI
-// plugin folder. Stash UI, another author's replacement interface, imports
-// assets/stashui.js from every enabled plugin, so everything this plugin ships
-// sits in its assets: the module, one stylesheet and the fonts and glyphs the
-// styles use.
+// City Pop for Stash UI's part of the build: what goes into the StashUI-CityPop plugin folder.
+// Stash UI, another author's replacement interface, imports assets/stashui.js
+// from every enabled plugin, so everything this plugin ships sits in its
+// assets: the module, which bundles the shared Stash UI style kit
+// (shared/stashui/style.js) with City Pop's colours, one stylesheet, and
+// the fonts and glyphs it uses, the same files City Pop ships.
+import { build as esbuild } from 'esbuild'
 import { cp, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -12,19 +14,19 @@ const root = join(here, '..', '..')
 const src = join(here, 'src')
 const modules = join(root, 'node_modules')
 
-export const id = 'StylesForStashUI'
-export const title = 'Styles for Stash UI'
+export const id = 'StashUI-CityPop'
+export const title = 'City Pop for Stash UI'
 // The line about the plugin in the repo's README (scripts/readme.mjs).
 export const summary =
-  "City Pop and Overclock as styles for Stash UI, another author's replacement interface: their colours and type, picked under its Colors."
+  "City Pop in Stash UI, another author's replacement interface: its dusk colours, brush-script titles and backdrop, picked under Stash UI's Colors."
 // Built and tested, never published or released, until it is ready.
 export const incubating = true
-// Paths in this folder whose changes alter the plugin zip. Tests and docs are
-// left out so changing them offers users no update.
-export const inputs = ['src', 'plugin.mjs']
+// Paths whose changes alter the plugin zip: this folder's sources and the
+// shared kit. Tests and docs are left out so changing them offers users no
+// update.
+export const inputs = ['src', 'plugin.mjs', '../../shared/stashui']
 
-// The fonts the styles bundle: the files they load and each family's license,
-// the same files City Pop and Overclock ship.
+// The fonts the style bundles: the files it loads and each family's license.
 const FONTS = [
   {
     dir: 'jost',
@@ -40,25 +42,22 @@ const FONTS = [
       (subset) => `mr-dafoe-${subset}-400-normal.woff2`,
     ),
   },
-  {
-    dir: 'chakra-petch',
-    pkg: join(modules, '@fontsource', 'chakra-petch'),
-    files: ['latin', 'latin-ext'].flatMap((subset) =>
-      ['500', '600', '700'].map(
-        (weight) => `chakra-petch-${subset}-${weight}-normal.woff2`,
-      ),
-    ),
-  },
-  {
-    dir: 'share-tech-mono',
-    pkg: join(modules, '@fontsource', 'share-tech-mono'),
-    files: ['share-tech-mono-latin-400-normal.woff2'],
-  },
 ]
 
 export async function build(out) {
   const assets = join(out, 'assets')
   await mkdir(join(assets, 'icons'), { recursive: true })
+
+  // The module Stash UI imports: the style and the kit in one ES module file
+  await esbuild({
+    entryPoints: [join(src, 'stashui.js')],
+    outfile: join(assets, 'stashui.js'),
+    bundle: true,
+    format: 'esm',
+    target: 'es2022',
+    legalComments: 'none',
+    logLevel: 'warning',
+  })
 
   // CSS: concatenate the numbered partials in order, one file for Stash UI
   // to load.
@@ -73,7 +72,6 @@ export async function build(out) {
   )
   await writeFile(join(assets, 'stashui.css'), css.join('\n'))
 
-  await cp(join(src, 'stashui.js'), join(assets, 'stashui.js'))
   await cp(join(src, `${id}.yml`), join(out, `${id}.yml`))
   await cp(join(src, 'icons'), join(assets, 'icons'), { recursive: true })
 
