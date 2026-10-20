@@ -2,19 +2,7 @@
 
 Styles for Stash UI brings two CandyBoudoir themes, [City Pop](../citypop/README.md) and [Overclock](../overclock/README.md), to [Stash UI](https://github.com/anonym88312/stash-pmv-plugins), another author's replacement interface for Stash. Stash UI draws its own pages, so the classic themes never reach it; this plugin adds each theme as a style beside Stash UI's own colour presets. A style gives Stash UI the theme's colours, type and backdrop. City Pop brings night blue and sunset coral, page and section titles in its brush script, a chrome wordmark, and its dusk of stars and palms behind the page. Overclock brings acid yellow on black, yellow capitals that carry a glitch split, a reticle by the wordmark, and its dot grid and scanline behind the page. Turn on Colors only to keep Stash UI's own fonts, lettering and backdrop. Stash UI keeps its own layout, cards and motifs.
 
-## Install
-
-Styles for Stash UI comes from the CandyBoudoir plugin source, which carries every CandyBoudoir plugin.
-
-1. In Stash, open Settings > Plugins > Available Plugins and click Add source.
-2. Fill in the source:
-   - Name: `CandyBoudoir`
-   - Source URL: `https://candyboudoir.github.io/index.yml`
-   - Local path: `candyboudoir`
-3. Expand the CandyBoudoir source, tick Styles for Stash UI and click Install.
-4. Reload Stash UI and pick a style, as below.
-
-If you run a Stash develop build, use `https://candyboudoir.github.io/develop/index.yml` as the source URL instead. Add one of the two sources, never both: they carry the same plugins.
+Styles for Stash UI is incubating: it is built and tested here and not yet in the plugin source.
 
 ## What you need
 

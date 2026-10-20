@@ -16,7 +16,9 @@ export const id = 'StylesForStashUI'
 export const title = 'Styles for Stash UI'
 // The line about the plugin in the repo's README (scripts/readme.mjs).
 export const summary =
-  "City Pop and Overclock as styles for Stash UI, another author's replacement interface: their colours, type and backdrops, picked under its Colors."
+  "City Pop and Overclock as styles for Stash UI, another author's replacement interface: their colours and type, picked under its Colors."
+// Built and tested, never published or released, until it is ready.
+export const incubating = true
 // Paths in this folder whose changes alter the plugin zip. Tests and docs are
 // left out so changing them offers users no update.
 export const inputs = ['src', 'plugin.mjs']
