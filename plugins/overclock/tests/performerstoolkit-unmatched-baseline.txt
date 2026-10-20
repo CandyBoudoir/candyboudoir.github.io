@@ -1,8 +1,10 @@
 pt-acct
 pt-b-gr
 pt-banner
+pt-bl
 pt-box
 pt-busy
+pt-bw
 pt-c-bl
 pt-c-gr
 pt-c-re
@@ -32,6 +34,7 @@ pt-frow
 pt-fwc
 pt-gcell
 pt-hitems
+pt-lbar
 pt-mcard
 pt-mcov
 pt-msg

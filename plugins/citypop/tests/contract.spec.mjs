@@ -13,6 +13,7 @@ import {
   VOICE_EMPTY_LINE,
   demoIds,
   demoPath,
+  gql,
   onlyCityPop,
   openInsights,
   openPerformerStats,
@@ -620,9 +621,10 @@ test.describe('beside Performers Toolkit', () => {
   })
 
   // From 0.10 the toolkit tidies a performer's header into rows that wrap,
-  // and from 0.13 it sets a side panel between the cover and the header.
-  // The J-card keeps its spine against the cover, restyle on or off, and
-  // the panel sits past the flap.
+  // and from 0.13 it sets a side panel between the cover and the header
+  // (from 0.17 in the third column of a grid with a gap). The J-card keeps
+  // its spine against the cover, restyle on or off, and the panel sits past
+  // the flap.
   for (const restyle of [false, true]) {
     test(`the J-card holds when the toolkit tidies the header, restyle ${restyle ? 'on' : 'off'}`, async ({
       page,
@@ -645,6 +647,56 @@ test.describe('beside Performers Toolkit', () => {
         expect(Math.abs(spine.y - cover.y)).toBeLessThan(2)
         expect(side.x).toBeGreaterThan(spine.x + spine.width)
       } finally {
+        await setPlugin({})
+      }
+    })
+  }
+
+  // The tidied header sets Stash's fields out as a grid of cells, each name
+  // over its value. City Pop's track listing (a 12rem name and its dotted
+  // leader on one row) once squeezed each value into what was left of its
+  // cell, a letter to a line. The demo performers have no such fields, so
+  // the test gives the favourite some. With the restyle on, the names take
+  // the flap's capitals.
+  for (const restyle of [false, true]) {
+    test(`the tidied header's fields stand over their values, restyle ${restyle ? 'on' : 'off'}`, async ({
+      page,
+    }) => {
+      const update = (input) =>
+        gql(
+          'mutation ($i: PerformerUpdateInput!) { performerUpdate(input: $i) { id } }',
+          { i: { id: ids.performer, ...input } },
+        )
+      try {
+        await update({
+          gender: 'FEMALE',
+          country: 'CA',
+          ethnicity: 'Caucasian',
+          details: 'Sweets of every colour, wrapped by hand.',
+        })
+        await setPlugin(restyle ? { restylePerformersToolkit: true } : {})
+        await page.goto(`/performers/${ids.performer}`)
+        const head = page.locator(
+          '#performer-page .performer-head[data-pt-tidy]',
+        )
+        await head.waitFor({ timeout: 30_000 })
+        for (const field of ['gender', 'ethnicity']) {
+          const item = head.locator(`.detail-item.${field}`)
+          const title = await item.locator('.detail-item-title').boundingBox()
+          const value = item.locator('.detail-item-value')
+          const box = await value.boundingBox()
+          const lineHeight = await value.evaluate((el) =>
+            parseFloat(getComputedStyle(el).lineHeight),
+          )
+          expect(box.y).toBeGreaterThanOrEqual(title.y + title.height - 1)
+          expect(box.height).toBeLessThan(lineHeight * 1.5)
+        }
+        await expect(head.locator('.detail-item-title').first()).toHaveCSS(
+          'text-transform',
+          restyle ? 'uppercase' : 'none',
+        )
+      } finally {
+        await update({ gender: null, country: '', ethnicity: '', details: '' })
         await setPlugin({})
       }
     })
