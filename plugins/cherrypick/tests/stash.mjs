@@ -2,6 +2,7 @@
 // Pick needs a library with ratings and plays, so its specs seed the demo
 // library (demo-library.mjs) next to the shared one and remove it after.
 import {
+  colorAt,
   demoIds,
   gql,
   setPluginSettings,
@@ -107,3 +108,69 @@ export const forYouCards = (page) =>
   page.locator(
     '.cherrypick-for-you .slick-slide:not(.slick-cloned) .scene-card',
   )
+
+// ------------------------------------------------- for the themes' checks
+
+// Starts a 16-performer bracket from the Performers list and returns its
+// play dialog once the opening banner has gone
+export async function openPerformerBracket(page) {
+  await page.goto('/performers')
+  const bracket = page
+    .locator('.cherrypick-bracket-button')
+    .filter({ visible: true })
+    .first()
+  await bracket.waitFor({ timeout: 20_000 })
+  await bracket.click()
+  const play = page.locator('.cherrypick-play-modal')
+  await play.locator('.cherrypick-contender').first().waitFor()
+  await play.locator('.cherrypick-banner').waitFor({ state: 'hidden' })
+  return play
+}
+
+// Abandons the bracket a play dialog shows (asking first, unless the
+// question is open), and waits for Stash's plugin configuration to drop it
+// (a debounced save), so the next test's list offers a new bracket instead
+// of resuming this one
+export async function abandonBracket(play) {
+  const confirm = play.locator('.modal-footer .btn-danger')
+  if (!(await confirm.isVisible()))
+    await play.getByRole('button', { name: 'Abandon', exact: true }).click()
+  await confirm.click()
+  await play.waitFor({ state: 'detached' })
+  for (let i = 0; i < 50 && (await pluginConfig())?.bracket != null; i++)
+    await new Promise((r) => setTimeout(r, 200))
+}
+
+// What a button in a bracket dialog's header shows, with the pointer off it
+// and its transitions over: its ink, its mark's colour (an icon, or the
+// close button's ×), the colour on screen beside the mark (halfway to the
+// button's edge, at the mark's middle) and its width
+export async function headerButtonLook(page, button, mark = 'svg') {
+  await page.mouse.move(0, 0)
+  await button.evaluate((el) =>
+    Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished)),
+  )
+  const icon = button.locator(mark)
+  const box = await button.boundingBox()
+  const at = await icon.boundingBox()
+  return {
+    ink: await button.evaluate((el) => getComputedStyle(el).color),
+    icon: await icon.evaluate((el) => getComputedStyle(el).color),
+    behind: await colorAt(page, (box.x + at.x) / 2, at.y + at.height / 2),
+    width: box.width,
+  }
+}
+
+// The colours a bracket's progress bar shows on screen, at the middle of its
+// filled part and near the end of its empty groove
+export async function progressLook(page, play) {
+  const track = await play.locator('.cherrypick-progress').boundingBox()
+  const bar = await play
+    .locator('.cherrypick-progress .progress-bar')
+    .boundingBox()
+  const y = track.y + track.height / 2
+  return {
+    fill: await colorAt(page, bar.x + bar.width / 2, y),
+    groove: await colorAt(page, track.x + track.width - 8, y),
+  }
+}

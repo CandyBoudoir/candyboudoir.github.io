@@ -2,7 +2,7 @@
 
 A pink, playful theme for [Stash](https://github.com/stashapp/stash), the self-hosted media organizer. Juicy installs as a Stash plugin, so you switch it on, off or update it from Settings > Plugins instead of pasting CSS into the Custom CSS box.
 
-Juicy brings glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording. Calm mode and Plain labels settings turn the motion and the copy down, and Stash's SFW mode keeps the candy and drops the cheek. The [live preview](https://candyboudoir.github.io/juicy/) shows every component on Stash's own markup, and the design rules are in [docs/design.md](docs/design.md). Juicy 0.5.2 is built and tested on Stash v0.31.1, including the Tagger and scrape screens that a stash-box such as StashDB adds.
+Juicy brings glossy candy stickers, gold hearts for ratings, a gum-bubble loader and a little cheek in the wording. Calm mode and Plain labels settings turn the motion and the copy down, and Stash's SFW mode keeps the candy and drops the cheek. The [live preview](https://candyboudoir.github.io/juicy/) shows every component on Stash's own markup, and the design rules are in [docs/design.md](docs/design.md). Juicy 0.5.3 is built and tested on Stash v0.31.1, including the Tagger and scrape screens that a stash-box such as StashDB adds.
 
 ![The scenes page with Juicy: glossy sticker cards with gold rating badges on a dotted plum background](docs/screenshots/scenes.png)
 

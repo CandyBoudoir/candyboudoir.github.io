@@ -20,6 +20,14 @@ import {
   usePlugins,
   visit,
 } from './stash.mjs'
+import {
+  abandonBracket,
+  headerButtonLook,
+  openPerformerBracket,
+  progressLook,
+  setUpCherryPick,
+  tearDownCherryPick,
+} from '../../cherrypick/tests/stash.mjs'
 
 let ids
 test.beforeAll(async () => {
@@ -246,6 +254,81 @@ test('SFW mode drops the voice and the collar', async ({ page }) => {
   } finally {
     await setSfw(false)
   }
+})
+
+// WCAG contrast between two computed colours, which must be opaque.
+function contrast(a, b) {
+  const luminance = (rgb) => {
+    const [r, g, bl] = rgb
+      .match(/[\d.]+/g)
+      .slice(0, 3)
+      .map(Number)
+    const linear = (c) =>
+      c / 255 <= 0.03928 ? c / 255 / 12.92 : ((c / 255 + 0.055) / 1.055) ** 2.4
+    return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(bl)
+  }
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x)
+  return (hi + 0.05) / (lo + 0.05)
+}
+
+// Cherry Pick's bracket dialogs: the speaker in the header and the bar of
+// the bracket's progress
+test.describe('beside Cherry Pick', () => {
+  test.use({ reducedMotion: 'reduce' })
+  test.beforeAll(async () => {
+    await setUpCherryPick()
+    await usePlugins('CherryPick', PLUGIN_ID)
+  })
+  test.afterAll(async () => {
+    await tearDownCherryPick()
+    await onlyLeather()
+  })
+
+  // The speaker takes its button's ink, white on blood red when sound is on,
+  // and has no rivets, which met over its icon.
+  test("the speaker in a bracket's header reads, sound off and on", async ({
+    page,
+  }) => {
+    const play = await openPerformerBracket(page)
+    const sound = play.locator('.cherrypick-sound')
+    const widths = []
+    for (const on of [false, true]) {
+      if (on) await sound.click()
+      await expect(sound).toHaveAttribute('aria-pressed', String(on))
+      const look = await headerButtonLook(page, sound)
+      expect(look.icon, "the button's ink").toBe(look.ink)
+      expect(contrast(look.icon, look.behind)).toBeGreaterThanOrEqual(3)
+      widths.push(look.width)
+    }
+    expect(widths[1]).toBeCloseTo(widths[0], 0)
+    await abandonBracket(play)
+  })
+
+  // A red strap fills a debossed groove, not Bootstrap's blue on white.
+  test("a bracket's progress fills brighter than its groove", async ({
+    page,
+  }) => {
+    const play = await openPerformerBracket(page)
+    await page.keyboard.press('ArrowLeft')
+    await expect(play.locator('.cherrypick-round')).toContainText(
+      'match 2 of 8',
+    )
+    const { fill, groove } = await progressLook(page, play)
+    const black = 'rgb(0, 0, 0)'
+    expect(contrast(fill, black)).toBeGreaterThan(contrast(groove, black))
+    expect(contrast(fill, groove)).toBeGreaterThanOrEqual(3)
+    await abandonBracket(play)
+  })
+
+  // The close button reads on the black leather
+  test("a bracket dialog's close button reads", async ({ page }) => {
+    const play = await openPerformerBracket(page)
+    const close = play.locator('.modal-header .close')
+    await expect(close).toHaveCSS('opacity', '1')
+    const look = await headerButtonLook(page, close, '[aria-hidden="true"]')
+    expect(contrast(look.icon, look.behind)).toBeGreaterThanOrEqual(4.5)
+    await abandonBracket(play)
+  })
 })
 
 // Insights, another author's stats dashboard on the Stats page (RESTYLED in

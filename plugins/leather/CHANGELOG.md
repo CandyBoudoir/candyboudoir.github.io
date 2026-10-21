@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.2
+
+Cherry Pick 0.3.1's bracket dialogs in leather, for Stash v0.31.1.
+
+- The speaker in a bracket's header reads with sound on, white on blood red. The two rivets of a primary button met in the middle of the small button and covered its icon, which Leather had painted red on the red. The speaker now has no rivets and keeps one width with sound on or off.
+- An icon on a header button takes the button's ink and the height of the map size marks beside it.
+- A bracket's progress bar is a red strap in a debossed groove. It had kept Bootstrap's blue on a white track.
+- The close button of a Cherry Pick dialog is at full opacity and reads at about 7:1 on the black leather. Bootstrap's half opacity had left it at about 2.6:1.
+- Tested beside Insights 2.12.1 and Performers Toolkit 0.17.1.
+
 ## 0.2.1
 
 Insights 2.12 and Performers Toolkit 0.13 in leather, for Stash v0.31.1.

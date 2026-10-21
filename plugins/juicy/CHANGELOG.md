@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.3
+
+Cherry Pick 0.3.1's bracket dialogs in candy, for Stash v0.31.1.
+
+- A bracket's progress bar fills with pink candy along a deep plum groove. Juicy's dark resume bar for cards had filled it dark over a pale track, so the matches already played looked empty.
+- Tested beside Insights 2.12.1 and Performers Toolkit 0.17.1.
+
 ## 0.5.2
 
 The picked button of a group shows, for Stash v0.31.1.

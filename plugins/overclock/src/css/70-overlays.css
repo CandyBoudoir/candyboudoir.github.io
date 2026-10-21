@@ -394,6 +394,40 @@ div.dropdown-menu .dropdown-item:active {
   height: 0.9em;
 }
 
+/*
+ * Cherry Pick's bracket dialogs carry buttons in the header: the speaker and
+ * the map sizes. The yellow is for the icon before a title; an icon on a
+ * button takes the button's ink, so the speaker reads on yellow when sound
+ * is on, and its height, so it lines up with the size marks.
+ */
+.cherrypick-dialog .modal-header .btn .fa-icon {
+  color: inherit;
+  height: 1em;
+}
+
+/*
+ * Cherry Pick's dialogs have a close button, which Stash's own don't. Its
+ * auto margin (Bootstrap's, and Cherry Pick's own) split the header's free
+ * space with the readout's, so it stood mid-header; it ends the header,
+ * after the readout.
+ */
+.modal.cherrypick-dialog .modal-header .close {
+  margin-left: 0;
+  order: 1;
+}
+
+/* On a phone the readout leaves their title and speaker no room, and the
+   close button takes the free space back */
+@media (width <= 575.98px) {
+  :is(#root, .modal).cherrypick-dialog .modal-header::after {
+    content: none;
+  }
+
+  .modal.cherrypick-dialog .modal-header .close {
+    margin-left: auto;
+  }
+}
+
 :is(#root, .modal) .modal-content:has(.modal-footer .btn-danger) .modal-header {
   background: var(--overclock-hazard);
   border-bottom-color: var(--overclock-yellow);
@@ -421,6 +455,27 @@ div.dropdown-menu .dropdown-item:active {
   .modal-header
   .fa-icon {
   display: none;
+}
+
+/* Cherry Pick asks before abandoning a bracket with a danger button in the
+   footer; its speaker keeps its icon on the hazard band, and its close
+   button sits on a black plate like the readout */
+:is(#root, .modal).cherrypick-dialog
+  .modal-content:has(.modal-footer .btn-danger)
+  .modal-header
+  .btn
+  .fa-icon {
+  display: inline-block;
+}
+
+:is(#root, .modal).cherrypick-dialog
+  .modal-content:has(.modal-footer .btn-danger)
+  .modal-header
+  .close {
+  background: var(--overclock-bg);
+  margin-block: 0;
+  margin-right: 0;
+  padding: 0.35rem 0.6rem;
 }
 
 :is(#root, .modal)

@@ -318,6 +318,22 @@ div.dropdown-menu .dropdown-item:active {
   height: 0.8em;
 }
 
+/*
+ * Cherry Pick's bracket dialogs carry buttons in the header: the speaker and
+ * the map sizes. The coral is for the icon before a title; an icon on a
+ * button takes the button's ink, so the speaker reads on the sunset when
+ * sound is on, and its height, so it lines up with the size marks. The
+ * speaker keeps one width on and off, so the sizes beside it stay put.
+ */
+.cherrypick-dialog .modal-header .btn .fa-icon {
+  color: inherit;
+  height: 1em;
+}
+
+.cherrypick-dialog .modal-header .cherrypick-sound.btn {
+  padding-inline: 0.5rem;
+}
+
 .modal-body {
   color: var(--citypop-muted);
 }

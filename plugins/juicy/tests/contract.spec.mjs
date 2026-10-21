@@ -20,6 +20,14 @@ import {
   usePlugins,
   visit,
 } from './stash.mjs'
+import {
+  abandonBracket,
+  headerButtonLook,
+  openPerformerBracket,
+  progressLook,
+  setUpCherryPick,
+  tearDownCherryPick,
+} from '../../cherrypick/tests/stash.mjs'
 
 let ids
 test.beforeAll(async () => {
@@ -277,6 +285,56 @@ function contrast(a, b) {
   const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x)
   return (hi + 0.05) / (lo + 0.05)
 }
+
+// Cherry Pick's bracket dialogs: the speaker in the header and the bar of
+// the bracket's progress
+test.describe('beside Cherry Pick', () => {
+  test.use({ reducedMotion: 'reduce' })
+  test.beforeAll(async () => {
+    await setUpCherryPick()
+    await usePlugins('CherryPick', PLUGIN_ID)
+  })
+  test.afterAll(async () => {
+    await tearDownCherryPick()
+    await onlyJuicy()
+  })
+
+  // The speaker takes its button's ink, on plum and on pink.
+  test("the speaker in a bracket's header reads, sound off and on", async ({
+    page,
+  }) => {
+    const play = await openPerformerBracket(page)
+    const sound = play.locator('.cherrypick-sound')
+    const widths = []
+    for (const on of [false, true]) {
+      if (on) await sound.click()
+      await expect(sound).toHaveAttribute('aria-pressed', String(on))
+      const look = await headerButtonLook(page, sound)
+      expect(look.icon, "the button's ink").toBe(look.ink)
+      expect(contrast(look.icon, look.behind)).toBeGreaterThanOrEqual(3)
+      widths.push(look.width)
+    }
+    expect(widths[1]).toBeCloseTo(widths[0], 0)
+    await abandonBracket(play)
+  })
+
+  // Pink candy fills a deep plum groove. Juicy's dark resume bar for cards
+  // filled it dark over a pale track, so it read backwards.
+  test("a bracket's progress fills brighter than its groove", async ({
+    page,
+  }) => {
+    const play = await openPerformerBracket(page)
+    await page.keyboard.press('ArrowLeft')
+    await expect(play.locator('.cherrypick-round')).toContainText(
+      'match 2 of 8',
+    )
+    const { fill, groove } = await progressLook(page, play)
+    const black = 'rgb(0, 0, 0)'
+    expect(contrast(fill, black)).toBeGreaterThan(contrast(groove, black))
+    expect(contrast(fill, groove)).toBeGreaterThanOrEqual(3)
+    await abandonBracket(play)
+  })
+})
 
 // Insights, another author's stats dashboard on the Stats page (RESTYLED in
 // tests/stash/companions.mjs), takes Juicy's colours by itself, and with

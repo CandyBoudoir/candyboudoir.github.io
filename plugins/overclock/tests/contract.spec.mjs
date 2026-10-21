@@ -21,6 +21,9 @@ import {
   visit,
 } from './stash.mjs'
 import {
+  abandonBracket,
+  headerButtonLook,
+  openPerformerBracket,
   setUpCherryPick,
   tearDownCherryPick,
 } from '../../cherrypick/tests/stash.mjs'
@@ -272,6 +275,70 @@ test.describe('beside Cherry Pick', () => {
     await card.hover()
     await expect(tag).toHaveCSS('opacity', '1')
     await tagClearsCheckbox(card)
+  })
+
+  // The yellow Overclock gives a dialog's header icon is for the one before
+  // the title. The speaker in a bracket's header takes its button's ink, so
+  // it reads on yellow when sound is on.
+  test("the speaker in a bracket's header reads, sound off and on", async ({
+    page,
+  }) => {
+    const play = await openPerformerBracket(page)
+    const sound = play.locator('.cherrypick-sound')
+    for (const on of [false, true]) {
+      if (on) await sound.click()
+      await expect(sound).toHaveAttribute('aria-pressed', String(on))
+      const look = await headerButtonLook(page, sound)
+      expect(look.icon, "the button's ink").toBe(look.ink)
+      expect(contrast(look.icon, look.behind)).toBeGreaterThanOrEqual(3)
+    }
+    // the Abandon question turns the header into a hazard band, which hides
+    // the icon before a title; the speaker keeps its own, and the close
+    // button reads on a black plate
+    await play.getByRole('button', { name: 'Abandon', exact: true }).click()
+    await expect(play.locator('.modal-footer .btn-danger')).toBeVisible()
+    await expect(sound.locator('svg')).toBeVisible()
+    const { color, background } = await play
+      .locator('.modal-header .close')
+      .evaluate((el) => {
+        const style = getComputedStyle(el)
+        return { color: style.color, background: style.backgroundColor }
+      })
+    expect(alpha(background), 'an opaque plate').toBe(1)
+    expect(contrast(color, background)).toBeGreaterThanOrEqual(4.5)
+    await abandonBracket(play)
+  })
+
+  // Cherry Pick's dialogs have a close button, which ends the header after
+  // the SYS.DLG readout
+  test("a bracket dialog's close button ends its header", async ({ page }) => {
+    const play = await openPerformerBracket(page)
+    const close = play.locator('.modal-header .close')
+    const readout = await play
+      .locator('.modal-header')
+      .evaluate((el) => parseFloat(getComputedStyle(el, '::after').width))
+    expect(readout).toBeGreaterThan(0)
+    // no auto margin to share the free space with the readout's
+    await expect(close).toHaveCSS('margin-left', '0px')
+    const endsHeader = async () => {
+      const header = await play.locator('.modal-header').boundingBox()
+      const box = await close.boundingBox()
+      expect(header.x + header.width - (box.x + box.width)).toBeLessThan(
+        box.width,
+      )
+    }
+    await endsHeader()
+    // a phone drops the readout, and the close button keeps the header's end
+    await page.setViewportSize({ width: 390, height: 844 })
+    await expect
+      .poll(() =>
+        play
+          .locator('.modal-header')
+          .evaluate((el) => getComputedStyle(el, '::after').content),
+      )
+      .toBe('none')
+    await endsHeader()
+    await abandonBracket(play)
   })
 })
 

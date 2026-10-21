@@ -22,6 +22,8 @@ bs-tooltip-top
 btn-info
 btn-warning
 card-drag-handle
+cherrypick-dialog
+cherrypick-sound
 criterion-list
 current
 custom-checkbox
@@ -59,6 +61,7 @@ performer-card__age
 popover
 popover-body
 popover-header
+progress
 progress-bar
 progress-indicator
 react-select__control--is-focused
