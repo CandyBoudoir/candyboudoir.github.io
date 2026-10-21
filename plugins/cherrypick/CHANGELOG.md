@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.2
+
+- A map size you haven't picked shows its mark in full while you point at it or reach it with the keyboard. Cherry Pick kept it dimmed on hover too, and under Juicy, which turns a button's mark pink on hover, the dimmed pink faded into the plum button.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.41.0, Xenith 3.2.0 and Restash 0.3.0-55c1cb2.
+
 ## 0.3.1
 
 - Three buttons beside the speaker in a bracket's header set how much room the map takes: No map, Short map and Tall map. Tall map is 0.3.0's layout and stays the default. Short map gives the map a lower frame and the height it frees to the two cards. No map hides the map and plays the cards at Brackets Classic Mode's size, with the same animations, round title cards and sound, and Show bracket still opens the whole map. In a scene bracket, whose map is already short, Short map is a strip that shows the match being played. The Challenge round's road follows the same choice. Cherry Pick keeps it in Stash's plugin configuration, so it holds across brackets, reloads and browsers. A phone keeps its own layout and shows no buttons.

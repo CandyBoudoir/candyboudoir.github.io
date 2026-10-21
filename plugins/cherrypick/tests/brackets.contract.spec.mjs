@@ -708,6 +708,35 @@ test('the map size buttons hide the map, shorten it or keep it tall, and the car
   await forgetMapSize()
 })
 
+test('a map size not picked shows in full while pointed at or focused', async ({
+  page,
+}) => {
+  await forgetMapSize()
+  const play = await openBracket(page)
+  const mark = (name) => sizeButton(play, name).locator('.cherrypick-size-icon')
+
+  // the picked size in full, the others dimmed
+  await expect(mark('Tall map')).toHaveCSS('opacity', '1')
+  await expect(mark('Short map')).toHaveCSS('opacity', '0.55')
+
+  // pointed at: in full, and dimmed again once the pointer leaves
+  await sizeButton(play, 'Short map').hover()
+  await expect(mark('Short map')).toHaveCSS('opacity', '1')
+  await expect(mark('No map')).toHaveCSS('opacity', '0.55')
+  await page.mouse.move(0, 0)
+  await expect(mark('Short map')).toHaveCSS('opacity', '0.55')
+
+  // reached with the keyboard: Short map sits before Tall map
+  await sizeButton(play, 'Tall map').focus()
+  await page.keyboard.press('Shift+Tab')
+  await expect(sizeButton(play, 'Short map')).toBeFocused()
+  await expect(mark('Short map')).toHaveCSS('opacity', '1')
+  await expect(pickedSize(play)).toHaveAttribute('aria-label', 'Tall map')
+
+  await abandon(play)
+  await forgetMapSize()
+})
+
 test('the map size picked holds after closing, a reload, in another browser and in a scene bracket', async ({
   page,
   browser,
