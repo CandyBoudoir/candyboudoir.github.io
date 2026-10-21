@@ -24,6 +24,7 @@ btn-info
 btn-light
 btn-warning
 card-drag-handle
+cherrypick-dialog
 cherrypick-score-banner
 collapsing
 criterion-list

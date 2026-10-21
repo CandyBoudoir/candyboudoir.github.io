@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.3
+
+Cherry Pick 0.3.1's bracket dialogs on the display, for Stash v0.31.1.
+
+- The speaker in a bracket's header reads with sound on. Overclock paints a dialog's header icons yellow, and the speaker's yellow sat on the yellow of the button turned on. An icon on a header button now takes the button's ink and the height of the map size marks beside it.
+- The close button of a Cherry Pick dialog ends the header bar, after the SYS.DLG readout. It had shared the bar's free space with the readout and stood in the middle of the bar.
+- On a phone, Cherry Pick's dialogs drop the readout, which wrapped their titles onto two lines.
+- While Cherry Pick asks before abandoning a bracket, the header is a hazard band, which hides the icon before a title. The speaker keeps its own icon there, and the close button sits on a black plate like the Irreversible readout. It had been grey on the yellow stripes.
+- Tested beside Insights 2.12.1 and Performers Toolkit 0.17.1.
+
 ## 0.2.2
 
 Cherry Pick's Your score reads on Overclock, for Stash v0.31.1.
