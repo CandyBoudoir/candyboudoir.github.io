@@ -2,7 +2,7 @@
 
 ## 0.1.3
 
-- New icons for Airtight, Anal Fingering, Anal Winking, Armpit Fetish, Ass Grabbing, Ass Smacking, Ass Stacking, Bald Head, Bangs, Bear and 80 more.
+- New icons for Adorable, Ahegao, Airtight, Anal Fingering, Anal Winking, Armpit Fetish, Ass Grabbing, Ass Smacking, Ass Stacking, Bald Head and 92 more.
 - Updated which tag names and StashDB tags match Sneakers.
 
 ## 0.1.2
