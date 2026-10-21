@@ -7,6 +7,7 @@ badge-primary
 btn-info
 btn-warning
 card-drag-handle
+cherrypick-dialog
 custom-checkbox
 custom-select
 default-value
@@ -27,6 +28,7 @@ pagination
 performer-card__age
 popover
 popover-body
+progress
 progress-bar
 progress-indicator
 react-select__control--is-focused
