@@ -8,6 +8,21 @@ import { STASH_BOX } from './tests/stash/stashbox-data.mjs'
 // prepare.mjs pointed Stash at starts with the tests.
 const step = process.env.PW_STEP
 
+// One time for the mock ThePornDB's release dates (theporndb.mjs) across
+// the run: the mock stash-box's own when one is already running and reused,
+// or now. The mock stash-box and the workers start with this env, and the
+// workers, loading this file again, keep it.
+async function tpdbNow() {
+  try {
+    const res = await fetch(`${STASH_BOX}/tpdb/_now`)
+    if (res.ok) return (await res.json()).now
+  } catch {
+    // None running: the run starts it
+  }
+  return new Date().toISOString()
+}
+process.env.TPDB_NOW ||= await tpdbNow()
+
 export default defineConfig({
   testDir: 'plugins',
   timeout: 60_000,
