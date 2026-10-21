@@ -10,17 +10,25 @@ import {
   SETTING_DEFAULTS,
 } from '../../src/js/storage/settings.js'
 
-// A fake Stash (one plugin map), a fake browser mirror and a clock.
+// A fake Stash (one plugin map), a fake browser mirror and a clock. A
+// promise in server.hold.read or .write holds that request back until it
+// settles; server.cutOff loses a write's answer after Stash took it, as when
+// the page is left while it is out.
 function rig({ settingsOpen = false } = {}) {
-  const server = { map: null, writes: 0 }
+  const server = { map: null, writes: 0, hold: {}, cutOff: false }
   const box = { mirror: null }
   let t = 0
   const open = { value: settingsOpen }
   const tier1 = createTier1({
-    read: async () => (server.map ? structuredClone(server.map) : null),
+    read: async () => {
+      await server.hold.read
+      return server.map ? structuredClone(server.map) : null
+    },
     write: async (map) => {
+      await server.hold.write
       server.map = structuredClone(map)
       server.writes++
+      if (server.cutOff) throw new Error('the page was left')
     },
     mirror: {
       get: () => box.mirror,
@@ -37,6 +45,13 @@ const state = (patch = {}) => ({
   ...fromConfig(null),
   ...patch,
 })
+
+// A request held back, and the function that lets it go
+function held() {
+  let release
+  const promise = new Promise((r) => (release = r))
+  return { promise, release }
+}
 
 test('a missing map reads as the defaults', () => {
   const s = fromConfig(null)
@@ -175,6 +190,45 @@ test('a staged change reaches the mirror at once and is restored at the next loa
   assert.equal(restored, 'stale')
   assert.deepEqual(fromConfig(map).dontLearn, [{ sceneId: '8' }])
   assert.deepEqual(fromConfig(server.map).dontLearn, [])
+})
+
+// A bracket is started and saved, then abandoned while that save is out,
+// and the page is left before the abandon's own save.
+const started = toConfig(
+  state({ brackets: { active: { id: 'b1' }, history: [] } }),
+)
+const abandoned = toConfig(state())
+
+test('a change staged while a save is out stays in the mirror, and the next load restores it', async () => {
+  const { server, box, tier1 } = rig()
+  tier1.stage(started, ['bracket'])
+  const write = held()
+  server.hold.write = write.promise
+  const saving = tier1.save(started, ['bracket'])
+  tier1.stage(abandoned, ['bracket'])
+  write.release()
+  await saving
+  assert.deepEqual(fromConfig(server.map).brackets.active, { id: 'b1' })
+  assert.equal(fromConfig(box.mirror).brackets.active, null)
+  const { map, restored } = await tier1.load()
+  assert.equal(restored, 'stale')
+  assert.equal(fromConfig(map).brackets.active, null)
+})
+
+test('a save that reaches Stash after the page was left is older than a change staged after it took its copy', async () => {
+  const { server, tier1 } = rig()
+  tier1.stage(started, ['bracket'])
+  const read = held()
+  server.hold.read = read.promise
+  server.cutOff = true
+  const saving = tier1.save(started, ['bracket'])
+  tier1.stage(abandoned, ['bracket'])
+  read.release()
+  await assert.rejects(saving)
+  assert.deepEqual(fromConfig(server.map).brackets.active, { id: 'b1' })
+  const { map, restored } = await tier1.load()
+  assert.equal(restored, 'stale')
+  assert.equal(fromConfig(map).brackets.active, null)
 })
 
 test('the first write after a removal keeps the tombstone', async () => {
