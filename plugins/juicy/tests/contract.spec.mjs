@@ -176,6 +176,65 @@ for (const [name, path, toggle] of SLATE_MENUS) {
   })
 }
 
+// Stash marks the picked button of a group with Bootstrap's .active alone: the
+// display mode in every list toolbar, the page number when a list has fewer
+// than four pages, and Overwrite, Add or Remove in a bulk edit. Juicy presses
+// it in, pink among plum or magenta among pink, where it once matched the rest.
+const PINK = 'rgb(252, 61, 159)'
+const PLUM = 'rgb(45, 24, 82)'
+const MAGENTA = 'rgb(221, 42, 151)'
+const INK = 'rgb(1, 2, 36)'
+
+async function expectPicked(group, picked, rest) {
+  const active = group.locator('> .btn.active')
+  await expect(active).toHaveCount(1)
+  await expect(active).toHaveCSS('background-color', picked)
+  await expect(active).toHaveCSS('color', INK)
+  await expect(active).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 2)')
+  const other = group.locator('> .btn:not(.active, :disabled)').first()
+  await expect(other).toHaveCSS('background-color', rest)
+  await expect(other).toHaveCSS('transform', 'none')
+}
+
+for (const [width, height] of [
+  [1440, 900],
+  [390, 844],
+]) {
+  test.describe(`at ${width}px`, () => {
+    test.use({ viewport: { width, height } })
+    for (const list of ['scenes', 'performers']) {
+      test(`the ${list} list's display mode shows which is picked`, async ({
+        page,
+      }) => {
+        await page.goto(`/${list}`)
+        const group = page
+          .locator('.filtered-list-toolbar .btn-group')
+          .filter({ has: page.locator('> .btn.active') })
+        await expectPicked(group, PINK, PLUM)
+      })
+    }
+  })
+}
+
+test("a short list's page numbers show the current page", async ({ page }) => {
+  await page.goto('/scenes?perPage=3')
+  const pages = page.locator('.pagination.btn-group').first()
+  await expect(pages.locator('> .btn.active')).toHaveText('1')
+  await expectPicked(pages, PINK, PLUM)
+})
+
+test("a bulk edit's Overwrite, Add and Remove show which is picked", async ({
+  page,
+}) => {
+  await page.goto('/scenes')
+  await page.locator('.scene-card .card-check').first().check()
+  await page
+    .locator('.filtered-list-toolbar button:has(svg[data-icon="pencil"])')
+    .click()
+  const modes = page.locator('.modal .multi-set .btn-group').first()
+  await expectPicked(modes, MAGENTA, PINK)
+})
+
 test('Calm mode and Plain labels take effect', async ({ page }) => {
   try {
     await setPlugin({ calmMode: true, plainCopy: true })

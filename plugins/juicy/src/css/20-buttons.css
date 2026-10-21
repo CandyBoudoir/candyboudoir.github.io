@@ -28,8 +28,7 @@
 }
 
 .btn.btn-primary:not(.minimal),
-.btn.btn-primary:not(.minimal):active,
-.btn.btn-primary:not(.minimal).active {
+.btn.btn-primary:not(.minimal):active {
   background-color: var(--juicy-pink);
   background-image: var(--juicy-gloss-pink);
   border-color: var(--juicy-ink);
@@ -37,8 +36,7 @@
 }
 
 .btn.btn-secondary:not(.minimal),
-.btn.btn-secondary:not(.minimal):active,
-.btn.btn-secondary:not(.minimal).active {
+.btn.btn-secondary:not(.minimal):active {
   background-color: var(--juicy-card-raised);
   background-image: var(--juicy-gloss-plum);
   border-color: var(--juicy-ink);
@@ -98,6 +96,41 @@
 .btn:not(.minimal):focus,
 .btn:not(.minimal).focus {
   box-shadow: var(--juicy-drop), var(--juicy-ring);
+}
+
+/*
+ * The picked button of a group (a list's display modes, its page numbers, a
+ * bulk edit's Overwrite, Add and Remove) is pressed in: it sits down on its
+ * drop with its shine turned to shade, and stays down on hover.
+ */
+.btn.btn:not(.minimal, :disabled, .disabled).active {
+  border-color: var(--juicy-ink);
+  box-shadow:
+    0 1px 0 var(--juicy-ink),
+    var(--juicy-press);
+  filter: none;
+  transform: translateY(2px);
+}
+
+.btn.btn:not(.minimal, :disabled, .disabled).active:focus {
+  box-shadow:
+    0 1px 0 var(--juicy-ink),
+    var(--juicy-press),
+    var(--juicy-ring);
+}
+
+/* A picked plum button turns pink candy, like the chosen pill or match */
+.btn.btn-secondary:not(.minimal, :disabled, .disabled).active {
+  background-color: var(--juicy-pink);
+  background-image: var(--juicy-gloss-pink);
+  color: var(--juicy-ink);
+}
+
+/* A picked pink one, among pink ones, is pressed to magenta */
+.btn.btn-primary:not(.minimal, :disabled, .disabled).active {
+  background-color: var(--juicy-magenta);
+  background-image: var(--juicy-gloss-magenta);
+  color: var(--juicy-ink);
 }
 
 .btn.minimal {
