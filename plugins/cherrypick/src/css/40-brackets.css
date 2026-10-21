@@ -105,7 +105,7 @@ body:has(.cherrypick-dialog) #hon-floating-btn {
    own backdrop colour. Opacity only: backdrop-filter stopped Linux WebKit
    rendering pages (see the CHANGELOG, 0.1.1). */
 body:has(.cherrypick-dialog) .modal-backdrop.show {
-  opacity: 0.85;
+  opacity: 0.92;
 }
 
 @media (width <= 575.98px) {
