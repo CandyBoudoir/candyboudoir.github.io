@@ -580,3 +580,26 @@ export async function unmatchedRestyledClasses(page, { css, folder, plugin }) {
     `${plugin}-unmatched`,
   )
 }
+
+// The colour the page shows at a point, in CSS pixels, read off a
+// screenshot: what lies behind an icon when a theme paints its button with
+// a gradient, which no computed style gives.
+export async function colorAt(page, x, y) {
+  const png = await page.screenshot({
+    clip: { x: Math.round(x), y: Math.round(y), width: 1, height: 1 },
+  })
+  return page.evaluate(
+    async (src) => {
+      const img = new Image()
+      img.src = src
+      await img.decode()
+      const canvas = document.createElement('canvas')
+      canvas.width = canvas.height = 1
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0)
+      const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data
+      return `rgb(${r}, ${g}, ${b})`
+    },
+    `data:image/png;base64,${png.toString('base64')}`,
+  )
+}
