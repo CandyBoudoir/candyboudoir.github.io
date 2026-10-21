@@ -17,7 +17,16 @@
 // a studio's newest release turns up between two checks:
 //   PUT /_late?site_id=<id>  lists it first among that site's scenes
 //   DELETE /_late            takes every one back
+// Release dates count back from TPDB_NOW, which the mock gives too:
+//   GET /_now          { now }, the time it counts from
 import { STASH_BOX } from './stashbox-data.mjs'
+
+// The time the release dates count back from. The mock stash-box starts
+// before the tests and each test worker imports this file again later, so
+// Playwright's config pins it for the whole run (TPDB_NOW, an ISO time):
+// otherwise a run that crosses midnight UTC dates a release one day in the
+// mock and the next in the specs.
+export const TPDB_NOW = Date.parse(process.env.TPDB_NOW) || Date.now()
 
 export const TPDB_PREFIX = '/tpdb'
 // What prepare-like setups register in Stash as the ThePornDB stash-box, and
@@ -88,8 +97,8 @@ const POSTERS = ['gigi', 'bijou', 'sherbet', 'mae', 'trixie']
 
 const slug = (title) => title.toLowerCase().replace(/\W+/g, '-')
 
-const daysAgo = (n) =>
-  new Date(Date.now() - n * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+export const daysAgo = (n) =>
+  new Date(TPDB_NOW - n * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
 let next = 0
 function scene(site, domain, [title, released, cover, cast, tags, duration]) {
@@ -260,9 +269,9 @@ export const TPDB_LATE = {
 const late = new Set()
 
 // Release dates as New Releases' task compares them: the day 48 hours (or
-// 96) before now
+// 96) before TPDB_NOW
 const dayBefore = (hours) =>
-  new Date(Date.now() - hours * 60 * 60 * 1000).toISOString().slice(0, 10)
+  new Date(TPDB_NOW - hours * 60 * 60 * 1000).toISOString().slice(0, 10)
 
 // A site's scenes a first check keeps: those dated within the last 48 hours
 export const tpdbFresh = (site) =>
@@ -333,6 +342,10 @@ export function handleTpdb(req, res, { delay = 30 } = {}) {
     if (req.method === 'PUT' && TPDB_LATE[id]) late.add(id)
     else if (req.method === 'DELETE') late.clear()
     res.writeHead(204).end()
+    return true
+  }
+  if (url.pathname === `${TPDB_PREFIX}/_now`) {
+    json(res, 200, { now: new Date(TPDB_NOW).toISOString() })
     return true
   }
   if (url.pathname === `${TPDB_PREFIX}/_requests`) {

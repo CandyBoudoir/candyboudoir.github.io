@@ -27,6 +27,7 @@ import {
   TPDB_SITES,
   tpdbFresh,
   TPDB_UNKNOWN,
+  daysAgo,
   handleTpdb,
 } from '../../../../tests/stash/theporndb.mjs'
 
@@ -68,9 +69,6 @@ const readBody = (req) =>
     req.on('data', (c) => (raw += c))
     req.on('end', () => done(raw ? JSON.parse(raw) : {}))
   })
-
-const daysAgo = (n) =>
-  new Date(Date.now() - n * 24 * 3600_000).toISOString().slice(0, 10)
 
 // The StashDB catalogue's scenes, released today, yesterday, four and nine
 // days ago in turn, so a check keeps half of them
