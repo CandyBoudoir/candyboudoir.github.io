@@ -2,8 +2,9 @@
 // configurePlugin and the same in every browser. It holds the settings, the
 // remembered bracket choice, Not interested, Don't learn, the bracket in
 // progress, the Hall of Fame, applied-rating batches, consent, the answer
-// to the offer beside Stash Curator, the auto-apply default last written
-// and Watch This's snoozes: a few KB, the snoozes at most 300 entries.
+// to the offer beside Stash Curator, the auto-apply default last written,
+// Watch This's snoozes and the bracket map's size: a few KB, the snoozes at
+// most 300 entries.
 //
 // Two Stash behaviours shape it:
 //   - configurePlugin replaces the plugin's whole map, so every write is
@@ -33,6 +34,7 @@ export const DATA_KEYS = [
   'curatorOffer',
   'autoApplyDefault',
   'snoozes',
+  'mapSize',
 ]
 export const ALL_KEYS = [...SETTING_KEYS, ...DATA_KEYS]
 
@@ -70,6 +72,9 @@ export function fromConfig(map) {
     autoApplyDefault: decode(m.autoApplyDefault),
     // Watch This's skipped and ignored scenes (model/watch.js Snooze)
     snoozes: decode(m.snoozes) || [],
+    // the bracket map's size, 'line', 'short' or 'tall' (map/stage.jsx);
+    // null until the user picks one, which reads as tall
+    mapSize: decode(m.mapSize),
   }
 }
 
@@ -87,6 +92,7 @@ export function toConfig(s) {
     curatorOffer: encode(s.curatorOffer),
     autoApplyDefault: encode(s.autoApplyDefault),
     snoozes: encode(s.snoozes),
+    mapSize: encode(s.mapSize),
   }
 }
 
@@ -100,6 +106,7 @@ export const STATE_TO_CONFIG = {
   consent: ['consent'],
   curatorOffer: ['curatorOffer'],
   snoozes: ['snoozes'],
+  mapSize: ['mapSize'],
 }
 
 // The map Stash's Settings page saves when the Curator offer is answered

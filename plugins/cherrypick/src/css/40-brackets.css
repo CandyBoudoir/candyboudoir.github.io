@@ -101,6 +101,13 @@ body:has(.cherrypick-dialog) #hon-floating-btn {
   z-index: 1000;
 }
 
+/* Cherry Pick's dialogs dim the page more than Stash's 0.5, in the theme's
+   own backdrop colour. Opacity only: backdrop-filter stopped Linux WebKit
+   rendering pages (see the CHANGELOG, 0.1.1). */
+body:has(.cherrypick-dialog) .modal-backdrop.show {
+  opacity: 0.85;
+}
+
 @media (width <= 575.98px) {
   .cherrypick-modal-phone.modal-dialog {
     height: 100%;

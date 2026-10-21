@@ -4,14 +4,17 @@
 // Apply's ratings for the unrated only, Apply and Undo leaving a rating set
 // by hand since the preview or since Apply, performers anchored by their
 // scenes' ratings, a bracket of unrated performers and its Challenge round,
-// and pause and resume.
+// the map's size and the dialog's darker backdrop, and pause and resume.
 import { expect, test } from '@playwright/test'
 import {
   DEMO,
   demoCandidates,
   gql,
   pickCandidate,
+  PLUGIN_ID,
+  pluginConfig,
   setAutoApply,
+  setPluginSettings,
   setUpCherryPick,
   tearDownCherryPick,
 } from './stash.mjs'
@@ -603,6 +606,175 @@ test('a scene bracket plays the unrated scenes and keeps the rated ones for the 
   await expect(result.locator('.cherrypick-challenge-outcome')).toContainText(
     `lost to ${rung}.`,
   )
+})
+
+// ------------------------------------------------------------ map size
+
+async function openBracket(page, list = 'performers') {
+  await page.goto('/' + list)
+  const bracket = visible(page.locator('.cherrypick-bracket-button'))
+  await expect(bracket).toBeVisible({ timeout: 20_000 })
+  await bracket.click()
+  const play = page.locator('.cherrypick-play-modal')
+  await expect(play).toContainText(`16 ${list}`)
+  return play
+}
+
+async function abandon(play) {
+  await play.getByRole('button', { name: 'Abandon' }).click()
+  await play.getByRole('button', { name: 'Abandon' }).last().click()
+  await expect(play).toHaveCount(0)
+}
+
+const sizeButton = (modal, name) =>
+  modal.getByRole('group', { name: 'Map size' }).getByRole('button', { name })
+const pickedSize = (modal) =>
+  modal
+    .getByRole('group', { name: 'Map size' })
+    .locator('[aria-pressed="true"]')
+
+// The map's size as Stash keeps it, and back to none picked (tall)
+const savedMapSize = async () => (await pluginConfig())?.mapSize ?? null
+async function forgetMapSize() {
+  const map = { ...((await pluginConfig()) || {}) }
+  delete map.mapSize
+  await setPluginSettings(PLUGIN_ID, map)
+}
+
+// Stash's root font size, which rem lengths follow
+const remPx = (page) =>
+  page.evaluate(() =>
+    parseFloat(getComputedStyle(document.documentElement).fontSize),
+  )
+const heightOf = async (locator) => (await locator.boundingBox()).height
+
+test('the map size buttons hide the map, shorten it or keep it tall, and the cards grow as the map shrinks', async ({
+  page,
+}) => {
+  await forgetMapSize()
+  const play = await openBracket(page)
+  const rem = await remPx(page)
+  const vh = page.viewportSize().height / 100
+  const vp = play.locator('.cherrypick-map-vp')
+  const art = play.locator('.cherrypick-layer.live .cherrypick-cont-img')
+  const area = async () => {
+    const b = await art.first().boundingBox()
+    return b.width * b.height
+  }
+
+  // tall until one is picked: 0.3.0's frame
+  await expect(pickedSize(play)).toHaveCount(1)
+  await expect(pickedSize(play)).toHaveAttribute('aria-label', 'Tall map')
+  await expect(sizeButton(play, 'Short map')).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  )
+  await expect(sizeButton(play, 'No map')).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  )
+  expect(await heightOf(vp)).toBeCloseTo(
+    Math.min(Math.max(11 * rem, 30 * vh), 18 * rem),
+    0,
+  )
+  const tall = await area()
+
+  // short: the scene brackets' frame, and bigger cards
+  await sizeButton(play, 'Short map').click()
+  await expect(pickedSize(play)).toHaveAttribute('aria-label', 'Short map')
+  await expect.poll(() => heightOf(vp)).toBeCloseTo(9.5 * rem, 0)
+  const short = await area()
+  expect(short).toBeGreaterThan(tall)
+
+  // line: no map, and Brackets Classic Mode's cards
+  await sizeButton(play, 'No map').click()
+  await expect(pickedSize(play)).toHaveAttribute('aria-label', 'No map')
+  await expect(vp).toHaveCount(0)
+  await expect
+    .poll(() => heightOf(art.first()))
+    .toBeCloseTo(Math.min(52 * vh, 34 * rem), 0)
+  expect(await area()).toBeGreaterThan(short)
+
+  // the match plays on, and Show bracket opens the whole map
+  await page.keyboard.press('ArrowLeft')
+  await expect(play.locator('.cherrypick-round')).toHaveText(
+    'Round of 16 · match 2 of 8',
+  )
+  await play.getByRole('button', { name: 'Show bracket' }).click()
+  await expect(play.locator('[data-node="trophy"]')).toBeVisible()
+  await play.getByRole('button', { name: 'Back to the match' }).click()
+  await expect(vp).toHaveCount(0)
+  await abandon(play)
+  await forgetMapSize()
+})
+
+test('the map size picked holds after closing, a reload, in another browser and in a scene bracket', async ({
+  page,
+  browser,
+}) => {
+  await forgetMapSize()
+  try {
+    const play = await openBracket(page)
+    await sizeButton(play, 'Short map').click()
+    await expect(pickedSize(play)).toHaveAttribute('aria-label', 'Short map')
+    // closing pauses it; its resume pill opens it as it was
+    await page.keyboard.press('Escape')
+    await expect(play).toBeHidden()
+    await visible(page.locator('.cherrypick-resume-pill')).click()
+    await expect(pickedSize(play)).toHaveAttribute('aria-label', 'Short map')
+    await page.reload()
+    await visible(page.locator('.cherrypick-resume-pill')).click({
+      timeout: 20_000,
+    })
+    await expect(pickedSize(play)).toHaveAttribute('aria-label', 'Short map')
+
+    // Stash's plugin configuration keeps it, so another browser has it too
+    await expect.poll(savedMapSize).toBe(JSON.stringify('short'))
+    const other = await browser.newContext({ reducedMotion: 'reduce' })
+    try {
+      const there = await other.newPage()
+      await there.goto('/performers')
+      await visible(there.locator('.cherrypick-resume-pill')).click({
+        timeout: 20_000,
+      })
+      await expect(
+        pickedSize(there.locator('.cherrypick-play-modal')),
+      ).toHaveAttribute('aria-label', 'Short map')
+    } finally {
+      await other.close()
+    }
+    await abandon(play)
+
+    // a scene bracket's frame is short already: its short map is a strip
+    const scenes = await openBracket(page, 'scenes')
+    const rem = await remPx(page)
+    const vp = scenes.locator('.cherrypick-map-vp')
+    await expect(pickedSize(scenes)).toHaveAttribute('aria-label', 'Short map')
+    await expect.poll(() => heightOf(vp)).toBeCloseTo(5.5 * rem, 0)
+    await sizeButton(scenes, 'No map').click()
+    await expect(vp).toHaveCount(0)
+    await expect(
+      scenes.locator('.cherrypick-layer.live .cherrypick-contender'),
+    ).toHaveCount(2)
+    await sizeButton(scenes, 'Tall map').click()
+    await expect.poll(() => heightOf(vp)).toBeCloseTo(9.5 * rem, 0)
+    await abandon(scenes)
+  } finally {
+    await forgetMapSize()
+  }
+})
+
+test('a Cherry Pick dialog dims the page behind it more than Stash’s own', async ({
+  page,
+}) => {
+  const play = await openBracket(page)
+  // Bootstrap's backdrop is 0.5
+  await expect(page.locator('.modal-backdrop.show')).toHaveCSS(
+    'opacity',
+    '0.85',
+  )
+  await abandon(play)
+  await expect(page.locator('.modal-backdrop')).toHaveCount(0)
 })
 
 test('a clip bracket pauses and resumes after a reload', async ({ page }) => {

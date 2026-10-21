@@ -4,8 +4,9 @@
 // pick is not pulled toward past ratings, and an anchor looks like any
 // other entrant. A scene match shows contact sheets; a frame, Look closer
 // or 1 and 2 open an inspector (judge.jsx), and no scene's own file plays.
-// The match plays on the bracket map (map/), with sound behind M and a
-// controller's d-pad picking; Brackets Classic Mode keeps the plain match.
+// The match plays on the bracket map (map/), with sound behind M, a
+// controller's d-pad picking and the map's size in the header; Brackets
+// Classic Mode keeps the plain match.
 import { FontAwesomeSolid, React } from '../../runtime/api.js'
 import { store } from '../../runtime/app.js'
 import * as BR from '../../model/brackets.js'
@@ -41,7 +42,13 @@ import { nextPair } from './sheet.js'
 import { BracketBanner, BracketMap, mapEffect } from './map/bracketMap.jsx'
 import { toggleSound, useGamepad } from './map/fx.js'
 import { MapPair } from './map/sides.jsx'
-import { gated, MatchStage, SoundButton } from './map/stage.jsx'
+import {
+  gated,
+  MapSizeButtons,
+  MatchStage,
+  SoundButton,
+  useMapSize,
+} from './map/stage.jsx'
 
 const { faRotateLeft, faUndo } = FontAwesomeSolid
 
@@ -172,6 +179,7 @@ export function PlayDialog() {
     undoPick()
   }
   const classic = useAppState((s) => !!s.settings.classicBrackets)
+  const size = useMapSize()
   // on the map, a pick while the next match arrives finishes its arrival
   const pickNow = (id) =>
     classic ? match.pick(id) : gated(() => match.pick(id))
@@ -289,7 +297,12 @@ export function PlayDialog() {
       headerExtra={
         <>
           <span className="cherrypick-round text-muted">{st.label}</span>
-          {classic ? null : <SoundButton />}
+          {classic ? null : (
+            <>
+              <SoundButton />
+              <MapSizeButtons />
+            </>
+          )}
         </>
       }
       footer={footer}
@@ -352,19 +365,19 @@ export function PlayDialog() {
             round={cur.round}
             opening={b.decisions.length === 0}
             winnerOf={(n) => b.decisions[n - 1]?.winner}
-            className={`cherrypick-map-stage ${b.kind}${tree ? ' cherrypick-overview' : ''}`}
+            className={`cherrypick-map-stage ${b.kind} cherrypick-size-${size}${tree ? ' cherrypick-overview' : ''}`}
             pick={match.pick}
             onLook={(id, frame) => match.setLook({ id, frame })}
             renderPair={(layer, on) => (
               <MapPair kind={b.kind} layer={layer} {...on} />
             )}
             renderTop={(ev) =>
-              b.kind === 'clip' || tree ? (
+              tree || (b.kind === 'clip' && size !== 'line') ? (
                 <BracketMap b={b} st={st} cur={cur} ev={ev} overview={tree} />
               ) : null
             }
             renderBottom={(ev) =>
-              b.kind === 'clip' || tree ? null : (
+              b.kind === 'clip' || tree || size === 'line' ? null : (
                 <BracketMap b={b} st={st} cur={cur} ev={ev} />
               )
             }
