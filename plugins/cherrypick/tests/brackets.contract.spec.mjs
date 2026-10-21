@@ -771,7 +771,7 @@ test('a Cherry Pick dialog dims the page behind it more than Stash’s own', asy
   // Bootstrap's backdrop is 0.5
   await expect(page.locator('.modal-backdrop.show')).toHaveCSS(
     'opacity',
-    '0.85',
+    '0.92',
   )
   await abandon(play)
   await expect(page.locator('.modal-backdrop')).toHaveCount(0)
