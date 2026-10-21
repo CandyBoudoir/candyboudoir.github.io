@@ -38,7 +38,8 @@
 /* the size marks: as tall as the speaker's FontAwesome icon and on its
    baseline, so the four buttons line up. The sizes not picked are dimmed,
    so the picked one shows in a theme that draws an active button like any
-   other (Juicy). */
+   other. One pointed at or focused shows in full: a theme's hover colour,
+   dimmed, can fade into the button (Juicy's pink on plum, about 2:1). */
 .cherrypick-size-icon {
   display: inline-block;
   height: 1em;
@@ -47,7 +48,9 @@
   width: 1.5em;
 }
 
-.cherrypick-map-size .btn:not(.active) .cherrypick-size-icon {
+.cherrypick-map-size
+  .btn:not(.active, :hover, :focus-visible)
+  .cherrypick-size-icon {
   opacity: 0.55;
 }
 
