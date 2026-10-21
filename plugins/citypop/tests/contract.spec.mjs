@@ -2,6 +2,9 @@
 // Pop's CSS, JavaScript and settings take effect.
 import { expect, test } from '@playwright/test'
 import {
+  abandonBracket,
+  headerButtonLook,
+  openPerformerBracket,
   setUpCherryPick,
   tearDownCherryPick,
 } from '../../cherrypick/tests/stash.mjs'
@@ -351,6 +354,27 @@ test.describe('beside Cherry Pick', () => {
     await card.hover()
     await expect(banner).toHaveCSS('opacity', '1')
     await stickerClearsCheckbox(card)
+  })
+
+  // The coral City Pop gives a dialog's header icon is for the one before
+  // the title. The speaker in a bracket's header takes its button's ink, so
+  // it reads on the sunset when sound is on, and keeps one width.
+  test("the speaker in a bracket's header reads, sound off and on", async ({
+    page,
+  }) => {
+    const play = await openPerformerBracket(page)
+    const sound = play.locator('.cherrypick-sound')
+    const widths = []
+    for (const on of [false, true]) {
+      if (on) await sound.click()
+      await expect(sound).toHaveAttribute('aria-pressed', String(on))
+      const look = await headerButtonLook(page, sound)
+      expect(look.icon, "the button's ink").toBe(look.ink)
+      expect(contrast(look.icon, look.behind)).toBeGreaterThanOrEqual(3)
+      widths.push(look.width)
+    }
+    expect(widths[1]).toBeCloseTo(widths[0], 0)
+    await abandonBracket(play)
   })
 })
 

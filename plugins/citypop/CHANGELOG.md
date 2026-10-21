@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.3
+
+Cherry Pick 0.3.1's bracket dialogs in the dusk, for Stash v0.31.1.
+
+- The speaker in a bracket's header reads with sound on. City Pop paints a dialog's header icons coral, and the speaker's coral sat on the sunset of the button turned on. An icon on a header button now takes the button's ink and the height of the map size marks beside it.
+- The speaker keeps one width with sound on or off, so the map size buttons beside it stay put.
+- Tested beside Insights 2.12.1 and Performers Toolkit 0.17.1.
+
 ## 0.2.2
 
 Performers Toolkit 0.17 on a performer's page, for Stash v0.31.1.

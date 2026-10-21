@@ -25,7 +25,9 @@ bs-tooltip-top
 btn-info
 btn-warning
 card-drag-handle
+cherrypick-dialog
 cherrypick-score-banner
+cherrypick-sound
 cherrypick-star
 criterion-list
 current
