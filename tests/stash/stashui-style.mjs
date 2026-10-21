@@ -41,7 +41,7 @@ const layer = (page, pseudo, property) =>
     ([pseudo, property]) => getComputedStyle(document.body, pseudo)[property],
     [pseudo, property],
   )
-const savedColorsOnly = async (style) => {
+export const savedColorsOnly = async (style) => {
   const { configuration } = await gql(
     `{ configuration { plugins(include: ["${style.pluginId}"]) } }`,
   )
@@ -64,6 +64,10 @@ export function freshStashUIBrowser(plugins) {
     await setPluginSettings('stashui', {})
   })
   test.beforeEach(async ({ page }) => {
+    // The page saves Colors only in two steps, a read and then a write, and
+    // stays open through afterEach, so the last test's write can land after
+    // its reset: each test resets again as it starts
+    for (const style of plugins) await setPluginSettings(style.pluginId, {})
     await page.addInitScript(() =>
       localStorage.setItem('stashui.autoBackup', 'false'),
     )
@@ -187,6 +191,7 @@ export function stashUIStyleSpecs(style) {
       await expect
         .poll(() => layer(page, '::before', 'backgroundImage'))
         .not.toContain(style.backdrop)
+      await expect.poll(() => savedColorsOnly(style)).toBe(true)
     })
 
     test('Stash UI’s own background image takes the backdrop’s place', async ({
