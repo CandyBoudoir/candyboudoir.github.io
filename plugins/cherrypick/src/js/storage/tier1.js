@@ -140,9 +140,23 @@ export function createTier1(io) {
   // Writes run one at a time, so two read-modify-writes never interleave.
   const serial = (fn) => (chain = chain.then(fn, fn))
 
+  // The map and the mirror are stamped in the order things happen in this
+  // tab, never twice alike, so a change staged after a save took its copy
+  // always reads as newer than what that save writes.
+  let lastStamp = ''
+  const stamp = () => {
+    const t = now()
+    lastStamp =
+      t > lastStamp ? t : new Date(Date.parse(lastStamp) + 1).toISOString()
+    return lastStamp
+  }
+  // When each key last changed (stage)
+  const stagedAt = {}
+
+  // at: the stamp taken with full, so the map is as old as its copy.
   // own: settings among keys the user changed through the plugin itself,
   // which are written over Stash's value.
-  async function readModifyWrite(full, keys, own = []) {
+  async function readModifyWrite(full, keys, own, at) {
     const cur = await io.read()
     const mirror = io.mirror.get()
     const stale =
@@ -171,9 +185,24 @@ export function createTier1(io) {
       cur[k] != null
     for (const k of write)
       if (full[k] !== undefined && !stashOwns(k)) next[k] = full[k]
-    next.updatedAt = now()
+    next.updatedAt = at
     await io.write(next)
-    io.mirror.set(next)
+    // A change staged while this write was out is newer than the copy it
+    // carried, so the mirror keeps it, still newer than the map, until its
+    // own save lands. Should the page be left or the tab closed before
+    // then, the next load restores the change rather than what it replaced
+    // (an abandoned bracket came back as "Resume bracket").
+    const later = Object.keys(stagedAt).filter((k) => stagedAt[k] > at)
+    const staged = io.mirror.get()
+    io.mirror.set(
+      later.length && staged
+        ? {
+            ...next,
+            ...Object.fromEntries(later.map((k) => [k, staged[k]])),
+            updatedAt: staged.updatedAt,
+          }
+        : next,
+    )
     log(
       !cur
         ? 'configurePlugin: the map was missing; wrote back everything'
@@ -197,7 +226,8 @@ export function createTier1(io) {
         log(`deferred ${keys.join(', ')}: Stash's Settings page is open`)
         return Promise.resolve('deferred')
       }
-      return serial(() => readModifyWrite(full, keys, own))
+      const at = stamp()
+      return serial(() => readModifyWrite(full, keys, own, at))
     },
 
     // Call when the user leaves Stash's Settings page.
@@ -209,7 +239,8 @@ export function createTier1(io) {
       pending.clear()
       pendingOwn.clear()
       pendingFull = null
-      return serial(() => readModifyWrite(map, keys, own))
+      const at = stamp()
+      return serial(() => readModifyWrite(map, keys, own, at))
     },
 
     pending: () => [...pending],
@@ -219,8 +250,12 @@ export function createTier1(io) {
     // mirror is then newer than Stash's map, and load restores it).
     stage(full, keys) {
       const next = { ...(io.mirror.get() || {}) }
-      for (const k of keys) if (full[k] !== undefined) next[k] = full[k]
-      next.updatedAt = now()
+      next.updatedAt = stamp()
+      for (const k of keys)
+        if (full[k] !== undefined) {
+          next[k] = full[k]
+          stagedAt[k] = next.updatedAt
+        }
       io.mirror.set(next)
     },
 
