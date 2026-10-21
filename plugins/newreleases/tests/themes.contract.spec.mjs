@@ -47,8 +47,14 @@ const themes = (await listPlugins())
   .filter(({ mod }) => mod.kind === 'theme' && !mod.incubating)
   .map(({ mod }) => mod.id)
 
-// What makes a loader look like itself
+// What makes a loader look like itself, read with its animations held at
+// their start, so two loaders read moments apart show the same frame (Leather
+// lights its studs through the background's colours)
 const loaderLook = (el) => {
+  for (const animation of el.getAnimations()) {
+    animation.pause()
+    animation.currentTime = 0
+  }
   const s = getComputedStyle(el)
   return {
     animation: s.animationName,
