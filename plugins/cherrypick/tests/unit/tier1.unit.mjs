@@ -126,6 +126,35 @@ test("a deferred write never undoes a switch turned on Stash's Settings page", a
   assert.deepEqual(fromConfig(server.map).dontLearn, [{ sceneId: '1' }])
 })
 
+test('Brackets starts on, and off keeps the paused bracket and the Hall of Fame through writes', async () => {
+  assert.equal(fromConfig(null).settings.brackets, true)
+  const { server, tier1 } = rig()
+  const paused = {
+    id: 'b1',
+    status: 'paused',
+    decisions: [{ winner: '3', loser: '4' }],
+  }
+  const history = [{ id: 'b0', result: { champion: '5' } }]
+  // Stash's Settings page turned the switch off
+  server.map = {
+    ...toConfig(state({ brackets: { active: paused, history } })),
+    brackets: false,
+  }
+  const { map } = await tier1.load()
+  const s = fromConfig(map)
+  assert.equal(s.settings.brackets, false)
+  assert.deepEqual(s.brackets, { active: paused, history })
+  // the plugin writes something else, from a copy that still has it on
+  const copy = {
+    ...s,
+    settings: { ...s.settings, brackets: true },
+    dontLearn: [{ sceneId: '8' }],
+  }
+  await tier1.save(toConfig(copy), ['dontLearn'])
+  assert.equal(server.map.brackets, false)
+  assert.deepEqual(fromConfig(server.map).brackets, { active: paused, history })
+})
+
 test('a missing map is restored from the mirror', async () => {
   const { server, box, tier1 } = rig()
   await tier1.save(toConfig(state({ notInterested: [{ sceneId: '2' }] })), [
