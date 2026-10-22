@@ -65,6 +65,7 @@ jobs:
       WORK: ${{ github.workspace }}/stash-work
       COMPANIONS: ${{ matrix.leg.companions || '' }}
       COMPANION_ZIPS: ${{ github.workspace }}/companion-zips
+      FFMPEG: ${{ github.workspace }}/ffmpeg
       BROWSER: ${{ matrix.leg.browser || 'chromium' }}
       STASH_TZ: ${{ matrix.leg.tz || '' }}
     steps:
@@ -80,7 +81,28 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      # ffmpeg draws the demo media, and Stash generates covers, previews and
+      # sprites with it. A pinned static build (tests/stash/ffmpeg.sh) instead
+      # of apt's, whose 99 packages can crawl from the mirror for half an hour.
+      # Its zips are cached by the script's hash; every leg misses on a new pin
+      # at once and races to save them, and the first one wins
+      - name: Restore ffmpeg
+        id: ffmpeg
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.FFMPEG }}/*.zip
+          key: ffmpeg-${{ hashFiles('tests/stash/ffmpeg.sh') }}
+      - name: ffmpeg
+        run: |
+          tests/stash/ffmpeg.sh "$FFMPEG"
+          echo "$FFMPEG/bin" >> "$GITHUB_PATH"
+      - name: Save ffmpeg
+        if: steps.ffmpeg.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.FFMPEG }}/*.zip
+          key: ffmpeg-${{ hashFiles('tests/stash/ffmpeg.sh') }}
       # prepare.mjs draws the demo portraits with Chromium, so every leg needs it
       - run: pnpm exec playwright install --with-deps chromium ${{ matrix.leg.browser || '' }}
       # Stash Curator's manifest runs `python`; the runner may have only python3
