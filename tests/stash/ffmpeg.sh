@@ -14,7 +14,10 @@ base=https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1
 mkdir -p "$dir/bin"
 while read -r sum name; do
   zip="$dir/$name-6.1-linux-64.zip"
-  [ -f "$zip" ] || curl -fsSL --retry 3 -o "$zip" "$base/$name-6.1-linux-64.zip"
+  # A download under 100 kB/s for 20 seconds gives up and starts again
+  [ -f "$zip" ] || curl -fsSL --retry 3 --connect-timeout 20 \
+    --speed-limit 102400 --speed-time 20 \
+    -o "$zip" "$base/$name-6.1-linux-64.zip"
   actual=$(shasum -a 256 "$zip" | awk '{ print $1 }')
   [ "$sum" = "$actual" ] ||
     { echo "Checksum mismatch for $name: expected '$sum', got '$actual'" >&2; exit 1; }

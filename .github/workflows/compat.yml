@@ -93,6 +93,7 @@ jobs:
           path: ${{ env.FFMPEG }}/*.zip
           key: ffmpeg-${{ hashFiles('tests/stash/ffmpeg.sh') }}
       - name: ffmpeg
+        timeout-minutes: 5
         run: |
           tests/stash/ffmpeg.sh "$FFMPEG"
           echo "$FFMPEG/bin" >> "$GITHUB_PATH"
@@ -103,8 +104,15 @@ jobs:
         with:
           path: ${{ env.FFMPEG }}/*.zip
           key: ffmpeg-${{ hashFiles('tests/stash/ffmpeg.sh') }}
+      # Playwright's --with-deps installs Linux packages with apt (9 font
+      # packages, 101 for WebKit). The runner tries azure.archive.ubuntu.com
+      # first, which sometimes serves 40 kB/s without stalling, so apt never
+      # fails over to archive.ubuntu.com (actions/runner-images#14594)
+      - name: apt without the Azure mirror
+        run: sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
       # prepare.mjs draws the demo portraits with Chromium, so every leg needs it
       - run: pnpm exec playwright install --with-deps chromium ${{ matrix.leg.browser || '' }}
+        timeout-minutes: 10
       # Stash Curator's manifest runs `python`; the runner may have only python3
       - name: Python for companion plugins
         if: matrix.leg.companions
