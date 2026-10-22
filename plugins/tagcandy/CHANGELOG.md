@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4
+
+- New icons for 3D Available, Anal Creampie, Anal Stretching Toys, Argentinian, Augmented Reality, Australian, AV1, Bad Girl, Ball Gag, Ball Play and 105 more.
+
 ## 0.1.3
 
 - New icons for Adorable, Ahegao, Airtight, Anal Fingering, Anal Winking, Armpit Fetish, Ass Grabbing, Ass Smacking, Ass Stacking, Bald Head and 92 more.
