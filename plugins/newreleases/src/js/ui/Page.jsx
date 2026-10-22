@@ -387,10 +387,12 @@ const loadStashLists = () =>
     .catch(() => {})
 
 // Stash's own slider settings for its front-page rows
-// (src/core/recommendations.ts), which plugins cannot import.
+// (src/core/recommendations.ts), which plugins cannot import, without the
+// loop: to loop, the slider copies every card to each end of the row, and
+// Just in's few cards leave room on a wide screen for the copies to show.
 function sliderSettings(cards, isTouch) {
   const at = (show) => ({
-    infinite: !isTouch && cards > show,
+    infinite: false,
     slidesToShow: cards > show ? show : cards,
     slidesToScroll: isTouch ? 1 : cards > show ? show : cards,
   })

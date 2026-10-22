@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+- Just in shows each release once. With more releases than Stash's slider shows at the window's width, the row looped, and the copies the slider makes to loop showed after the releases on a wide screen, so each release appeared twice. The row now ends at its last release.
+
 ## 0.2.0
 
 - The page sorts as Stash's scene lists do, with Stash's sort menu and direction button: Date, Duration, Found, Performer Count, Random, Studio, Tag Count and Title. Date, newest first, is the default. Found sorts by when a check first found each release, which orders releases within a day, since release dates carry no time. Random keeps its seed in the address, and Reshuffle picks another. The sort lives in the address with the filters and the page.

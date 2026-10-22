@@ -185,18 +185,18 @@ export async function ageCatalog(hours) {
 
 /**
  * Makes the page's first read of the catalog a day old and without
- * `release`, so the page starts a check (which finds nothing due) and its
- * next read brings the release in while the page is open, as a check's
- * arrival.
+ * `releases`, so the page starts a check (which finds nothing due) and its
+ * next read brings them in while the page is open, as a check's arrivals.
  */
-export async function arriveWhileOpen(page, release) {
+export async function arriveWhileOpen(page, ...releases) {
+  const ids = new Set(releases.map((r) => r.id))
   let first = true
   await page.route('**/assets/catalog/catalog.json', async (route) => {
     if (!first) return route.continue()
     first = false
     const response = await route.fetch()
     const catalog = await response.json()
-    catalog.releases = catalog.releases.filter((r) => r.id !== release.id)
+    catalog.releases = catalog.releases.filter((r) => !ids.has(r.id))
     catalog.run.finished = earlier(catalog.run.finished, 21)
     await route.fulfill({ response, json: catalog })
   })
