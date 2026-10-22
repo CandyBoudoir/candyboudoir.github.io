@@ -20,6 +20,7 @@ import {
   TPDB_SITES,
   TPDB_STASH_BOX,
   ageCatalog,
+  arriveWhileOpen,
   clearTpdbRequests,
   gql,
   lateRelease,
@@ -65,12 +66,10 @@ const titles = (page) =>
   page
     .locator('.newreleases-grid .newreleases-card .card-section-title')
     .allInnerTexts()
-// Just in's cards, without the copies Stash's slider makes to loop
+// Just in's cards, all of them: copies of a card would show twice
 const justInTitles = (page) =>
   page
-    .locator(
-      '.newreleases-just-in .slick-slide:not(.slick-cloned) .card-section-title',
-    )
+    .locator('.newreleases-just-in .newreleases-card .card-section-title')
     .allInnerTexts()
 
 // Names in Stash's natural order, case aside
@@ -493,11 +492,9 @@ test('a check while the page is open puts what it finds in Just in, New, and the
       { timeout: 15_000 },
     )
     expect(await justInTitles(page)).toEqual([late.title])
-    await expect(
-      justIn.locator(
-        '.slick-slide:not(.slick-cloned) .newreleases-new-badge .badge',
-      ),
-    ).toHaveText('New')
+    await expect(justIn.locator('.newreleases-new-badge .badge')).toHaveText(
+      'New',
+    )
     // The list never moved, and what the first check found is not New
     expect(await titles(page)).toEqual(order)
     await expect(
@@ -536,6 +533,31 @@ test('a check while the page is open puts what it finds in Just in, New, and the
   } finally {
     await withdrawLate()
   }
+  expect(errors).toEqual([])
+})
+
+test('Just in shows each arrival once, however many arrive', async ({
+  page,
+}) => {
+  const errors = []
+  page.on('pageerror', (e) => errors.push(e.message))
+  await waitForChecks()
+  // More arrivals than Stash's slider shows at any width, on a screen wide
+  // enough to hold them all with room to spare
+  await page.setViewportSize({ width: 3840, height: 1000 })
+  const [stays, ...arrivals] = newestFirst(SHOWN)
+  await arriveWhileOpen(page, ...arrivals)
+  await page.goto(ROUTE)
+  await expect(page.locator('.newreleases-just-in')).toBeVisible({
+    timeout: 30_000,
+  })
+  await waitForChecks()
+  await expect(page.locator('.newreleases-status')).toHaveText(
+    /^Checked just now/,
+    { timeout: 15_000 },
+  )
+  expect(await justInTitles(page)).toEqual(arrivals.map((s) => s.title))
+  expect(await titles(page)).toContain(stays.title)
   expect(errors).toEqual([])
 })
 
