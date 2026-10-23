@@ -2,20 +2,12 @@
 // stash-boxes and favourite studios, the user's tags and performers to name
 // what the stash-boxes list, the scenes that already hold a release, and the
 // job queue. The one thing it writes is the task it starts.
-import { gql, mutate, query } from '../api.js'
+import { cached, gql, GQL, mutate, query } from '../api.js'
 import { CATALOG_URL, PLUGIN_ID, TASK_NAME } from '../name.js'
 import { releaseKey } from './match.js'
 
 const SETUP = gql`
   query NewReleasesSetup {
-    configuration {
-      general {
-        stashBoxes {
-          name
-          endpoint
-        }
-      }
-    }
     findStudios(
       studio_filter: { favorite: true }
       filter: { per_page: -1, sort: "name", direction: ASC }
@@ -102,10 +94,16 @@ const LIBRARY = gql`
   }
 `
 
+// The stash-boxes come from Stash's own copy of its configuration rather
+// than a query of the page's: a configuration query can freeze Stash 0.30 to
+// 0.31.1 when it meets a configuration write.
 export async function loadSetup() {
-  const data = await query(SETUP)
+  const [config, data] = await Promise.all([
+    cached(GQL.ConfigurationDocument),
+    query(SETUP),
+  ])
   return {
-    boxes: data.configuration.general.stashBoxes || [],
+    boxes: config.configuration.general.stashBoxes || [],
     favourites: data.findStudios.studios || [],
   }
 }
