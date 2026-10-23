@@ -350,6 +350,25 @@ test('a write waiting for the page to settle keeps a change staged while it wait
   assert.equal(box.mirror.updatedAt, server.map.updatedAt)
 })
 
+test("a write waiting for the page to settle waits on for the user to leave Stash's Settings page", async () => {
+  const { server, open, tier1 } = rig()
+  const page = held()
+  server.hold.settle = page.promise
+  const saving = tier1.save(
+    toConfig(state({ dontLearn: [{ sceneId: '3' }] })),
+    ['dontLearn'],
+  )
+  open.value = true
+  page.release()
+  assert.equal(await saving, 'deferred')
+  assert.equal(server.writes, 0)
+  assert.deepEqual(tier1.pending(), ['dontLearn'])
+  open.value = false
+  server.hold.settle = null
+  await tier1.flush()
+  assert.deepEqual(fromConfig(server.map).dontLearn, [{ sceneId: '3' }])
+})
+
 test('load takes a map the caller already read and sends no read of its own', async () => {
   const { server, tier1 } = rig()
   const map = toConfig(state({ dontLearn: [{ sceneId: '6' }] }))

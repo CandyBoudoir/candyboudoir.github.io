@@ -228,8 +228,17 @@ export function createTier1(io) {
     return changed ? 'written' : 'unchanged'
   }
 
+  function defer(full, keys, own) {
+    keys.forEach((k) => pending.add(k))
+    own.forEach((k) => pendingOwn.add(k))
+    pendingFull = full
+    log(`deferred ${keys.join(', ')}: Stash's Settings page is open`)
+    return 'deferred'
+  }
+
   // The write waiting for the page to settle. A save made meanwhile joins
-  // it with its newer copy, so a burst of changes is one write.
+  // it with its newer copy, so a burst of changes is one write. Should the
+  // user open Stash's Settings page meanwhile, it waits for them to leave.
   let batch = null
   function enqueue(full, keys, own) {
     const at = stamp()
@@ -246,6 +255,7 @@ export function createTier1(io) {
       // dropped by remove
       if (batch !== b) return 'none'
       batch = null
+      if (io.settingsOpen()) return defer(b.full, [...b.keys], [...b.own])
       return readModifyWrite(b.full, [...b.keys], [...b.own], b.at)
     })
     return b.done
@@ -257,13 +267,7 @@ export function createTier1(io) {
     // (Hide on cards, off Stash's Settings page), written over Stash's.
     save(full, keys, own = []) {
       if (!keys.length) return Promise.resolve('none')
-      if (io.settingsOpen()) {
-        keys.forEach((k) => pending.add(k))
-        own.forEach((k) => pendingOwn.add(k))
-        pendingFull = full
-        log(`deferred ${keys.join(', ')}: Stash's Settings page is open`)
-        return Promise.resolve('deferred')
-      }
+      if (io.settingsOpen()) return Promise.resolve(defer(full, keys, own))
       return enqueue(full, keys, own)
     },
 

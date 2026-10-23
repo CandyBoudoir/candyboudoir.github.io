@@ -64,7 +64,8 @@ export const store = createStore({
 })
 
 // Stash's own copy of its configuration, which it fetches as it starts and
-// again after every write. Reading it sends Stash no configuration query,
+// keeps current after each save (writePluginMap updates it for Cherry
+// Pick's own). Reading it sends Stash no configuration query,
 // each of which can freeze Stash 0.30 to 0.31.1 when it meets a write
 // (runtime/settle.js).
 export const stashConfiguration = async () =>
@@ -122,7 +123,7 @@ export const tier1 = createTier1({
 // Writes what changed to where it lives: tier 1 for the plugin's own data,
 // tier 3 for row signals. Settings are Stash's to write, except one the user
 // changes through Cherry Pick itself (changeSettings). Tier 1 writes wait
-// for a second of quiet (every write makes Stash refetch its
+// for a second of quiet (each is a read and a write of Stash's
 // configuration, and bracket picks come quickly), and Watch This's snoozes
 // alone for five, so skips a few seconds apart go out as one write; the
 // mirror takes each change at once. Tier 1 then holds the write until the
