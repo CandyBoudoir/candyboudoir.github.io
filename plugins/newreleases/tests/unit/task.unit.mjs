@@ -183,6 +183,11 @@ const clearTpdb = () => fetch(`${base}/tpdb/_requests`, { method: 'DELETE' })
 const publishLate = (site) =>
   fetch(`${base}/tpdb/_late?site_id=${site.id}`, { method: 'PUT' })
 const withdrawLate = () => fetch(`${base}/tpdb/_late`, { method: 'DELETE' })
+const cutOff = (site, times) =>
+  fetch(`${base}/tpdb/_cut?site_id=${site.id}&times=${times}`, {
+    method: 'PUT',
+  })
+const clearCuts = () => fetch(`${base}/tpdb/_cut`, { method: 'DELETE' })
 const tpdbLog = async () => (await fetch(`${base}/tpdb/_requests`)).json()
 
 beforeEach(async () => {
@@ -198,6 +203,7 @@ beforeEach(async () => {
   boxRequests.length = 0
   stashRequests.length = 0
   await clearTpdb()
+  await clearCuts()
 })
 
 // Runs the task once, as Stash does, and returns its stdout answer.
@@ -474,6 +480,73 @@ for (const [site, why] of [
       assert.equal((await tpdbLog()).requests.length, 0)
     },
   )
+
+test(
+  'an answer cut off partway is asked for once more, after the same pause',
+  { skip: !hasPython },
+  async () => {
+    await cutOff(TPDB_SITES.lollipop, 1)
+    const { answer, log } = await runTask()
+    assert.equal(answer.error, null)
+    const { requests } = await tpdbLog()
+    const scenes = `/scenes?site_id=${TPDB_SITES.lollipop.id}&per_page=25&orderBy=recently_released`
+    assert.deepEqual(
+      requests.slice(0, 3).map((r) => `${r.path}${r.query}`),
+      [`/sites/${TPDB_SITES.lollipop.uuid}`, scenes, scenes],
+    )
+    assert.ok(
+      requests[2].start - requests[1].end >= 40,
+      `the second ask waited ${requests[2].start - requests[1].end} ms`,
+    )
+    assert.match(
+      log,
+      /ThePornDB: an answer cut off after \d+ bytes; asking once more/,
+    )
+    const catalog = await readCatalog()
+    assert.equal(catalog.run.state, 'done')
+    assert.equal(catalog.boxes[`${base}/tpdb/graphql`].error, undefined)
+    assert.equal(
+      releasesOf(catalog, 1).length,
+      tpdbFresh(TPDB_SITES.lollipop).length,
+    )
+    // The studios after it are asked as usual
+    assert.equal(
+      releasesOf(catalog, 2).length,
+      tpdbFresh(TPDB_SITES.gumball).length,
+    )
+  },
+)
+
+test(
+  'a second cut-off answer stops asking ThePornDB until the next day',
+  { skip: !hasPython },
+  async () => {
+    const t = `${base}/tpdb/graphql`
+    stash.favourites = [
+      studio(1, 'Lollipop Lounge', [[t, TPDB_SITES.lollipop.uuid]]),
+      studio(2, 'Gumball Gallery', [[t, TPDB_SITES.gumball.uuid]]),
+      studio(5, 'Fudge Factory', [[`${base}/box/graphql`, 'sdb-st-fudge']]),
+    ]
+    await cutOff(TPDB_SITES.lollipop, 2)
+    const { answer } = await runTask()
+    // A stopped check, not a failed one
+    assert.equal(answer.error, null)
+    const { requests } = await tpdbLog()
+    // The site, its scenes twice, and nothing after
+    assert.equal(requests.length, 3)
+    const catalog = await readCatalog()
+    assert.equal(catalog.run.state, 'stopped')
+    const box = catalog.boxes[t]
+    assert.equal(box.error, 'stopped: an answer cut off partway, twice')
+    const hours = (Date.parse(box.pausedUntil) - Date.now()) / 3600_000
+    assert.ok(hours > 19 && hours <= 20, `paused for ${hours} hours`)
+    // The other stash-box still answers
+    assert.equal(boxRequests.length, 1)
+    // Neither studio counts as checked, so the next day asks both
+    assert.equal(catalog.studios['1'].checked, undefined)
+    assert.equal(catalog.studios['2'].checked, undefined)
+  },
+)
 
 test(
   'a refused key stops asking that stash-box and says so',

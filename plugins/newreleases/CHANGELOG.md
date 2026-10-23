@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.3
+
+- When a stash-box's answer stops partway, the check asks for it once more after the usual pause, and leaves that stash-box alone until the next day if the second answer stops partway too. Before, one cut-off answer failed the whole check with an error such as `IncompleteRead(5126 bytes read)`, and the studios after it went unchecked until the next day.
+
 ## 0.2.2
 
 - The page takes Stash's stash-boxes from the copy of Stash's configuration that Stash's own pages hold, and no longer sends a configuration query of its own on each visit. On Stash v0.30.0 to v0.31.1 a configuration query that meets a configuration write can freeze Stash until it restarts, so this lowers the risk of a freeze.

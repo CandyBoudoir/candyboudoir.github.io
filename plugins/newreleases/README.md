@@ -48,7 +48,7 @@ The check goes slowly and asks as little as it can:
 - One request at a time, each three seconds after the last answer, or further apart when Stash has a request limit set for that stash-box.
 - ThePornDB gets two requests the first time it is asked about a studio, one for its numeric id and one for its newest 25 releases, and one a day after that, with the same address for the same studio on every install. Another stash-box gets one request a day for all of your studios linked to it, for their newest 100 releases.
 - A studio whose newest release is more than 90 days old is asked about once a week.
-- A stash-box that answers too many requests (429), a server error, a Cloudflare challenge or nothing at all is left alone until the next day. The check never retries.
+- A stash-box that answers too many requests (429), a server error, a Cloudflare challenge or nothing at all is left alone until the next day. An answer that stops partway is asked for once more after the usual pause, and a second one leaves that stash-box alone until the next day too.
 - Every request says it comes from New Releases, with its version and this page's address, and carries your own key.
 
 A studio linked to both ThePornDB and another stash-box comes from ThePornDB, since StashDB often lists clip-site releases weeks or months later, by when they are past the 48 hours. The page lists favourite studios with no stash-box link, with a pointer to the studio Tagger, and says when a stash-box has no key, refused it, or asked New Releases to stop.

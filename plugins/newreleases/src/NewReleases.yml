@@ -1,6 +1,6 @@
 name: New Releases
 description: What your favourite studios released in the last 48 hours, from ThePornDB and your other stash-boxes, each linked to the studio's own page to buy it, leaving out what you have. Needs Python, which Stash's Docker image includes.
-version: 0.2.2
+version: 0.2.3
 url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/newreleases
 # The task asks the stash-boxes from Stash's own Python, since a plugin's
 # JavaScript in Stash has no web requests of its own. Stash replaces
