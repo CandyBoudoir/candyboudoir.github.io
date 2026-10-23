@@ -126,6 +126,23 @@ div.react-select__control--is-focused {
   border-radius: 3px;
 }
 
+/*
+ * An unchecked box or radio keeps its debossed well, rimmed in the thread's
+ * colour so it reads on the black leather (dimmer while disabled). Switches
+ * keep a black edge: their nickel snap shows where they are.
+ */
+:is(.custom-checkbox, .custom-radio)
+  .custom-control-input:not(:checked)
+  ~ .custom-control-label::before {
+  border-color: rgb(185 174 169 / 70%);
+}
+
+:is(.custom-checkbox, .custom-radio)
+  .custom-control-input:disabled:not(:checked)
+  ~ .custom-control-label::before {
+  border-color: rgb(185 174 169 / 30%);
+}
+
 .custom-control-input:checked ~ .custom-control-label::before {
   background: var(--leather-grain), var(--leather-blood-dye);
   border-color: #000;

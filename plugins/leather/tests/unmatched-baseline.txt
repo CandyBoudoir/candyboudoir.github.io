@@ -27,6 +27,7 @@ cherrypick-sound
 criterion-list
 current
 custom-checkbox
+custom-radio
 custom-select
 danger
 default-value

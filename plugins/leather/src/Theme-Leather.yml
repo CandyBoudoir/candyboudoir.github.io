@@ -1,6 +1,6 @@
 name: Theme - Leather
 description: Black pebble-grain leather, saddle stitching and nickel studs with a blood-red accent. Studs for ratings, a collar for favourites and a strict voice.
-version: 0.2.2
+version: 0.2.3
 url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/leather
 ui:
   css:
