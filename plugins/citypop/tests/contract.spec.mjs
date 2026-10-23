@@ -6,6 +6,7 @@ import {
   headerButtonLook,
   openPerformerBracket,
   setUpCherryPick,
+  sizeMarkLook,
   tearDownCherryPick,
 } from '../../cherrypick/tests/stash.mjs'
 import {
@@ -374,6 +375,19 @@ test.describe('beside Cherry Pick', () => {
       widths.push(look.width)
     }
     expect(widths[1]).toBeCloseTo(widths[0], 0)
+    await abandonBracket(play)
+  })
+
+  // A map size not picked shows its mark in full while pointed at or reached
+  // with the keyboard, in the ink City Pop's hover and focus give a button.
+  test('a map size not picked reads while pointed at or focused', async ({
+    page,
+  }) => {
+    const play = await openPerformerBracket(page)
+    for (const by of ['pointer', 'keyboard']) {
+      const look = await sizeMarkLook(page, play, by)
+      expect(contrast(look.mark, look.behind), by).toBeGreaterThanOrEqual(3)
+    }
     await abandonBracket(play)
   })
 })
