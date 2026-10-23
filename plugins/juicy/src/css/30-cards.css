@@ -119,13 +119,12 @@
   }
 }
 
-.progress-bar,
+/* A card's resume bar. Bootstrap's progress bars are in 80-pages.css. */
 .grid-card .progress-bar {
   background-color: rgb(1 2 36 / 70%);
 }
 
-.progress-indicator,
-.progress-bar .progress-indicator {
+.grid-card .progress-indicator {
   background-image: linear-gradient(
     90deg,
     var(--juicy-pink),

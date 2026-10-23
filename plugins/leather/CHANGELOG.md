@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.3
+
+Unchecked radios that show, and every progress bar in leather, for Stash v0.31.1.
+
+- An unchecked radio or checkbox, such as the Pool choices in Cherry Pick's bracket options, keeps its debossed well and takes a rim in the thread's colour, so it reads on the black leather at 3:1 or more. Its black edge on the black leather had left it barely visible. A disabled one's rim is dimmer.
+- A running job's progress bar in Settings > Tasks is a red strap in a debossed groove, its percentage in white, as a bracket's bar in Cherry Pick is since 0.2.2. It had kept Bootstrap's blue on a white track.
+- Tested beside Insights 2.13.0 and Performers Toolkit 0.19.0.
+
 ## 0.2.2
 
 Cherry Pick 0.3.1's bracket dialogs in leather, for Stash v0.31.1.

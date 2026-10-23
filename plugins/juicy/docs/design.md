@@ -54,7 +54,8 @@ Glyphs (`glyph-*.svg`) are flat silhouettes on a 24-unit grid. The theme uses th
 - **Ratings** are gold hearts. The Font Awesome star paths are hidden and the svg paints a heart through a mask. On cards the rating is a tilted gold pill in the top-left corner. It moves right, past the card's checkbox, on touch screens and on selected cards, where Stash shows the checkbox without hover.
 - **Tags** are purple chips with an ink outline; badges follow the palette.
 - **Navigation**: the active page is a pink pill, the brand gets the cherry, and the bar sits on an ink line over a pink rule.
-- **Overlays** (menus, modals, toasts, tooltips) are raised plum stickers. Tooltips are ink with lime text. Cherry Pick's progress through a bracket fills with pink candy along a deep plum groove.
+- **Overlays** (menus, modals, toasts, tooltips) are raised plum stickers. Tooltips are ink with lime text.
+- **Progress bars** (a running job in Settings > Tasks, a bracket in Cherry Pick) fill with pink candy along a deep plum groove, the percentage in ink. A card's resume bar stays pink over a dark track along the foot of the picture.
 - **Loading** is a gum bubble that swells and pops in place of Bootstrap's spinner.
 - **Stash-box screens** (the Tagger, scrape dialogs and StashID links) are where people clear hundreds of rows, so Tagger rows are flat plum panels that never tilt or lift. The chosen match, button or select, is pink candy. The winning side of a scrape dialog gets a lime toggle and a lime field edge. StashID links are a chip with the stash-box name on pink and the ID on plum.
 

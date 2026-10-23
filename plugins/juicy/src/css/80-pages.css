@@ -122,6 +122,30 @@
   color: var(--juicy-ink);
 }
 
+/* The job list, which Stash paints slate two classes deep */
+#root .job-table.card {
+  background-color: var(--juicy-card);
+}
+
+/*
+ * Bootstrap's progress bars, as in a running job or a bracket in Cherry Pick:
+ * pink candy along a deep plum groove. The candy covers the stripes Stash
+ * asks of a running job's bar, which still slide it along by their width, so
+ * pink lies under the candy and no seam shows.
+ */
+.progress {
+  background-color: var(--juicy-bg-deep);
+  border-radius: var(--juicy-radius-pill);
+}
+
+.progress .progress-bar {
+  background: var(--juicy-pink)
+    linear-gradient(90deg, var(--juicy-pink), var(--juicy-bubblegum)) no-repeat;
+  color: var(--juicy-ink);
+  font-family: var(--juicy-font-display);
+  font-weight: 600;
+}
+
 /*
  * Tables: plum header, hairline rows. Modals render outside #root, so
  * :is(#root, .modal) keeps #root's weight and reaches tables in dialogs too.

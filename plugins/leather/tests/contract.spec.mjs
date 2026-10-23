@@ -7,12 +7,15 @@ import {
   PAGES,
   PLUGIN_ID,
   STRICT_EMPTY_LINE,
+  colorsIn,
   demoIds,
   demoPath,
   onlyLeather,
   openInsights,
   openPerformerStats,
   openPerformersToolkit,
+  openRunningJob,
+  progressColors,
   setPlugin,
   setSfw,
   unmatchedClasses,
@@ -271,8 +274,24 @@ function contrast(a, b) {
   return (hi + 0.05) / (lo + 0.05)
 }
 
+// A running job's bar in Settings > Tasks is a red strap in a debossed
+// groove, its label in white, not Bootstrap's blue on white.
+test("a running job's progress fills brighter than its groove", async ({
+  page,
+}) => {
+  const progress = await openRunningJob(page)
+  const { fill, groove } = await progressColors(page, progress)
+  const black = 'rgb(0, 0, 0)'
+  expect(contrast(fill, black)).toBeGreaterThan(contrast(groove, black))
+  expect(contrast(fill, groove)).toBeGreaterThanOrEqual(3)
+  const label = await progress
+    .locator('.progress-bar')
+    .evaluate((el) => getComputedStyle(el).color)
+  expect(contrast(label, fill)).toBeGreaterThanOrEqual(4.5)
+})
+
 // Cherry Pick's bracket dialogs: the speaker in the header and the bar of
-// the bracket's progress
+// the bracket's progress, and its setup sheet's radios
 test.describe('beside Cherry Pick', () => {
   test.use({ reducedMotion: 'reduce' })
   test.beforeAll(async () => {
@@ -304,7 +323,7 @@ test.describe('beside Cherry Pick', () => {
     await abandonBracket(play)
   })
 
-  // A red strap fills a debossed groove, not Bootstrap's blue on white.
+  // The bracket's bar is the red strap of every progress bar
   test("a bracket's progress fills brighter than its groove", async ({
     page,
   }) => {
@@ -328,6 +347,51 @@ test.describe('beside Cherry Pick', () => {
     const look = await headerButtonLook(page, close, '[aria-hidden="true"]')
     expect(contrast(look.icon, look.behind)).toBeGreaterThanOrEqual(4.5)
     await abandonBracket(play)
+  })
+
+  // An unchecked radio in the setup sheet's Pool keeps its debossed well,
+  // rimmed so it reads on the black leather. Its rim at its lightest against
+  // the leather beside it at its lightest, on a 2x screen, where the 1px rim
+  // fills whole screen pixels.
+  test.describe('on a 2x screen', () => {
+    test.use({ deviceScaleFactor: 2 })
+    test("an unchecked radio's rim reads on the leather", async ({ page }) => {
+      await page.goto('/performers')
+      const options = page
+        .locator('.cherrypick-options-link')
+        .filter({ visible: true })
+        .first()
+      await expect(options).toBeEnabled({ timeout: 20_000 })
+      await options.click()
+      const label = page
+        .locator(
+          '.cherrypick-pools .custom-control-input:not(:checked, :disabled) ~ .custom-control-label',
+        )
+        .first()
+      const box = await label.boundingBox()
+      const ring = await label.evaluate((el) => {
+        const style = getComputedStyle(el, '::before')
+        return {
+          left: parseFloat(style.left),
+          middle: parseFloat(style.top) + parseFloat(style.height) / 2,
+        }
+      })
+      const x = box.x + ring.left
+      const y = box.y + ring.middle
+      const black = 'rgb(0, 0, 0)'
+      const lightest = (colors) =>
+        colors.reduce((a, b) =>
+          contrast(b, black) > contrast(a, black) ? b : a,
+        )
+      const rim = lightest(
+        await colorsIn(page, { x: x - 1, y, width: 3, height: 1 }),
+      )
+      const leather = lightest(
+        await colorsIn(page, { x: x - 6, y, width: 4, height: 1 }),
+      )
+      expect(contrast(rim, leather)).toBeGreaterThanOrEqual(3)
+      await page.keyboard.press('Escape')
+    })
   })
 })
 
