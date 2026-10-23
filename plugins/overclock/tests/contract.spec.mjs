@@ -25,6 +25,7 @@ import {
   headerButtonLook,
   openPerformerBracket,
   setUpCherryPick,
+  sizeMarkLook,
   tearDownCherryPick,
 } from '../../cherrypick/tests/stash.mjs'
 
@@ -306,6 +307,20 @@ test.describe('beside Cherry Pick', () => {
       })
     expect(alpha(background), 'an opaque plate').toBe(1)
     expect(contrast(color, background)).toBeGreaterThanOrEqual(4.5)
+    await abandonBracket(play)
+  })
+
+  // A map size not picked shows its mark in full while pointed at, in the
+  // yellow Overclock's hover gives a button's ink, and when reached with the
+  // keyboard.
+  test('a map size not picked reads while pointed at or focused', async ({
+    page,
+  }) => {
+    const play = await openPerformerBracket(page)
+    for (const by of ['pointer', 'keyboard']) {
+      const look = await sizeMarkLook(page, play, by)
+      expect(contrast(look.mark, look.behind), by).toBeGreaterThanOrEqual(3)
+    }
     await abandonBracket(play)
   })
 

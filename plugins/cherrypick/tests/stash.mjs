@@ -161,6 +161,49 @@ export async function headerButtonLook(page, button, mark = 'svg') {
   }
 }
 
+// What the map size No map shows while pointed at, or reached with the
+// keyboard (Shift+Tab from Short map), when it isn't the size picked: the
+// colour on screen beside its mark, read as headerButtonLook reads it, and
+// the mark's line in its ink at its opacity over that colour. The line is
+// 2 units of the mark's 12, under 2px in a theme with smaller buttons, so
+// no pixel of the screen is sure to lie inside it.
+export async function sizeMarkLook(page, play, by) {
+  const size = (name) =>
+    play.getByRole('group', { name: 'Map size' }).getByRole('button', { name })
+  const button = size('No map')
+  if ((await button.getAttribute('aria-pressed')) !== 'false')
+    throw new Error('No map is the size picked')
+  if (by === 'keyboard') {
+    await page.mouse.move(0, 0)
+    await size('Short map').focus()
+    await page.keyboard.press('Shift+Tab')
+    if (!(await button.evaluate((el) => el.matches(':focus-visible'))))
+      throw new Error('No map has no keyboard focus')
+  } else await button.hover()
+  await button.evaluate((el) =>
+    Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished)),
+  )
+  const box = await button.boundingBox()
+  const at = await button.locator('svg').boundingBox()
+  const behind = await colorAt(page, (box.x + at.x) / 2, at.y + at.height / 2)
+  const mark = await button.locator('svg rect').evaluate((line, under) => {
+    let alpha = 1
+    for (let el = line; el !== line.closest('button'); el = el.parentElement)
+      alpha *= Number(getComputedStyle(el).opacity)
+    const canvas = document.createElement('canvas')
+    canvas.width = canvas.height = 1
+    const ctx = canvas.getContext('2d')
+    ctx.fillStyle = under
+    ctx.fillRect(0, 0, 1, 1)
+    ctx.globalAlpha = alpha
+    ctx.fillStyle = getComputedStyle(line).fill
+    ctx.fillRect(0, 0, 1, 1)
+    const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data
+    return `rgb(${r}, ${g}, ${b})`
+  }, behind)
+  return { mark, behind }
+}
+
 // The colours a bracket's progress bar shows on screen, at the middle of its
 // filled part and near the end of its empty groove
 export async function progressLook(page, play) {

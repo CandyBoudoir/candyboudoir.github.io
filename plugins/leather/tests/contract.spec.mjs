@@ -26,6 +26,7 @@ import {
   openPerformerBracket,
   progressLook,
   setUpCherryPick,
+  sizeMarkLook,
   tearDownCherryPick,
 } from '../../cherrypick/tests/stash.mjs'
 
@@ -301,6 +302,20 @@ test.describe('beside Cherry Pick', () => {
       widths.push(look.width)
     }
     expect(widths[1]).toBeCloseTo(widths[0], 0)
+    await abandonBracket(play)
+  })
+
+  // A map size not picked shows its mark in full while pointed at, white on
+  // blood red, and when reached with the keyboard. Dimmed, as Cherry Pick
+  // 0.3.1 kept it, the focused mark faded into its button at about 2.3:1.
+  test('a map size not picked reads while pointed at or focused', async ({
+    page,
+  }) => {
+    const play = await openPerformerBracket(page)
+    for (const by of ['pointer', 'keyboard']) {
+      const look = await sizeMarkLook(page, play, by)
+      expect(contrast(look.mark, look.behind), by).toBeGreaterThanOrEqual(3)
+    }
     await abandonBracket(play)
   })
 
