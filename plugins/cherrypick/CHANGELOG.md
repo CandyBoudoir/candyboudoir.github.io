@@ -1,8 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.3.3
 
 - Brackets, a new setting that starts on, takes Cherry Pick's bracket buttons out of Stash's pages when you turn it off, for those who rank with another plugin: Bracket and Options leave the Performers and Scenes lists, "Bracket her scenes" leaves a performer's Scenes tab, For you's header offers ratings alone, and Cherry Pick's page shows no Champions round. A paused bracket stays in Stash's plugin configuration, and its Resume pill comes back with the switch. The brackets you played, a paused one's picks included, keep teaching Cherry Pick, and the Hall of Fame row, crowns and medals and the For you line keep their own switches.
+- Cherry Pick sends Stash fewer configuration reads and writes, which lowers the risk of a freeze on Stash v0.30.0 to v0.31.1. Those versions can stop answering until restarted when a configuration write reaches them while they serve a configuration query or the image of a performer who has none, as the Performers list loads. Cherry Pick reads the configuration from the copy Stash's own pages hold, sends no write that would change nothing, and holds each write until the page's performer images have loaded and the page has been quiet for half a second. The settings it fills in at first load go out in one write. Reads and writes from other plugins, other browsers and Stash's own pages are out of Cherry Pick's sight, so a freeze can still happen.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.41.0, Xenith 3.2.0 and Restash 0.3.0-55c1cb2.
 
 ## 0.3.2
 

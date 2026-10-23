@@ -632,9 +632,10 @@ async function openBracket(page, list = 'performers') {
   return play
 }
 
+// Abandons the bracket and waits for its save, so the next test's list
+// offers Bracket rather than Resume and forgetMapSize writes over no bracket
 async function abandon(play) {
-  await play.getByRole('button', { name: 'Abandon' }).click()
-  await play.getByRole('button', { name: 'Abandon' }).last().click()
+  await abandonBracket(play)
   await expect(play).toHaveCount(0)
 }
 

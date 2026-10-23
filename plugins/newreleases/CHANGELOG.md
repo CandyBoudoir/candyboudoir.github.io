@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2
+
+- The page takes Stash's stash-boxes from the copy of Stash's configuration that Stash's own pages hold, and no longer sends a configuration query of its own on each visit. On Stash v0.30.0 to v0.31.1 a configuration query that meets a configuration write can freeze Stash until it restarts, so this lowers the risk of a freeze.
+
 ## 0.2.1
 
 - Just in shows each release once. With more releases than Stash's slider shows at the window's width, the row looped, and the copies the slider makes to loop showed after the releases on a wide screen, so each release appeared twice. The row now ends at its last release.

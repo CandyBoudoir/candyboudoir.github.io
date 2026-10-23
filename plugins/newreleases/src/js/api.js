@@ -2,7 +2,7 @@
 // window.PluginApi, so these are safe to read at module load.
 const api = window.PluginApi
 
-export const { React, patch, register, utils } = api
+export const { GQL, React, patch, register, utils } = api
 export const { Bootstrap, Apollo, ReactRouterDOM, FontAwesomeSolid } =
   api.libraries
 export const ReactSelect = api.libraries.ReactSelect
@@ -19,6 +19,16 @@ export async function query(doc, variables) {
     query: doc,
     variables,
     fetchPolicy: 'network-only',
+  })
+  return data
+}
+
+// From Stash's cache when it holds the answer: Stash keeps its own
+// configuration there, current after every save its pages make.
+export async function cached(doc) {
+  const { data } = await client().query({
+    query: doc,
+    fetchPolicy: 'cache-first',
   })
   return data
 }

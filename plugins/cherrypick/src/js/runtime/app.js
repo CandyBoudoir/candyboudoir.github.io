@@ -10,6 +10,7 @@ import { PLUGIN_ID } from '../name.js'
 import { createStore } from './store.js'
 import { client, gql, GQL, mutate, query, utils } from './api.js'
 import { inSettings, onFrontPage, onLocation } from './location.js'
+import { whenSettled } from './settle.js'
 import * as Q from '../data/queries.js'
 import { loadLibrary, REFRESH_MS } from '../data/library.js'
 import {
@@ -62,17 +63,49 @@ export const store = createStore({
   error: null,
 })
 
+// Stash's own copy of its configuration, which it fetches as it starts and
+// keeps current after each save (writePluginMap updates it for Cherry
+// Pick's own). Reading it sends Stash no configuration query,
+// each of which can freeze Stash 0.30 to 0.31.1 when it meets a write
+// (runtime/settle.js).
+export const stashConfiguration = async () =>
+  (await query(GQL.ConfigurationDocument, undefined, 'cache-first'))
+    .configuration
+
+// The map as Stash holds it now, read just before each write
 const readPluginMap = async () => {
   const { configuration } = await run(Q.CONFIGURATION)
   return configuration.plugins?.[PLUGIN_ID] ?? null
 }
 
-// After a write, drop Stash's cached configuration as Stash's own
-// useConfigurePlugin does, so its Settings page and the next plugin-settings
-// save start from what was written.
+// After a write, Stash's cached configuration takes the map written, as
+// Stash's own configureUI does for its UI settings, so its Settings page and
+// the next plugin-settings save start from it. Stash's useConfigurePlugin
+// drops the cache instead, and Stash then queries its configuration again;
+// that stays the fallback when the cache holds none.
 async function writePluginMap(map) {
   await runMutation(Q.CONFIGURE_PLUGIN, { plugin_id: PLUGIN_ID, input: map })
-  utils.StashService.evictQueries(client().cache, [GQL.ConfigurationDocument])
+  const { cache } = client()
+  let cached = null
+  try {
+    cached = cache.readQuery({ query: GQL.ConfigurationDocument })
+  } catch {
+    // incomplete: dropped below
+  }
+  if (!cached?.configuration) {
+    utils.StashService.evictQueries(cache, [GQL.ConfigurationDocument])
+    return
+  }
+  const { configuration } = cached
+  cache.writeQuery({
+    query: GQL.ConfigurationDocument,
+    data: {
+      configuration: {
+        ...configuration,
+        plugins: { ...configuration.plugins, [PLUGIN_ID]: map },
+      },
+    },
+  })
 }
 
 export const tier1 = createTier1({
@@ -84,15 +117,17 @@ export const tier1 = createTier1({
     del: () => local.del(KEYS.mirror),
   },
   settingsOpen: () => inSettings(),
+  settle: () => whenSettled(),
 })
 
 // Writes what changed to where it lives: tier 1 for the plugin's own data,
 // tier 3 for row signals. Settings are Stash's to write, except one the user
 // changes through Cherry Pick itself (changeSettings). Tier 1 writes wait
-// for a second of quiet (every write makes Stash refetch its
+// for a second of quiet (each is a read and a write of Stash's
 // configuration, and bracket picks come quickly), and Watch This's snoozes
 // alone for five, so skips a few seconds apart go out as one write; the
-// mirror takes each change at once.
+// mirror takes each change at once. Tier 1 then holds the write until the
+// page settles (runtime/settle.js).
 const WRITE_DELAY_MS = 1000
 const SNOOZE_DELAY_MS = 5000
 const unsaved = new Set()
@@ -164,23 +199,21 @@ function reportError(e) {
 }
 
 async function loadConfig() {
-  const { configuration } = await run(Q.CONFIGURATION)
+  const configuration = await stashConfiguration()
   const box = (configuration.general.stashBoxes || []).find((b) =>
     isStashdbEndpoint(b.endpoint),
   )
-  const { map, restored } = await tier1.load()
+  const { map, restored } = await tier1.load(
+    configuration.plugins?.[PLUGIN_ID] ?? null,
+  )
   store.set({
     ...fromConfig(map),
     configLoaded: true,
     stashdb: box?.api_key
       ? { endpoint: box.endpoint, apiKey: box.api_key }
       : null,
+    ...(restored ? { notice: { kind: 'restored', restored } } : {}),
   })
-  if (restored) {
-    // Put back what the mirror restored, before anything else writes.
-    await tier1.save(toConfig(store.get()), Object.keys(toConfig(store.get())))
-    store.set({ notice: { kind: 'restored', restored } })
-  }
   // Apply bracket ratings automatically starts on unless another plugin
   // manages Stash's ratings, and follows that rule until the user sets it
   const auto = await autoApplyNow(map, configuration.plugins)
@@ -193,12 +226,13 @@ async function loadConfig() {
   // would turn it on. Writing the defaults once makes its switches match.
   const missing = SETTING_KEYS.filter((k) => map?.[k] == null)
   const moved = auto != null && map?.autoApply != null ? ['autoApply'] : []
-  const keys = [
-    ...missing,
-    ...moved,
-    ...(auto != null ? ['autoApplyDefault'] : []),
-  ]
-  if (keys.length) await tier1.save(toConfig(store.get()), keys, moved)
+  // What the mirror restored goes back with the rest, in one write once the
+  // page has settled; the library loads meanwhile.
+  const keys = restored
+    ? Object.keys(toConfig(store.get()))
+    : [...missing, ...moved, ...(auto != null ? ['autoApplyDefault'] : [])]
+  if (keys.length)
+    tier1.save(toConfig(store.get()), keys, moved).catch(reportError)
 }
 
 // The value to write for autoApply, or null to leave it (storage/settings.js)
@@ -216,10 +250,13 @@ async function autoApplyNow(map, configs) {
   }
 }
 
-// Settings changed on Stash's own page: read them again.
+// Settings changed on Stash's own page: read them again, from the copy
+// that page's saves keep current.
 async function reloadSettings() {
-  const map = await readPluginMap()
-  store.set({ settings: fromConfig(map).settings })
+  const configuration = await stashConfiguration()
+  store.set({
+    settings: fromConfig(configuration.plugins?.[PLUGIN_ID]).settings,
+  })
 }
 
 let loading = null

@@ -4,6 +4,7 @@
 // (consent.stashdbOff) and when they connected through Cherry Pick.
 import { client, GQL, utils } from '../runtime/api.js'
 import { run, runMutation, store } from '../runtime/app.js'
+import { whenSettled } from '../runtime/settle.js'
 import { STASHBOX_NAME, STASHDB_ENDPOINT, withStashdbKey } from './queries.js'
 
 const STASH_BOXES = `
@@ -35,9 +36,11 @@ export async function validateKey(apiKey, endpoint = STASHDB_ENDPOINT) {
   return validateStashBoxCredentials
 }
 
-// Adds the key to Stash's stash-boxes, then turns lookups on.
+// Adds the key to Stash's stash-boxes, then turns lookups on. The write
+// waits for the page to settle, as tier 1's do (runtime/settle.js).
 export async function saveKey(apiKey) {
   const key = apiKey.trim()
+  await whenSettled()
   const { configuration } = await run(STASH_BOXES)
   const { boxes, endpoint } = withStashdbKey(
     configuration.general.stashBoxes || [],

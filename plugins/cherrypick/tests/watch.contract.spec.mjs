@@ -106,6 +106,17 @@ const ready = (page) =>
   expect(page.locator('.cherrypick-watch-title')).toBeVisible({
     timeout: 20_000,
   })
+// The player takes focus when the scene loads, as on the scene page, and
+// only then takes Space. The pick's title can show sooner, while the player
+// still sets itself up.
+const playerFocused = (page) =>
+  expect
+    .poll(() =>
+      page.evaluate(
+        () => !!document.activeElement?.closest('.cherrypick-watch-player'),
+      ),
+    )
+    .toBe(true)
 const pickId = async (page) =>
   (await page.locator('.cherrypick-watch-title').getAttribute('href'))
     .split('/')
@@ -168,12 +179,20 @@ test("with Watch This on, one player takes the place of Cherry Pick's rows, abov
   )
   await expect(page.locator('.cherrypick-watch-reason')).not.toBeEmpty()
   // The rows' switches keep their values for when Watch This goes off
-  const config = await pluginConfig()
-  expect([
-    config.showForYou,
-    config.showFollowRows,
-    config.showHallOfFame,
-  ]).toEqual([true, true, true])
+  // (written with the first load's defaults once the page settles)
+  await expect
+    .poll(
+      async () => {
+        const config = await pluginConfig()
+        return [
+          config?.showForYou,
+          config?.showFollowRows,
+          config?.showHallOfFame,
+        ]
+      },
+      { timeout: 15_000 },
+    )
+    .toEqual([true, true, true])
   expect(errors).toEqual([])
 })
 
@@ -185,14 +204,7 @@ test('Space plays the pick, Stash records it, the line steps out and the end bri
   await ready(page)
   const id = await pickId(page)
   const before = await activity(id)
-  // The player takes focus when the scene loads, as on the scene page
-  await expect
-    .poll(() =>
-      page.evaluate(
-        () => !!document.activeElement?.closest('.cherrypick-watch-player'),
-      ),
-    )
-    .toBe(true)
+  await playerFocused(page)
   await page.keyboard.press('Space')
   await expect(player(page)).toHaveClass(/vjs-playing/)
   await expect(line(page)).toHaveCount(0)
@@ -442,6 +454,7 @@ test('a skip after playing a tenth of the pick starts its ladder again; a shorte
 
   // The demo clip lasts 8 seconds: 2 seconds of play is a quarter of it.
   // The control bar takes clicks once the mouse moves over the player.
+  await playerFocused(page)
   await page.keyboard.press('Space')
   await expect(player(page)).toHaveClass(/vjs-playing/)
   await page.waitForTimeout(2000)

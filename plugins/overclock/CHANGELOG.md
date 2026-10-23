@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.4
+
+Settings read from Stash's own copy, for Stash v0.31.1.
+
+- Overclock reads its settings from the copy of Stash's configuration that Stash's own pages hold, and no longer asks Stash for them on every page. On Stash v0.30.0 to v0.31.1 a configuration query that meets a configuration write can freeze Stash until it restarts, so this lowers the risk of a freeze. A setting changed in Settings › Plugins still takes effect on the next page, and one changed in another browser at the next reload.
+- Tested beside Insights 2.13.0 and Performers Toolkit 0.19.0.
+
 ## 0.2.3
 
 Cherry Pick 0.3.1's bracket dialogs on the display, for Stash v0.31.1.

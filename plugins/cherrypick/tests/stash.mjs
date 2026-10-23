@@ -161,15 +161,15 @@ export async function openPerformerBracket(page) {
 
 // Abandons the bracket a play dialog shows (asking first, unless the
 // question is open), and waits for Stash's plugin configuration to drop it
-// (a debounced save), so the next test's list offers a new bracket instead
-// of resuming this one
+// (a debounced save that then waits for the page to settle, at most 11 s),
+// so the next test's list offers a new bracket instead of resuming this one
 export async function abandonBracket(play) {
   const confirm = play.locator('.modal-footer .btn-danger')
   if (!(await confirm.isVisible()))
     await play.getByRole('button', { name: 'Abandon', exact: true }).click()
   await confirm.click()
   await play.waitFor({ state: 'detached' })
-  for (let i = 0; i < 50 && (await pluginConfig())?.bracket != null; i++)
+  for (let i = 0; i < 75 && (await pluginConfig())?.bracket != null; i++)
     await new Promise((r) => setTimeout(r, 200))
 }
 
