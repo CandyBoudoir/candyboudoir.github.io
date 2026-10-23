@@ -15,6 +15,7 @@ import {
   openPerformersToolkit,
   setPlugin,
   setSfw,
+  switchSetting,
   unmatchedClasses,
   unmatchedRestyledClasses,
   usePlugins,
@@ -424,7 +425,8 @@ test.describe('beside Insights', () => {
       await expect(page.locator('html')).not.toHaveClass(
         /\boverclock-restyle-insights\b/,
       )
-      await setPlugin({ restyleInsights: true })
+      // Turned on in Settings › Plugins, then on to Stats with no reload
+      await switchSetting(page, 'restyleInsights', true)
       await page
         .locator('a[href="/stats"]')
         .filter({ visible: true })

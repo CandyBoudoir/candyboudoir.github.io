@@ -44,6 +44,27 @@ export const setPluginSettings = (id, input) =>
     },
   )
 
+// Turns a plugin's switch in Settings › Plugins on or off, as the user does,
+// and waits for Stash to save it. Stash's pages then hold the new value in
+// their cached configuration; setPluginSettings goes past them, as another
+// browser would. Develop collapses each plugin's settings until its heading
+// is clicked.
+export async function switchPluginSetting(page, id, setting, on) {
+  await page.goto('/settings?tab=plugins')
+  const input = page.locator(`[id="plugin-${id}-${setting}"]`)
+  await input.waitFor({ state: 'attached', timeout: 20_000 })
+  if (await input.isHidden())
+    await page
+      .locator('.setting-group', { has: input })
+      .locator(':scope > .setting')
+      .click()
+  const saved = page.waitForResponse(
+    (r) => r.request().postDataJSON()?.operationName === 'ConfigurePlugin',
+  )
+  await input.setChecked(on)
+  await saved
+}
+
 // Enables the named plugins and disables every other installed plugin,
 // except the companions (COMPANIONS, companions.mjs), which stay enabled
 // beside them. prepare.mjs installs every plugin in the source into one

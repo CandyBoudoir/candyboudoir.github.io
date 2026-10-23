@@ -350,14 +350,12 @@
 
   async function loadSettings() {
     try {
-      const response = await fetch('/graphql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: '{ configuration { plugins } }' }),
+      const { GQL, utils } = window.PluginApi
+      const { data } = await utils.StashService.getClient().query({
+        query: GQL.ConfigurationDocument,
+        fetchPolicy: 'cache-first',
       })
-      if (!response.ok) return
-      const body = await response.json()
-      const settings = body?.data?.configuration?.plugins?.[PLUGIN_ID] ?? {}
+      const settings = data?.configuration?.plugins?.[PLUGIN_ID] ?? {}
       apply({
         calm: settings.calmMode === true,
         voice: settings.plainCopy !== true,
@@ -387,7 +385,10 @@
       loadSettings()
       markAudio()
       // The settings are read again on every page Stash opens, so changing
-      // one takes effect on the next page, with no reload
+      // one takes effect on the next page, with no reload. They come from
+      // Stash's own copy of its configuration, which its Settings page keeps
+      // current, not a query of their own: a configuration query can freeze
+      // Stash 0.30 to 0.31.1 when it meets a configuration write.
       window.PluginApi.Event?.addEventListener('stash:location', loadSettings)
     }
   }
