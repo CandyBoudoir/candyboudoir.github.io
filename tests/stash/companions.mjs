@@ -151,7 +151,7 @@ export const COMPANIONS = {
 // --issues opens an issue for it; pin-restyled.mjs moves a pin to the latest
 // release.
 const INSIGHTS_COMMIT = '8d5b6d1db155bdb7fadfe05aeae90b8f4a1ac2a0'
-const PERFORMERS_TOOLKIT_COMMIT = '8d5b6d1db155bdb7fadfe05aeae90b8f4a1ac2a0'
+const PERFORMERS_TOOLKIT_COMMIT = '98ae0c85e20f5cb2d5858a8285f99d98402257cb'
 export const RESTYLED = {
   // Insights 2.13.0, a stats dashboard on Stash's Stats page, from
   // https://gitlab.com/allisless0/stash-plugins (MIT): its plugin folder at
@@ -177,27 +177,27 @@ export const RESTYLED = {
       index: 'https://allisless0.gitlab.io/stash-plugins/main/index.yml',
     },
   },
-  // Performers Toolkit 0.18.2, a toolkit page at /performerstoolkit and a
+  // Performers Toolkit 0.19.0, a toolkit page at /performerstoolkit and a
   // strip and two tabs on performer pages, from the same repository and
   // in the same Flexoki look as Insights. Its scans and saves run in a
   // Python backend (standard library only), which the specs never start.
   performerstoolkit: {
     id: 'PerformersToolkit',
     name: 'Performers Toolkit',
-    version: '0.18.2',
+    version: '0.19.0',
     commit: PERFORMERS_TOOLKIT_COMMIT,
     base: `https://gitlab.com/allisless0/stash-plugins/-/raw/${PERFORMERS_TOOLKIT_COMMIT}/plugins/PerformersToolkit`,
     files: {
       'PerformersToolkit-matte.js':
         'fdd022c5b4653b6ade3ce88f57198abcc6d344769304164205247925a63f76f6',
       'PerformersToolkit.js':
-        '99113f69eed3f10954cbb8ed8427e8a68983456aab0f45beb5caf80261699d16',
+        '90f992217ae48e85fb7da04ad25c7e68400aadb8d3425c51b4f9cb30360e3ed5',
       'PerformersToolkit.py':
-        '45a3e0133f99f2c30bca69d550bc5e4fba114136e866bd560fbb0ef783aaab0e',
+        '8c813bdacd02427a60022d441d33a87315f58ccb4c32340aa68bcc86aba4aff6',
       'PerformersToolkit.yml':
-        'ae47eedd7a9f1cc49de18ad952eae3e57af0501f12a64528898cc0e2ac6e662e',
+        '0a662f5a50c29613336d27636462440f78c5cb125ce91d26d843232f6b17b39e',
       'README.md':
-        'bd1c39835a31d6eaca19b40d9e18d2be7f057dd588609af1964fbd280fa86bf0',
+        'cfd4fa01295e224dc2a40f303505e71e95af68e9732dfdd6206c9cd296e0b2d0',
     },
     latest: {
       index: 'https://allisless0.gitlab.io/stash-plugins/main/index.yml',
