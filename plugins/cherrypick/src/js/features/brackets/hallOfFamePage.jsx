@@ -2,7 +2,8 @@
 // with its champion, finalist and semifinalists, size and date, and a mark
 // for a champion who won the Challenge round; Champions rounds once a
 // gender has four different champions; clip champions; and the
-// applied-rating batches, each with Undo.
+// applied-rating batches, each with Undo. With Brackets off, all of it
+// stays but Champions round, and a line says where the brackets went.
 import {
   components,
   FontAwesomeSolid,
@@ -11,12 +12,13 @@ import {
 import * as BR from '../../model/brackets.js'
 import { championsRoundPool } from '../../model/bracketSetup.js'
 import { GENDERS } from '../../model/util.js'
+import { PLUGIN_NAME } from '../../name.js'
 import { useAppState } from '../../ui/hooks.js'
 import { useStashRecords } from '../../ui/records.js'
 import { useRowComponents } from '../../ui/Row.jsx'
 import { SettingRow } from '../pluginPage.jsx'
 import { startChampionsRound } from './actions.js'
-import { Icon, plural, useEntrant } from './parts.jsx'
+import { Icon, plural, useBracketsOn, useEntrant } from './parts.jsx'
 import { AppliedButton, keptText, WINNERS_URL } from './results.jsx'
 
 const { Link } = ReactRouterDOM
@@ -78,6 +80,7 @@ function GenderGroup({ gender, label, runs }) {
   const M = useAppState((s) => s.M)
   const history = useAppState((s) => s.brackets.history)
   const active = useAppState((s) => !!s.brackets.active)
+  const brackets = useBracketsOn()
   const entrant = useEntrant('performer')
   const due = M ? championsRoundPool(M, history, gender) : { size: 0 }
   return (
@@ -89,7 +92,7 @@ function GenderGroup({ gender, label, runs }) {
             {runs.length} {plural(runs.length, 'bracket')}
           </span>
         </h5>
-        {due.size ? (
+        {!brackets ? null : due.size ? (
           <button
             type="button"
             className="btn btn-secondary btn-sm cherrypick-champions-round"
@@ -197,6 +200,8 @@ function AppliedBatches() {
 export function HallOfFameSection() {
   const history = useAppState((s) => s.brackets.history)
   const active = useAppState((s) => s.brackets.active)
+  const brackets = useBracketsOn()
+  const configLoaded = useAppState((s) => s.configLoaded)
   const done = history
     .filter((b) => b.result?.champion)
     .sort((a, b) => (b.finishedAt || '').localeCompare(a.finishedAt || ''))
@@ -212,7 +217,18 @@ export function HallOfFameSection() {
           </span>
         </p>
       ) : null}
-      {!done.length && !active ? (
+      {configLoaded && !brackets ? (
+        <div className="card setting-card cherrypick-brackets-off">
+          <SettingRow
+            title="Brackets are off"
+            sub={
+              active
+                ? `Your paused bracket waits: turn Brackets on in Settings › Plugins › ${PLUGIN_NAME} to resume it.`
+                : `Turn Brackets on in Settings › Plugins › ${PLUGIN_NAME} for Bracket beside the Performers and Scenes lists.`
+            }
+          />
+        </div>
+      ) : !done.length && !active ? (
         <div className="card setting-card">
           <SettingRow
             title="No brackets yet"

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Brackets, a new setting that starts on, takes Cherry Pick's bracket buttons out of Stash's pages when you turn it off, for those who rank with another plugin: Bracket and Options leave the Performers and Scenes lists, "Bracket her scenes" leaves a performer's Scenes tab, For you's header offers ratings alone, and Cherry Pick's page shows no Champions round. A paused bracket stays in Stash's plugin configuration, and its Resume pill comes back with the switch. The brackets you played, a paused one's picks included, keep teaching Cherry Pick, and the Hall of Fame row, crowns and medals and the For you line keep their own switches.
+
 ## 0.3.2
 
 - A map size you haven't picked shows its mark in full while you point at it or reach it with the keyboard. Cherry Pick kept it dimmed on hover too, and under Juicy, which turns a button's mark pink on hover, the dimmed pink faded into the plum button.

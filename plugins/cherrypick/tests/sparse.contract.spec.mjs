@@ -10,6 +10,7 @@ import {
   forYouCards,
   gql,
   pluginConfig,
+  savedBracketStatus,
   setPluginSettings,
   setUpSparseCherryPick,
   sharedScenes,
@@ -146,6 +147,61 @@ test('play a bracket starts one from the front page', async ({ page }) => {
     'finish your bracket',
   )
   await line.locator('.cherrypick-sharpen-bracket').click()
+  await expect(play).toContainText('match 2 of 8')
+})
+
+test("with Brackets off, For you's line offers ratings alone, and a paused bracket keeps out of the front page", async ({
+  page,
+}) => {
+  // a paused bracket of one pick, and no champion yet
+  const config = { ...(await pluginConfig()) }
+  delete config.bracket
+  await setPluginSettings(PLUGIN_ID, config)
+  await page.goto('/')
+  const line = page.locator('.cherrypick-for-you .cherrypick-sharpen')
+  await line.locator('.cherrypick-sharpen-bracket').click()
+  const play = page.locator('.cherrypick-play-modal')
+  await page.keyboard.press('ArrowLeft')
+  await expect(play).toContainText('match 2 of 8')
+  await page.keyboard.press('Escape')
+  await expect(play).toBeHidden()
+  await expect.poll(savedBracketStatus).toBe('paused')
+  // on: the Hall of Fame row holds the pill, though no one has won yet
+  const row = page.locator('.cherrypick-row-hall-of-fame')
+  await expect(row.locator('.cherrypick-resume-pill')).toBeVisible()
+
+  const on = await pluginConfig()
+  await setPluginSettings(PLUGIN_ID, { ...on, brackets: false })
+  try {
+    await page.goto('/')
+    // the line needs the model, which comes after the configuration
+    await expect(line).toHaveText('Rate 9 more scenes to sharpen these picks', {
+      timeout: 20_000,
+    })
+    await expect(line.locator('.cherrypick-sharpen-bracket')).toHaveCount(0)
+    await expect(row).toHaveCount(0)
+    await expect(page.locator('.cherrypick-resume-pill')).toHaveCount(0)
+    await page.goto('/plugins/cherrypick')
+    await expect(page.locator('#hall-of-fame')).toContainText(
+      'Brackets are off',
+      { timeout: 20_000 },
+    )
+    await expect(page.locator('#hall-of-fame')).not.toContainText(
+      'No brackets yet',
+    )
+  } finally {
+    await setPluginSettings(PLUGIN_ID, {
+      ...(await pluginConfig()),
+      brackets: true,
+    })
+  }
+
+  await page.goto('/')
+  await expect(line).toHaveText(
+    'Rate 9 more scenes or finish your bracket to sharpen these picks',
+    { timeout: 20_000 },
+  )
+  await row.locator('.cherrypick-resume-pill').click()
   await expect(play).toContainText('match 2 of 8')
 })
 

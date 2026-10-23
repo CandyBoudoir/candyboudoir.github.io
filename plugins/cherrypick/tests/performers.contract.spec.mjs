@@ -2,6 +2,7 @@
 // the For you line, crowns and medals, and the remembered bracket gender.
 import { expect, test } from '@playwright/test'
 import {
+  finishedBracket,
   PLUGIN_ID,
   pluginConfig,
   setPluginSettings,
@@ -14,30 +15,6 @@ test.beforeAll(async () => {
   ;({ demo } = await setUpCherryPick())
 })
 test.afterAll(tearDownCherryPick)
-
-// A finished 16-performer bracket, as the plugin stores it: its champion and
-// finalist get a crown and a medal.
-function finishedBracket(champion, finalist) {
-  return {
-    id: 'btest',
-    kind: 'performer',
-    gender: 'FEMALE',
-    poolLabel: 'Female',
-    size: 16,
-    champions: false,
-    seeds: [],
-    decisions: [],
-    createdAt: '2026-01-01T00:00:00.000Z',
-    finishedAt: '2026-01-01T00:20:00.000Z',
-    status: 'done',
-    result: {
-      champion,
-      finalist,
-      semifinalists: [],
-      quarterfinalists: [],
-    },
-  }
-}
 
 test('the performer page shows the For you line', async ({ page }) => {
   const id = demo.performers['Bea Lark']

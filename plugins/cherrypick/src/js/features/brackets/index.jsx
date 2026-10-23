@@ -13,7 +13,7 @@ import { ApplyDialog, ResultDialog } from './results.jsx'
 import { ClipSetup, GenderGrid, SetupSheet } from './setup.jsx'
 import { HallOfFameSection } from './hallOfFamePage.jsx'
 
-export { ResumePill } from './parts.jsx'
+export { ResumePill, useBracketsOn } from './parts.jsx'
 
 const OURS = new Set(Object.values(VIEWS))
 

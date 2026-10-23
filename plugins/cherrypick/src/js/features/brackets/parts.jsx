@@ -7,6 +7,19 @@ import { resumeBracket } from './actions.js'
 
 const { faPlay } = FontAwesomeSolid
 
+// The Brackets switch. Off, nothing offers to start or resume a bracket:
+// Bracket and Options beside the lists, the resume pill, "play a bracket" in
+// For you's header and Champions round. A paused bracket stays in Stash's
+// plugin configuration and comes back with the switch, and the brackets
+// played, the paused one's picks included, keep teaching the model. The Hall
+// of Fame, crowns and medals and the For you line keep their own switches.
+// Off until the configuration arrives, so the buttons never show for a
+// moment to someone who turned them off. The library loads once Stash has
+// answered for the configuration, so with a library and no configuration
+// it could not be read, and the default holds.
+export const useBracketsOn = () =>
+  useAppState((s) => (s.configLoaded || !!s.library) && !!s.settings.brackets)
+
 export const lc = (s) => (s ? s[0].toLowerCase() + s.slice(1) : s)
 export const plural = (n, one, many = one + 's') => (n === 1 ? one : many)
 
@@ -181,11 +194,12 @@ export function BracketTree({ b, st }) {
 }
 
 // "Resume bracket · round of 16": under the list toolbars and in the Hall
-// of Fame row's header while a bracket is paused
+// of Fame row's header while a bracket is paused and Brackets is on
 export function ResumePill() {
+  const on = useBracketsOn()
   const b = useAppState((s) => s.brackets.active)
   const dialog = useAppState((s) => s.dialog)
-  if (!b || dialog) return null
+  if (!on || !b || dialog) return null
   const st = BR.bracketState(b)
   if (!st.current) return null
   return (

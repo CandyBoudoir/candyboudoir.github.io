@@ -1,10 +1,13 @@
 // The Hall of Fame row on the front page: performer cards of bracket
 // champions, newest first, grouped by gender (each gender's brackets are
-// separate contests). The full list lives on the plugin page.
+// separate contests). The full list lives on the plugin page. With Brackets
+// off the champions stay, under the row's own switch, and a paused bracket
+// no longer brings the row on its own.
 import { components } from '../runtime/api.js'
 import { CardRow } from '../ui/Row.jsx'
 import { useAppState } from '../ui/hooks.js'
 import { PLUGIN_ROUTE } from '../name.js'
+import { useBracketsOn } from './brackets/parts.jsx'
 
 // Distinct performer champions, grouped by gender in the order each gender
 // last crowned one, newest first within a gender.
@@ -26,9 +29,10 @@ export function HallOfFameRow({ extra }) {
   const show = useAppState((s) => s.settings.showHallOfFame)
   const history = useAppState((s) => s.brackets.history)
   const active = useAppState((s) => s.brackets.active)
+  const brackets = useBracketsOn()
   if (!show) return null
   const ids = championIds(history)
-  if (!ids.length && !active) return null
+  if (!ids.length && !(active && brackets)) return null
   const { PerformerCard } = components
   return (
     <CardRow
