@@ -27,7 +27,7 @@ import { RowSceneCard } from '../ui/rowCards.jsx'
 import { Safe } from '../ui/Safe.jsx'
 import { useAppState } from '../ui/hooks.js'
 import { HallOfFameRow } from './hallOfFame.jsx'
-import { ResumePill } from './brackets/index.jsx'
+import { ResumePill, useBracketsOn } from './brackets/index.jsx'
 import { quickStartPerformers, resumeBracket } from './brackets/actions.js'
 import { rateMore } from '../model/index.js'
 import { toRateUrl } from '../data/listFilter.js'
@@ -128,22 +128,30 @@ const { Link } = ReactRouterDOM
 // One line in For you's header while Your score has too few ratings to
 // check itself: the two quickest ways to sharpen the row, each one click.
 // The ratings link opens your unrated scenes, most played first; a bracket
-// starts (or resumes) here.
+// starts (or resumes) here, with Brackets on.
 function SharpenLine() {
   const M = useAppState((s) => s.M)
   const active = useAppState((s) => !!s.brackets.active)
+  const brackets = useBracketsOn()
   const rate = rateMore(M)
   if (!rate) return null
   return (
     <span className="text-muted small cherrypick-sharpen">
-      <Link to={toRateUrl()}>{rate}</Link> or{' '}
-      <button
-        type="button"
-        className="btn btn-link cherrypick-sharpen-bracket"
-        onClick={() => (active ? resumeBracket() : quickStartPerformers(null))}
-      >
-        {active ? 'finish your bracket' : 'play a bracket'}
-      </button>{' '}
+      <Link to={toRateUrl()}>{rate}</Link>{' '}
+      {brackets ? (
+        <>
+          or{' '}
+          <button
+            type="button"
+            className="btn btn-link cherrypick-sharpen-bracket"
+            onClick={() =>
+              active ? resumeBracket() : quickStartPerformers(null)
+            }
+          >
+            {active ? 'finish your bracket' : 'play a bracket'}
+          </button>{' '}
+        </>
+      ) : null}
       to sharpen these picks
     </span>
   )
