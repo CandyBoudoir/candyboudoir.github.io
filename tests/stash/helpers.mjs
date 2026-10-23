@@ -47,8 +47,11 @@ export const setPluginSettings = (id, input) =>
 // Turns a plugin's switch in Settings › Plugins on or off, as the user does,
 // and waits for Stash to save it and fetch its configuration again, after
 // which Stash's pages hold the new value in their cached configuration;
-// setPluginSettings goes past them, as another browser would. Develop
-// collapses each plugin's settings until its heading is clicked.
+// setPluginSettings goes past them, as another browser would. Stash saves
+// the settings of every plugin its configuration holds, one ConfigurePlugin
+// after another in plugin id order, and fetches its configuration again
+// after each, so the fetch to wait for is the one that carries the new value.
+// Develop collapses each plugin's settings until its heading is clicked.
 export async function switchPluginSetting(page, id, setting, on) {
   await page.goto('/settings?tab=plugins')
   const input = page.locator(`[id="plugin-${id}-${setting}"]`)
@@ -58,16 +61,13 @@ export async function switchPluginSetting(page, id, setting, on) {
       .locator('.setting-group', { has: input })
       .locator(':scope > .setting')
       .click()
-  const op = (r) => r.request().postDataJSON()?.operationName
-  let wrote = false
-  const saved = page
-    .waitForResponse((r) => op(r) === 'ConfigurePlugin')
-    .then(() => (wrote = true))
-  const fetched = page.waitForResponse(
-    (r) => wrote && op(r) === 'Configuration',
-  )
+  const fetched = page.waitForResponse(async (r) => {
+    if (r.request().postDataJSON()?.operationName !== 'Configuration')
+      return false
+    const body = await r.json().catch(() => null)
+    return body?.data?.configuration?.plugins?.[id]?.[setting] === on
+  })
   await input.setChecked(on)
-  await saved
   await fetched
 }
 
