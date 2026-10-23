@@ -48,6 +48,15 @@ async function withField(field, modifier = 'NOT_NULL', value) {
 test('one click plays a 16-performer bracket to its champion', async ({
   page,
 }) => {
+  // The bracket's custom-field writes, counted once Stash has answered them
+  // ('requestfinished'). They go out one after another when the bracket
+  // ends, so the champion's can land well before the rest: on CI's WebKit
+  // the champion screen held up the second one for two seconds.
+  const fieldWrites = []
+  page.on('requestfinished', (r) => {
+    if ((r.postData() || '').includes('CherryPickBracketSetFields'))
+      fieldWrites.push(r.postData())
+  })
   await page.goto('/performers')
   const bracket = visible(page.locator('.cherrypick-bracket-button'))
   await expect(bracket).toBeVisible({ timeout: 20_000 })
@@ -61,13 +70,12 @@ test('one click plays a 16-performer bracket to its champion', async ({
   }
   const result = page.locator('.cherrypick-result-modal')
   await expect(result.locator('.cherrypick-champ-name')).not.toBeEmpty()
-  // Every placed performer gets the fields; only the champion has a title.
-  await expect
-    .poll(() => withField('cherrypick_titles', 'GREATER_THAN', [0]))
-    .toBe(1)
-  const placed = await withField('cherrypick_best_finish')
-  expect(placed).toBeGreaterThan(1)
-  expect(placed).toBeLessThanOrEqual(8)
+  // Every placed performer gets the fields (16 entrants place 8: the
+  // champion, the finalist, two semifinalists and four quarterfinalists);
+  // only the champion has a title.
+  await expect.poll(() => fieldWrites.length, { timeout: 15_000 }).toBe(8)
+  expect(await withField('cherrypick_titles', 'GREATER_THAN', [0])).toBe(1)
+  expect(await withField('cherrypick_best_finish')).toBe(8)
 })
 
 test('an anchored bracket hides ratings while you pick and rates only the unrated', async ({
