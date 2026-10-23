@@ -77,12 +77,34 @@ const readPluginMap = async () => {
   return configuration.plugins?.[PLUGIN_ID] ?? null
 }
 
-// After a write, drop Stash's cached configuration as Stash's own
-// useConfigurePlugin does, so its Settings page and the next plugin-settings
-// save start from what was written.
+// After a write, Stash's cached configuration takes the map written, as
+// Stash's own configureUI does for its UI settings, so its Settings page and
+// the next plugin-settings save start from it. Stash's useConfigurePlugin
+// drops the cache instead, and Stash then queries its configuration again;
+// that stays the fallback when the cache holds none.
 async function writePluginMap(map) {
   await runMutation(Q.CONFIGURE_PLUGIN, { plugin_id: PLUGIN_ID, input: map })
-  utils.StashService.evictQueries(client().cache, [GQL.ConfigurationDocument])
+  const { cache } = client()
+  let cached = null
+  try {
+    cached = cache.readQuery({ query: GQL.ConfigurationDocument })
+  } catch {
+    // incomplete: dropped below
+  }
+  if (!cached?.configuration) {
+    utils.StashService.evictQueries(cache, [GQL.ConfigurationDocument])
+    return
+  }
+  const { configuration } = cached
+  cache.writeQuery({
+    query: GQL.ConfigurationDocument,
+    data: {
+      configuration: {
+        ...configuration,
+        plugins: { ...configuration.plugins, [PLUGIN_ID]: map },
+      },
+    },
+  })
 }
 
 export const tier1 = createTier1({

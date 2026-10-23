@@ -5,7 +5,7 @@
 // wait until this page has been quiet for a moment: no such image loading on
 // screen or loaded just before, none of Stash's own queries out (a list that
 // arrives brings its images), and Stash's own copy of its configuration in
-// place (Stash fetches it again after every write). Images other pages and
+// place (Stash fetches it again after the writes its own pages make). Images other pages and
 // other browsers load are out of sight, so this lowers the odds, no more.
 import { client, GQL } from './api.js'
 
@@ -63,8 +63,8 @@ function queriesLoading() {
   return false
 }
 
-// Stash's cached configuration goes after each write and comes back once
-// Stash's own query for it answers.
+// Stash's cached configuration goes after a write that drops it (Stash's
+// own pages' writes do) and comes back once Stash's query for it answers.
 function configurationCached() {
   try {
     return !!client().readQuery({ query: GQL.ConfigurationDocument })
