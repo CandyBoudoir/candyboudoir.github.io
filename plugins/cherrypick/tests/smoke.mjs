@@ -154,12 +154,17 @@ await check('front page: navbar cherries and For you', async () => {
   return `${rows} Cherry Pick rows, ${await cards.count()} For you cards`
 })
 
-// A paused bracket shows its resume pill and Options in place of the button
+// A paused bracket shows its resume pill and Options in place of the button.
+// With Brackets off there are none to check.
+const { configuration } = await gql('{ configuration { plugins } }')
 for (const list of ['scenes', 'performers'])
-  await check(`${list} list: bracket controls`, async () => {
-    await page.goto(`/${list}`)
-    await visible('.cherrypick-bracket-button, .cherrypick-bracket-ops')
-  })
+  if (configuration.plugins?.CherryPick?.brackets === false)
+    skip(`${list} list: bracket controls`, 'Brackets is off')
+  else
+    await check(`${list} list: bracket controls`, async () => {
+      await page.goto(`/${list}`)
+      await visible('.cherrypick-bracket-button, .cherrypick-bracket-ops')
+    })
 
 await check('plugin page survives a reload', async () => {
   await page.goto('/plugins/cherrypick')

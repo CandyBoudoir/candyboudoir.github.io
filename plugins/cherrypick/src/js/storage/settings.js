@@ -18,6 +18,8 @@ export const MANIFEST_SETTINGS = [
   { key: 'relativeBadges', type: 'BOOLEAN', def: false },
   { key: 'excludedTags', type: 'STRING', def: '' },
   { key: 'learnFromMatches', type: 'BOOLEAN', def: true },
+  // off: nothing offers to start or resume a bracket (features/brackets)
+  { key: 'brackets', type: 'BOOLEAN', def: true },
   // written at first load by autoApplyToWrite, which can make it false
   { key: 'autoApply', type: 'BOOLEAN', def: true },
   // brackets as before 0.3.0: no map, animation or sound

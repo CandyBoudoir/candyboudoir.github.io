@@ -4,15 +4,19 @@
 // Apply's ratings for the unrated only, Apply and Undo leaving a rating set
 // by hand since the preview or since Apply, performers anchored by their
 // scenes' ratings, a bracket of unrated performers and its Challenge round,
-// the map's size and the dialog's darker backdrop, and pause and resume.
+// the map's size and the dialog's darker backdrop, pause and resume, and the
+// Brackets switch.
 import { expect, test } from '@playwright/test'
 import {
+  abandonBracket,
   DEMO,
   demoCandidates,
+  finishedBracket,
   gql,
   pickCandidate,
   PLUGIN_ID,
   pluginConfig,
+  savedBracketStatus,
   setAutoApply,
   setPluginSettings,
   setUpCherryPick,
@@ -48,6 +52,15 @@ async function withField(field, modifier = 'NOT_NULL', value) {
 test('one click plays a 16-performer bracket to its champion', async ({
   page,
 }) => {
+  // The bracket's custom-field writes, counted once Stash has answered them
+  // ('requestfinished'). They go out one after another when the bracket
+  // ends, so the champion's can land well before the rest: on CI's WebKit
+  // the champion screen held up the second one for two seconds.
+  const fieldWrites = []
+  page.on('requestfinished', (r) => {
+    if ((r.postData() || '').includes('CherryPickBracketSetFields'))
+      fieldWrites.push(r.postData())
+  })
   await page.goto('/performers')
   const bracket = visible(page.locator('.cherrypick-bracket-button'))
   await expect(bracket).toBeVisible({ timeout: 20_000 })
@@ -61,13 +74,12 @@ test('one click plays a 16-performer bracket to its champion', async ({
   }
   const result = page.locator('.cherrypick-result-modal')
   await expect(result.locator('.cherrypick-champ-name')).not.toBeEmpty()
-  // Every placed performer gets the fields; only the champion has a title.
-  await expect
-    .poll(() => withField('cherrypick_titles', 'GREATER_THAN', [0]))
-    .toBe(1)
-  const placed = await withField('cherrypick_best_finish')
-  expect(placed).toBeGreaterThan(1)
-  expect(placed).toBeLessThanOrEqual(8)
+  // Every placed performer gets the fields (16 entrants place 8: the
+  // champion, the finalist, two semifinalists and four quarterfinalists);
+  // only the champion has a title.
+  await expect.poll(() => fieldWrites.length, { timeout: 15_000 }).toBe(8)
+  expect(await withField('cherrypick_titles', 'GREATER_THAN', [0])).toBe(1)
+  expect(await withField('cherrypick_best_finish')).toBe(8)
 })
 
 test('an anchored bracket hides ratings while you pick and rates only the unrated', async ({
@@ -822,5 +834,121 @@ test('a clip bracket pauses and resumes after a reload', async ({ page }) => {
   await pill.click()
   await expect(page.locator('.cherrypick-play-modal')).toContainText(
     'match 2 of 8',
+  )
+})
+
+// ------------------------------------------------------------ the Brackets switch
+
+// The switch, as Stash's Settings page saves it
+async function setBrackets(on) {
+  await setPluginSettings(PLUGIN_ID, {
+    ...((await pluginConfig()) || {}),
+    brackets: on,
+  })
+}
+
+// "Learning from …, 15 bracket picks" on Cherry Pick's page: the picks the
+// model learns from, finished brackets' and the paused one's (none, no line)
+async function bracketPicks(page) {
+  await page.goto('/plugins/cherrypick')
+  const card = page.locator('#your-score')
+  await expect(card).toContainText(/within half a star \d+ times in 10/, {
+    timeout: 20_000,
+  })
+  return Number((await card.innerText()).match(/(\d+) bracket picks/)?.[1] ?? 0)
+}
+
+test('with Brackets off, nothing offers a bracket, the results stay, and a paused bracket waits for the switch', async ({
+  page,
+}) => {
+  test.setTimeout(120_000)
+  // one champion, and no bracket in play: the scene bracket the last test
+  // resumed is still on
+  const her = demo.performers['Bea Lark']
+  const config = {
+    ...(await pluginConfig()),
+    hallOfFame: JSON.stringify([
+      finishedBracket(her, demo.performers['Juno Marsh']),
+    ]),
+  }
+  delete config.bracket
+  await setPluginSettings(PLUGIN_ID, config)
+  const before = await bracketPicks(page)
+
+  // one pick, then Esc: a paused bracket, in Stash once its save lands
+  const play = await openBracket(page)
+  await page.keyboard.press('ArrowLeft')
+  await expect(play.locator('.cherrypick-round')).toHaveText(
+    'Round of 16 · match 2 of 8',
+  )
+  await page.keyboard.press('Escape')
+  await expect(play).toBeHidden()
+  await expect.poll(savedBracketStatus).toBe('paused')
+
+  await setBrackets(false)
+  try {
+    // Lists: no Bracket, no Options, no resume pill. Crowns show once the
+    // configuration is in, so the buttons would have shown by then.
+    await page.goto('/performers?perPage=120')
+    await expect(
+      visible(page.locator('.performer-card .cherrypick-honours')),
+    ).toBeVisible({ timeout: 20_000 })
+    await expect(page.locator('.cherrypick-bracket-ops')).toHaveCount(0)
+    await expect(page.locator('.cherrypick-resume-pill')).toHaveCount(0)
+
+    // a performer's Scenes tab: no Bracket her scenes. Her For you line
+    // needs the model, which comes after the configuration.
+    await page.goto(`/performers/${her}/scenes`)
+    await expect(
+      visible(page.locator('.cherrypick-performer-line')),
+    ).toBeVisible({ timeout: 20_000 })
+    await expect(visible(page.locator('.scene-card'))).toBeVisible()
+    await expect(page.locator('.cherrypick-bracket-ops')).toHaveCount(0)
+
+    // the front page: the Hall of Fame row keeps its champions, without
+    // the pill
+    await page.goto('/')
+    const row = page.locator('.cherrypick-row-hall-of-fame')
+    await expect(visible(row.locator('.performer-card'))).toBeVisible({
+      timeout: 20_000,
+    })
+    await expect(page.locator('.cherrypick-resume-pill')).toHaveCount(0)
+
+    // Cherry Pick's page says where the brackets went, and the paused
+    // bracket's pick still teaches the model
+    expect(await bracketPicks(page)).toBe(before + 1)
+    const hof = page.locator('#hall-of-fame')
+    await expect(hof.locator('.cherrypick-brackets-off')).toContainText(
+      'Your paused bracket waits: turn Brackets on',
+    )
+    // the champion stays, with no word of a Champions round
+    await expect(hof.locator('.cherrypick-hof-group')).toBeVisible()
+    await expect(hof).not.toContainText('Champions round')
+    expect(await savedBracketStatus()).toBe('paused')
+  } finally {
+    await setBrackets(true)
+  }
+
+  // back on: the pill resumes the bracket where it stopped
+  await page.goto('/performers')
+  const pill = visible(page.locator('.cherrypick-resume-pill'))
+  await expect(pill).toBeVisible({ timeout: 20_000 })
+  await pill.click()
+  await expect(play.locator('.cherrypick-round')).toHaveText(
+    'Round of 16 · match 2 of 8',
+  )
+  await abandonBracket(play)
+  await page.goto('/plugins/cherrypick')
+  await expect(page.locator('#hall-of-fame')).toContainText(
+    'Champions round at 4 different champions',
+    { timeout: 20_000 },
+  )
+  await expect(page.locator('.cherrypick-brackets-off')).toHaveCount(0)
+
+  // and her Scenes tab offers her scenes again
+  await page.goto(`/performers/${her}/scenes`)
+  await expect(visible(page.locator('.cherrypick-bracket-button'))).toHaveText(
+    'Bracket her scenes',
+    { timeout: 20_000 },
   )
 })

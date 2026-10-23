@@ -9,10 +9,13 @@ import {
   PLUGIN_ID,
   demoIds,
   demoPath,
+  gql,
   onlyJuicy,
   openInsights,
   openPerformerStats,
   openPerformersToolkit,
+  openRunningJob,
+  progressColors,
   setPlugin,
   setSfw,
   unmatchedClasses,
@@ -287,6 +290,41 @@ function contrast(a, b) {
   return (hi + 0.05) / (lo + 0.05)
 }
 
+// A running job's bar in Settings > Tasks fills with pink candy along a deep
+// plum groove, its label in ink. Juicy's dark resume bar for cards filled it
+// dark over Bootstrap's pale track, so it read backwards.
+test("a running job's progress fills brighter than its groove", async ({
+  page,
+}) => {
+  const progress = await openRunningJob(page)
+  const { fill, groove } = await progressColors(page, progress)
+  const black = 'rgb(0, 0, 0)'
+  expect(contrast(fill, black)).toBeGreaterThan(contrast(groove, black))
+  expect(contrast(fill, groove)).toBeGreaterThanOrEqual(3)
+  const label = await progress
+    .locator('.progress-bar')
+    .evaluate((el) => getComputedStyle(el).color)
+  expect(contrast(label, fill)).toBeGreaterThanOrEqual(4.5)
+})
+
+// A card's resume bar keeps its dark track under the pink
+test("a card's resume bar keeps its dark track", async ({ page }) => {
+  const activity = (mutation) =>
+    gql(`mutation ($id: ID!) { ${mutation} }`, { id: ids.scene })
+  await activity('sceneSaveActivity(id: $id, resume_time: 3)')
+  try {
+    await page.goto('/scenes')
+    const bar = page.locator('.scene-card .progress-bar').first()
+    await expect(bar).toHaveCSS('background-color', 'rgba(1, 2, 36, 0.7)')
+    await expect(bar.locator('.progress-indicator')).toHaveCSS(
+      'background-image',
+      /^linear-gradient/,
+    )
+  } finally {
+    await activity('sceneResetActivity(id: $id, reset_resume: true)')
+  }
+})
+
 // Cherry Pick's bracket dialogs: the speaker in the header and the bar of
 // the bracket's progress
 test.describe('beside Cherry Pick', () => {
@@ -334,8 +372,7 @@ test.describe('beside Cherry Pick', () => {
     await abandonBracket(play)
   })
 
-  // Pink candy fills a deep plum groove. Juicy's dark resume bar for cards
-  // filled it dark over a pale track, so it read backwards.
+  // The bracket's bar takes the pink candy of every progress bar
   test("a bracket's progress fills brighter than its groove", async ({
     page,
   }) => {

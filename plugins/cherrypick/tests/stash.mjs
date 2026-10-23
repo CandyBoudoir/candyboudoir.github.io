@@ -5,6 +5,7 @@ import {
   colorAt,
   demoIds,
   gql,
+  progressColors,
   setPluginSettings,
   usePlugins,
 } from '../../../tests/stash/helpers.mjs'
@@ -54,6 +55,37 @@ export async function tearDownCherryPick() {
 export async function pluginConfig() {
   const { configuration } = await gql('{ configuration { plugins } }')
   return configuration.plugins?.[PLUGIN_ID] ?? null
+}
+
+// The bracket in progress as Stash's plugin configuration holds it, once
+// its debounced save lands: 'playing', 'paused', or null for none
+export async function savedBracketStatus() {
+  const b = (await pluginConfig())?.bracket
+  return b ? (JSON.parse(b)?.status ?? null) : null
+}
+
+// A finished 16-performer bracket, as the plugin stores it: its champion and
+// finalist get a crown and a medal.
+export function finishedBracket(champion, finalist) {
+  return {
+    id: 'btest',
+    kind: 'performer',
+    gender: 'FEMALE',
+    poolLabel: 'Female',
+    size: 16,
+    champions: false,
+    seeds: [],
+    decisions: [],
+    createdAt: '2026-01-01T00:00:00.000Z',
+    finishedAt: '2026-01-01T00:20:00.000Z',
+    status: 'done',
+    result: {
+      champion,
+      finalist,
+      semifinalists: [],
+      quarterfinalists: [],
+    },
+  }
 }
 
 // A demo scene by what it is: rated or not, played or not, in the demo plan
@@ -204,16 +236,7 @@ export async function sizeMarkLook(page, play, by) {
   return { mark, behind }
 }
 
-// The colours a bracket's progress bar shows on screen, at the middle of its
-// filled part and near the end of its empty groove
-export async function progressLook(page, play) {
-  const track = await play.locator('.cherrypick-progress').boundingBox()
-  const bar = await play
-    .locator('.cherrypick-progress .progress-bar')
-    .boundingBox()
-  const y = track.y + track.height / 2
-  return {
-    fill: await colorAt(page, bar.x + bar.width / 2, y),
-    groove: await colorAt(page, track.x + track.width - 8, y),
-  }
-}
+// The colours a bracket's progress bar shows on screen, in its filled part
+// and near the end of its empty groove
+export const progressLook = (page, play) =>
+  progressColors(page, play.locator('.cherrypick-progress'))

@@ -97,25 +97,6 @@ div.dropdown-menu .dropdown-item:active {
   opacity: 0.8;
 }
 
-/*
- * A bracket's progress in Cherry Pick's dialogs fills with pink candy along
- * a deep plum groove. The dark bar Juicy gives a card's resume bar would
- * fill it dark over Bootstrap's pale track, so it read backwards.
- */
-.cherrypick-dialog .progress {
-  background-color: var(--juicy-bg-deep);
-  border-radius: var(--juicy-radius-pill);
-}
-
-.cherrypick-dialog .progress-bar {
-  background-color: var(--juicy-pink);
-  background-image: linear-gradient(
-    90deg,
-    var(--juicy-pink),
-    var(--juicy-bubblegum)
-  );
-}
-
 .tooltip-inner {
   background-color: var(--juicy-ink);
   border: 2px solid var(--juicy-lime);

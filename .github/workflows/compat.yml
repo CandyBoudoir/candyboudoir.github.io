@@ -193,9 +193,10 @@ jobs:
         run: pnpm exec playwright test ${{ steps.baselines.outputs.specs && format('{0} --update-snapshots=all', steps.baselines.outputs.specs) || 'visual' }}
         env:
           PW_STEP: visual
-      # A Stash that stops answering (once so far, mid-run, with nothing in
-      # its log) writes every goroutine's stack to its log on SIGQUIT, which
-      # the report artifact keeps
+      # A Stash that stops answering writes every goroutine's stack to its log
+      # on SIGQUIT, which the report artifact keeps. The stacks of the five
+      # hangs from 2026-10-21 to 23 all show the config lock deadlock that
+      # config-guard.mjs (started by stash.sh) now keeps out
       - name: Stash's stacks if it stopped answering
         if: always() && steps.prepare.outcome == 'success'
         run: |
@@ -222,6 +223,7 @@ jobs:
             test-results/
             pw-results/
             stash-work/stash.log
+            stash-work/guard.log
           retention-days: 14
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()

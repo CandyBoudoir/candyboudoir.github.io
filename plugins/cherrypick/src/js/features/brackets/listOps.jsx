@@ -9,7 +9,8 @@
 //
 // Where: the Performers page gets the performer pair; the Scenes page and
 // the scenes of a tag, studio or group get the scene pair; a performer's
-// Scenes tab gets "Bracket her scenes". No toolbar, no buttons.
+// Scenes tab gets "Bracket her scenes". No toolbar, no buttons, and none
+// with Brackets off (parts.jsx useBracketsOn).
 import {
   patch,
   patchAfter,
@@ -31,7 +32,7 @@ import {
   quickStartClip,
   quickStartPerformers,
 } from './actions.js'
-import { BracketIcon, ResumePill } from './parts.jsx'
+import { BracketIcon, ResumePill, useBracketsOn } from './parts.jsx'
 
 // ------------------------------------------------------------ the list's filter
 
@@ -421,10 +422,9 @@ function useToolbarSlots(anchor, enabled) {
   return enabled ? slots : null
 }
 
-function ListBracket({ kind, since: listStart }) {
+function ListOps({ kind, since }) {
   const { pathname } = ReactRouterDOM.useLocation()
   const where = listPlace(kind, pathname)
-  const [since] = React.useState(listStart)
   const entry = useStoreValue(lists, (s) => s[kind])
   const filter = entry && entry.seq > since ? entry.filter : null
   const known = useKnownFields(kind)
@@ -461,6 +461,14 @@ function ListBracket({ kind, since: listStart }) {
         : null}
     </>
   )
+}
+
+// since: the report count when the list first rendered, kept from then, so
+// buttons that come with the switch still take this list's filter
+function ListBracket({ kind, since: listStart }) {
+  const [since] = React.useState(listStart)
+  const on = useBracketsOn()
+  return on ? <ListOps kind={kind} since={since} /> : null
 }
 
 export function registerListOps() {
