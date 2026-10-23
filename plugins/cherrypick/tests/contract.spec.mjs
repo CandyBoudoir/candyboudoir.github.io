@@ -476,9 +476,9 @@ test('the first load writes once, with no image out, and the next load writes no
       .toBe(true)
     const writes = sent('CherryPickConfigurePlugin')
     expect(writes).toHaveLength(1)
-    const images = sent('no image')
-    expect(images.length).toBeGreaterThan(0)
-    const out = images.filter(
+    // Firefox loads a lazy image only once it is on screen, so the list's
+    // images of performers with none may not load at all
+    const out = sent('no image').filter(
       (i) => i.start <= writes[0].start && i.end >= writes[0].start,
     )
     expect(out).toHaveLength(0)

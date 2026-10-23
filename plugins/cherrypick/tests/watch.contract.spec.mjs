@@ -168,12 +168,20 @@ test("with Watch This on, one player takes the place of Cherry Pick's rows, abov
   )
   await expect(page.locator('.cherrypick-watch-reason')).not.toBeEmpty()
   // The rows' switches keep their values for when Watch This goes off
-  const config = await pluginConfig()
-  expect([
-    config.showForYou,
-    config.showFollowRows,
-    config.showHallOfFame,
-  ]).toEqual([true, true, true])
+  // (written with the first load's defaults once the page settles)
+  await expect
+    .poll(
+      async () => {
+        const config = await pluginConfig()
+        return [
+          config?.showForYou,
+          config?.showFollowRows,
+          config?.showHallOfFame,
+        ]
+      },
+      { timeout: 15_000 },
+    )
+    .toEqual([true, true, true])
   expect(errors).toEqual([])
 })
 
