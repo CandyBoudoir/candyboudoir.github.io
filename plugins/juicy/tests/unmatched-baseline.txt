@@ -7,7 +7,6 @@ badge-primary
 btn-info
 btn-warning
 card-drag-handle
-cherrypick-dialog
 custom-checkbox
 custom-select
 default-value

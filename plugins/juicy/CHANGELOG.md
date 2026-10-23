@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.4
+
+Every progress bar in candy, for Stash v0.31.1.
+
+- A running job's progress bar in Settings > Tasks fills with pink candy along a deep plum groove, its percentage in ink, as a bracket's bar in Cherry Pick does since 0.5.3. Juicy's dark resume bar for cards had filled it dark over Bootstrap's pale track, so the part already done looked empty.
+- The job list in Settings > Tasks is a plum card like the others. Stash had kept it slate.
+- A card's resume bar is unchanged.
+- Tested beside Insights 2.13.0 and Performers Toolkit 0.18.2.
+
 ## 0.5.3
 
 Cherry Pick 0.3.1's bracket dialogs in candy, for Stash v0.31.1.
