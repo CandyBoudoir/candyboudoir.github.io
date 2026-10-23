@@ -443,6 +443,63 @@ test('Settings › Plugins lists the switches, already on', async ({ page }) => 
   else await expect(auto).toBeChecked()
 })
 
+// Stash 0.30 to 0.31.1 can freeze when a configuration write reaches it
+// while it serves the image of a performer with none or a configuration
+// query (runtime/settle.js). Cherry Pick reads Stash's own copy of its
+// configuration, writes its first-load defaults once, after the list's
+// images, and on a load with nothing to change writes nothing.
+test('the first load writes once, with no image out, and the next load writes nothing', async ({
+  page,
+}) => {
+  const before = await pluginConfig()
+  const seen = []
+  page.on('request', (r) => {
+    const op = r.url().endsWith('/graphql')
+      ? r.postDataJSON()?.operationName
+      : /\/performer\/\d+\/image\?.*default=true/.test(r.url())
+        ? 'no image'
+        : null
+    if (op) seen.push({ r, op, start: Date.now(), end: Infinity })
+  })
+  const done = (r) => {
+    const e = seen.find((x) => x.r === r)
+    if (e) e.end = Date.now()
+  }
+  page.on('requestfinished', done)
+  page.on('requestfailed', done)
+  const sent = (op) => seen.filter((e) => e.op === op)
+  try {
+    await setPluginSettings(PLUGIN_ID, {})
+    await page.goto('/performers')
+    await expect
+      .poll(async () => (await pluginConfig())?.showForYou, { timeout: 20_000 })
+      .toBe(true)
+    const writes = sent('CherryPickConfigurePlugin')
+    expect(writes).toHaveLength(1)
+    const images = sent('no image')
+    expect(images.length).toBeGreaterThan(0)
+    const out = images.filter(
+      (i) => i.start <= writes[0].start && i.end >= writes[0].start,
+    )
+    expect(out).toHaveLength(0)
+    // its one configuration query: the map, read just before the write
+    expect(sent('CherryPickConfiguration')).toHaveLength(1)
+
+    seen.length = 0
+    await page.reload()
+    await expect(
+      page.locator('.cherrypick-bracket-button').filter({ visible: true }),
+    ).not.toHaveCount(0, { timeout: 20_000 })
+    // longer than a write would wait: a second of quiet, then the page
+    // settling
+    await page.waitForTimeout(3000)
+    expect(sent('CherryPickConfigurePlugin')).toHaveLength(0)
+    expect(sent('CherryPickConfiguration')).toHaveLength(0)
+  } finally {
+    await setPluginSettings(PLUGIN_ID, before)
+  }
+})
+
 test('without Stash Curator, nothing offers to hide Your score on cards', async ({
   page,
 }) => {

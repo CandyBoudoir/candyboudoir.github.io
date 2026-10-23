@@ -13,6 +13,10 @@
 //     toggle, writes back the copy it loaded. A value the plugin wrote while
 //     that page was open would be lost, so the plugin's writes wait until the
 //     user leaves Settings, then land on top.
+//   - Stash 0.30.0 to 0.31.1 can freeze until restarted when a write meets
+//     a request that reads its SFW setting (docs/stash-seams.md). Each write
+//     waits for the page to settle (io.settle), changes made meanwhile go out
+//     with it, and a write that would change nothing is not sent.
 // A mirror of the map lives in browser storage. On load, a missing map is
 // restored from it, and a map older than the mirror gets the plugin's data
 // keys back while keeping the settings Stash wrote.
@@ -125,6 +129,7 @@ export const withCuratorAnswer = (map, answer, settings) => ({
  *   write: (map: object) => Promise<void>, // configurePlugin
  *   mirror: { get: () => object|null, set: (map: object) => void, del: () => void },
  *   settingsOpen: () => boolean,
+ *   settle?: () => Promise<void>,          // resolves when a write is safe
  *   now?: () => string,
  *   log?: (text: string) => void,
  * }} io
@@ -132,6 +137,7 @@ export const withCuratorAnswer = (map, answer, settings) => ({
 export function createTier1(io) {
   const now = io.now || (() => new Date().toISOString())
   const log = io.log || (() => {})
+  const settle = io.settle || (() => Promise.resolve())
   const pending = new Set()
   const pendingOwn = new Set()
   let pendingFull = null
@@ -185,8 +191,15 @@ export function createTier1(io) {
       cur[k] != null
     for (const k of write)
       if (full[k] !== undefined && !stashOwns(k)) next[k] = full[k]
-    next.updatedAt = at
-    await io.write(next)
+    // A map that already holds every value needs no write: the mirror takes
+    // the map's stamp instead, so the next load does not read it as stale.
+    const same = (k) => (next[k] ?? null) === (cur?.[k] ?? null)
+    const changed =
+      !cur || Object.keys(next).some((k) => k !== 'updatedAt' && !same(k))
+    if (changed) {
+      next.updatedAt = at
+      await io.write(next)
+    }
     // A change staged while this write was out is newer than the copy it
     // carried, so the mirror keeps it, still newer than the map, until its
     // own save lands. Should the page be left or the tab closed before
@@ -204,13 +217,38 @@ export function createTier1(io) {
         : next,
     )
     log(
-      !cur
-        ? 'configurePlugin: the map was missing; wrote back everything'
-        : stale
-          ? "configurePlugin: the map was stale; wrote back the plugin's data"
-          : `configurePlugin: ${[...keys].join(', ')}`,
+      !changed
+        ? `no configurePlugin: the map already holds ${[...keys].join(', ')}`
+        : !cur
+          ? 'configurePlugin: the map was missing; wrote back everything'
+          : stale
+            ? "configurePlugin: the map was stale; wrote back the plugin's data"
+            : `configurePlugin: ${[...keys].join(', ')}`,
     )
-    return 'written'
+    return changed ? 'written' : 'unchanged'
+  }
+
+  // The write waiting for the page to settle. A save made meanwhile joins
+  // it with its newer copy, so a burst of changes is one write.
+  let batch = null
+  function enqueue(full, keys, own) {
+    const at = stamp()
+    if (batch) {
+      keys.forEach((k) => batch.keys.add(k))
+      own.forEach((k) => batch.own.add(k))
+      Object.assign(batch, { full, at })
+      return batch.done
+    }
+    const b = { full, keys: new Set(keys), own: new Set(own), at }
+    batch = b
+    b.done = serial(async () => {
+      await settle()
+      // dropped by remove
+      if (batch !== b) return 'none'
+      batch = null
+      return readModifyWrite(b.full, [...b.keys], [...b.own], b.at)
+    })
+    return b.done
   }
 
   return {
@@ -226,8 +264,7 @@ export function createTier1(io) {
         log(`deferred ${keys.join(', ')}: Stash's Settings page is open`)
         return Promise.resolve('deferred')
       }
-      const at = stamp()
-      return serial(() => readModifyWrite(full, keys, own, at))
+      return enqueue(full, keys, own)
     },
 
     // Call when the user leaves Stash's Settings page.
@@ -239,8 +276,7 @@ export function createTier1(io) {
       pending.clear()
       pendingOwn.clear()
       pendingFull = null
-      const at = stamp()
-      return serial(() => readModifyWrite(map, keys, own, at))
+      return enqueue(map, keys, own)
     },
 
     pending: () => [...pending],
@@ -261,8 +297,10 @@ export function createTier1(io) {
 
     // The map to start from, and whether it came back from the mirror
     // ('missing' or 'stale'), in which case the caller writes it back.
-    async load() {
-      const cur = await io.read()
+    // read: the map, when the caller already has it (null when Stash holds
+    // none); without it, load reads it.
+    async load(read) {
+      const cur = read === undefined ? await io.read() : read
       const mirror = io.mirror.get()
       if (cur?.removedAt && cur.removedAt >= (mirror?.updatedAt || '')) {
         // The plugin's data was removed after this browser last wrote: its
@@ -288,7 +326,9 @@ export function createTier1(io) {
     // "Remove Cherry Pick data": a tombstone stops other browsers' mirrors
     // from bringing the data back.
     async remove() {
+      batch = null
       await serial(async () => {
+        await settle()
         await io.write({ removedAt: now() })
         io.mirror.del()
       })

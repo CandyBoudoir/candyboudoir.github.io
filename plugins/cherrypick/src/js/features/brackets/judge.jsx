@@ -14,9 +14,9 @@
 // generates (H.264), in a plain <video>. So judging works for every file
 // and records no play.
 import { FontAwesomeSolid, React } from '../../runtime/api.js'
-import { run } from '../../runtime/app.js'
+import { run, stashConfiguration } from '../../runtime/app.js'
 import { createStore, useStoreValue } from '../../runtime/store.js'
-import { PREVIEW_SETTINGS, SCENE_LOOK } from '../../data/queries.js'
+import { SCENE_LOOK } from '../../data/queries.js'
 import { useAppState } from '../../ui/hooks.js'
 import { fmtDuration } from '../../ui/StashdbSceneCard.jsx'
 import { Icon } from './parts.jsx'
@@ -124,8 +124,8 @@ function probePreview(id, url) {
 // Stash's preview settings: sound on or off, and the clip's length
 let previewSettings = null
 function loadPreviewSettings() {
-  previewSettings ||= run(PREVIEW_SETTINGS).then(
-    ({ configuration: c }) => ({
+  previewSettings ||= stashConfiguration().then(
+    (c) => ({
       sound: !!c.interface?.soundOnPreview,
       seconds:
         (c.general?.previewSegments || 0) *

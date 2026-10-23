@@ -12,15 +12,17 @@ import {
 
 // A fake Stash (one plugin map), a fake browser mirror and a clock. A
 // promise in server.hold.read or .write holds that request back until it
+// settles, and one in server.hold.settle holds every write until the page
 // settles; server.cutOff loses a write's answer after Stash took it, as when
 // the page is left while it is out.
 function rig({ settingsOpen = false } = {}) {
-  const server = { map: null, writes: 0, hold: {}, cutOff: false }
+  const server = { map: null, reads: 0, writes: 0, hold: {}, cutOff: false }
   const box = { mirror: null }
   let t = 0
   const open = { value: settingsOpen }
   const tier1 = createTier1({
     read: async () => {
+      server.reads++
       await server.hold.read
       return server.map ? structuredClone(server.map) : null
     },
@@ -36,6 +38,9 @@ function rig({ settingsOpen = false } = {}) {
       del: () => (box.mirror = null),
     },
     settingsOpen: () => open.value,
+    settle: async () => {
+      await server.hold.settle
+    },
     now: () => new Date(Date.UTC(2026, 0, 1, 0, 0, t++)).toISOString(),
   })
   return { server, box, open, tier1 }
@@ -274,6 +279,107 @@ test('the first write after a removal keeps the tombstone', async () => {
   const { map } = await a.tier1.load()
   assert.deepEqual(fromConfig(map).dontLearn, [])
   assert.equal(a.box.mirror, null)
+})
+
+// Stash 0.30 to 0.31.1 can freeze when a configuration write meets certain
+// reads, so tier 1 sends as few writes as it can, each once the page has
+// settled (runtime/settle.js).
+test('a write that would change nothing is not sent, and the next load does not read the map as stale', async () => {
+  const { server, box, tier1 } = rig()
+  const s = state({ dontLearn: [{ sceneId: '4' }] })
+  await tier1.save(toConfig(s), ['dontLearn'])
+  assert.equal(server.writes, 1)
+  // the same value staged and saved again, as when a list is rebuilt
+  tier1.stage(toConfig(s), ['dontLearn'])
+  assert.equal(await tier1.save(toConfig(s), ['dontLearn']), 'unchanged')
+  assert.equal(server.writes, 1)
+  assert.equal(box.mirror.updatedAt, server.map.updatedAt)
+  const { restored } = await tier1.load()
+  assert.equal(restored, null)
+})
+
+test('the defaults on a map that already holds them are not written again', async () => {
+  const { server, tier1 } = rig()
+  const full = toConfig(state())
+  await tier1.save(full, Object.keys(full))
+  assert.equal(server.writes, 1)
+  await tier1.save(full, Object.keys(full))
+  assert.equal(server.writes, 1)
+})
+
+test('saves made while a write waits for the page to settle go out with it, as one write', async () => {
+  const { server, tier1 } = rig()
+  const page = held()
+  server.hold.settle = page.promise
+  const first = tier1.save(toConfig(state({ dontLearn: [{ sceneId: '1' }] })), [
+    'dontLearn',
+  ])
+  const second = tier1.save(
+    toConfig(
+      state({
+        dontLearn: [{ sceneId: '1' }],
+        notInterested: [{ sceneId: '2' }],
+      }),
+    ),
+    ['notInterested'],
+  )
+  assert.equal(server.reads, 0, 'nothing is sent before the page settles')
+  page.release()
+  assert.equal(await first, 'written')
+  assert.equal(await second, 'written')
+  assert.equal(server.reads, 1)
+  assert.equal(server.writes, 1)
+  const s = fromConfig(server.map)
+  assert.deepEqual(s.dontLearn, [{ sceneId: '1' }])
+  assert.deepEqual(s.notInterested, [{ sceneId: '2' }])
+})
+
+test('a write waiting for the page to settle keeps a change staged while it waits, stamped with its copy', async () => {
+  const { server, box, tier1 } = rig()
+  const page = held()
+  server.hold.settle = page.promise
+  tier1.stage(started, ['bracket'])
+  const saving = tier1.save(started, ['bracket'])
+  tier1.stage(abandoned, ['bracket'])
+  const again = tier1.save(abandoned, ['bracket'])
+  page.release()
+  await saving
+  await again
+  assert.equal(server.writes, 1)
+  assert.equal(fromConfig(server.map).brackets.active, null)
+  assert.equal(box.mirror.updatedAt, server.map.updatedAt)
+})
+
+test('load takes a map the caller already read and sends no read of its own', async () => {
+  const { server, tier1 } = rig()
+  const map = toConfig(state({ dontLearn: [{ sceneId: '6' }] }))
+  const { map: got, restored } = await tier1.load(map)
+  assert.equal(server.reads, 0)
+  assert.equal(restored, null)
+  assert.deepEqual(fromConfig(got).dontLearn, [{ sceneId: '6' }])
+  // null: Stash holds no map, and the mirror the first load kept brings it
+  // back
+  const none = await tier1.load(null)
+  assert.equal(server.reads, 0)
+  assert.equal(none.restored, 'missing')
+  assert.deepEqual(fromConfig(none.map).dontLearn, [{ sceneId: '6' }])
+})
+
+test('removal drops a write still waiting for the page to settle', async () => {
+  const { server, tier1 } = rig()
+  const page = held()
+  server.hold.settle = page.promise
+  const saving = tier1.save(
+    toConfig(state({ dontLearn: [{ sceneId: '7' }] })),
+    ['dontLearn'],
+  )
+  const removing = tier1.remove()
+  page.release()
+  assert.equal(await saving, 'none')
+  await removing
+  assert.equal(server.writes, 1)
+  assert.ok(server.map.removedAt)
+  assert.deepEqual(fromConfig(server.map).dontLearn, [])
 })
 
 test('Apply bracket ratings automatically: on unless another plugin manages ratings, until the user sets it', () => {

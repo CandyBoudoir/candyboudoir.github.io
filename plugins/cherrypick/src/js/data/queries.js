@@ -52,16 +52,6 @@ export const SCENE_LOOK = `
   }
 `
 
-// Whether Stash plays previews with sound, and how long it makes them
-export const PREVIEW_SETTINGS = `
-  query CherryPickPreviewSettings {
-    configuration {
-      interface { soundOnPreview }
-      general { previewSegments previewSegmentDuration }
-    }
-  }
-`
-
 // Each scene's id and the times Stash keeps of its changes, for finding
 // the scenes changed since the library was last read (data/library.js)
 export const SCENE_TIMES = `
