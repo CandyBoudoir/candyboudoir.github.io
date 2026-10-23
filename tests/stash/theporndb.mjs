@@ -17,6 +17,10 @@
 // a studio's newest release turns up between two checks:
 //   PUT /_late?site_id=<id>  lists it first among that site's scenes
 //   DELETE /_late            takes every one back
+// A site's scenes answers can stop partway, as ThePornDB's chunked answers
+// sometimes do when the connection drops mid-answer:
+//   PUT /_cut?site_id=<id>&times=<n>  cuts off that site's next n answers
+//   DELETE /_cut                      ends every cut
 // Release dates count back from TPDB_NOW, which the mock gives too:
 //   GET /_now          { now }, the time it counts from
 import { STASH_BOX } from './stashbox-data.mjs'
@@ -267,6 +271,8 @@ export const TPDB_LATE = {
   ),
 }
 const late = new Set()
+// Site id: how many of its next scenes answers stop partway
+const cuts = new Map()
 
 // Release dates as New Releases' task compares them: the day 48 hours (or
 // 96) before TPDB_NOW
@@ -317,10 +323,21 @@ function answer(req, res, url) {
       ...(late.has(id) ? [TPDB_LATE[id]] : []),
       ...(TPDB_SCENES[id] || []),
     ]
-    return json(res, 200, {
+    const body = {
       data: scenes.slice(0, perPage),
       meta: { current_page: 1, per_page: perPage, total: scenes.length },
-    })
+    }
+    if (cuts.get(id) > 0) {
+      cuts.set(id, cuts.get(id) - 1)
+      // The first half in one chunk, then the connection drops
+      const whole = JSON.stringify(body)
+      res.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Transfer-Encoding': 'chunked',
+      })
+      return res.write(whole.slice(0, whole.length >> 1), () => res.destroy())
+    }
+    return json(res, 200, body)
   }
   return json(res, 404, { message: 'Not Found' })
 }
@@ -341,6 +358,14 @@ export function handleTpdb(req, res, { delay = 30 } = {}) {
     const id = url.searchParams.get('site_id')
     if (req.method === 'PUT' && TPDB_LATE[id]) late.add(id)
     else if (req.method === 'DELETE') late.clear()
+    res.writeHead(204).end()
+    return true
+  }
+  if (url.pathname === `${TPDB_PREFIX}/_cut`) {
+    const id = url.searchParams.get('site_id')
+    if (req.method === 'PUT' && id)
+      cuts.set(id, Number(url.searchParams.get('times') || 1))
+    else if (req.method === 'DELETE') cuts.clear()
     res.writeHead(204).end()
     return true
   }

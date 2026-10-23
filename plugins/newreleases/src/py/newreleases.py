@@ -23,12 +23,14 @@ first found it, which the page sorts by and marks New from.
 Polite by design: one request at a time with a pause between them, the same
 address for the same studio on every install, an identifying User-Agent and
 the user's own key. A 429, a 5xx, a Cloudflare challenge or no answer stops
-asking that service until the next day, with no retry. Each studio is asked
-once a day, or once a week when its newest release is more than 90 days
-old, and the catalog is saved after each one, so the page fills in as the
-task goes.
+asking that service until the next day, with no retry. An answer cut off
+partway is asked for once more after the same pause, and a second one stops
+the same way. Each studio is asked once a day, or once a week when its
+newest release is more than 90 days old, and the catalog is saved after
+each one, so the page fills in as the task goes.
 """
 
+import http.client
 import json
 import os
 import re
@@ -213,6 +215,11 @@ class Stop(Exception):
     """The service asked to be left alone, or did not answer."""
 
 
+class CutOff(Stop):
+    """The answer stopped partway, as a connection that drops mid-answer
+    leaves it. Asked for once more before it stops the service."""
+
+
 class Refused(Exception):
     """The service refused the key."""
 
@@ -229,12 +236,17 @@ def fetch(url, headers, body=None, context=None):
     data = json.dumps(body).encode('utf-8') if body is not None else None
     req = request.Request(url, data=data, headers=headers)
     try:
-        with request.urlopen(req, timeout=TIMEOUT, context=context) as res:
-            status, info, raw = res.status, res.headers, res.read()
-    except error.HTTPError as e:
-        status, info, raw = e.code, e.headers, e.read()
+        try:
+            with request.urlopen(req, timeout=TIMEOUT, context=context) as res:
+                status, info, raw = res.status, res.headers, res.read()
+        except error.HTTPError as e:
+            status, info, raw = e.code, e.headers, e.read()
     except (error.URLError, OSError) as e:
         raise Stop('no answer (%s)' % getattr(e, 'reason', e))
+    except http.client.IncompleteRead as e:
+        raise CutOff('an answer cut off after %d bytes' % len(e.partial))
+    except http.client.HTTPException as e:
+        raise Stop('a broken answer (%s)' % (str(e) or e.__class__.__name__))
     kind = (info.get('Content-Type') or '').lower()
     if (info.get('cf-mitigated') or '').lower() == 'challenge' or (
         'html' in kind and 'json' not in kind
@@ -373,6 +385,18 @@ class Service:
             'User-Agent': user_agent(),
         }
 
+    def ask(self, request_fn):
+        """One paced request, made once more after the same pause when its
+        answer is cut off partway. A second cut-off answer stops."""
+        try:
+            return self.pacer.call(self.pause, request_fn)
+        except CutOff as e:
+            log('w', '%s: %s; asking once more' % (self.name, e))
+        try:
+            return self.pacer.call(self.pause, request_fn)
+        except CutOff:
+            raise Stop('an answer cut off partway, twice')
+
 
 class Tpdb(Service):
     """ThePornDB's REST API: a studio's numeric site id from its StashID,
@@ -390,7 +414,7 @@ class Tpdb(Service):
     def get(self, path):
         headers = self.headers()
         headers['Authorization'] = 'Bearer %s' % self.key
-        return self.pacer.call(self.pause, lambda: fetch(self.api + path, headers))
+        return self.ask(lambda: fetch(self.api + path, headers))
 
     def site_id(self, uuid):
         data = (self.get('/sites/%s' % parse.quote(uuid, safe='')) or {}).get(
@@ -452,9 +476,7 @@ class StashBox(Service):
                 }
             },
         }
-        body = self.pacer.call(
-            self.pause, lambda: fetch(self.endpoint, headers, query)
-        )
+        body = self.ask(lambda: fetch(self.endpoint, headers, query))
         if body.get('errors'):
             message = body['errors'][0].get('message') or 'an error'
             if REFUSED.search(message):
