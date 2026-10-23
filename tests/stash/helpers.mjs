@@ -585,8 +585,15 @@ export async function unmatchedRestyledClasses(page, { css, folder, plugin }) {
 // screenshot: what lies behind an icon when a theme paints its button with
 // a gradient, which no computed style gives.
 export async function colorAt(page, x, y) {
+  const [color] = await colorsIn(page, { x, y, width: 1, height: 1 })
+  return color
+}
+
+// The colour of every screen pixel in a box given in CSS pixels, row by row:
+// on a 2x screen, two pixels for each CSS pixel each way.
+export async function colorsIn(page, { x, y, width, height }) {
   const png = await page.screenshot({
-    clip: { x: Math.round(x), y: Math.round(y), width: 1, height: 1 },
+    clip: { x: Math.round(x), y: Math.round(y), width, height },
   })
   return page.evaluate(
     async (src) => {
@@ -594,12 +601,60 @@ export async function colorAt(page, x, y) {
       img.src = src
       await img.decode()
       const canvas = document.createElement('canvas')
-      canvas.width = canvas.height = 1
+      canvas.width = img.width
+      canvas.height = img.height
       const ctx = canvas.getContext('2d')
       ctx.drawImage(img, 0, 0)
-      const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data
-      return `rgb(${r}, ${g}, ${b})`
+      const { data } = ctx.getImageData(0, 0, img.width, img.height)
+      const colors = []
+      for (let i = 0; i < data.length; i += 4)
+        colors.push(`rgb(${data[i]}, ${data[i + 1]}, ${data[i + 2]})`)
+      return colors
     },
     `data:image/png;base64,${png.toString('base64')}`,
   )
+}
+
+// Settings > Tasks with a scan running, 42% done, and its Bootstrap progress
+// bar. No real job runs long enough to look at, so Stash's job queue answers
+// with this one.
+export async function openRunningJob(page) {
+  const job = {
+    id: '1',
+    status: 'RUNNING',
+    subTasks: [],
+    description: 'Scanning...',
+    progress: 0.42,
+    startTime: new Date(Date.now() - 60_000).toISOString(),
+    endTime: null,
+    addTime: new Date(Date.now() - 60_000).toISOString(),
+    error: null,
+    __typename: 'Job',
+  }
+  await page.route('**/graphql', (route) =>
+    route.request().postData()?.includes('"JobQueue"')
+      ? route.fulfill({ json: { data: { jobQueue: [job] } } })
+      : route.fallback(),
+  )
+  await page.goto('/settings?tab=tasks')
+  // Stash fades the job in
+  const row = page.locator('.job-table li.fade-in')
+  await row.waitFor()
+  await row.evaluate((el) =>
+    Promise.all(el.getAnimations().map((a) => a.finished)),
+  )
+  return row.locator('.progress')
+}
+
+// The colours a Bootstrap progress bar shows on screen: its filled part a
+// quarter of the way along, clear of a label in the middle, and its empty
+// groove near the end
+export async function progressColors(page, progress) {
+  const track = await progress.boundingBox()
+  const bar = await progress.locator('.progress-bar').boundingBox()
+  const y = track.y + track.height / 2
+  return {
+    fill: await colorAt(page, bar.x + bar.width / 4, y),
+    groove: await colorAt(page, track.x + track.width - 8, y),
+  }
 }

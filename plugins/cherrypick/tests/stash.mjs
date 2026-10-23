@@ -5,6 +5,7 @@ import {
   colorAt,
   demoIds,
   gql,
+  progressColors,
   setPluginSettings,
   usePlugins,
 } from '../../../tests/stash/helpers.mjs'
@@ -161,16 +162,7 @@ export async function headerButtonLook(page, button, mark = 'svg') {
   }
 }
 
-// The colours a bracket's progress bar shows on screen, at the middle of its
-// filled part and near the end of its empty groove
-export async function progressLook(page, play) {
-  const track = await play.locator('.cherrypick-progress').boundingBox()
-  const bar = await play
-    .locator('.cherrypick-progress .progress-bar')
-    .boundingBox()
-  const y = track.y + track.height / 2
-  return {
-    fill: await colorAt(page, bar.x + bar.width / 2, y),
-    groove: await colorAt(page, track.x + track.width - 8, y),
-  }
-}
+// The colours a bracket's progress bar shows on screen, in its filled part
+// and near the end of its empty groove
+export const progressLook = (page, play) =>
+  progressColors(page, play.locator('.cherrypick-progress'))
