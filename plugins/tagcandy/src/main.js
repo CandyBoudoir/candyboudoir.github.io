@@ -391,17 +391,20 @@ function removeIcons() {
 }
 
 // New, renamed and merged tags: fill an empty tag, and touch nothing else.
+// The settings are read only for a tag that has no image: this runs on every
+// tag change, and a configuration query can freeze Stash 0.30 to 0.31.1 when
+// it meets a configuration write.
 function hook(context) {
   const fields = context.inputFields || []
   if (context.type === 'Tag.Update.Post' && fields.indexOf('image') >= 0)
     return { Output: 'The update set the image itself.' }
-  const s = readSettings()
-  if (!s.hooks) return { Output: 'Leave new and renamed tags alone is on.' }
   const tag = query(`query ($id: ID!) { findTag(id: $id) { ${TAG_FIELDS} } }`, {
     id: String(context.id),
   }).findTag
   if (!tag || isBackup(tag) || ownership(tag).state !== 'empty')
     return { Output: 'Nothing to do.' }
+  const s = readSettings()
+  if (!s.hooks) return { Output: 'Leave new and renamed tags alone is on.' }
   const idx = data()
   const m = matchTag(tag, idx, parseExtraMatches(s.extra, idx).pairs)
   const concept =

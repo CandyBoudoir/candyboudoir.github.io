@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.5
+
+- Icons for new tags reads Tag Candy's settings only for a tag with no image. It had sent Stash a configuration query on every tag change. On Stash v0.30.0 to v0.31.1 a configuration query that meets a configuration write can freeze Stash until it restarts, so this lowers the risk of a freeze.
+
 ## 0.1.4
 
 - New icons for 3D Available, Anal Creampie, Anal Stretching Toys, Argentinian, Augmented Reality, Australian, AV1, Bad Girl, Ball Gag, Ball Play and 105 more.
