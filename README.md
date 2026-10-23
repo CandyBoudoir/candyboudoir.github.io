@@ -69,9 +69,11 @@ WORK=stash-work node tests/stash/prepare.mjs   # PLUGINS=<id>,<id> picks the plu
 pnpm test:compat contract
 ```
 
+`stash.sh` starts Stash behind `tests/stash/config-guard.mjs`, a proxy on `STASH_PORT` (9999 by default), with Stash itself on the port 10000 above it. Stash v0.30.0 to v0.31.1 and develop deadlock when a config write such as `configurePlugin` arrives while another request is inside `GetSFWContentMode`, which takes Stash's config read lock twice. Every `configuration` query and every image of a performer with no image runs that function. The proxy holds a config write until no such read is in Stash, and holds those reads while a write is in.
+
 `prepare.mjs` installs every plugin into the one Stash, and two themes enabled together would each see the other's CSS. Each plugin's spec files therefore start with `usePlugins` (`tests/stash/helpers.mjs`), which enables that plugin and disables the others; the shared pages, stash-box flows and screenshot helpers live in the same file.
 
-Tag Candy's specs start a Stash of their own from the binary `stash.sh` downloaded into `WORK/bin` (`plugins/tagcandy/tests/stash.mjs`), on port 9961 with a stand-in for the icon site on 9962 (`TAGCANDY_PORT` moves both), so Apply icons never changes the tag images the themes' screenshots show. They check the port is free first, since `stash.sh`'s readiness check would accept any Stash already listening there.
+Tag Candy's specs start a Stash of their own from the binary `stash.sh` downloaded into `WORK/bin` (`plugins/tagcandy/tests/stash.mjs`), on port 9961 with a stand-in for the icon site on 9962 (`TAGCANDY_PORT` moves both), so Apply icons never changes the tag images the themes' screenshots show. They check the port is free first, since a readiness check would accept any Stash already listening there.
 
 `prepare.mjs` also points Stash at a mock stash-box (`tests/stash/stashbox.mjs`) that Playwright starts with the tests, so the Tagger, scrape dialogs and StashID links are checked against invented scenes, performers and studios with no stash-box account. The same server stands in for ThePornDB's REST API under `/tpdb/` (`tests/stash/theporndb.mjs`), which New Releases' specs register as a second stash-box while they run, so no test calls ThePornDB. New Releases' unit tests run its Python task against that mock with `python3`, and skip it where there is none.
 
