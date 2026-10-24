@@ -108,8 +108,27 @@ export function pronoun(performer) {
 // 4.25 -> "4.3": stars with one decimal, for reasons and badges
 export const fmtStars = (x) => (Math.round(x * 10) / 10).toFixed(1)
 
-// ["a", "b", "c"] -> "a, b and c"
-export const andList = (items) =>
+// ["a", "b", "c"] -> "a, b and c" (or "a, b or c")
+export const andList = (items, word = 'and') =>
   items.length > 1
-    ? `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`
+    ? `${items.slice(0, -1).join(', ')} ${word} ${items[items.length - 1]}`
     : items[0] || ''
+
+// " beach, VINTAGE ," -> ["beach", "VINTAGE"]: the tag names a
+// comma-separated setting holds, as typed
+export const tagNames = (text) =>
+  String(text || '')
+    .split(',')
+    .map((x) => x.trim())
+    .filter(Boolean)
+
+// The ids of the library's tags those names name, in any case
+export function tagIdsNamed(db, text) {
+  const names = new Set(tagNames(text).map((x) => x.toLowerCase()))
+  if (!names.size) return new Set()
+  return new Set(
+    [...db.tags.values()]
+      .filter((t) => names.has(t.name.toLowerCase()))
+      .map((t) => t.id),
+  )
+}

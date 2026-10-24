@@ -6,7 +6,7 @@
 // model, ratings, Not interested or For you's signals.
 import { store } from './app.js'
 import { onFrontPage, onLocation } from './location.js'
-import { context, visitSignals } from '../model/foryou.js'
+import { context, learnSkip, visitSignals } from '../model/foryou.js'
 import { localDay } from '../model/util.js'
 import {
   ignoreScene,
@@ -51,7 +51,7 @@ export function watchSnapshot(s) {
   if (!s.M || !s.configLoaded) return null
   const key = keyOf(s)
   if (snap?.key === key) return snap
-  const skip = new Set(s.dontLearn.map((d) => d.sceneId))
+  const skip = learnSkip(s.M, s)
   const order = watchOrder(context(s.M, s), visitSignals(s.signals, skip))
   const { scenes } = s.M.db
   const snoozes = settle(s.snoozes, scenes)

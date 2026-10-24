@@ -12,7 +12,7 @@ import {
 import { allDecisions } from '../runtime/engine.js'
 import { rateMore } from '../model/index.js'
 import { sourcesText } from '../model/matches.js'
-import { andList } from '../model/util.js'
+import { andList, tagNames } from '../model/util.js'
 import { MIN_RATED } from '../model/taste.js'
 import { toRateUrl } from '../data/listFilter.js'
 import { NAME_S, PLUGIN_NAME, PLUGIN_ROUTE } from '../name.js'
@@ -221,37 +221,62 @@ function NotInterested() {
   )
 }
 
+// The scenes with a tag from "Tags Cherry Pick doesn't learn from": how many,
+// and the names no scene in the library carries (a typo, or a tag renamed
+// in Stash since).
+function TaggedRow({ names }) {
+  const M = useAppState((s) => s.M)
+  let sub = 'Counting them…'
+  if (M) {
+    const found = new Set()
+    for (const id of M.dontLearnTagged)
+      for (const t of M.db.scenes.get(id).tags) found.add(t.name.toLowerCase())
+    const missing = names.filter((n) => !found.has(n.toLowerCase()))
+    const n = M.dontLearnTagged.size
+    sub = [
+      `${n} ${n === 1 ? 'scene' : 'scenes'}`,
+      'Change the tags in Settings › Plugins',
+      missing.length ? `No scene has the tag ${andList(missing, 'or')}` : '',
+    ]
+      .filter(Boolean)
+      .join(' · ')
+  }
+  return (
+    <SettingRow title={`Scenes tagged ${andList(names, 'or')}`} sub={sub} />
+  )
+}
+
 function DontLearnList() {
   const list = useAppState((s) => s.dontLearn)
+  const tags = useAppState((s) => s.settings.dontLearnTags)
+  const names = tagNames(tags)
   return (
     <div className="card setting-card">
-      {list.length ? (
-        list
-          .slice()
-          .reverse()
-          .map((n) => (
-            <SettingRow
-              key={n.sceneId}
-              title={n.title}
-              sub={`Its plays, rating and picks stay out of your picks · ${shortDate(n.at)}`}
+      {names.length ? <TaggedRow names={names} /> : null}
+      {list
+        .slice()
+        .reverse()
+        .map((n) => (
+          <SettingRow
+            key={n.sceneId}
+            title={n.title}
+            sub={`Its plays, rating and picks stay out of your picks · ${shortDate(n.at)}`}
+          >
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => toggleDontLearn({ id: n.sceneId, title: n.title })}
             >
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() =>
-                  toggleDontLearn({ id: n.sceneId, title: n.title })
-                }
-              >
-                Learn from it again
-              </Button>
-            </SettingRow>
-          ))
-      ) : (
+              Learn from it again
+            </Button>
+          </SettingRow>
+        ))}
+      {!names.length && !list.length ? (
         <SettingRow
           title="Learning from everything you watch"
-          sub={`"Don't learn from this", beside a scene's stars or in a pick's menu, keeps a scene out of what ${PLUGIN_NAME} learns.`}
+          sub={`To keep scenes out of what ${PLUGIN_NAME} learns, tag them in Stash and add the tags to Tags ${PLUGIN_NAME} doesn't learn from, in Settings › Plugins. A pick's ⋯ menu also has Don't learn from this.`}
         />
-      )}
+      ) : null}
     </div>
   )
 }

@@ -23,7 +23,8 @@
 //               in fixed slots (4 and 9). In the debug view it is how far the slot lifted the card above
 //               the row's cut.
 //
-// Scenes marked "Don't learn from this" add nothing to momentum or signals
+// Scenes marked "Don't learn from this", and scenes with a tag from "Tags
+// Cherry Pick doesn't learn from", add nothing to momentum or signals
 // (their own freshness still counts: it is a fact about the scene, not
 // something learned). Scenes with a tag from "Tags to keep out of my picks"
 // and scenes marked Not interested never appear.
@@ -34,6 +35,7 @@ import {
   timeAgo,
   fmtStars,
   sceneRating,
+  tagIdsNamed,
 } from './util.js'
 import { behaviourOf, barelyPlayed, playWeight } from './behaviour.js'
 import { popularity, popularityLine } from './signals.js'
@@ -120,20 +122,18 @@ export function playMap(db) {
   return out
 }
 
-export function excludedTagIds(db, text) {
-  const names = new Set(
-    String(text || '')
-      .split(',')
-      .map((x) => x.trim().toLowerCase())
-      .filter(Boolean),
-  )
-  if (!names.size) return new Set()
-  return new Set(
-    [...db.tags.values()]
-      .filter((t) => names.has(t.name.toLowerCase()))
-      .map((t) => t.id),
-  )
-}
+// The tags "Tags to keep out of my picks" names
+export const excludedTagIds = tagIdsNamed
+
+// The scenes Cherry Pick learns nothing from: those marked "Don't learn from
+// this", read from the state (a mark can be newer than the model), and
+// those the model found with a tag from "Tags Cherry Pick doesn't learn
+// from". M may be null before the first model.
+export const learnSkip = (M, state) =>
+  new Set([
+    ...state.dontLearn.map((d) => d.sceneId),
+    ...(M?.dontLearnTagged || []),
+  ])
 
 // Decayed plays per performer (p:), studio (s:) and tag (t:) over the window
 export function momentumOf(db, plays, skip, now) {
@@ -205,7 +205,7 @@ export function rewatchRate(db, plays, skip) {
 export function context(M, state, opts = {}) {
   const db = M.db
   const now = db.asOf
-  const skip = new Set(state.dontLearn.map((d) => d.sceneId))
+  const skip = learnSkip(M, state)
   const plays = playMap(db)
   const mom = momentumOf(db, plays, skip, now)
   const rewatch = rewatchRate(db, plays, skip)
@@ -254,7 +254,7 @@ export function rowSignal(signals, sceneId) {
 
 // The signals a visit starts from: cards shown last visit and not opened
 // count as passed over, once, here ("Don't learn" scenes teach nothing).
-// skip: Set of "Don't learn" scene ids
+// skip: Set of "Don't learn" scene ids (learnSkip)
 export function visitSignals(signals, skip) {
   const passes = { ...signals.passes }
   for (const id of signals.lastShown)

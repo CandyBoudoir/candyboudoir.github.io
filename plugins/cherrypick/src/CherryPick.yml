@@ -1,6 +1,6 @@
 name: Cherry Pick
 description: Learns what you like from your ratings and plays. A For you row, Your score on scenes you haven't rated, More like this and performer brackets.
-version: 0.3.3
+version: 0.4.0
 url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/cherrypick
 ui:
   javascript:
@@ -62,6 +62,10 @@ settings:
   excludedTags:
     displayName: Tags to keep out of my picks
     description: Comma-separated tag names. Scenes with any of them never appear in Cherry Pick's rows.
+    type: STRING
+  dontLearnTags:
+    displayName: Tags Cherry Pick doesn't learn from
+    description: Comma-separated tag names. Cherry Pick won't use scenes with any of these tags to learn what you like.
     type: STRING
   learnFromMatches:
     displayName: Learn from Ascension, HotOrNot and Xenith matches
