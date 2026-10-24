@@ -25,8 +25,24 @@ export async function renderStickers(specs) {
         background:radial-gradient(circle at 30% 25%, ${from}, ${to})">
         <div style="width:${size}px;height:${size}px">${svg}</div></body>`,
     )
-    out[key] = await page.screenshot()
+    out[key] = await capture(page)
   }
   await browser.close()
   return out
+}
+
+// Chromium on a busy CI runner can refuse a capture ("Unable to capture
+// screenshot"), which ended the Restash leg's setup once (PR #211) before
+// any test ran. The next frame takes it, so try up to three times.
+export async function capture(page, tries = 3) {
+  for (let i = 1; ; i++) {
+    try {
+      return await page.screenshot()
+    } catch (e) {
+      if (i >= tries || !/Unable to capture screenshot/.test(e.message)) throw e
+      await page.evaluate(
+        () => new Promise((done) => requestAnimationFrame(() => done())),
+      )
+    }
+  }
 }

@@ -388,6 +388,28 @@ test("Don't learn keeps a scene's plays out of momentum, not its freshness", () 
     if (theirs.includes(it.scene.id)) assert.equal(it.freshKind, 'recent')
 })
 
+test("For you's signals skip tagged scenes as they skip marked ones", () => {
+  const tag = [...db.tags.values()].find(
+    (t) => db.owned.filter((s) => s.tags.some((x) => x.id === t.id)).length,
+  )
+  const Mt = createEngine(db).compute({ dontLearnTags: tag.name })
+  const ids = [...Mt.dontLearnTagged]
+  assert.ok(ids.length)
+  const marked = db.owned.find((s) => !Mt.dontLearnTagged.has(s.id)).id
+  const skip = FY.learnSkip(Mt, { ...STATE, dontLearn: [{ sceneId: marked }] })
+  assert.deepEqual([...skip].sort(), [marked, ...ids].sort())
+  // before the first model, only the marks
+  assert.deepEqual(
+    [...FY.learnSkip(null, { dontLearn: [{ sceneId: 'x' }] })],
+    ['x'],
+  )
+  const ctx = FY.context(Mt, STATE)
+  for (const id of ids) assert.ok(ctx.skip.has(id))
+  // a tagged scene shown last visit and not opened is not passed over
+  const signals = { ...FY.EMPTY_SIGNALS, lastShown: [ids[0]] }
+  assert.equal(FY.visitSignals(signals, ctx.skip).passes[ids[0]], undefined)
+})
+
 test('no kind of reason, and no one sentence, dominates the row', () => {
   // A fortnight of heavy watching: momentum could explain most cards.
   const loved = [...db.localPerformers]

@@ -264,7 +264,7 @@ test("Your score shows where another plugin set the rating, in place of Stash's 
   }
 })
 
-test("the scene page shows the score line, Don't learn and More like this", async ({
+test('the scene page shows the score line and More like this', async ({
   page,
 }) => {
   const unrated = demoScene(demo, { rated: false, played: true })
@@ -281,19 +281,55 @@ test("the scene page shows the score line, Don't learn and More like this", asyn
   ).toBeAttached()
   // Without a StashDB key, the second row is the connect line.
   await expect(page.locator('.cherrypick-connect-line')).toBeAttached()
+  // Don't learn is in a pick's menu and in its tags setting, not here
+  await expect(line).toHaveText(/^likely .* for you$/)
+})
 
-  await line.locator('.cherrypick-dont-learn').click()
-  await expect(line.locator('.cherrypick-dont-learn')).toHaveAttribute(
-    'aria-pressed',
-    'true',
+test("Don't learn from this in a pick's menu is saved to Stash", async ({
+  page,
+}) => {
+  await page.goto('/')
+  await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
+  const slide = page
+    .locator('.cherrypick-for-you .slick-active:not(.slick-cloned)')
+    .first()
+  const marks = async () =>
+    JSON.parse((await pluginConfig())?.dontLearn || '[]')
+  await slide.locator('.cherrypick-card-menu button').click()
+  await slide.locator('.cherrypick-dl').click()
+  await expect.poll(marks).toHaveLength(1)
+  await slide.locator('.cherrypick-card-menu button').click()
+  await expect(slide.locator('.cherrypick-dl')).toHaveText(
+    'Not learning from this (undo)',
   )
-  await expect
-    .poll(async () => JSON.parse((await pluginConfig())?.dontLearn || '[]'))
-    .toEqual([expect.objectContaining({ sceneId: unrated })])
-  await line.locator('.cherrypick-dont-learn').click()
-  await expect
-    .poll(async () => JSON.parse((await pluginConfig())?.dontLearn || '[]'))
-    .toEqual([])
+  await slide.locator('.cherrypick-dl').click()
+  await expect.poll(marks).toHaveLength(0)
+})
+
+test("Cherry Pick's page counts the scenes with a tag it doesn't learn from", async ({
+  page,
+}) => {
+  const { name } = DEMO.tags[0]
+  const n = DEMO.scenes.filter((s) => s.tags.includes(name)).length
+  const before = await pluginConfig()
+  // Names match in any case; one no scene has is named on the page
+  await setPluginSettings(PLUGIN_ID, {
+    ...before,
+    dontLearnTags: `${name.toUpperCase()}, No such tag`,
+  })
+  try {
+    await page.goto('/plugins/cherrypick')
+    const section = page.locator('#dont-learn')
+    await expect(section).toContainText(
+      `Scenes tagged ${name.toUpperCase()} or No such tag`,
+    )
+    await expect(section).toContainText(new RegExp(`(^|\\D)${n} scenes? ·`), {
+      timeout: 20_000,
+    })
+    await expect(section).toContainText('No scene has the tag No such tag')
+  } finally {
+    await setPluginSettings(PLUGIN_ID, before)
+  }
 })
 
 // Stash draws a row's arrows outside its slider. More like this is as wide as

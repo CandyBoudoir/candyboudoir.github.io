@@ -1,15 +1,16 @@
-// The scene page: "likely 4★ for you" and Don't learn beside Stash's rating
-// stars, and More like this under the player.
+// The scene page: "likely 4★ for you" beside Stash's rating stars, and More
+// like this under the player. Don't learn lives in a pick's ⋯ menu and in
+// "Tags Cherry Pick doesn't learn from", not here: a second button beside
+// the stars crowded themes that narrow the toolbar.
 //
 // Stash has no slot beside the rating (RatingSystem does not know its scene,
 // and the toolbar takes no extensions), so the line renders through a portal
 // into the toolbar's first group, from a component added after ScenePage.
 import { Bootstrap, patchAfter, React, ReactDOM } from '../runtime/api.js'
-import { toggleDontLearn, isDontLearn } from '../runtime/actions.js'
 import { badgeLabel, fmtStars, rateMore, unratedByYou } from '../model/index.js'
 import { popularity, performerRankPhrase } from '../model/signals.js'
 import { moreLikeThis } from '../model/recs.js'
-import { NAME_S, PLUGIN_NAME } from '../name.js'
+import { NAME_S } from '../name.js'
 import { Safe } from '../ui/Safe.jsx'
 import { useAppState } from '../ui/hooks.js'
 import { CardRow } from '../ui/Row.jsx'
@@ -82,25 +83,6 @@ function ScoreLine({ scene }) {
   )
 }
 
-function DontLearn({ scene }) {
-  const on = useAppState((s) => isDontLearn(s, scene.id))
-  return (
-    <button
-      type="button"
-      className={`btn btn-link btn-sm cherrypick-line-button cherrypick-dont-learn ${on ? 'text-warning' : 'text-muted'}`}
-      aria-pressed={on}
-      title={
-        on
-          ? `${PLUGIN_NAME} ignores this scene's plays, rating and picks. Click to learn from it again.`
-          : `Keep this scene's plays, rating and picks out of ${NAME_S} picks`
-      }
-      onClick={() => toggleDontLearn(scene)}
-    >
-      {on ? 'Not learning from this · undo' : "Don't learn from this"}
-    </button>
-  )
-}
-
 // Renders into Stash's scene toolbar, beside the rating, through a portal.
 function ToolbarExtras({ scene }) {
   const anchor = React.useRef(null)
@@ -119,15 +101,7 @@ function ToolbarExtras({ scene }) {
   return (
     <>
       <span ref={anchor} hidden />
-      {slot
-        ? ReactDOM.createPortal(
-            <>
-              <ScoreLine scene={scene} />
-              <DontLearn scene={scene} />
-            </>,
-            slot,
-          )
-        : null}
+      {slot ? ReactDOM.createPortal(<ScoreLine scene={scene} />, slot) : null}
     </>
   )
 }

@@ -82,8 +82,8 @@ test('no Your score yet: the scene page says how many ratings it needs', async (
     'Rate 9 more for Your score',
     { timeout: 20_000 },
   )
-  await expect(line.locator('.cherrypick-line-button')).toHaveCount(1)
-  await expect(line.locator('.cherrypick-dont-learn')).toBeVisible()
+  // no score to show, and Don't learn is not on the scene page
+  await expect(line.locator('.cherrypick-line-button')).toHaveCount(0)
   await expect(
     page.locator('.cherrypick-more-like-this .cherrypick-mlt-owned'),
   ).toBeAttached()

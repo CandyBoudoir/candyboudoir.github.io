@@ -14,7 +14,13 @@ import {
 import { replay } from './bt.js'
 import { matchDecisions, sourcesText } from './matches.js'
 import { behaviourOf } from './behaviour.js'
-import { ownRating, sceneRating, pronoun, fmtStars } from './util.js'
+import {
+  ownRating,
+  sceneRating,
+  pronoun,
+  fmtStars,
+  tagIdsNamed,
+} from './util.js'
 
 export { fmtStars }
 
@@ -37,6 +43,9 @@ const fmt1 = fmtStars
  * @property {NotInterested[]} [notInterested]
  * @property {string[]} [dontLearn]  ids of scenes marked "Don't learn from
  *   this": their ratings, plays and clip-bracket picks stay out of the model
+ * @property {string} [dontLearnTags]  "Tags Cherry Pick doesn't learn from",
+ *   tag names separated by commas: owned scenes with any of them stay out
+ *   as if marked
  * @property {boolean} [learnFromRankings]  read ratings another plugin set
  *   (Elo scores, Restash's mirrored score, Ascension's Prime; rankings.js)
  *   as the user's own. Off by default: they stay out of the model, which
@@ -123,7 +132,15 @@ export function createEngine(db, shared = {}) {
   function compute(input) {
     const overrides = input.overrides || {}
     const performerOverrides = input.performerOverrides || {}
-    const dontLearn = new Set(input.dontLearn || [])
+    const tagged = tagIdsNamed(db, input.dontLearnTags)
+    const dontLearnTagged = new Set(
+      tagged.size
+        ? db.owned
+            .filter((s) => s.tags.some((t) => tagged.has(t.id)))
+            .map((s) => s.id)
+        : [],
+    )
+    const dontLearn = new Set([...(input.dontLearn || []), ...dontLearnTagged])
     const learnAll = !!input.learnFromRankings
     const rate = learnAll ? sceneRating : ownRating
     const F = fits(overrides, dontLearn, rate)
@@ -280,7 +297,9 @@ export function createEngine(db, shared = {}) {
       db,
       overrides,
       performerOverrides,
+      // every scene left out: marked, or tagged (dontLearnTagged)
       dontLearn,
+      dontLearnTagged,
       performerRating,
       stashPerformerRating,
       ratingSource,

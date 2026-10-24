@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0
+
+- Tags Cherry Pick doesn't learn from, a new setting under Settings > Plugins, keeps every scene with one of the tags you list out of what Cherry Pick learns, as Don't learn from this does for one scene. Their plays, ratings and bracket picks teach Cherry Pick nothing, and opening or passing one in For you changes nothing. Tag the scenes in Stash, one at a time or many at once from the Scenes list, and type the tags' names into the setting, separated by commas. Cherry Pick's page counts the tagged scenes and names any listed tag no scene in your library has. The scenes can still show up in Cherry Pick's rows, which Tags to keep out of my picks controls.
+- Don't learn from this leaves the scene page. Beside the stars it crowded Stash's toolbar, and under themes that narrow the toolbar, such as Refract, it could make the scene's details jump. It stays in the ⋯ menu on cards in Cherry Pick's rows, and the scenes you marked stay marked, listed on Cherry Pick's page with Learn from it again.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.41.0, Xenith 3.2.0 and Restash 0.3.0-55c1cb2.
+
 ## 0.3.3
 
 - Brackets, a new setting that starts on, takes Cherry Pick's bracket buttons out of Stash's pages when you turn it off, for those who rank with another plugin: Bracket and Options leave the Performers and Scenes lists, "Bracket her scenes" leaves a performer's Scenes tab, For you's header offers ratings alone, and Cherry Pick's page shows no Champions round. A paused bracket stays in Stash's plugin configuration, and its Resume pill comes back with the switch. The brackets you played, a paused one's picks included, keep teaching Cherry Pick, and the Hall of Fame row, crowns and medals and the For you line keep their own switches.

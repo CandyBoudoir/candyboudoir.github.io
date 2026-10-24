@@ -3,7 +3,7 @@
 // a store change; app.js persists it to its tier.
 import { changeSettings, store } from './app.js'
 import { blameKey, keyLabel } from '../model/index.js'
-import { openSignals } from '../model/foryou.js'
+import { learnSkip, openSignals } from '../model/foryou.js'
 import { answerSettings } from '../model/curator.js'
 
 // ------------------------------------------------------------ Not interested
@@ -70,7 +70,7 @@ export function toggleDontLearn(scene) {
 // passed over this visit.
 export function recordOpen(sceneId) {
   const s = store.get()
-  const skip = new Set(s.dontLearn.map((d) => d.sceneId))
+  const skip = learnSkip(s.M, s)
   store.set({ signals: openSignals(s.signals, sceneId, skip) })
 }
 

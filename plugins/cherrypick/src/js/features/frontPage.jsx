@@ -16,6 +16,7 @@ import {
   computeForYou,
   context,
   followRows,
+  learnSkip,
   newInLibrary,
   shownSignals,
   tooSmall,
@@ -48,7 +49,7 @@ function snapshot(s) {
   const key = [s.visit, JSON.stringify(s.settings), s.M.db.hasStashdb].join('|')
   if (snap?.key === key) return snap
   const sameVisit = snap?.visit === s.visit
-  const skip = new Set(s.dontLearn.map((d) => d.sceneId))
+  const skip = learnSkip(s.M, s)
   const signals = sameVisit ? snap.signals : visitSignals(s.signals, skip)
   const ctx = context(s.M, s)
   const small = tooSmall(s.db)

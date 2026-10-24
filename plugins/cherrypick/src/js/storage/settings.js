@@ -17,6 +17,7 @@ export const MANIFEST_SETTINGS = [
   { key: 'performerLine', type: 'BOOLEAN', def: true },
   { key: 'relativeBadges', type: 'BOOLEAN', def: false },
   { key: 'excludedTags', type: 'STRING', def: '' },
+  { key: 'dontLearnTags', type: 'STRING', def: '' },
   { key: 'learnFromMatches', type: 'BOOLEAN', def: true },
   // off: nothing offers to start or resume a bracket (features/brackets)
   { key: 'brackets', type: 'BOOLEAN', def: true },

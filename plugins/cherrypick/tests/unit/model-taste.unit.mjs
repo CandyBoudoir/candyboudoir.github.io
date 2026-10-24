@@ -204,6 +204,38 @@ test("Don't learn keeps a scene's rating, plays and clip picks out of the model"
   assert.ok(Mx.dontLearn.has(ratedScene.id))
 })
 
+test("Tags Cherry Pick doesn't learn from leave tagged scenes out as if marked", () => {
+  const isRated = (s) => s.local.rating100 != null
+  const tag = [...db.tags.values()].find(
+    (t) =>
+      db.owned.filter((s) => isRated(s) && s.tags.some((x) => x.id === t.id))
+        .length >= 2,
+  )
+  const tagged = db.owned.filter((s) => s.tags.some((x) => x.id === tag.id))
+  const ids = tagged.map((s) => s.id)
+  // matched by name in any case; a name no tag has matches nothing
+  const Mt = createEngine(db).compute({
+    dontLearnTags: ` ${tag.name.toUpperCase()} , no such tag,`,
+  })
+  assert.deepEqual([...Mt.dontLearnTagged].sort(), [...ids].sort())
+  for (const id of ids) assert.ok(Mt.dontLearn.has(id))
+  // the same fit as marking each one Don't learn
+  const Mm = createEngine(db).compute({ dontLearn: ids })
+  assert.equal(Mt.fits.rated.length, Mm.fits.rated.length)
+  assert.equal(Mt.fits.watchedUnrated.length, Mm.fits.watchedUnrated.length)
+  assert.ok(Mt.fits.rated.length < M.fits.rated.length)
+  assert.ok(!Mt.fits.rated.some((x) => tagged.includes(x.scene)))
+  // marks and tags add up
+  const marked = db.owned.find((s) => isRated(s) && !tagged.includes(s))
+  const Mb = createEngine(db).compute({
+    dontLearn: [marked.id],
+    dontLearnTags: tag.name,
+  })
+  assert.equal(Mb.dontLearn.size, ids.length + 1)
+  assert.equal(Mb.dontLearnTagged.size, ids.length)
+  assert.equal(M.dontLearnTagged.size, 0, 'no tags listed, none left out')
+})
+
 test('bracket picks replay in order, so Undo is dropping the last pick', () => {
   const watched = db.owned.filter((s) => behaviourOf(s)).slice(0, 8)
   const ids = watched.map((s) => s.id)

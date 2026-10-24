@@ -1,6 +1,6 @@
-/* Beside the scene page's rating: the score line and Don't learn, on one
-   line. Stash's toolbar may then wrap its buttons onto a second line; on a
-   phone, Don't learn wraps under the score line. */
+/* Beside the scene page's rating: the score line. Stash's toolbar may then
+   wrap its buttons onto a second line. A scene you rated has no score line,
+   and its empty slot takes no room. */
 .scene-toolbar:has(.cherrypick-score-line) {
   flex-wrap: wrap;
   row-gap: 0.25rem;
@@ -13,6 +13,10 @@
   margin-left: 0.4rem;
   min-width: 0;
   white-space: nowrap;
+}
+
+.cherrypick-score-line:empty {
+  display: none;
 }
 
 .cherrypick-line-button.btn {
