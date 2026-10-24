@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.6
+
+- New icons for Accidental Exposure, All Natural, All Sex, Anal Hooks, Anchored Bondage, Anime Character, Ankle Socks, Armbinder, Arms Restrained Behind Back, Backroom and 214 more.
+- Updated which tag names and StashDB tags match Strip Poker.
+- Explicit icons URL now also covers Ball Licking, Big Dick, Cum on Tits, Deepthroat, Female Masturbation, Hands Free Blowjob, Nipple Play, Oral Sex, Pink Nipples, Tit Wank and 2 more.
+
 ## 0.1.5
 
 - Icons for new tags reads Tag Candy's settings only for a tag with no image. It had sent Stash a configuration query on every tag change. On Stash v0.30.0 to v0.31.1 a configuration query that meets a configuration write can freeze Stash until it restarts, so this lowers the risk of a freeze.
