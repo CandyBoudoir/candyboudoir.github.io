@@ -1,6 +1,6 @@
 // Turns the imported bundle (data/concepts.json) into the compact index the
 // plugin script carries, at build time:
-//   concepts  [{ n: name, i: icon file or null, x: true when a nude version exists }]
+//   concepts  [{ n: name, i: icon file or null }]
 //   stashdb   { StashDB tag ID: concept index, or -1 for "no icon" }
 //   names     { normalized name: concept index }
 // Library names come first. StashDB names and aliases fill in after them, and
@@ -11,11 +11,7 @@ import { normalize } from './src/match.js'
 export function buildIndex(bundle) {
   if (bundle.format !== 1)
     throw new Error(`Unknown bundle format ${bundle.format}`)
-  const concepts = bundle.concepts.map((c) => {
-    const entry = { n: c.name, i: c.icon }
-    if (c.nude) entry.x = true
-    return entry
-  })
+  const concepts = bundle.concepts.map((c) => ({ n: c.name, i: c.icon }))
 
   const stashdb = {}
   for (const id of bundle.stashdb_none) stashdb[id] = -1
