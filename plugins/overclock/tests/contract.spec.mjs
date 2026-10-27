@@ -560,6 +560,42 @@ test.describe('beside Performers Toolkit', () => {
     }
   })
 
+  // From 0.22 the toolkit seats the rating beside the name in the header
+  // it tidies, where the chevrons covered the Locked tag and the O counter
+  // ran under the side panel. The rating keeps its row under the name, with
+  // the restyle off and on.
+  for (const restylePerformersToolkit of [false, true]) {
+    test(`the rating keeps its row under the name, with the restyle ${restylePerformersToolkit ? 'on' : 'off'}`, async ({
+      page,
+    }) => {
+      try {
+        await setPlugin({ restylePerformersToolkit })
+        await page.goto(url('/performers/:performer'))
+        const head = page.locator(
+          '#performer-page .performer-head[data-pt-tidy]',
+        )
+        await head.waitFor({ timeout: 30_000 })
+        await page.locator('#pt-side').waitFor()
+        const name = await head.locator('> h2').boundingBox()
+        const rating = head.locator('> .quality-group')
+        const side = await page.locator('#pt-side').boundingBox()
+        expect((await rating.boundingBox()).y).toBeGreaterThanOrEqual(
+          name.y + name.height - 1,
+        )
+        const right = await rating.evaluate((el) =>
+          Math.max(
+            ...[...el.querySelectorAll('*')].map(
+              (child) => child.getBoundingClientRect().right,
+            ),
+          ),
+        )
+        expect(right).toBeLessThan(side.x)
+      } finally {
+        await setPlugin({})
+      }
+    })
+  }
+
   // The Catalog tab's count is a Stash badge in a Stash tab, which also
   // carries Performers Toolkit's badge class and its near-black type. It
   // shows once a stash-box has answered, which the mock stash-box does not,

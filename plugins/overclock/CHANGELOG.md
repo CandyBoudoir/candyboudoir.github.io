@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.5
+
+Performers Toolkit 0.22 on a performer's page, for Stash v0.31.1.
+
+- The rating keeps its row under a performer's name when Performers Toolkit tidies the header, with the restyle on or off. Performers Toolkit 0.22 moved it beside the name, where its chevrons covered a favourite's Locked tag and the O counter ran under the toolkit's Body panel.
+- Tested beside Insights 2.14.0 and Performers Toolkit 0.22.0.
+
 ## 0.2.4
 
 Settings read from Stash's own copy, for Stash v0.31.1.
