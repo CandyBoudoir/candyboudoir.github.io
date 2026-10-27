@@ -146,8 +146,10 @@ export function createGuard({ target, log = () => {} }) {
     res.on('close', () => {
       if (res.writableFinished) return
       // A guarded request runs to the end in Stash even when the browser
-      // gives up on it, since Stash's handler may still hold the lock
-      if (kind) answer?.resume()
+      // gives up on it, since Stash's handler may still hold the lock. Its
+      // answer leaves the pipe first: pipe()'s own close handler, after this
+      // one, would pause it again, and it would never end
+      if (kind) answer?.unpipe(res).resume()
       else up.destroy()
     })
     if (body) up.end(body)
