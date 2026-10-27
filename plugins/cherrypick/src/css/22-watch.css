@@ -36,6 +36,18 @@
   width: 100%;
 }
 
+/* Refract makes every .video-wrapper fill its column, for its scene page,
+   with !important (its css/06_scene_player.css). Here the column takes its
+   height from the video's box, which had none. */
+body.stash-liquid-glass
+  .cherrypick-watch
+  .cherrypick-watch-player
+  .VideoPlayer
+  .video-wrapper {
+  aspect-ratio: 16 / 9 !important;
+  flex: 0 1 auto !important;
+}
+
 /* Stash's skeleton card, stretched to the player's box */
 .cherrypick-watch .cherrypick-watch-skeleton {
   aspect-ratio: 16 / 9;

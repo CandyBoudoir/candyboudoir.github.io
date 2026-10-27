@@ -9,6 +9,7 @@
 // as they were afterwards, for the themes' screenshots.
 import { expect, test } from '@playwright/test'
 import { listPlugins } from '../../../scripts/site.mjs'
+import { companionPluginIds } from '../../../tests/stash/companions.mjs'
 import {
   PLUGIN_ID,
   forYouCards,
@@ -20,6 +21,9 @@ import {
   tearDownCherryPick,
   usePlugins,
 } from './stash.mjs'
+
+// Refract is a theme too
+const besideRefract = companionPluginIds().includes('refract')
 
 const setWatchThis = async (on) =>
   setPluginSettings(PLUGIN_ID, {
@@ -261,7 +265,9 @@ test("Stash's Auto-start video decides whether the pick starts by itself", async
   await ready(page)
   await page.waitForTimeout(2000)
   await expect(player(page)).not.toHaveClass(/vjs-has-started/)
-  await page.locator('.cherrypick-watch-player .vjs-big-play-button').click()
+  // Refract hides the big play button and leaves the bar's
+  const play = besideRefract ? '.vjs-play-control' : '.vjs-big-play-button'
+  await page.locator(`.cherrypick-watch-player ${play}`).click()
   await expect(player(page)).toHaveClass(/vjs-playing/)
 })
 
@@ -543,8 +549,8 @@ test.describe('phone', () => {
   })
 })
 
-// Every CandyBoudoir theme but the incubating ones, as in
-// themes.contract.spec.mjs
+// Every CandyBoudoir theme but the incubating ones, and none beside Refract,
+// as in themes.contract.spec.mjs
 const themes = (await listPlugins())
   .filter(({ mod }) => mod.kind === 'theme' && !mod.incubating)
   .map(({ mod }) => mod.id)
@@ -553,6 +559,7 @@ for (const theme of themes) {
   test(`with ${theme}: the player and its line render, the line on screen`, async ({
     page,
   }) => {
+    test.skip(besideRefract, 'Refract is a theme too')
     await usePlugins(PLUGIN_ID, theme)
     await setWatchThis(true)
     const errors = []

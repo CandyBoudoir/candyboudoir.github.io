@@ -18,6 +18,9 @@
 // Beside Restash, its own tasks score the library: with its mirror off
 // every rating stays the user's, and with it on Apply leaves each mirrored
 // performer alone and checks again before it writes and before an Undo.
+// Beside Refract (COMPANIONS=refract), a theme that fits the scene page to
+// the window, More like this sits under the details and the player and
+// leaves them their height.
 import { expect, test } from '@playwright/test'
 import { companionPluginIds } from '../../../tests/stash/companions.mjs'
 import {
@@ -1239,5 +1242,129 @@ test.describe('beside Restash', () => {
       await putBack(before)
       await putBackScenes(scenes)
     }
+  })
+})
+
+// Refract lays the scene page's .row out as a grid from 1200px wide: the
+// details in a narrow column beside the player, both locked to the window's
+// height. More like this sits under them, as wide as the page, and leaves
+// them the height they have without it.
+test.describe('beside Refract', () => {
+  test.skip(
+    companionPluginIds().length !== 1 ||
+      !companionPluginIds().includes('refract'),
+    'Refract is not installed alone (COMPANIONS=refract)',
+  )
+
+  let demo
+  test.beforeAll(async () => {
+    ;({ demo } = await setUpCherryPick())
+  })
+  test.afterAll(tearDownCherryPick)
+  test.afterEach(() => setPluginSettings(PLUGIN_ID, {}))
+
+  // The boxes of the player, the details and More like this, once the scene
+  // page has its score line (or More like this its first card)
+  async function sceneBoxes(page, scene, ready) {
+    await page.goto(`/scenes/${scene}`)
+    await expect(page.locator('body.stash-liquid-glass')).toBeAttached({
+      timeout: 20_000,
+    })
+    await expect(ready).toBeAttached({ timeout: 20_000 })
+    return page.evaluate(() => {
+      const box = (selector) => {
+        const r = document.querySelector(selector)?.getBoundingClientRect()
+        return (
+          r && { top: r.top, bottom: r.bottom, left: r.left, right: r.right }
+        )
+      }
+      return {
+        player: box('.scene-player-container'),
+        tabs: box('.scene-tabs'),
+        more: box('.cherrypick-more-like-this'),
+        sideways: document.documentElement.scrollWidth - window.innerWidth,
+      }
+    })
+  }
+
+  test('More like this sits under the player and the details, across the page', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    const scene = demoScene(demo, { rated: false, played: true })
+    const height = (b) => Math.round(b.bottom - b.top)
+
+    await setPluginSettings(PLUGIN_ID, { showMoreLikeThis: false })
+    const without = await sceneBoxes(
+      page,
+      scene,
+      page.locator('.scene-toolbar .cherrypick-line-button'),
+    )
+    expect(without.more).toBeUndefined()
+
+    await setPluginSettings(PLUGIN_ID, {})
+    const card = page.locator('.cherrypick-mlt-owned .scene-card').first()
+    const now = await sceneBoxes(page, scene, card)
+    expect(height(now.player)).toBe(height(without.player))
+    expect(height(now.tabs)).toBe(height(without.tabs))
+    expect(now.more.top).toBeGreaterThanOrEqual(
+      Math.max(now.player.bottom, now.tabs.bottom),
+    )
+    // Refract pads the row, not the page: More like this lines up with the
+    // details on the left and the player on the right
+    expect(Math.abs(now.more.left - now.tabs.left)).toBeLessThanOrEqual(1)
+    expect(Math.abs(now.more.right - now.player.right)).toBeLessThanOrEqual(1)
+    expect(now.sideways).toBe(0)
+
+    // The page scrolls down to it
+    const shown = page
+      .locator('.cherrypick-mlt-owned .slick-active:not(.slick-cloned)')
+      .first()
+    await shown.scrollIntoViewIfNeeded()
+    await expect(shown).toBeInViewport()
+  })
+
+  // Refract hides each .rating-banner nested in a scene card, puts its number
+  // in place of its text and frames the card by it, and hides the popover row
+  test("Your score is a chip in Refract's corner, and the ⋯ menu a pill in its row", async ({
+    page,
+  }) => {
+    const unrated = demoScene(demo, { rated: false, played: true })
+    await page.goto('/scenes?sortby=title&perPage=120')
+    const card = page.locator(
+      `.scene-card:has(a[href="/scenes/${unrated}"], a[href^="/scenes/${unrated}?"])`,
+    )
+    const chip = card.locator('.cherrypick-score-chip')
+    await expect(chip).toBeVisible({ timeout: 20_000 })
+    // Refract's chips for the rated scenes: it has read the cards
+    await expect(
+      page.locator('.scene-card > .rating-banner').first(),
+    ).toBeVisible()
+    await expect(chip).toHaveText(/^~\d\.\d/)
+    const [ours, corner] = [await chip.boundingBox(), await card.boundingBox()]
+    expect(ours.x - corner.x).toBeLessThan(12)
+    expect(ours.y - corner.y).toBeLessThan(12)
+    const framed = await page
+      .locator('.scene-card:has(.cherrypick-score-chip)')
+      .evaluateAll((cards) =>
+        cards.filter((c) => /\brefract-card-tier-/.test(c.className)),
+      )
+    expect(framed).toHaveLength(0)
+
+    await page.goto('/')
+    const pills = page
+      .locator(
+        '.cherrypick-for-you .slick-active:not(.slick-cloned) .stash-card-counts',
+      )
+      .first()
+    const menu = pills.locator('.cherrypick-card-menu button')
+    await expect(menu).toBeVisible({ timeout: 20_000 })
+    const height = async (l) => (await l.boundingBox()).height
+    expect(
+      Math.abs(
+        (await height(menu)) -
+          (await height(pills.locator(':scope > :visible').first())),
+      ),
+    ).toBeLessThanOrEqual(1)
   })
 })

@@ -62,11 +62,11 @@ test("the cards in Cherry Pick's rows end at the same height, as in Stash's rows
     await page.addStyleTag({
       content: `${row} .slick-slide[data-index="1"] .scene-card__details { padding-bottom: 3rem; }`,
     })
+    // offsetHeight, the height before transforms: Refract floats its cards
+    // rated 4.75★ and up, up to 6% larger, in Stash's rows as in these
     const heights = await page
       .locator(`${row} .slick-slide:not(.slick-cloned) .scene-card`)
-      .evaluateAll((cards) => [
-        ...new Set(cards.map((c) => c.getBoundingClientRect().height)),
-      ])
+      .evaluateAll((cards) => [...new Set(cards.map((c) => c.offsetHeight))])
     expect(heights, row).toHaveLength(1)
   }
   await page.goto('/')
@@ -138,6 +138,15 @@ test('the bracket buttons say why they are greyed out until the model is in', as
   )
 })
 
+// Refract floats its cards rated 4.75★ and up for as long as they show (its
+// reduced motion rule loses to the float), and a click waits for its target
+// to stand still. Beside Refract, a click in a card checks that its target
+// shows and goes ahead.
+async function press(target) {
+  await expect(target).toBeVisible()
+  await target.click({ force: companionPluginIds().includes('refract') })
+}
+
 test('Not interested hides a card in place and is saved to Stash', async ({
   page,
 }) => {
@@ -147,8 +156,8 @@ test('Not interested hides a card in place and is saved to Stash', async ({
   const slide = page.locator(
     '.cherrypick-for-you .slick-active:not(.slick-cloned)',
   )
-  await slide.first().locator('.cherrypick-card-menu button').click()
-  await slide.first().locator('.cherrypick-ni').click()
+  await press(slide.first().locator('.cherrypick-card-menu button'))
+  await press(slide.first().locator('.cherrypick-ni'))
   // Slick clones slides for its infinite scroll; act on the real ones.
   const hidden = page.locator(
     '.cherrypick-for-you .slick-slide:not(.slick-cloned) .cherrypick-hidden-card',
@@ -185,6 +194,10 @@ test('Your score shows on unrated scene cards only', async ({ page }) => {
 test("Your score's ribbon is as long as Stash's rating ribbon", async ({
   page,
 }) => {
+  test.skip(
+    companionPluginIds().includes('refract'),
+    'Refract draws ratings as chips (companions.contract.spec.mjs)',
+  )
   const unrated = demoScene(demo, { rated: false, played: true })
   const rated = demoScene(demo, { rated: true, played: true })
   await page.goto('/scenes?sortby=title&perPage=120')
@@ -244,11 +257,13 @@ test("Your score shows where another plugin set the rating, in place of Stash's 
         /^~\d\.\d/,
       )
       await expect(card.locator('.cherrypick-score-banner')).toBeVisible()
-      // Stash's banner carries the other plugin's number: Your score takes
-      // the corner
+      // Stash's banner carries the other plugin's number (and Refract's
+      // chip, beside Refract): Your score takes the corner
+      if (companionPluginIds().includes('refract'))
+        await expect(card.locator(':scope > .rating-banner')).toBeAttached()
       await expect(
-        card.locator('.rating-banner:not(.cherrypick-score-banner)'),
-      ).toBeHidden()
+        card.locator('.rating-banner:not(.cherrypick-score-banner):visible'),
+      ).toHaveCount(0)
     }
     await page.goto(`/scenes/${mirrored}`)
     await expect(
@@ -283,6 +298,25 @@ test('the scene page shows the score line and More like this', async ({
   await expect(page.locator('.cherrypick-connect-line')).toBeAttached()
   // Don't learn is in a pick's menu and in its tags setting, not here
   await expect(line).toHaveText(/^likely .* for you$/)
+  // Its words sit beside the stars, not on them: a theme that sizes the
+  // toolbar's buttons would squeeze the line's button and spill its words
+  const onStars = await page.evaluate(() => {
+    const stars = document
+      .querySelector('.scene-toolbar .rating-stars')
+      .getBoundingClientRect()
+    const words = document.createRange()
+    words.selectNodeContents(
+      document.querySelector('.scene-toolbar .cherrypick-line-button'),
+    )
+    const box = words.getBoundingClientRect()
+    return (
+      box.left < stars.right &&
+      stars.left < box.right &&
+      box.top < stars.bottom &&
+      stars.top < box.bottom
+    )
+  })
+  expect(onStars).toBe(false)
 })
 
 test("Don't learn from this in a pick's menu is saved to Stash", async ({
@@ -295,14 +329,14 @@ test("Don't learn from this in a pick's menu is saved to Stash", async ({
     .first()
   const marks = async () =>
     JSON.parse((await pluginConfig())?.dontLearn || '[]')
-  await slide.locator('.cherrypick-card-menu button').click()
-  await slide.locator('.cherrypick-dl').click()
+  await press(slide.locator('.cherrypick-card-menu button'))
+  await press(slide.locator('.cherrypick-dl'))
   await expect.poll(marks).toHaveLength(1)
-  await slide.locator('.cherrypick-card-menu button').click()
+  await press(slide.locator('.cherrypick-card-menu button'))
   await expect(slide.locator('.cherrypick-dl')).toHaveText(
     'Not learning from this (undo)',
   )
-  await slide.locator('.cherrypick-dl').click()
+  await press(slide.locator('.cherrypick-dl'))
   await expect.poll(marks).toHaveLength(0)
 })
 

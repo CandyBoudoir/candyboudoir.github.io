@@ -119,18 +119,25 @@ Stash Curator puts its own Appeal score on scene cards, so with both plugins an 
 
 Bracket on a list filtered by Curator Appeal or Curator affinity leaves that criterion out, since Stash can't filter on it, and says so in the pool's name.
 
+### With Refract
+
+Refract fits the scene page to the window, with the details beside the player. More like this sits under both: scroll down to it.
+
+Refract also redraws scene cards. Your score is an outlined chip in a card's top left corner, where Refract shows a scene's rating. Refract hides the row of buttons under each card, so the ⋯ menu on cards in Cherry Pick's rows is a pill over the picture, beside Refract's own pills, and on a scene you don't have, so are the links to its store and to StashDB. Refract hides the big play button in the middle of every player, so Watch This starts from the play button in the player's bar, a click on the video or Space.
+
 ## Tested with
 
 Cherry Pick's tests run on these Stash versions and on Stash's latest develop build, and beside the latest release of each plugin above. A Cherry Pick release waits until every one of them is that plugin's newest, and its release notes name the versions it was tested beside.
 
-| Tested on     | Version       |
-| ------------- | ------------- |
-| Stash         | v0.31.1       |
-| Ascension     | 1.4.1         |
-| HotOrNot      | 1.0.0-c4106bf |
-| Stash Curator | 0.42.2        |
-| Xenith        | 3.2.0         |
-| Restash       | 0.3.0-55c1cb2 |
+| Tested on     | Version        |
+| ------------- | -------------- |
+| Stash         | v0.31.1        |
+| Ascension     | 1.4.1          |
+| HotOrNot      | 1.0.0-c4106bf  |
+| Stash Curator | 0.42.2         |
+| Xenith        | 3.2.0          |
+| Restash       | 0.3.0-55c1cb2  |
+| Refract       | 1.24.3-458b135 |
 
 ## Settings
 

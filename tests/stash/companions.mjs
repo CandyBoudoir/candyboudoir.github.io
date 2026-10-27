@@ -138,6 +138,30 @@ export const COMPANIONS = {
     disable: [],
     latest: { index: 'https://espionage9248.github.io/Restash/index.yml' },
   },
+  // Refract 1.24.3, the liquid-glass theme with the busiest theme topic on
+  // the forum, from https://github.com/ordureconnoisseur/stash-refract
+  // (AGPL-3.0). Its GitHub Pages source is the only build it publishes:
+  // the zip holds the theme at commit 458b135 of ordureconnoisseur/plugins.
+  // Pages keeps no history and rebuilds the zip on every push, so a
+  // republished zip fails the sha256 check instead of changing what the leg
+  // tests. From 1200px wide it lays the scene page's .row out as a grid
+  // locked to the window's height, which is why it is a companion.
+  refract: {
+    package: {
+      id: 'refract',
+      name: 'Refract',
+      version: '1.24.3-458b135',
+      date: '2026-09-06 09:04:46',
+      path: 'https://ordureconnoisseur.github.io/plugins/main/refract.zip',
+      sha256:
+        '5071d1aaf7052f1c6f82a346d27ccad7eddbde978402516639db33bbdb7cfd47',
+    },
+    enable: ['refract'],
+    disable: [],
+    latest: {
+      index: 'https://ordureconnoisseur.github.io/plugins/main/index.yml',
+    },
+  },
 }
 
 // Other authors' plugins that themes here restyle. prepare.mjs puts each of

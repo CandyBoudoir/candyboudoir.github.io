@@ -4,6 +4,7 @@
 // no page errors with each theme enabled beside it.
 import { expect, test } from '@playwright/test'
 import { listPlugins } from '../../../scripts/site.mjs'
+import { companionPluginIds } from '../../../tests/stash/companions.mjs'
 import {
   forYouCards,
   PLUGIN_ID,
@@ -28,6 +29,8 @@ test.afterAll(async () => {
 const themes = (await listPlugins())
   .filter(({ mod }) => mod.kind === 'theme' && !mod.incubating)
   .map(({ mod }) => mod.id)
+// Refract is a theme too, and restyles the same pieces: none is paired with it
+const besideRefract = companionPluginIds().includes('refract')
 
 const unratedPlayed = (ids) =>
   ids.scenes['Bright Street'] ?? Object.values(ids.scenes)[0]
@@ -36,6 +39,7 @@ for (const theme of themes) {
   test(`with ${theme}: the rows, badges and scene line render in the theme`, async ({
     page,
   }) => {
+    test.skip(besideRefract, 'Refract is a theme too')
     await usePlugins('CherryPick', theme)
     const errors = []
     page.on('pageerror', (e) => errors.push(e.message))
@@ -65,6 +69,7 @@ for (const theme of themes) {
 
 // The bracket map draws in the theme's accent, read from its primary button
 test('the bracket map takes each theme’s accent', async ({ page }) => {
+  test.skip(besideRefract, 'Refract is a theme too')
   for (const theme of themes) {
     await usePlugins('CherryPick', theme)
     await setPluginSettings(PLUGIN_ID, {})

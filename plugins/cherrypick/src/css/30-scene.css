@@ -36,12 +36,11 @@
   margin-top: 0.3rem;
 }
 
-/* More like this, under the player: two labelled rows under one heading. */
+/* More like this, after the scene page's .row, under the player: two
+   labelled rows under one heading. The page's container pads it as it pads
+   the row's columns. */
 .cherrypick-more-like-this {
-  flex: 0 0 100%;
-  max-width: 100%;
-  order: 99;
-  padding: 0 15px 1rem;
+  padding: 0 0 1rem;
 }
 
 /* Stash draws a row's arrows outside its slider, 20px to the left and 25px
@@ -52,12 +51,13 @@
   margin: 0 20px;
 }
 
-/* Below Stash's xl breakpoint the scene's tabs come before More like this.
-   Stash caps their box at the window's height and lets the rest spill out,
-   which is harmless with nothing after it, but More like this would sit on
-   the spilled performer cards, so the box takes its content's height. */
+/* Below Stash's xl breakpoint the scene's tabs come last in the row, before
+   More like this. Stash caps their box at the window's height and lets the
+   rest spill out of the row, which is harmless with nothing after it, but
+   More like this would sit on the spilled performer cards, so the box takes
+   its content's height. */
 @media (width <= 1199.98px) {
-  .row:has(> .cherrypick-more-like-this) > .scene-tabs {
+  .row:has(+ .cherrypick-after-row .cherrypick-more-like-this) > .scene-tabs {
     max-height: none;
   }
 }
