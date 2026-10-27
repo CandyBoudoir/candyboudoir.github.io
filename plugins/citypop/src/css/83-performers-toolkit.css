@@ -56,6 +56,37 @@
   max-width: 40rem;
 }
 
+/* From 0.22 the head's grid seats the name beside the rating, runs the rest
+   across both columns and pins Stash's buttons to the foot of a header
+   stretched as tall as its tallest column, the picture with it. On the
+   J-card the spine keeps the first column and the rest stays on the flap,
+   and the cover keeps its 2:3, so the buttons sit at the foot of the cover
+   and the spine. Under 1200px the panel lies across the header under the
+   J-card, clear of its shadow and in line with the cover. */
+#root #performer-page .detail-header .performer-head[data-pt-tidy] > :not(h2) {
+  grid-column: 2;
+}
+
+@media (width >= 768px) {
+  #root
+    #performer-page
+    .detail-header
+    .detail-container
+    > :is(.detail-header-image, .row) {
+    align-self: start;
+  }
+
+  #root #performer-page .detail-header .performer-head[data-pt-tidy] {
+    height: auto;
+  }
+}
+
+@media (width < 1200px) {
+  #root #performer-page .detail-header .detail-container > .pt-side {
+    margin: 1.5rem 0 0;
+  }
+}
+
 @media (width <= 720px) {
   #root #performer-page .detail-header .performer-head[data-pt-tidy] {
     display: block;

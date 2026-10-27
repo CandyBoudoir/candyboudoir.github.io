@@ -33,6 +33,19 @@
   color: var(--overclock-text);
 }
 
+/* From 0.22, where it tidies a performer's header, it seats the rating
+   beside the name. The Locked tag hangs past the name's reticle, where the
+   rating's chevrons would cover it, and the chevrons and the O counter
+   would run under the side panel, so the rating keeps its own row under
+   the name, whether the setting is on or not. */
+#root
+  #performer-page
+  .detail-header
+  .performer-head[data-pt-tidy]
+  > .quality-group {
+  grid-column: 1 / -1;
+}
+
 /* The palette Insights takes, from 82-insights.css. --acc stays the
    toolkit's: it picks one of these per tab. From 0.13 it also paints a
    performer's header (when it tidies it), its full-body pictures, side

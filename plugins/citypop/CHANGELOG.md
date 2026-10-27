@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.5
+
+Performers Toolkit 0.22 on a performer's page, for Stash v0.31.1.
+
+- A performer's header is an open J-card again when Performers Toolkit tidies it, with the restyle on or off. Performers Toolkit 0.22 ran the rows after the name across the spine's column, so Stash's buttons, the toolkit's strip and its facts at a glance started under the spine and the cover's shadow, and the Edit button was hidden. It also stretched the cover taller than the spine. The rows now stay on the flap, the cover keeps its 2:3 and the spine its height, and Stash's buttons sit at the foot of the J-card.
+- Under 1200px wide, the toolkit's Body panel lies under the J-card in line with the cover and clear of its shadow.
+- Tested beside Insights 2.14.0 and Performers Toolkit 0.22.0.
+
 ## 0.2.4
 
 Settings read from Stash's own copy, for Stash v0.31.1.

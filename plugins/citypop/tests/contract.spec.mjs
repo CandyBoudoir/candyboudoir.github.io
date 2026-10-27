@@ -646,35 +646,53 @@ test.describe('beside Performers Toolkit', () => {
 
   // From 0.10 the toolkit tidies a performer's header into rows that wrap,
   // and from 0.13 it sets a side panel between the cover and the header
-  // (from 0.17 in the third column of a grid with a gap). The J-card keeps
-  // its spine against the cover, restyle on or off, and the panel sits past
-  // the flap.
-  for (const restyle of [false, true]) {
-    test(`the J-card holds when the toolkit tidies the header, restyle ${restyle ? 'on' : 'off'}`, async ({
-      page,
-    }) => {
-      try {
-        await setPlugin(restyle ? { restylePerformersToolkit: true } : {})
-        await page.goto(`/performers/${ids.performer}`)
-        const head = page.locator(
-          '#performer-page .performer-head[data-pt-tidy]',
-        )
-        await head.waitFor({ timeout: 30_000 })
-        await page.locator('#pt-side').waitFor()
-        await expect(head).toHaveCSS('display', 'grid')
-        const cover = await page
-          .locator('#performer-page .detail-header-image')
-          .boundingBox()
-        const spine = await head.locator('> h2').boundingBox()
-        const side = await page.locator('#pt-side').boundingBox()
-        expect(Math.abs(spine.x - (cover.x + cover.width))).toBeLessThan(2)
-        expect(Math.abs(spine.y - cover.y)).toBeLessThan(2)
-        expect(side.x).toBeGreaterThan(spine.x + spine.width)
-      } finally {
-        await setPlugin({})
-      }
-    })
-  }
+  // (from 0.17 in the third column of a grid with a gap, under 1200px
+  // across the header below it). From 0.22 it runs the head's rows across
+  // the spine's column and stretches the cover. The J-card keeps its spine
+  // against the cover and as tall as it, restyle on or off, the flap's rows
+  // and Stash's buttons stay right of the spine, and the panel sits past
+  // the flap, or under the J-card clear of its shadow.
+  for (const width of [1440, 1000])
+    for (const restyle of [false, true]) {
+      test(`the J-card holds when the toolkit tidies the header, ${width}px, restyle ${restyle ? 'on' : 'off'}`, async ({
+        page,
+      }) => {
+        try {
+          await setPlugin(restyle ? { restylePerformersToolkit: true } : {})
+          await page.setViewportSize({ width, height: 900 })
+          await page.goto(`/performers/${ids.performer}`)
+          const head = page.locator(
+            '#performer-page .performer-head[data-pt-tidy]',
+          )
+          await head.waitFor({ timeout: 30_000 })
+          await page.locator('#pt-side').waitFor()
+          await expect(head).toHaveCSS('display', 'grid')
+          const cover = await page
+            .locator('#performer-page .detail-header-image')
+            .boundingBox()
+          const spine = await head.locator('> h2').boundingBox()
+          const side = await page.locator('#pt-side').boundingBox()
+          expect(Math.abs(spine.x - (cover.x + cover.width))).toBeLessThan(2)
+          expect(Math.abs(spine.y - cover.y)).toBeLessThan(2)
+          expect(Math.abs(spine.height - cover.height)).toBeLessThan(2)
+          const flap = await head
+            .locator('> :not(h2)')
+            .evaluateAll((els) =>
+              els
+                .filter((el) => el.getClientRects().length)
+                .map((el) => el.getBoundingClientRect().left),
+            )
+          expect(flap.length).toBeGreaterThan(3)
+          for (const left of flap)
+            expect(left).toBeGreaterThanOrEqual(spine.x + spine.width)
+          if (width >= 1200)
+            expect(side.x).toBeGreaterThan(spine.x + spine.width)
+          else expect(side.y).toBeGreaterThan(cover.y + cover.height + 8)
+        } finally {
+          await setPlugin({})
+        }
+      })
+    }
 
   // The tidied header sets Stash's fields out as a grid of cells, each name
   // over its value. City Pop's track listing (a 12rem name and its dotted
