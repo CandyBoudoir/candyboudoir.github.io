@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.7
+
+- Redrawn icons for American, Anal Demolition, British, Cock Slapping, Face Fuck, Gagging, Hard Fuck and Head Pushing Blowjob.
+- Explicit icons URL now also covers Accidental Exposure, Anal Creampie, Anal Fingering, Anal Gape, Anal Winking, Ass Spreading, Big Clit, Biting Balls, Bottomless, Breast Licking and 59 more.
+
 ## 0.1.6
 
 - New icons for Accidental Exposure, All Natural, All Sex, Anal Hooks, Anchored Bondage, Anime Character, Ankle Socks, Armbinder, Arms Restrained Behind Back, Backroom and 214 more.

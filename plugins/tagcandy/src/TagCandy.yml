@@ -1,6 +1,6 @@
 name: Tag Candy
 description: Glossy sticker icons for your tags. Matches each tag by its StashDB link or its name and has Stash download the icon from candyboudoir.github.io. Needs Stash v0.31.0 or later.
-version: 0.1.6
+version: 0.1.7
 url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/tagcandy
 exec:
   - tagcandy.js
