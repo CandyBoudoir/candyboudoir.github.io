@@ -1,8 +1,9 @@
 // Tag Candy's tests run on a Stash of their own, so Apply icons never changes
 // the tag images the other plugins' screenshots show. It starts from the
 // binary tests/stash/stash.sh downloaded for the leg into WORK/bin, in a
-// folder of its own, with a folder served at /custom/tagcandy-explicit/, and
-// an HTTP server on the side stands in for the icons on the site.
+// folder of its own, with a folder served at /custom/tagcandy-overrides/, and
+// an HTTP server on the side stands in for the icons on the site and for a
+// web address of overrides, with a folder under /locked/ that answers 401.
 // Env: WORK (default stash-work), TAGCANDY_PORT (default 9961; the icon
 // server takes the next port).
 import { spawn } from 'node:child_process'
@@ -22,7 +23,7 @@ const DIR = `${WORK}-tagcandy`
 const PORT = Number(process.env.TAGCANDY_PORT ?? 9961)
 export const TC = `http://127.0.0.1:${PORT}`
 export const ICONS = `http://127.0.0.1:${PORT + 1}`
-export const EXPLICIT_DIR = join(DIR, 'explicit')
+export const OVERRIDES_DIR = join(DIR, 'overrides')
 const BINARY = join(
   WORK,
   'bin',
@@ -242,9 +243,10 @@ export async function installScript(
 }
 
 function serveIcons() {
-  const roots = { icons: join(PLUGIN, 'icons'), explicit: EXPLICIT_DIR }
+  const roots = { icons: join(PLUGIN, 'icons'), overrides: OVERRIDES_DIR }
   server = createServer((req, res) => {
     const [, folder, file] = req.url.split('?')[0].split('/')
+    if (folder === 'locked') return res.writeHead(401).end()
     const path =
       roots[folder] && file && !file.includes('..')
         ? join(roots[folder], file)
@@ -260,7 +262,7 @@ export async function setUp() {
   await rm(DIR, { recursive: true, force: true })
   await mkdir(join(DIR, 'config'), { recursive: true })
   await mkdir(join(DIR, 'library'), { recursive: true })
-  await mkdir(EXPLICIT_DIR, { recursive: true })
+  await mkdir(OVERRIDES_DIR, { recursive: true })
   await start()
   const config = join(DIR, 'config')
   await gql('mutation ($i: SetupInput!) { setup(input: $i) }', {
@@ -291,7 +293,7 @@ export async function setUp() {
   await stop()
   await appendFile(
     join(config, 'config.yml'),
-    `custom_served_folders:\n  /tagcandy-explicit: ${EXPLICIT_DIR}\n`,
+    `custom_served_folders:\n  /tagcandy-overrides: ${OVERRIDES_DIR}\n`,
   )
   await start()
   await installScript()

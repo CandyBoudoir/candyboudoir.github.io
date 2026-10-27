@@ -28,7 +28,8 @@ Tag Candy needs Stash v0.31.0 or later, which gave tags the custom fields it kee
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | Apply icons             | Gives every matching tag its icon, and updates the icons Tag Candy set when a new version redraws them. Your own images stay. |
 | Dry run                 | Reports what Apply icons would do with your current settings and lists the tags that match nothing. It changes nothing.       |
-| Restore replaced images | Puts back the images that Replace my own tag images swapped out, on tags that still hold Tag Candy's icon.                    |
+| Replace my own images   | Does what Apply icons does, and also swaps the images you set for icons, after copying each to a backup tag.                  |
+| Restore replaced images | Puts back the images that Replace my own images swapped out, on tags that still hold Tag Candy's icon.                        |
 | Delete backups          | Deletes the Tag Candy backups tags once you are happy with a swap.                                                            |
 | Remove Tag Candy icons  | Clears every icon Tag Candy set and leaves every other image.                                                                 |
 
@@ -48,9 +49,9 @@ If Dry run lists tags of yours that match nothing and should, open an issue with
 
 Tag Candy never replaces an image you set unless you ask it to. When it sets an icon it also writes a `tag_candy` custom field on the tag with the icon's name and the time, and an image counts as Tag Candy's only while the tag is unchanged since. Once you edit the tag, by uploading an image, renaming it or adding an alias, the image counts as yours, so Tag Candy stops updating that icon. A Tag Candy icon you copy onto a tag by hand counts as yours too. If you remove an icon Tag Candy set, it stays removed.
 
-To swap your own images for icons as well, turn on Replace my own tag images and run Apply icons. Only a run you start does this; the hooks never replace an image. Before each swap Tag Candy copies your image onto a backup tag named `Tag Candy backup <id>` under a parent tag, Tag Candy backups. Restore replaced images puts each one back, unless you have chosen another image since, and Delete backups removes the backup tags when you no longer need them.
+To swap your own images for icons as well, run Replace my own images. Only that task does this; Apply icons and the hooks never replace an image. Before each swap Tag Candy copies your image onto a backup tag named `Tag Candy backup <id>` under a parent tag, Tag Candy backups. Restore replaced images puts each one back, unless you have chosen another image since, and Delete backups removes the backup tags when you no longer need them.
 
-Stash copies the image from its own address, so on a Stash with a password this needs an API key. Generate one in Settings > Security; Tag Candy reads it from Stash's settings and never creates one itself. Without a key, Apply with the setting on changes nothing and says so in the log.
+Stash copies the image from its own address, so on a Stash with a password this needs an API key. Generate one in Settings > Security; Tag Candy reads it from Stash's settings and never creates one itself. Without a key, Replace my own images changes nothing and says so in the log.
 
 ## Settings
 
@@ -58,23 +59,24 @@ Tag Candy's settings sit with the plugin under Settings > Plugins.
 
 | Setting                          | Default | Effect                                                                                                                           |
 | -------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Replace my own tag images        | Off     | Apply icons also swaps the images you set, after copying each to a backup tag.                                                   |
 | Leave new and renamed tags alone | Off     | Stops the hooks that give new, renamed and merged tags their icon. Apply icons still works.                                      |
 | Extra matches                    | Empty   | `tag=concept` pairs separated by semicolons, such as `Nylons=Stockings / Hosiery`. The concept is an icon's name in the gallery. |
-| Explicit icons URL               | Empty   | Where nude versions are served, if you keep any. See below.                                                                      |
+| Icon overrides URL               | Empty   | Where your own pictures are served, if you keep any. See below.                                                                  |
 
-## Explicit icons
+## Icon overrides
 
-Tag Candy ships no nude images. If you keep nude versions of some icons yourself, Explicit icons URL points Tag Candy at them, and a concept whose nude version is there shows it instead of the regular icon. Each file is named like the regular icon without its hash: the icon `stockings-0a1b2c3d.webp` becomes `stockings.webp`. A concept with no file there keeps its regular icon. Clearing the setting and running Apply icons puts the regular icons back.
+Tag Candy ships no nude images. If you keep pictures of your own, nude versions or anything else, Icon overrides URL points Tag Candy at them, and each matching tag shows your picture instead of the regular icon. Tag Candy asks the address for every concept, including concepts with no icon yet, and a concept with no file there keeps its regular icon. Clearing the setting and running Apply icons puts the regular icons back.
 
-The setting takes a web address, such as `https://example.org/tag-icons/`, or a path that your own Stash serves. To serve a folder from Stash, add it to `custom_served_folders` in Stash's `config.yml` and restart Stash:
+Each file is named after its concept: lowercase, `&` as `and`, accents dropped and everything else between words a hyphen, with `.webp` on the end. `Big Dick` is `big-dick.webp` and `Stockings / Hosiery` is `stockings-hosiery.webp`, the regular icon's file name without its hash. With the setting filled in, Dry run lists the file each of your tags asks for. Dry run cannot see which files the address holds, so Apply icons is what finds out. When you replace or delete a file, the next Apply icons updates its tags.
+
+The setting takes a web address, such as `https://example.org/tag-icons/`, or a path that your own Stash serves. The address must answer 404 for a file it does not have, as Stash, GitHub Pages, nginx and Caddy do. To serve a folder from Stash, add it to `custom_served_folders` in Stash's `config.yml` and restart Stash:
 
 ```yaml
 custom_served_folders:
-  /tag-candy-explicit: /root/.stash/tag-candy-explicit
+  /tag-candy-overrides: /root/.stash/tag-candy-overrides
 ```
 
-then set Explicit icons URL to `/custom/tag-candy-explicit/`. The folder stays behind Stash's login, so on a Stash with a password this also needs an API key.
+then set Icon overrides URL to `/custom/tag-candy-overrides/`. The folder stays behind Stash's login, so on a Stash with a password this also needs an API key.
 
 ## Uninstall
 
