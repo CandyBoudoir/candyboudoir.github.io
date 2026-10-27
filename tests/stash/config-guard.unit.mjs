@@ -103,8 +103,8 @@ async function standIn({ hold = () => sleep(Math.random() * 3) } = {}) {
 const shut = (...servers) =>
   servers.forEach((s) => (s.closeAllConnections(), s.close()))
 
-async function guarding(port) {
-  const guard = createGuard({ target: port })
+async function guarding(port, log) {
+  const guard = createGuard({ target: port, log })
   guard.listen(0, '127.0.0.1')
   await once(guard, 'listening')
   return { guard, port: guard.address().port }
@@ -166,7 +166,8 @@ test('a read the browser gives up on holds writes back until Stash answers it', 
   const stash = await standIn({
     hold: (kind) => sleep(kind === 'read' ? 200 : 0),
   })
-  const { guard, port } = await guarding(stash.port)
+  const logged = []
+  const { guard, port } = await guarding(stash.port, (l) => logged.push(l))
   try {
     const gaveUp = new AbortController()
     const started = Date.now()
@@ -184,6 +185,11 @@ test('a read the browser gives up on holds writes back until Stash answers it', 
       `the write reached Stash after ${at - started} ms`,
     )
     assert.equal(stash.state.overlaps, 0)
+    // and the log names the read the write waited for
+    assert.match(
+      logged.join('\n'),
+      /^held a write for 1 read\(s\) in Stash: GET \/performer\/7\/image \(0\.\d s, its client gone\)$/,
+    )
   } finally {
     shut(guard, stash.server)
   }
