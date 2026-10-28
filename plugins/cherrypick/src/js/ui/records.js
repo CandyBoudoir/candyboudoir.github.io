@@ -3,6 +3,7 @@
 // PerformerData), so rows fetch those by id through Stash's own queries and
 // client, sharing its cache with Stash's pages.
 import { React, utils } from '../runtime/api.js'
+import { recordsByIds } from '../data/byIds.js'
 
 const { useEffect, useState } = React
 
@@ -15,7 +16,8 @@ const fetchers = {
       .findPerformers.performers,
 }
 
-// Records for ids, in the order of ids. null while loading.
+// Records for ids, in the order of ids, without those Stash no longer has
+// (data/byIds.js). null while loading.
 export function useStashRecords(kind, ids) {
   const key = ids.join(',')
   const [records, setRecords] = useState(null)
@@ -25,7 +27,7 @@ export function useStashRecords(kind, ids) {
       setRecords([])
       return
     }
-    fetchers[kind](ids)
+    recordsByIds(fetchers[kind], ids)
       .then((rows) => {
         if (!live) return
         const byId = new Map(rows.map((r) => [r.id, r]))

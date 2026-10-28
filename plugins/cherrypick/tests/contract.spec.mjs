@@ -6,6 +6,7 @@ import {
   DEMO,
   PLUGIN_ID,
   demoScene,
+  finishedBracket,
   forYouCards,
   gql,
   pluginConfig,
@@ -50,6 +51,86 @@ test('For you comes first on the front page, before Stash rows', async ({
   })
   expect(order).toEqual({ before: true, customise: true })
   expect(errors).toEqual([])
+})
+
+// Cherry Pick's rows ask Stash for their scenes by id (Stash's own
+// FindScenes with scene_ids), and Stash fails the whole request if one id
+// is gone: a scene deleted or merged since Cherry Pick read the library.
+// This adds an id no scene has to each request for more than one scene.
+const sceneByIds = (route) => {
+  const body = route.request().postDataJSON()
+  return body?.operationName === 'FindScenes' &&
+    Array.isArray(body.variables?.scene_ids)
+    ? body
+    : null
+}
+
+test('For you keeps its cards when Stash has lost one of its scenes', async ({
+  page,
+}) => {
+  await page.route('**/graphql', (route) => {
+    const body = sceneByIds(route)
+    const ids = body?.variables.scene_ids
+    if (!ids || ids.length < 2) return route.continue()
+    return route.continue({
+      postData: JSON.stringify({
+        ...body,
+        variables: { ...body.variables, scene_ids: [...ids, 999999] },
+      }),
+    })
+  })
+  await page.goto('/')
+  await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
+  expect(await forYouCards(page).count()).toBe(12)
+})
+
+test('For you says so when Stash sends none of its scenes', async ({
+  page,
+}) => {
+  await page.route('**/graphql', (route) =>
+    sceneByIds(route)
+      ? route.fulfill({
+          json: { errors: [{ message: 'scene with id 1 not found' }] },
+        })
+      : route.continue(),
+  )
+  await page.goto('/')
+  await expect(
+    page.locator('.cherrypick-for-you .cherrypick-row-empty'),
+  ).toHaveText(
+    "Stash didn't send these scenes. Reload the page to try again.",
+    {
+      timeout: 20_000,
+    },
+  )
+})
+
+// A champion merged into another performer, or deleted, stays in the
+// bracket history Cherry Pick keeps.
+test('the Hall of Fame keeps its champions when Stash has lost one', async ({
+  page,
+}) => {
+  const before = (await pluginConfig()) ?? {}
+  const gone = { ...finishedBracket('999999', null), id: 'bgone' }
+  await setPluginSettings(PLUGIN_ID, {
+    ...before,
+    hallOfFame: JSON.stringify([
+      finishedBracket(demo.performers['Bea Lark'], null),
+      gone,
+    ]),
+  })
+  try {
+    await page.goto('/')
+    const cards = page.locator(
+      '.cherrypick-row-hall-of-fame .slick-slide:not(.slick-cloned) .performer-card',
+    )
+    await expect(cards.first()).toBeVisible({ timeout: 20_000 })
+    expect(await cards.count()).toBe(1)
+  } finally {
+    // no page left open to save over the configuration put back
+    await page.close()
+    await setPluginSettings(PLUGIN_ID, before)
+  }
 })
 
 // Stash stretches every card in a row to the tallest one, with the popover
