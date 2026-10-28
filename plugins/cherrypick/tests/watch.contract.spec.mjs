@@ -492,9 +492,12 @@ test('a skip after playing a tenth of the pick starts its ladder again; a shorte
   ).toBe(true)
   await clickBar(page, next)
   await expect.poll(() => playerSceneId(page)).not.toBe(a)
-  await expect.poll(() => writes.length, { timeout: 15_000 }).toBe(2)
+  // Back's save and the skip's go to Stash as one write, or as two when
+  // Back's is out before the skip
+  await expect
+    .poll(async () => (await stepOf(a))?.step, { timeout: 15_000 })
+    .toBe(3)
   const look = await stepOf(a)
-  expect(look.step).toBe(3)
   expect((look.until - Date.now()) / HOUR).toBeGreaterThan(719.9)
 })
 

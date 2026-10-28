@@ -166,16 +166,35 @@ export async function openPerformerBracket(page) {
 }
 
 // Abandons the bracket a play dialog shows (asking first, unless the
-// question is open), and waits for Stash's plugin configuration to drop it
-// (a debounced save that then waits for the page to settle, at most 11 s),
-// so the next test's list offers a new bracket instead of resuming this one
+// question is open), and waits until Stash's plugin configuration holds the
+// abandonment (a debounced save that then waits for the page to settle, at
+// most 11 s), so the next test's list offers a new bracket instead of
+// resuming this one. A map with no bracket is not enough: the save of the
+// bracket's opening may still be on its way, and lands after the page has
+// closed with the abandonment unsaved. The tab's browser mirror takes each
+// change at once, newer than the map, and the map's stamp once the last
+// save has landed.
 export async function abandonBracket(play) {
   const confirm = play.locator('.modal-footer .btn-danger')
   if (!(await confirm.isVisible()))
     await play.getByRole('button', { name: 'Abandon', exact: true }).click()
   await confirm.click()
   await play.waitFor({ state: 'detached' })
-  for (let i = 0; i < 75 && (await pluginConfig())?.bracket != null; i++)
+  const mirrored = () =>
+    play
+      .page()
+      .evaluate(
+        () =>
+          JSON.parse(localStorage.getItem('cherrypick:config-mirror'))
+            ?.updatedAt ?? null,
+      )
+  const saved = async () => {
+    const map = await pluginConfig()
+    return (
+      map?.bracket == null && (map?.updatedAt ?? null) === (await mirrored())
+    )
+  }
+  for (let i = 0; i < 75 && !(await saved()); i++)
     await new Promise((r) => setTimeout(r, 200))
 }
 
