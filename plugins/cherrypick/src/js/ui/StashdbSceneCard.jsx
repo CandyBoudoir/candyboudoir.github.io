@@ -5,12 +5,15 @@
 // here: the StashDB cover, title, date and studio, the reason it is shown,
 // a "Not in your library" badge, and links to where to get the scene (a
 // store or its studio's site) and to StashDB. Its menu has Not interested
-// only.
+// only. Refract hides every scene card's popover row, so under Refract the
+// links and the menu go in a row of pills over the picture, in the markup
+// of Refract's own, which Refract lays out in either of its card styles.
 import { components, FontAwesomeSolid, ReactRouterDOM } from '../runtime/api.js'
 import { fetchedScene } from '../stashdb/layer.js'
 import { stashdbPage, storeOf } from '../stashdb/queries.js'
 import { CardMenu } from './CardMenu.jsx'
 import { useAppState } from './hooks.js'
+import { refract } from './refract.js'
 
 const { Link } = ReactRouterDOM
 const { faDatabase, faExternalLinkAlt } = FontAwesomeSolid
@@ -41,6 +44,39 @@ export function StashdbSceneCard({ scene, item, rowId, width, zoom = 1 }) {
   const url = stashdbPage(endpoint, 'scenes', scene.stashId)
   const duration = fmtDuration(scene.duration)
   const icon = (i) => (Icon ? <Icon icon={i} /> : null)
+  // Refract keeps a minimal button's fill clear, so its pills take no
+  // button classes
+  const pills = refract()
+  const link = pills ? 'cherrypick-pill' : 'minimal btn btn-primary'
+  const links = (
+    <>
+      {store ? (
+        <a
+          className={`${link} cherrypick-store-link`}
+          href={store.url}
+          title={
+            studioSite
+              ? "The scene on its studio's site"
+              : `The scene on ${store.site}`
+          }
+          {...EXTERNAL}
+        >
+          {icon(faExternalLinkAlt)}
+          <span>{store.site}</span>
+        </a>
+      ) : null}
+      <a
+        className={`${link} cherrypick-stashdb-link`}
+        href={url}
+        title="Open on StashDB"
+        {...EXTERNAL}
+      >
+        {icon(faDatabase)}
+        <span>StashDB</span>
+      </a>
+      {item ? <CardMenu item={item} rowId={rowId} /> : null}
+    </>
+  )
   return (
     <div
       className={`card grid-card scene-card zoom-${zoom} cherrypick-card cherrypick-missing cherrypick-ui`}
@@ -95,35 +131,18 @@ export function StashdbSceneCard({ scene, item, rowId, width, zoom = 1 }) {
             </div>
           ) : null}
         </div>
-      </div>
-      <hr />
-      <div className="card-popovers btn-group">
-        {store ? (
-          <a
-            className="minimal btn btn-primary cherrypick-store-link"
-            href={store.url}
-            title={
-              studioSite
-                ? "The scene on its studio's site"
-                : `The scene on ${store.site}`
-            }
-            {...EXTERNAL}
-          >
-            {icon(faExternalLinkAlt)}
-            <span>{store.site}</span>
-          </a>
+        {pills ? (
+          <div className="stash-performer-circles cherrypick-pills">
+            <div className="stash-card-counts">{links}</div>
+          </div>
         ) : null}
-        <a
-          className="minimal btn btn-primary cherrypick-stashdb-link"
-          href={url}
-          title="Open on StashDB"
-          {...EXTERNAL}
-        >
-          {icon(faDatabase)}
-          <span>StashDB</span>
-        </a>
-        {item ? <CardMenu item={item} rowId={rowId} /> : null}
       </div>
+      {pills ? null : (
+        <>
+          <hr />
+          <div className="card-popovers btn-group">{links}</div>
+        </>
+      )}
     </div>
   )
 }

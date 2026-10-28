@@ -17,6 +17,31 @@
   display: contents;
 }
 
+/* Under Refract, the ⋯ menu, and on a StashDB card its links, are pills at
+   the end of the row Refract draws over the picture (ui/rowCards.jsx,
+   ui/StashdbSceneCard.jsx), in the look of Refract's own pills (its
+   css/08_misc_mid.css) */
+.stash-card-counts .cherrypick-card-menu > .btn,
+.stash-card-counts > .cherrypick-pill {
+  align-items: center;
+  background: var(--accent-tint);
+  border: 1px solid var(--accent-glow);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 0 8px var(--accent-glow);
+  color: #fff;
+  display: inline-flex;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  gap: 0.3em;
+  line-height: 1;
+  padding: 0.18em 0.6em;
+}
+
+/* Refract's own row has the performers on its left, a StashDB card's none */
+.cherrypick-pills .stash-card-counts {
+  margin-left: auto;
+}
+
 .cherrypick-hidden-card.card {
   align-items: center;
   display: flex;

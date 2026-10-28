@@ -45,6 +45,49 @@
   opacity: 1;
 }
 
+/* Under Refract, Your score is a chip of its own where Refract draws the
+   scene's rating, in the card's top left corner (its css/03_cards.css): the
+   size, corners and fill of Refract's chip, outlined, without the glow
+   Refract scales to the rating. A longer label widens it. */
+.cherrypick-score-chip {
+  align-items: center;
+  background: rgb(20 20 24 / 78%);
+  border-radius: clamp(0.85rem, 28%, 1.2rem);
+  box-shadow: inset 0 0 0 1px currentcolor;
+  box-sizing: border-box;
+  color: var(--accent-bright, #fff);
+  display: inline-flex;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  height: 2.7rem;
+  justify-content: center;
+  left: 0.45rem;
+  line-height: 1;
+  min-width: 2.7rem;
+  padding: 0 0.45rem;
+  position: absolute;
+  top: 0.45rem;
+  white-space: nowrap;
+  z-index: 6;
+}
+
+/* Refract fades its chip while the select circle over it is hovered or
+   checked, and Your score with it */
+.scene-card.refract-check-hover .cherrypick-score-chip,
+.scene-card:has(.card-check:checked) .cherrypick-score-chip {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+/* Where another plugin set the rating, Refract draws its chip for it, and
+   Your score takes the corner as it does from Stash's banner */
+body.stash-liquid-glass
+  .grid-card.scene-card:has(.cherrypick-score-chip)
+  > .rating-banner {
+  display: none !important;
+}
+
 .cherrypick-score-banner .cherrypick-star {
   font-size: 0.7em;
   margin-left: 0.15em;

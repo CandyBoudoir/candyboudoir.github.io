@@ -1,9 +1,11 @@
 // Stash's SceneCard, as Cherry Pick's rows show it: the card's description
 // gives way to the reason the card is there, and its popover row gains the
-// ⋯ menu. The patches apply to every SceneCard, so they read a context only
-// Cherry Pick's rows provide and render nothing anywhere else.
-import { components, patchAfter, React } from '../runtime/api.js'
+// ⋯ menu (Refract's row of pills, under Refract). The patches apply to every
+// SceneCard, so they read a context only Cherry Pick's rows provide and
+// render nothing anywhere else.
+import { components, patchAfter, React, ReactDOM } from '../runtime/api.js'
 import { CardMenu } from './CardMenu.jsx'
+import { refract } from './refract.js'
 import { Safe } from './Safe.jsx'
 
 export const RowItem = React.createContext(null)
@@ -21,7 +23,45 @@ function Reason() {
 function Menu() {
   const ctx = React.useContext(RowItem)
   if (!ctx || !ctx.item.scene) return null
-  return <CardMenu item={ctx.item} rowId={ctx.rowId} />
+  return refract() ? (
+    <PillMenu item={ctx.item} rowId={ctx.rowId} />
+  ) : (
+    <CardMenu item={ctx.item} rowId={ctx.rowId} />
+  )
+}
+
+// Refract hides the popover row and draws a row of pills over the picture
+// once it has the scene's counts. The menu goes at the end of those pills,
+// through a portal, and back there if Refract draws them again.
+function PillMenu({ item, rowId }) {
+  const anchor = React.useRef(null)
+  const [slot, setSlot] = React.useState(null)
+  React.useEffect(() => {
+    const card = anchor.current?.closest('.scene-card')
+    if (!card) return
+    const el = document.createElement('div')
+    el.className = 'cherrypick-pill-menu'
+    const place = () => {
+      const pills = card.querySelector('.stash-card-counts')
+      if (pills && el.parentNode !== pills) pills.appendChild(el)
+    }
+    place()
+    setSlot(el)
+    const watch = new MutationObserver(place)
+    watch.observe(card, { childList: true, subtree: true })
+    return () => {
+      watch.disconnect()
+      el.remove()
+    }
+  }, [])
+  return (
+    <>
+      <span ref={anchor} hidden />
+      {slot
+        ? ReactDOM.createPortal(<CardMenu item={item} rowId={rowId} />, slot)
+        : null}
+    </>
+  )
 }
 
 // A card with no tags, performers or counts has no popover row, so in

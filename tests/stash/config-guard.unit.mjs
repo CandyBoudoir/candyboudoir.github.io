@@ -189,6 +189,36 @@ test('a read the browser gives up on holds writes back until Stash answers it', 
   }
 })
 
+test('a read the browser gives up on halfway through its answer leaves when Stash ends it', async () => {
+  // Stash sends an image's head and first bytes at once and the rest 200 ms
+  // later, and answers a write at once
+  const stash = createServer(async (req, res) => {
+    for await (const c of req) void c
+    if (!req.url.startsWith('/performer/')) return res.end('ok')
+    res.writeHead(200, { 'Content-Type': 'image/png' })
+    res.write('first')
+    setTimeout(() => res.end('rest'), 200)
+  })
+  stash.listen(0, '127.0.0.1')
+  await once(stash, 'listening')
+  const { guard, port } = await guarding(stash.address().port)
+  try {
+    const gaveUp = new AbortController()
+    const image = await fetch(`http://127.0.0.1:${port}/performer/7/image`, {
+      signal: gaveUp.signal,
+    })
+    await image.body.getReader().read()
+    gaveUp.abort()
+    const written = await Promise.race([
+      write(port).then(() => 'written'),
+      sleep(1500).then(() => 'held'),
+    ])
+    assert.equal(written, 'written')
+  } finally {
+    shut(guard, stash)
+  }
+})
+
 test('the guard keeps the Host header and passes websockets through', async () => {
   const stash = await standIn()
   const { guard, port } = await guarding(stash.port)

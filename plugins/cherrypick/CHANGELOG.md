@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.1
+
+- More like this sits under the scene's details and player, as wide as the page, under themes that fit the scene page to the window, such as Refract. Under Refract it sat in the narrow details column instead, and the details and the player shrank to make room for it. The page now scrolls down to it.
+- "likely 4★ for you" stays beside the stars under Refract. Refract draws the toolbar's buttons as small circles, and it squeezed the line into one, so its words ran over the fourth and fifth stars.
+- Your score shows on scene cards under Refract, as an outlined chip in the top left corner, where Refract shows a scene's rating. Refract hid it, and read it as the scene's rating: it could frame the card as it frames a well-rated scene.
+- The ⋯ menu on cards in Cherry Pick's rows is a pill over the picture under Refract, beside Refract's own pills. Refract hides the row of buttons under each card, which held the menu, so Not interested and Don't learn from this were out of reach. On a scene you don't have, the links to its store and to StashDB are pills there too, and "Not in your library" moves to the top left corner, clear of the title.
+- Watch This shows its player under Refract. Refract stretches every player to fill the scene page's column, which on the front page left it no height. Refract also hides the big play button in the middle of every player, so start the pick with the play button in the player's bar, a click on the video or Space.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.44.0, Xenith 3.2.0, Restash 0.3.0-55c1cb2 and Refract 1.24.3-458b135.
+
 ## 0.4.0
 
 - Tags Cherry Pick doesn't learn from, a new setting under Settings > Plugins, keeps every scene with one of the tags you list out of what Cherry Pick learns, as Don't learn from this does for one scene. Their plays, ratings and bracket picks teach Cherry Pick nothing, and opening or passing one in For you changes nothing. Tag the scenes in Stash, one at a time or many at once from the Scenes list, and type the tags' names into the setting, separated by commas. Cherry Pick's page counts the tagged scenes and names any listed tag no scene in your library has. The scenes can still show up in Cherry Pick's rows, which Tags to keep out of my picks controls.
