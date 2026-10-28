@@ -8,7 +8,7 @@
 - The ⋯ menu on cards in Cherry Pick's rows is a pill over the picture under Refract, beside Refract's own pills. Refract hides the row of buttons under each card, which held the menu, so Not interested and Don't learn from this were out of reach. On a scene you don't have, the links to its store and to StashDB are pills there too, and "Not in your library" moves to the top left corner, clear of the title.
 - Watch This shows its player under Refract. Refract stretches every player to fill the scene page's column, which on the front page left it no height. Refract also hides the big play button in the middle of every player, so start the pick with the play button in the player's bar, a click on the video or Space.
 
-Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.42.2, Xenith 3.2.0, Restash 0.3.0-55c1cb2 and Refract 1.24.3-458b135.
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.44.0, Xenith 3.2.0, Restash 0.3.0-55c1cb2 and Refract 1.24.3-458b135.
 
 ## 0.4.0
 
