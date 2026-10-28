@@ -135,10 +135,16 @@ test('a pick lands the winner in the next round and moves the cherries on; a pic
   )
   await expect(play.locator('.cherrypick-map-path.won')).toHaveCount(1)
 
-  // two keys at once: the first picks, the second only ends the arrival
+  // two keys at once: the first picks, the second only ends the arrival.
+  // Both in one go: pressed one after the other, the second can come after
+  // the arrival on a machine slow to draw the match the first one brought
   await page.waitForTimeout(600)
-  await page.keyboard.press('ArrowLeft')
-  await page.keyboard.press('ArrowLeft')
+  await page.evaluate(() => {
+    for (let i = 0; i < 2; i++)
+      document.activeElement.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }),
+      )
+  })
   await expect(round(play)).toHaveText('Round of 16 · match 3 of 8')
   await page.waitForTimeout(800)
   await expect(round(play)).toHaveText('Round of 16 · match 3 of 8')

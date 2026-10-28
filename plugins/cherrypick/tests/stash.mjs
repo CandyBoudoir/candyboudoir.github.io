@@ -123,13 +123,19 @@ export function demoCandidates({ ownRatings = true } = {}, plan = DEMO) {
   )
 }
 
+// The two names on the match's cards now. Their text, not innerText:
+// Refract gives every .card content-visibility: auto, and the text of a
+// card the browser has not drawn yet reads empty to innerText
+export const contenders = (modal) =>
+  modal
+    .locator('.cherrypick-contender .cherrypick-cont-title')
+    .allTextContents()
+
 // One bracket pick with the keyboard: the candidate when one meets a rated
 // performer, else the left side, so every candidate gets past its first
 // match against a rated one and Apply always has a row to show
 export async function pickCandidate(page, play, candidates) {
-  const [a, b] = await play
-    .locator('.cherrypick-contender .cherrypick-cont-title')
-    .allInnerTexts()
+  const [a, b] = await contenders(play)
   await page.keyboard.press(
     candidates.has(b) && !candidates.has(a) ? 'ArrowRight' : 'ArrowLeft',
   )

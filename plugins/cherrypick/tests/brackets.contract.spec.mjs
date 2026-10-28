@@ -9,6 +9,7 @@
 import { expect, test } from '@playwright/test'
 import {
   abandonBracket,
+  contenders,
   DEMO,
   demoCandidates,
   finishedBracket,
@@ -293,10 +294,6 @@ test('performers rated only through their scenes anchor a bracket, and Apply rat
       await setPerformerRating(id, r)
   }
 })
-
-// The two names on the play cards now
-const contenders = (modal) =>
-  modal.locator('.cherrypick-contender .cherrypick-cont-title').allInnerTexts()
 
 test('a bracket of unrated performers, then its champion takes on your favorites', async ({
   page,

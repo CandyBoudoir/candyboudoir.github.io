@@ -103,6 +103,13 @@ test.afterAll(async () => {
 })
 
 const player = (page) => page.locator('.cherrypick-watch-player .video-js')
+// A click on the player's bar, the mouse over the player first, as a
+// viewer's is: video.js hides a playing player's bar while the mouse stays
+// still, and Refract hides a paused one's 2.5 s after the mouse last moved
+const clickBar = async (page, button) => {
+  await player(page).hover()
+  await button.click()
+}
 const line = (page) => page.locator('.cherrypick-watch-line')
 // The pick's line, once the player has its scene (the skeleton has a line
 // of its own for the progress)
@@ -267,7 +274,7 @@ test("Stash's Auto-start video decides whether the pick starts by itself", async
   await expect(player(page)).not.toHaveClass(/vjs-has-started/)
   // Refract hides the big play button and leaves the bar's
   const play = besideRefract ? '.vjs-play-control' : '.vjs-big-play-button'
-  await page.locator(`.cherrypick-watch-player ${play}`).click()
+  await clickBar(page, page.locator(`.cherrypick-watch-player ${play}`))
   await expect(player(page)).toHaveClass(/vjs-playing/)
 })
 
@@ -400,7 +407,7 @@ test("during playback the player's next and previous buttons skip and go back", 
     if ((r.postData() || '').includes('CherryPickConfigurePlugin'))
       writes.push(r.postData())
   })
-  await next.click()
+  await clickBar(page, next)
   await expect.poll(() => playerSceneId(page)).not.toBe(a)
   await expect(previous).toBeVisible()
   // the same player, with the next pick, and still no line
@@ -413,7 +420,7 @@ test("during playback the player's next and previous buttons skip and go back", 
     [a, 1],
   ])
 
-  await previous.click()
+  await clickBar(page, previous)
   await expect.poll(() => playerSceneId(page)).toBe(a)
   await expect(previous).toBeHidden()
   // Back puts the snooze back as it was: none
@@ -459,13 +466,11 @@ test('a skip after playing a tenth of the pick starts its ladder again; a shorte
     snoozesIn(await pluginConfig()).find((e) => e.id === id)
 
   // The demo clip lasts 8 seconds: 2 seconds of play is a quarter of it.
-  // The control bar takes clicks once the mouse moves over the player.
   await playerFocused(page)
   await page.keyboard.press('Space')
   await expect(player(page)).toHaveClass(/vjs-playing/)
   await page.waitForTimeout(2000)
-  await player(page).hover()
-  await next.click()
+  await clickBar(page, next)
   expect(
     await page
       .locator('.cherrypick-watch-player video')
@@ -478,14 +483,14 @@ test('a skip after playing a tenth of the pick starts its ladder again; a shorte
   expect((watched.until - Date.now()) / HOUR).toBeGreaterThan(47.9)
 
   // Back puts the two steps back; skipped at once, a look, it climbs
-  await previous.click()
+  await clickBar(page, previous)
   await expect.poll(() => playerSceneId(page)).toBe(a)
   expect(
     await page
       .locator('.cherrypick-watch-player video')
       .evaluate((v) => v.paused),
   ).toBe(true)
-  await next.click()
+  await clickBar(page, next)
   await expect.poll(() => playerSceneId(page)).not.toBe(a)
   await expect.poll(() => writes.length, { timeout: 15_000 }).toBe(2)
   const look = await stepOf(a)

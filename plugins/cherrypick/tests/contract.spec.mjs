@@ -397,14 +397,23 @@ test("More like this fits the page and clears the scene's details", async ({
         `at ${width} wide`,
       ).toBe(0)
   }
-  // Still 390 wide: the demo scene's performer cards run past one screen
+  // Still 390 wide: the demo scene's performer cards run past one screen.
+  // What shows of each piece: a box that clips its overflow cuts off what
+  // runs past it, such as the glare Refract lays over each card
   const overlap = await page.evaluate(() => {
     const tabs = document.querySelector('.scene-tabs')
-    const bottom = Math.max(
-      ...[...tabs.querySelectorAll('*')].map(
-        (e) => e.getBoundingClientRect().bottom,
-      ),
-    )
+    const shown = (e) => {
+      let bottom = e.getBoundingClientRect().bottom
+      for (
+        let a = e.parentElement;
+        a !== tabs.parentElement;
+        a = a.parentElement
+      )
+        if (getComputedStyle(a).overflowY !== 'visible')
+          bottom = Math.min(bottom, a.getBoundingClientRect().bottom)
+      return bottom
+    }
+    const bottom = Math.max(...[...tabs.querySelectorAll('*')].map(shown))
     const top = document
       .querySelector('.cherrypick-more-like-this')
       .getBoundingClientRect().top
