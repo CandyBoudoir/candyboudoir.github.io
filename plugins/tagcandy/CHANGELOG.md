@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.8
+
+- Explicit icons URL no longer covers Accidental Exposure, Anal Creampie, Anal Fingering, Anal Gape, Anal Winking, Ass Spreading, Ball Licking, Big Clit, Big Dick, Biting Balls and 71 more.
+
 ## 0.1.7
 
 - Redrawn icons for American, Anal Demolition, British, Cock Slapping, Face Fuck, Gagging, Hard Fuck and Head Pushing Blowjob.
