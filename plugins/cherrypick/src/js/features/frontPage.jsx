@@ -83,9 +83,14 @@ function snapshot(s) {
   return snap
 }
 
+// What a row with scenes says when Stash sends none of them back (a scene
+// deleted since the visit began is only left out: data/byIds.js).
+const NOT_SENT = "Stash didn't send these scenes. Reload the page to try again."
+
 // One row of the visit. Hidden cards stay in place as Undo cards; scenes
-// hidden since the visit began never show again in it.
-function SceneRow({ id, title, items, className, onOpen, extra }) {
+// hidden since the visit began never show again in it. A row with nothing
+// to show says why in `empty`; without it, the row leaves the page.
+function SceneRow({ id, title, items, className, onOpen, extra, empty }) {
   const hidden = useAppState((s) => s.notInterested)
   const recent = useAppState((s) => s.recentHidden)
   const isHidden = new Set(hidden.map((n) => n.sceneId))
@@ -101,6 +106,7 @@ function SceneRow({ id, title, items, className, onOpen, extra }) {
       className={`cherrypick-ui ${className || ''}`}
       kind="scene"
       extra={extra}
+      empty={shown.length ? NOT_SENT : empty}
       items={items ? shown : null}
       renderCard={(scene, it, i) =>
         isHidden.has(it.scene.id) ? (
@@ -193,6 +199,7 @@ function CherryPickRows() {
           className="cherrypick-for-you"
           onOpen={recordOpen}
           extra={<SharpenLine />}
+          empty="Every scene is marked Not interested or has a tag from Tags to keep out of my picks."
         />
       ) : null}
       {v.fallback ? (
@@ -201,6 +208,7 @@ function CherryPickRows() {
           title="New in your library"
           items={v.fallback}
           className="cherrypick-fallback"
+          empty="Every scene here was played in the last two weeks, rated under 3★ or kept out of your picks. For you starts at 30 scenes."
         />
       ) : null}
       {v.follow.map((r) => (

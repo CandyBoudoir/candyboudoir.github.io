@@ -12,15 +12,15 @@ import { access } from 'node:fs/promises'
 // latest release: `latest` says where to look, and tested-with.mjs holds
 // back a Cherry Pick release while a newer one is out.
 const CURATOR_RELEASE =
-  'https://github.com/mrx-31415/stash-curator/releases/download/v0.44.0'
+  'https://github.com/mrx-31415/stash-curator/releases/download/v0.45.0'
 const CURATOR_ZIPS = {
   'linux-x64': [
     'stash-curator-linux-amd64.zip',
-    '2f9a34444db889070854b788608b30e38f2c71953695a640fc3eb7b606426d15',
+    '7474e5de50eb35e8388ca8a698f8d0c83d33359ff7e51b81bf9ec0b34b740afe',
   ],
   'darwin-arm64': [
     'stash-curator-darwin-arm64.zip',
-    '74f34aabe8d57847e762fae04f59bb972cb2bfcf60740dcf86e3066f21d71058',
+    '148524794c55467001849d28917a4224a63d2702a3a2b9412789b7992eabc178',
   ],
 }
 // Stash Curator's zip for the machine Stash runs on, linux-amd64 by default
@@ -77,11 +77,11 @@ export const COMPANIONS = {
     disable: [],
     latest: { index: 'https://lowgrade12.github.io/hot-or-not/main/index.yml' },
   },
-  // Stash Curator 0.44.0, local recommendations that score scenes and
+  // Stash Curator 0.45.0, local recommendations that score scenes and
   // performers on Stash's own cards, from
   // https://github.com/mrx-31415/stash-curator (AGPL-3.0). Its zip carries a
   // compiled backend, one zip per platform: linux-amd64 in CI, darwin-arm64
-  // for a local run on a Mac. Both are the builds attached to the v0.44.0
+  // for a local run on a Mac. Both are the builds attached to the v0.45.0
   // release, which later releases leave in place; its GitHub Pages index
   // serves only the newest. Its manifest runs `python` (a launcher for the
   // backend), so Stash needs one on its PATH: where there is only python3,
@@ -90,8 +90,8 @@ export const COMPANIONS = {
     package: {
       id: 'stash-curator',
       name: 'Stash Curator',
-      version: '0.44.0',
-      date: '2026-10-28 10:49:40',
+      version: '0.45.0',
+      date: '2026-10-28 17:42:11',
       ...curatorZip(),
     },
     enable: ['stash-curator'],
