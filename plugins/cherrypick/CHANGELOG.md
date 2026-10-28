@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.2
+
+- For you stays on the front page when Stash no longer has one of its scenes, after the scene is deleted, merged into another scene or removed by Stash's Clean task. Stash turns down a request for several scenes when one of them is gone, and Cherry Pick asked for For you's twelve in one request, so the row left the page with no word until a later visit to the front page, a few minutes on. The rows after For you could go the same way, and More like this on a scene page said it found nothing like the scene. When Stash turns a request down, Cherry Pick now asks for each scene on its own and shows the ones Stash still has.
+- The Hall of Fame shows its champions after one of them is merged into another performer or deleted. It said "No champions yet" for good.
+- A Cherry Pick row with nothing to show stays on the front page and says why. In a library under 30 scenes, New in your library takes For you's place and leaves out scenes played in the last two weeks or rated under 3★. When that leaves nothing, the row says so and that For you starts at 30 scenes. A row whose scenes Stash didn't send asks you to reload the page.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.45.0, Xenith 3.2.0, Restash 0.3.0-55c1cb2 and Refract 1.24.3-458b135.
+
 ## 0.4.1
 
 - More like this sits under the scene's details and player, as wide as the page, under themes that fit the scene page to the window, such as Refract. Under Refract it sat in the narrow details column instead, and the details and the player shrank to make room for it. The page now scrolls down to it.
@@ -8,7 +16,7 @@
 - The ⋯ menu on cards in Cherry Pick's rows is a pill over the picture under Refract, beside Refract's own pills. Refract hides the row of buttons under each card, which held the menu, so Not interested and Don't learn from this were out of reach. On a scene you don't have, the links to its store and to StashDB are pills there too, and "Not in your library" moves to the top left corner, clear of the title.
 - Watch This shows its player under Refract. Refract stretches every player to fill the scene page's column, which on the front page left it no height. Refract also hides the big play button in the middle of every player, so start the pick with the play button in the player's bar, a click on the video or Space.
 
-Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.44.0, Xenith 3.2.0, Restash 0.3.0-55c1cb2 and Refract 1.24.3-458b135.
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.45.0, Xenith 3.2.0, Restash 0.3.0-55c1cb2 and Refract 1.24.3-458b135.
 
 ## 0.4.0
 
