@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- In a scene bracket, each cover plays the scene's preview clip, muted and on a loop, so you can see both scenes move before you pick. A click or tap on the playing cover still picks it. Pointing at a cover turns its sound on when Stash is set to play sound on previews. A clip starts once at least half the cover is on screen, so on a phone the lower scene waits until you scroll to it, and nothing loads for a cover you haven't reached. A scene Stash made no preview for keeps its cover, and with reduced motion set on your device every cover stays still. The clip is the preview Stash generated, as in Look closer, so it plays whatever the scene's format and records no play.
+
 ## 0.4.2
 
 - For you stays on the front page when Stash no longer has one of its scenes, after the scene is deleted, merged into another scene or removed by Stash's Clean task. Stash turns down a request for several scenes when one of them is gone, and Cherry Pick asked for For you's twelve in one request, so the row left the page with no word until a later visit to the front page, a few minutes on. The rows after For you could go the same way, and More like this on a scene page said it found nothing like the scene. When Stash turns a request down, Cherry Pick now asks for each scene on its own and shows the ones Stash still has.

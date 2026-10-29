@@ -10,6 +10,12 @@
 // generated previews says so; at 390 px the scenes stack with both Pick
 // buttons above the footer.
 //
+// Without reduced motion each cover plays its preview clip, muted and on a
+// loop, and still picks; pointing at one turns its sound on when Stash's
+// sound on preview setting is on; a scene without a clip keeps its cover;
+// on a short screen the lower cover waits until it scrolls into view. With
+// reduced motion no cover plays.
+//
 // The shared demo clips (tests/stash/prepare.mjs) have sprites and
 // previews, and the Scenes list's search for "ffmpeg" (their description)
 // gives a pool of those eight alone. The demo library's scenes have no
@@ -83,6 +89,33 @@ async function plays() {
   return findScenes.scenes
 }
 
+// The scenes' own files the page asks Stash for, which would play them
+function streamsOf(page) {
+  const streams = []
+  page.on('request', (r) => {
+    if (/\/scene\/\d+\/stream/.test(r.url())) streams.push(r.url())
+  })
+  return streams
+}
+
+// The scenes Stash has answered for about their preview clip
+function previewAnswers(page) {
+  const answered = new Set()
+  page.on('response', (r) => {
+    const m = /\/scene\/(\d+)\/preview$/.exec(r.url())
+    if (m) answered.add(m[1])
+  })
+  return answered
+}
+
+const soundOnPreview = (on) =>
+  gql(
+    'mutation ($on: Boolean) { configureInterface(input: { soundOnPreview: $on }) { soundOnPreview } }',
+    { on },
+  )
+
+const playing = (video) => video.evaluate((v) => !v.paused && v.currentTime > 0)
+
 test('a scene bracket draws on scenes you have never played', async ({
   page,
 }) => {
@@ -108,6 +141,7 @@ test('a scene match shows contact sheets, and the cover picks', async ({
 }) => {
   const errors = []
   page.on('pageerror', (e) => errors.push(e.message))
+  const answered = previewAnswers(page)
   const play = await startBracket(page, CLIPS)
   await expect(play).toContainText('8 scenes')
   await expect(round(play)).toContainText('match 1 of 4')
@@ -123,6 +157,10 @@ test('a scene match shows contact sheets, and the cover picks', async ({
     ),
   ).toBe(true)
   await expect(card.locator('.cherrypick-cover-pick img')).toHaveCount(1)
+  // with reduced motion the cover stays still, though the scene has a clip
+  const ids = await sceneIds(play)
+  await expect.poll(() => ids.every((id) => answered.has(id))).toBe(true)
+  await expect(play.locator('.cherrypick-cover-pick video')).toHaveCount(0)
   await expect(
     card.locator('.cherrypick-sheet button').first(),
   ).toHaveAttribute('aria-label', /^Look closer from \d+:\d\d$/)
@@ -159,16 +197,8 @@ test('a frame or Look closer opens the inspector without picking, and Esc goes b
   page,
 }) => {
   const before = await plays()
-  const streams = []
-  page.on('request', (r) => {
-    if (/\/scene\/\d+\/stream/.test(r.url())) streams.push(r.url())
-  })
-  // the scenes Stash has answered for about their preview clip
-  const answered = new Set()
-  page.on('response', (r) => {
-    const m = /\/scene\/(\d+)\/preview$/.exec(r.url())
-    if (m) answered.add(m[1])
-  })
+  const streams = streamsOf(page)
+  const answered = previewAnswers(page)
   const play = await startBracket(page, CLIPS)
   const [left, right] = await sceneIds(play)
   // a frame under the cover opens the inspector at that frame (the third of
@@ -289,6 +319,96 @@ test('a scene without generated previews says so', async ({ page }) => {
   await page.keyboard.press('ArrowRight')
   await expect(insp).toBeVisible()
   await expect(round(play)).toContainText('match 1 of')
+})
+
+test.describe('with motion', () => {
+  test.use({ reducedMotion: 'no-preference' })
+
+  test('each cover plays its preview clip, muted and on a loop, and still picks', async ({
+    page,
+  }) => {
+    const before = await plays()
+    const streams = streamsOf(page)
+    const play = await startBracket(page, CLIPS)
+    const ids = await sceneIds(play)
+    const videos = play.locator('.cherrypick-cover-pick video')
+    for (const [i, id] of ids.entries()) {
+      const video = videos.nth(i)
+      await expect(video).toHaveAttribute(
+        'src',
+        new RegExp(`/scene/${id}/preview$`),
+      )
+      expect(await video.evaluate((v) => [v.muted, v.loop])).toEqual([
+        true,
+        true,
+      ])
+      await expect.poll(() => playing(video)).toBe(true)
+      // the cover shows until the clip has a frame
+      await expect(video).toHaveClass(/\bon\b/)
+    }
+    // a click on the playing clip picks its scene
+    await arrived(play)
+    await play.locator('.cherrypick-cover-pick').first().click()
+    await expect(round(play)).toContainText('match 2 of 4')
+    expect(streams).toEqual([])
+    expect(await plays()).toEqual(before)
+  })
+
+  test("pointing at a cover turns its sound on when Stash's sound on preview is on", async ({
+    page,
+  }) => {
+    await soundOnPreview(true)
+    try {
+      const play = await startBracket(page, CLIPS)
+      await arrived(play)
+      const covers = play.locator('.cherrypick-cover-pick')
+      const [one, other] = [0, 1].map((i) => covers.nth(i).locator('video'))
+      await expect.poll(() => playing(one)).toBe(true)
+      await covers.first().hover()
+      await expect.poll(() => one.evaluate((v) => v.muted)).toBe(false)
+      expect(await playing(one)).toBe(true)
+      expect(await other.evaluate((v) => v.muted)).toBe(true)
+      // the sound goes when the pointer leaves
+      await page.mouse.move(1, 1)
+      await expect.poll(() => one.evaluate((v) => v.muted)).toBe(true)
+    } finally {
+      await soundOnPreview(false)
+    }
+  })
+
+  test('a scene without a preview clip keeps its cover', async ({ page }) => {
+    const answered = previewAnswers(page)
+    // the demo library's scenes have no files: an unfiltered bracket plays them
+    const play = await startBracket(page, '/scenes')
+    const card = play.locator('.cherrypick-judge').first()
+    await expect(card.locator('.cherrypick-sheet-none')).toBeVisible()
+    const id = await card.getAttribute('data-scene')
+    await expect.poll(() => answered.has(id)).toBe(true)
+    await expect(card.locator('.cherrypick-cover-pick video')).toHaveCount(0)
+  })
+
+  test.describe('on a short screen', () => {
+    test.use({ viewport: { width: 390, height: 500 }, hasTouch: true })
+
+    test('the lower cover waits until it scrolls into view', async ({
+      page,
+    }) => {
+      const play = await startBracket(page, CLIPS)
+      await arrived(play)
+      const covers = play.locator('.cherrypick-cover-pick')
+      const [upper, lower] = [0, 1].map((i) => covers.nth(i).locator('video'))
+      await expect.poll(() => playing(upper)).toBe(true)
+      // most of the lower cover is under the fold, and its clip hasn't loaded
+      const box = await covers.nth(1).boundingBox()
+      expect(box.y + box.height / 2).toBeGreaterThan(500)
+      expect(await lower.evaluate((v) => [v.paused, v.readyState])).toEqual([
+        true,
+        0,
+      ])
+      await covers.nth(1).scrollIntoViewIfNeeded()
+      await expect.poll(() => playing(lower)).toBe(true)
+    })
+  })
 })
 
 test.describe('at 390 px', () => {
