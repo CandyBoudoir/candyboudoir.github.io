@@ -191,9 +191,7 @@ test('Not interested on a For you card takes it off the tab and is saved to Stas
   await page.goto('/plugins/cherrypick')
   await expect(tabCards(page)).toHaveCount(40, { timeout: 20_000 })
   const [first] = await sceneIds(tabCards(page))
-  const card = tabCards(page).first()
-  await card.hover()
-  await press(card.locator('.cherrypick-card-menu button'))
+  await press(tabCards(page).first().locator('.cherrypick-card-menu button'))
   await press(page.locator('.cherrypick-ni').first())
   await expect
     .poll(async () => (await sceneIds(tabCards(page)))[0])

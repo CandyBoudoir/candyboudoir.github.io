@@ -223,7 +223,11 @@ function Pickers({ v, set, db }) {
 }
 
 // The first line: the search, the pickers, Unwatched and the length. On a
-// phone the pickers fold behind a Filters button beside the search.
+// phone the pickers fold behind a Filters button beside the search. A
+// search form: Refract tags the box around a search field as a list's
+// filter bar unless it is a form, then shows every button in it, the
+// phone's Filters button too, and swaps its largest button group (here a
+// pager) for its view menu.
 function Filters({ v, set, db }) {
   const [open, setOpen] = React.useState(false)
   const on =
@@ -240,7 +244,11 @@ function Filters({ v, set, db }) {
     return () => clearTimeout(t)
   }, [q, v.q, set])
   return (
-    <div className="cherrypick-fy-filters">
+    <form
+      className="cherrypick-fy-filters"
+      role="search"
+      onSubmit={(e) => e.preventDefault()}
+    >
       <Form.Control
         className="cherrypick-fy-search text-input"
         placeholder="Search For you"
@@ -297,7 +305,7 @@ function Filters({ v, set, db }) {
           Clear
         </Button>
       ) : null}
-    </div>
+    </form>
   )
 }
 
@@ -317,14 +325,17 @@ function ViewBar({ v, set, total, setPage }) {
           />
         ) : null}
       </div>
-      {Pagination ? (
-        <Pagination
-          itemsPerPage={v.per}
-          currentPage={v.page}
-          totalItems={total}
-          onChangePage={setPage}
-        />
-      ) : null}
+      {/* A box of its own: Refract hides each pager's box but the last */}
+      <div className="cherrypick-fy-pager">
+        {Pagination ? (
+          <Pagination
+            itemsPerPage={v.per}
+            currentPage={v.page}
+            totalItems={total}
+            onChangePage={setPage}
+          />
+        ) : null}
+      </div>
       <div className="cherrypick-fy-view">
         <Form.Control
           as="select"

@@ -51,6 +51,11 @@
   justify-content: flex-end;
 }
 
+/* the view stays in the right column when Refract hides the pages */
+.cherrypick-fy-viewbar > .cherrypick-fy-view {
+  grid-column: 3;
+}
+
 .cherrypick-fy-search.form-control {
   width: 14rem;
 }
@@ -132,6 +137,10 @@
   .cherrypick-fy-viewbar {
     grid-template-columns: 1fr;
     justify-items: center;
+  }
+
+  .cherrypick-fy-viewbar > .cherrypick-fy-view {
+    grid-column: auto;
   }
 }
 
