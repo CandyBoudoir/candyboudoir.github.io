@@ -7,7 +7,7 @@
 - In a scene bracket, each cover plays the scene's preview clip, muted and on a loop, so you can see both scenes move before you pick. A click or tap on the playing cover still picks it. Pointing at a cover turns its sound on when Stash is set to play sound on previews. A clip starts once at least half the cover is on screen, so on a phone the lower scene waits until you scroll to it, and nothing loads for a cover you haven't reached. A scene Stash made no preview for keeps its cover, and with reduced motion set on your device every cover stays still. The clip is the preview Stash generated, as in Look closer, so it plays whatever the scene's format and records no play.
 - The foot of Cherry Pick's page shows the version Stash has installed, with links to what's new, the forum topic and the source code, and Support Cherry Pick, which opens CandyBoudoir's Ko-fi page for anyone who wants to leave a tip. Cherry Pick is free, and a tip changes nothing in it.
 
-Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.45.0, Xenith 3.2.0, Restash 0.3.0-55c1cb2 and Refract 1.24.3-458b135.
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.46.0, Xenith 3.2.0, Restash 0.3.0-55c1cb2 and Refract 1.24.3-458b135.
 
 ## 0.4.2
 
