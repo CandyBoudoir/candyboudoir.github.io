@@ -1,6 +1,6 @@
-// The cherries in the navbar's utility area, linking to the plugin page, and
-// the host for Cherry Pick's dialogs. During playback the icon keeps its
-// space but hides (watching.css).
+// The cherries in the navbar's utility area, linking to the plugin page (lit
+// on each of its tabs), and the host for Cherry Pick's dialogs. During
+// playback the icon keeps its space but hides (watching.css).
 import { patchAfter, ReactRouterDOM } from '../runtime/api.js'
 import { PLUGIN_NAME, PLUGIN_ROUTE } from '../name.js'
 import { Cherries } from '../ui/Cherries.jsx'
@@ -12,7 +12,6 @@ function NavIcon() {
   return (
     <NavLink
       className="nav-utility cherrypick-ui cherrypick-nav-icon"
-      exact
       to={PLUGIN_ROUTE}
     >
       <button

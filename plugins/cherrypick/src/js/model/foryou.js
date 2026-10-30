@@ -554,6 +554,60 @@ export function rankedScenes(ctx, signals, keep = () => true) {
 export const reasonFor = (ctx, x) =>
   reasonOptions(ctx, { ...x, kind: 'main' })[0].text
 
+// How far down the ranking the list looks for a scene that keeps the spread
+const SPREAD_LOOK = 50
+
+// For you's tab: every scene the row allows, in For you's order. Over the
+// whole library the row's own cards (`row`, computeForYou's items) come
+// first, as the row showed them; within a pool (the ids a filter let
+// through) the ranking starts afresh, with no exploration cards. The rest
+// keep the row's variety rule over every run of FY.size cards: no performer
+// on more than FY.perPerformer of them while a scene a little further down
+// can take the place. Items are { scene, x } (x: rankedScenes' entry) or the
+// row's own; reasonFor(ctx, x) gives the rest their reason when shown.
+export function forYouList(ctx, signals, { pool = null, row = null } = {}) {
+  const scored = rankedScenes(
+    ctx,
+    signals,
+    pool ? (s) => pool.has(s.id) : undefined,
+  )
+  const out = pool ? [] : [...(row ?? computeForYou(ctx, signals))]
+  const taken = new Set(out.map((it) => it.scene.id))
+  const window = new Map()
+  const count = (s, by) => {
+    for (const p of s.performers) window.set(p.id, (window.get(p.id) || 0) + by)
+  }
+  for (const it of out.slice(-(FY.size - 1))) count(it.scene, 1)
+  const push = (x) => {
+    out.push({ scene: x.scene, x })
+    taken.add(x.scene.id)
+    count(x.scene, 1)
+    if (out.length >= FY.size) count(out[out.length - FY.size].scene, -1)
+  }
+  const fits = (s) =>
+    s.performers.every((p) => (window.get(p.id) || 0) < FY.perPerformer)
+  let start = 0
+  for (;;) {
+    while (start < scored.length && taken.has(scored[start].scene.id)) start++
+    if (start >= scored.length) break
+    let pick = null
+    for (
+      let i = start, seen = 0;
+      i < scored.length && seen < SPREAD_LOOK;
+      i++
+    ) {
+      if (taken.has(scored[i].scene.id)) continue
+      seen++
+      if (fits(scored[i].scene)) {
+        pick = scored[i]
+        break
+      }
+    }
+    push(pick || scored[start])
+  }
+  return out
+}
+
 // signals: the visit's (visitSignals). Every candidate is a scene you own.
 export function computeForYou(ctx, signals) {
   const { M } = ctx

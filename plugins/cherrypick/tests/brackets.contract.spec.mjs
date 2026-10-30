@@ -452,10 +452,11 @@ test('with auto-apply on, closing the champion screen sets its ratings, and Undo
   try {
     await setPerformerRating(mine, hand)
 
-    // Cherry Pick's page lists the batch, with Undo
+    // Cherry Pick's Hall of Fame tab lists the batch, with Undo
     await visible(page.locator('a.cherrypick-nav-icon')).click()
-    await expect(page.locator('#your-score')).toContainText(
-      'within half a star',
+    await page.locator('.cherrypick-tabs').getByText('Hall of Fame').click()
+    await expect(page.locator('.cherrypick-strip')).toContainText(
+      /Your score is (on|waiting)/,
       { timeout: 20_000 },
     )
     const batches = page.locator('.cherrypick-applied-batches')
@@ -845,10 +846,11 @@ async function setBrackets(on) {
   })
 }
 
-// "Learning from …, 15 bracket picks" on Cherry Pick's page: the picks the
-// model learns from, finished brackets' and the paused one's (none, no line)
+// "Learning from …, 15 bracket picks" on Cherry Pick's Manage tab: the picks
+// the model learns from, finished brackets' and the paused one's (none, no
+// line)
 async function bracketPicks(page) {
-  await page.goto('/plugins/cherrypick')
+  await page.goto('/plugins/cherrypick/manage')
   const card = page.locator('#your-score')
   await expect(card).toContainText(/within half a star \d+ times in 10/, {
     timeout: 20_000,
@@ -915,6 +917,7 @@ test('with Brackets off, nothing offers a bracket, the results stay, and a pause
     // Cherry Pick's page says where the brackets went, and the paused
     // bracket's pick still teaches the model
     expect(await bracketPicks(page)).toBe(before + 1)
+    await page.goto('/plugins/cherrypick/hall-of-fame')
     const hof = page.locator('#hall-of-fame')
     await expect(hof.locator('.cherrypick-brackets-off')).toContainText(
       'Your paused bracket waits: turn Brackets on',
@@ -936,7 +939,7 @@ test('with Brackets off, nothing offers a bracket, the results stay, and a pause
     'Round of 16 · match 2 of 8',
   )
   await abandonBracket(play)
-  await page.goto('/plugins/cherrypick')
+  await page.goto('/plugins/cherrypick/hall-of-fame')
   await expect(page.locator('#hall-of-fame')).toContainText(
     'Champions round at 4 different champions',
     { timeout: 20_000 },

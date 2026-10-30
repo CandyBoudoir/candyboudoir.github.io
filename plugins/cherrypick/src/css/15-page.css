@@ -1,0 +1,162 @@
+/* Cherry Pick's page (features/pluginPage.jsx): the line on Your score and
+   brackets, the tabs, the For you tab's toolbar and pages (forYouPage.jsx)
+   and the footer. Layout only. */
+
+.cherrypick-strip {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  justify-content: space-between;
+  margin: 0.25rem 0 1rem;
+}
+
+.cherrypick-strip-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cherrypick-tabs {
+  margin-bottom: 1rem;
+}
+
+.cherrypick-fy-filters,
+.cherrypick-fy-view {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cherrypick-fy-filters {
+  margin-bottom: 0.75rem;
+}
+
+/* where the page is, the pages and the view: three columns, the pages in
+   the middle */
+.cherrypick-fy-viewbar {
+  align-items: center;
+  display: grid;
+  gap: 0.5rem 1rem;
+  grid-template-columns: 1fr auto 1fr;
+  margin-bottom: 0.75rem;
+}
+
+.cherrypick-fy-viewbar .pagination {
+  margin: 0;
+}
+
+.cherrypick-fy-view {
+  justify-content: flex-end;
+}
+
+.cherrypick-fy-search.form-control {
+  width: 14rem;
+}
+
+.cherrypick-fy-pick {
+  min-width: 10rem;
+}
+
+.cherrypick-fy-length.form-control,
+.cherrypick-fy-per.form-control {
+  width: auto;
+}
+
+.cherrypick-fy-zoom.form-control {
+  width: 6rem;
+}
+
+.cherrypick-fy-pages {
+  display: flex;
+  justify-content: center;
+  margin: 0.5rem 0;
+}
+
+.cherrypick-fy-list {
+  margin: 0 -15px;
+}
+
+/* as in the rows, the reason takes the place of the scene's description */
+.cherrypick-fy-list .scene-card__description:not(.cherrypick-reason) {
+  display: none;
+}
+
+.cherrypick-fy-list .cherrypick-reason {
+  -webkit-line-clamp: 2;
+}
+
+/* the pickers sit in the line on wider screens; on a phone they fold */
+.cherrypick-fy-more {
+  display: contents;
+}
+
+.cherrypick-fy-more-toggle.btn {
+  display: none;
+}
+
+/* Stash's cards and table rows offer to select; nothing on the tab acts on
+   a selection */
+.cherrypick-fy-list .card-check,
+.cherrypick-fy-list .wall-item-check,
+.cherrypick-fy-list td.select-col > * {
+  display: none;
+}
+
+.cherrypick-fy-loading,
+.cherrypick-fy-empty {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.cherrypick-footer {
+  border-top: 1px solid currentcolor;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding: 1rem 0 2rem;
+}
+
+.cherrypick-footer-links,
+.cherrypick-footer-kofi {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+@media (width <= 767.98px) {
+  .cherrypick-fy-viewbar {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+}
+
+@media (width <= 575.98px) {
+  .cherrypick-fy-search.form-control {
+    flex: 1;
+    width: auto;
+  }
+
+  .cherrypick-fy-more-toggle.btn {
+    display: inline-block;
+  }
+
+  .cherrypick-fy-more {
+    display: none;
+  }
+
+  .cherrypick-fy-more.open {
+    display: flex;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .cherrypick-fy-pick {
+    flex: 1 1 100%;
+  }
+}

@@ -587,7 +587,7 @@ for (const [key, side] of Object.entries(SIDE)) {
             ...config,
             learnFromMatches: true,
           })
-          await visit.goto('/plugins/cherrypick')
+          await visit.goto('/plugins/cherrypick/manage')
           await expect(visit.locator('#your-score')).toContainText(
             `${matches.size} matches in ${side.name}`,
             { timeout: 20_000 },
@@ -909,7 +909,7 @@ test.describe('beside Stash Curator', () => {
       await page.goto('/scenes?sortby=title&perPage=120')
       await expect(banners.first()).toBeVisible({ timeout: 20_000 })
 
-      await page.goto('/plugins/cherrypick')
+      await page.goto('/plugins/cherrypick/manage')
       const card = page.locator('#your-score .cherrypick-curator-offer')
       await expect(card).toContainText('Stash Curator also scores your cards', {
         timeout: 20_000,
@@ -970,7 +970,7 @@ test.describe('beside Stash Curator', () => {
     try {
       // Cherry Pick writes its defaults at first load, as it would long
       // before anyone opens Settings
-      await page.goto('/plugins/cherrypick')
+      await page.goto('/plugins/cherrypick/manage')
       await expect(offer(page)).toBeVisible({ timeout: 20_000 })
       await expect.poll(async () => (await pluginConfig())?.badges).toBe(true)
 
@@ -1014,7 +1014,7 @@ test.describe('beside Stash Curator', () => {
   }) => {
     const before = await pluginConfig()
     try {
-      await page.goto('/plugins/cherrypick')
+      await page.goto('/plugins/cherrypick/manage')
       await offer(page).getByRole('button', { name: 'Keep both' }).click({
         timeout: 20_000,
       })
@@ -1139,7 +1139,7 @@ test.describe('beside Restash', () => {
       expect(s.rating100, s.id).toBe(scenes[s.id].rating100)
     // Cherry Pick learns from every rated scene but one that equals its
     // score by chance
-    await page.goto('/plugins/cherrypick')
+    await page.goto('/plugins/cherrypick/manage')
     await expect(page.locator('#your-score')).toContainText(
       learning(await learnedScenes()),
       { timeout: 20_000 },
@@ -1160,7 +1160,7 @@ test.describe('beside Restash', () => {
       expect(learned).toBeLessThan(
         Object.values(scenes).filter((s) => s.rating100 != null).length,
       )
-      await page.goto('/plugins/cherrypick')
+      await page.goto('/plugins/cherrypick/manage')
       await expect(page.locator('#your-score')).toContainText(
         learning(learned),
         { timeout: 20_000 },

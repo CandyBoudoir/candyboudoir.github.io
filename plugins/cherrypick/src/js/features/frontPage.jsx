@@ -34,6 +34,7 @@ import { rateMore } from '../model/index.js'
 import { toRateUrl } from '../data/listFilter.js'
 import { useFallbackLookups } from '../stashdb/layer.js'
 import { KEYS, local } from '../storage/tier3.js'
+import { FOR_YOU_TAB } from '../name.js'
 import { WatchThis } from './watchThis.jsx'
 
 // ------------------------------------------------------------ the visit's rows
@@ -43,8 +44,8 @@ let snap = null
 // The rows for this visit: computed when the front page opens with a model
 // (and again within the visit only if the settings or the StashDB data
 // change). Cards shown last visit and not opened count as passed over,
-// once, here.
-function snapshot(s) {
+// once, here. For you's tab starts with the same row (forYouPage.jsx).
+export function snapshot(s) {
   if (!s.M) return null
   const key = [s.visit, JSON.stringify(s.settings), s.M.db.hasStashdb].join('|')
   if (snap?.key === key) return snap
@@ -90,7 +91,7 @@ const NOT_SENT = "Stash didn't send these scenes. Reload the page to try again."
 // One row of the visit. Hidden cards stay in place as Undo cards; scenes
 // hidden since the visit began never show again in it. A row with nothing
 // to show says why in `empty`; without it, the row leaves the page.
-function SceneRow({ id, title, items, className, onOpen, extra, empty }) {
+function SceneRow({ id, title, items, className, onOpen, extra, empty, link }) {
   const hidden = useAppState((s) => s.notInterested)
   const recent = useAppState((s) => s.recentHidden)
   const isHidden = new Set(hidden.map((n) => n.sceneId))
@@ -106,6 +107,7 @@ function SceneRow({ id, title, items, className, onOpen, extra, empty }) {
       className={`cherrypick-ui ${className || ''}`}
       kind="scene"
       extra={extra}
+      link={link}
       empty={shown.length ? NOT_SENT : empty}
       items={items ? shown : null}
       renderCard={(scene, it, i) =>
@@ -199,6 +201,7 @@ function CherryPickRows() {
           className="cherrypick-for-you"
           onOpen={recordOpen}
           extra={<SharpenLine />}
+          link={{ to: FOR_YOU_TAB, text: 'View all' }}
           empty="Every scene is marked Not interested or has a tag from Tags to keep out of my picks."
         />
       ) : null}

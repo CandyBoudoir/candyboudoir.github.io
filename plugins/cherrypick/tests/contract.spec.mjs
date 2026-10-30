@@ -433,7 +433,7 @@ test("Cherry Pick's page counts the scenes with a tag it doesn't learn from", as
     dontLearnTags: `${name.toUpperCase()}, No such tag`,
   })
   try {
-    await page.goto('/plugins/cherrypick')
+    await page.goto('/plugins/cherrypick/manage')
     const section = page.locator('#dont-learn')
     await expect(section).toContainText(
       `Scenes tagged ${name.toUpperCase()} or No such tag`,
@@ -518,7 +518,7 @@ test('nothing of Cherry Pick shows once the scene plays', async ({ page }) => {
   await expect(page.locator('.cherrypick-nav-icon').first()).toBeHidden()
 })
 
-test('the navbar cherries open the plugin page, which survives a reload', async ({
+test('the navbar cherries open the plugin page on For you, which survives a reload', async ({
   page,
 }) => {
   await page.goto('/')
@@ -527,10 +527,15 @@ test('the navbar cherries open the plugin page, which survives a reload', async 
   await expect(page.locator('.cherrypick-page h1').first()).toContainText(
     'Cherry Pick',
   )
+  await expect(page.locator('.cherrypick-tabs .nav-link.active')).toHaveText(
+    'For you',
+  )
   await page.reload()
-  await expect(page.locator('#your-score')).toBeVisible({ timeout: 20_000 })
-  await expect(page.locator('#your-score')).toContainText(
-    /within half a star \d+ times in 10/,
+  await expect(
+    page.locator('.cherrypick-fy-list .scene-card').first(),
+  ).toBeVisible({ timeout: 20_000 })
+  await expect(page.locator('.cherrypick-strip')).toContainText(
+    /Your score is (on: within half a star \d+ times in 10|waiting)/,
   )
 })
 
@@ -676,7 +681,7 @@ test('without Stash Curator, nothing offers to hide Your score on cards', async 
     )
   const offer = page.locator('.cherrypick-curator-offer')
   let answer = asked()
-  await page.goto('/plugins/cherrypick')
+  await page.goto('/plugins/cherrypick/manage')
   await answer
   await expect(page.locator('#your-score')).toContainText(
     /within half a star \d+ times in 10/,
@@ -693,7 +698,7 @@ test('without Stash Curator, nothing offers to hide Your score on cards', async 
   await expect(offer).toHaveCount(0)
 })
 
-test('switching For you off removes the row', async ({ page }) => {
+test('switching For you off removes the row and the tab', async ({ page }) => {
   // Through the configuration, as Stash's Settings page saves it: develop
   // collapses each plugin's settings, so the switch is not always visible.
   const before = await pluginConfig()
@@ -706,6 +711,16 @@ test('switching For you off removes the row', async ({ page }) => {
     })
     await page.waitForTimeout(2000)
     await expect(page.locator('.cherrypick-for-you')).toHaveCount(0)
+    // Cherry Pick's page opens on the Hall of Fame, with no For you tab
+    await page.goto('/plugins/cherrypick')
+    await expect(page.locator('.cherrypick-tabs .nav-link.active')).toHaveText(
+      'Hall of Fame',
+      { timeout: 20_000 },
+    )
+    await expect(page.locator('.cherrypick-tabs .nav-link')).toHaveText([
+      'Hall of Fame',
+      'Manage',
+    ])
   } finally {
     await setPluginSettings(PLUGIN_ID, before)
   }
@@ -738,7 +753,7 @@ test("with the switch on, other plugins' matches reach the model", async ({
   const before = await pluginConfig()
   await setPluginSettings(PLUGIN_ID, { ...before, learnFromMatches: true })
   try {
-    await page.goto('/plugins/cherrypick')
+    await page.goto('/plugins/cherrypick/manage')
     await expect(page.locator('#your-score')).toContainText(
       '2 matches in HotOrNot',
       { timeout: 20_000 },
@@ -751,8 +766,8 @@ test("with the switch on, other plugins' matches reach the model", async ({
 })
 
 test('Remove Cherry Pick data leaves a tombstone', async ({ page }) => {
-  await page.goto('/plugins/cherrypick')
-  // Every section renders at once, Your score as "Learning your taste…", and
+  await page.goto('/plugins/cherrypick/manage')
+  // The tab's sections render at once, Your score as "Learning your taste…", and
   // grows by a row when the model lands, which moves Remove down. A click
   // that Playwright dispatches in that moment lands on the section beside the
   // button, and Playwright does not retry it: the dialog never opens.

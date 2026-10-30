@@ -100,13 +100,19 @@ test('no Your score yet: the scene page says how many ratings it needs', async (
 test("Cherry Pick's page counts the ratings and links to the scenes to rate", async ({
   page,
 }) => {
-  await page.goto('/plugins/cherrypick')
+  await page.goto('/plugins/cherrypick/hall-of-fame')
+  await expect(page.locator('#hall-of-fame')).toContainText('No brackets yet', {
+    timeout: 20_000,
+  })
+  await expect(page.locator('.cherrypick-strip')).toContainText(
+    'Your score starts once you rate 9 more scenes.',
+  )
+  await page.goto('/plugins/cherrypick/manage')
   const card = page.locator('#your-score')
   await expect(card).toContainText('Rate 9 more scenes to start', {
     timeout: 20_000,
   })
   await expect(card).toContainText('For you goes by your favorites')
-  await expect(page.locator('#hall-of-fame')).toContainText('No brackets yet')
   await card.locator('.cherrypick-rate-link').click()
   await expect(page).toHaveURL(/\/scenes\?c=.*rating100/)
   await expect(page.locator('.scene-card').first()).toBeVisible({
@@ -181,7 +187,7 @@ test("with Brackets off, For you's line offers ratings alone, and a paused brack
     await expect(line.locator('.cherrypick-sharpen-bracket')).toHaveCount(0)
     await expect(row).toHaveCount(0)
     await expect(page.locator('.cherrypick-resume-pill')).toHaveCount(0)
-    await page.goto('/plugins/cherrypick')
+    await page.goto('/plugins/cherrypick/hall-of-fame')
     await expect(page.locator('#hall-of-fame')).toContainText(
       'Brackets are off',
       { timeout: 20_000 },

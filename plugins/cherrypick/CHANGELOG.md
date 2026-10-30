@@ -1,8 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.5.0
 
+- For you has its own tab on Cherry Pick's page, which the cherries in the navbar open, and View all on the For you row opens it too. The tab lists every scene For you would show, in For you's order: the row's twelve first, then the rest of your library. It uses Stash's own Grid, List and Wall, with Stash's card sizes and pages of 20, 40, 60 or 120 scenes, and each card says why it is there and has the ⋯ menu, as in the row. A click on a scene plays it, with the scenes on that page queued in For you's order. A search, Performers, Studios, Tags, Unwatched and a length narrow the tab to the scenes that fit, ranked again among themselves. The view, the page and the filters are in the page's address, so Back from a scene returns to the same place, and the tab opens in the view you used last. With For you off under Settings > Plugins, the tab goes with the row and the page opens on the Hall of Fame.
+- Cherry Pick's page has three tabs, For you, Hall of Fame and Manage, each at its own address. Manage holds Your score, StashDB, Not interested, Don't learn and Remove Cherry Pick data, and links to Cherry Pick's switches in Settings > Plugins. A line above the tabs says where Your score stands, and with Brackets on it starts a performer or scene bracket, or finishes the one you paused. A link to a part of the old page, such as one you bookmarked, opens the tab that holds it.
 - In a scene bracket, each cover plays the scene's preview clip, muted and on a loop, so you can see both scenes move before you pick. A click or tap on the playing cover still picks it. Pointing at a cover turns its sound on when Stash is set to play sound on previews. A clip starts once at least half the cover is on screen, so on a phone the lower scene waits until you scroll to it, and nothing loads for a cover you haven't reached. A scene Stash made no preview for keeps its cover, and with reduced motion set on your device every cover stays still. The clip is the preview Stash generated, as in Look closer, so it plays whatever the scene's format and records no play.
+- The foot of Cherry Pick's page shows the version Stash has installed, with links to what's new, the forum topic and the source code, and Support Cherry Pick, which opens CandyBoudoir's Ko-fi page for anyone who wants to leave a tip. Cherry Pick is free, and a tip changes nothing in it.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.45.0, Xenith 3.2.0, Restash 0.3.0-55c1cb2 and Refract 1.24.3-458b135.
 
 ## 0.4.2
 
