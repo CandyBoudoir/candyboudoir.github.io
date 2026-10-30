@@ -394,8 +394,10 @@ test('Not interested takes a card out', async ({ page }) => {
   await expect(cards(page).first().locator('.card-section-title')).toHaveText(
     MISSING[1].title,
   )
-  // Undo, on the plugin page (through the navbar, so nothing reloads)
+  // Undo, on the plugin page's Manage tab (through the navbar, so nothing
+  // reloads)
   await page.locator('.cherrypick-nav-icon').filter({ visible: true }).click()
+  await page.locator('.cherrypick-tabs').getByText('Manage').click()
   await page
     .locator('#not-interested .setting', { hasText: MISSING[0].title })
     .getByRole('button', { name: 'Undo' })

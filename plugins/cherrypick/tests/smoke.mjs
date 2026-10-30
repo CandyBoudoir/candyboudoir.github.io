@@ -167,7 +167,7 @@ for (const list of ['scenes', 'performers'])
     })
 
 await check('plugin page survives a reload', async () => {
-  await page.goto('/plugins/cherrypick')
+  await page.goto('/plugins/cherrypick/manage')
   await visible('#your-score')
   await page.reload()
   await visible('#your-score')

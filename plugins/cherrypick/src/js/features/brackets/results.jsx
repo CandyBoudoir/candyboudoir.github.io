@@ -15,7 +15,7 @@ import * as BR from '../../model/brackets.js'
 import { championsRoundPool } from '../../model/bracketSetup.js'
 import { andList, fmtStars, genderLabel, pronoun } from '../../model/util.js'
 import { customFieldUrl } from '../../data/listFilter.js'
-import { NAME_S, PLUGIN_ROUTE } from '../../name.js'
+import { HALL_OF_FAME_TAB, NAME_S } from '../../name.js'
 import { closeDialog, openDialog } from '../../ui/dialogs.jsx'
 import { useAppState } from '../../ui/hooks.js'
 import {
@@ -528,7 +528,7 @@ export function ResultDialog({ id, moment }) {
                 Closing this sets {toSet} {isP ? 'performer ' : ''}
                 {plural(toSet, 'rating')} in Stash. You can undo{' '}
                 {toSet === 1 ? 'it' : 'them'} on{' '}
-                <Link to={`${PLUGIN_ROUTE}#hall-of-fame`} onClick={closeDialog}>
+                <Link to={HALL_OF_FAME_TAB} onClick={closeDialog}>
                   {NAME_S} page
                 </Link>
                 .

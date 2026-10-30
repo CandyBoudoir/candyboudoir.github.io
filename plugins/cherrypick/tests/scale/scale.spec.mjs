@@ -518,7 +518,7 @@ test('StashDB: popularity and scenes you do not have', async () => {
 })
 
 test('the plugin page, then Remove Cherry Pick data', async () => {
-  await page.goto('/plugins/cherrypick')
+  await page.goto('/plugins/cherrypick/manage')
   await expect(page.locator('.cherrypick-page-title').first()).toBeVisible({
     timeout: 30_000,
   })

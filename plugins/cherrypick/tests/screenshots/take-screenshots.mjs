@@ -324,12 +324,15 @@ if (want('performers')) {
   await shot(page, 'performers')
 }
 
+// Cherry Pick's page on its For you tab, in Stash's Wall view
 if (want('plugin-page')) {
-  await page.goto('/plugins/cherrypick')
-  await page.locator('#your-score').waitFor({ timeout: 30_000 })
-  await page.getByText('Hall of Fame').first().waitFor()
+  await page.goto('/plugins/cherrypick?disp=2&z=1&per=40')
+  await page
+    .locator('.cherrypick-fy-list .wall-item')
+    .first()
+    .waitFor({ timeout: 30_000 })
   await shot(page, 'plugin-page')
-  console.log((await page.locator('#your-score').innerText()).slice(0, 400))
+  console.log(await page.locator('.cherrypick-strip').innerText())
 }
 
 if (want('settings')) {

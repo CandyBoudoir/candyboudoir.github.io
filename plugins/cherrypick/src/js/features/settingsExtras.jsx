@@ -130,7 +130,7 @@ function PageLink() {
       id={`plugin-${PLUGIN_ID}-page`}
       className="cherrypick-ui"
       heading={`${PLUGIN_NAME} page`}
-      subHeading={`How well Your score is doing, the full Hall of Fame, StashDB, what you hid, and Remove ${PLUGIN_NAME} data.`}
+      subHeading={`For you in full, the Hall of Fame, how well Your score is doing, StashDB, what you hid, and Remove ${PLUGIN_NAME} data.`}
     >
       <Link className="btn btn-secondary btn-sm" to={PLUGIN_ROUTE}>
         Open
