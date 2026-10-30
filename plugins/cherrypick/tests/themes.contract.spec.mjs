@@ -42,7 +42,14 @@ for (const theme of themes) {
     test.skip(besideRefract, 'Refract is a theme too')
     await usePlugins('CherryPick', theme)
     const errors = []
-    page.on('pageerror', (e) => errors.push(e.message))
+    page.on('pageerror', (e) => {
+      // WebKit rejects a request a full page load cancels, and Stash's
+      // Apollo client leaves that rejection unhandled. The test loads each
+      // page in full while queries are in flight; Stash's own navigation
+      // never unloads the page, so users don't hit it.
+      if (/graphql due to access control checks/.test(e.message)) return
+      errors.push(e.message)
+    })
     await page.goto('/')
     await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
     // The row's heading is Stash's, so it takes the theme's font.

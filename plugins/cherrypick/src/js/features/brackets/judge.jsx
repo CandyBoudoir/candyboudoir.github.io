@@ -2,10 +2,11 @@
 // Each side of a match is a contact sheet: the cover and eight frames over
 // the runtime, title, studio, year, length, resolution, up to four
 // performers' faces and a row of tags, with no rating, seed or reason. The
-// cover picks, as a performer card's photo does. A frame under it opens the
-// inspector at that frame, and Look closer on the cover: one scene large, a
-// frame viewer with a scrub bar, sixteen tiles, Stash's preview clip, every
-// performer, the description and every tag.
+// cover picks, as a performer card's photo does, and plays Stash's preview
+// clip, muted and on a loop. A frame under it opens the inspector at that
+// frame, and Look closer on the cover: one scene large, a frame viewer with
+// a scrub bar, sixteen tiles, Stash's preview clip, every performer, the
+// description and every tag.
 //
 // Nothing here plays the scene's own file or uses Stash's scene player,
 // which records a play and saves activity as it plays. The frames come
@@ -19,6 +20,7 @@ import { createStore, useStoreValue } from '../../runtime/store.js'
 import { SCENE_LOOK } from '../../data/queries.js'
 import { useAppState } from '../../ui/hooks.js'
 import { fmtDuration } from '../../ui/StashdbSceneCard.jsx'
+import { calm } from './map/fx.js'
 import { Icon } from './parts.jsx'
 import { NONE, cardTags, evenly, parseSprites, resolution } from './sheet.js'
 
@@ -220,6 +222,74 @@ function Faces({ db, performers, max, big = false }) {
   )
 }
 
+// The cover's preview clip, once the match knows Stash made one. It plays
+// muted and on a loop while at least half of it is in view: at phone width
+// the scenes stack, and the lower one waits until it scrolls up. Pointing
+// at it turns its sound on when Stash's sound on preview setting is on; a
+// browser that pauses a clip for sound without a click gets it muted
+// again. The cover shows until the clip's first frame, and stays under
+// reduced motion or when the browser can't play the clip.
+function CoverPreview({ id }) {
+  const settings = usePreviewSettings()
+  const ref = React.useRef(null)
+  const [on, setOn] = React.useState(false)
+  const [failed, setFailed] = React.useState(false)
+  const url = looks.get(id)?.paths?.preview
+  const show = !!url && previews.get(id) === true && !failed && !calm()
+  const sound = !!settings?.sound
+  React.useEffect(() => {
+    const v = ref.current
+    if (!v) return
+    const cover = v.parentElement
+    let seen = false
+    const io = new IntersectionObserver(
+      ([e]) => {
+        seen = e.intersectionRatio >= 0.5
+        if (seen) v.play().catch(() => {})
+        else {
+          v.muted = true
+          v.pause()
+        }
+      },
+      { threshold: 0.5 },
+    )
+    const loud = (e) => {
+      if (sound && e.pointerType === 'mouse') v.muted = false
+    }
+    const quiet = () => (v.muted = true)
+    const resume = () => {
+      if (!seen || v.muted) return
+      v.muted = true
+      v.play().catch(() => {})
+    }
+    io.observe(v)
+    cover.addEventListener('pointerenter', loud)
+    cover.addEventListener('pointerleave', quiet)
+    v.addEventListener('pause', resume)
+    return () => {
+      io.disconnect()
+      cover.removeEventListener('pointerenter', loud)
+      cover.removeEventListener('pointerleave', quiet)
+      v.removeEventListener('pause', resume)
+    }
+  }, [show, sound])
+  if (!show) return null
+  return (
+    <video
+      ref={ref}
+      className={`cherrypick-cover-video${on ? ' on' : ''}`}
+      src={url}
+      muted
+      loop
+      playsInline
+      preload="none"
+      aria-hidden="true"
+      onPlaying={() => setOn(true)}
+      onError={() => setFailed(true)}
+    />
+  )
+}
+
 /**
  * One side of a scene match. The cover picks, as a performer card's photo
  * does; onLook(frame) opens the inspector, at a frame under the cover or
@@ -245,6 +315,7 @@ export function SceneContender({ id, side, onPick, onLook }) {
         aria-label={`Pick ${title}`}
       >
         {s.image ? <img src={s.image} alt="" /> : null}
+        <CoverPreview id={id} />
         <span className="cherrypick-key badge badge-dark">
           {side === 'left' ? '←' : '→'}
         </span>
