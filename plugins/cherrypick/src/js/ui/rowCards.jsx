@@ -1,15 +1,29 @@
-// Stash's SceneCard, as Cherry Pick's rows show it: the card's description
-// gives way to the reason the card is there, and its popover row gains the
-// ⋯ menu. The patches apply to every SceneCard, so they read a context only
-// Cherry Pick's rows provide and render nothing anywhere else.
-import { components, patchAfter, React } from '../runtime/api.js'
+// Stash's SceneCard, as Cherry Pick's rows and For you's tab show it: the
+// card's description gives way to the reason the card is there, and its
+// popover row gains the ⋯ menu (Refract's row of pills, under Refract). The
+// patches apply to every SceneCard, so they read a context only Cherry
+// Pick's rows and tab provide and render nothing anywhere else.
+import { components, patchAfter, React, ReactDOM } from '../runtime/api.js'
 import { CardMenu } from './CardMenu.jsx'
+import { refract } from './refract.js'
 import { Safe } from './Safe.jsx'
 
 export const RowItem = React.createContext(null)
+// For you's tab: its cards come from Stash's SceneList, one context for all
+// of them. { rowId, items: Map(scene id -> item) }
+export const PageItems = React.createContext(null)
 
-function Reason() {
-  const ctx = React.useContext(RowItem)
+// The row item a card stands for, with its row, or null on Stash's own cards
+function useItem(scene) {
+  const row = React.useContext(RowItem)
+  const page = React.useContext(PageItems)
+  if (row) return row
+  const item = scene && page?.items.get(scene.id)
+  return item ? { item, rowId: page.rowId } : null
+}
+
+function Reason({ scene }) {
+  const ctx = useItem(scene)
   if (!ctx?.item.reason) return null
   return (
     <div className="scene-card__description cherrypick-reason cherrypick-ui">
@@ -18,33 +32,72 @@ function Reason() {
   )
 }
 
-function Menu() {
-  const ctx = React.useContext(RowItem)
+function Menu({ scene }) {
+  const ctx = useItem(scene)
   if (!ctx || !ctx.item.scene) return null
-  return <CardMenu item={ctx.item} rowId={ctx.rowId} />
+  return refract() ? (
+    <PillMenu item={ctx.item} rowId={ctx.rowId} />
+  ) : (
+    <CardMenu item={ctx.item} rowId={ctx.rowId} />
+  )
+}
+
+// Refract hides the popover row and draws a row of pills over the picture
+// once it has the scene's counts. The menu goes at the end of those pills,
+// through a portal, and back there if Refract draws them again.
+function PillMenu({ item, rowId }) {
+  const anchor = React.useRef(null)
+  const [slot, setSlot] = React.useState(null)
+  React.useEffect(() => {
+    const card = anchor.current?.closest('.scene-card')
+    if (!card) return
+    const el = document.createElement('div')
+    el.className = 'cherrypick-pill-menu'
+    const place = () => {
+      const pills = card.querySelector('.stash-card-counts')
+      if (pills && el.parentNode !== pills) pills.appendChild(el)
+    }
+    place()
+    setSlot(el)
+    const watch = new MutationObserver(place)
+    watch.observe(card, { childList: true, subtree: true })
+    return () => {
+      watch.disconnect()
+      el.remove()
+    }
+  }, [])
+  return (
+    <>
+      <span ref={anchor} hidden />
+      {slot
+        ? ReactDOM.createPortal(<CardMenu item={item} rowId={rowId} />, slot)
+        : null}
+    </>
+  )
 }
 
 // A card with no tags, performers or counts has no popover row, so in
 // Cherry Pick's rows the menu brings its own, in Stash's markup.
-function MenuRow() {
-  const ctx = React.useContext(RowItem)
+function MenuRow({ scene }) {
+  const ctx = useItem(scene)
   if (!ctx || !ctx.item.scene) return null
   return (
     <>
       <hr />
       <div className="card-popovers btn-group">
-        <Menu />
+        <Menu scene={scene} />
       </div>
     </>
   )
 }
 
-// The ButtonGroup Stash renders as .card-popovers, a few fragments down.
-function withMenu(node, depth = 0) {
+// The ButtonGroup Stash renders as .card-popovers, a few fragments down,
+// with the menu added.
+function withMenu(node, menu, depth = 0) {
   if (!node || typeof node !== 'object' || depth > 4) return null
   if (Array.isArray(node)) {
     for (let i = 0; i < node.length; i++) {
-      const found = withMenu(node[i], depth + 1)
+      const found = withMenu(node[i], menu, depth + 1)
       if (found) return node.map((n, j) => (j === i ? found : n))
     }
     return null
@@ -55,10 +108,10 @@ function withMenu(node, depth = 0) {
       node,
       {},
       ...[].concat(props.children ?? []),
-      <Menu key="cherrypick-menu" />,
+      menu,
     )
   if (props.children == null) return null
-  const inner = withMenu(props.children, depth + 1)
+  const inner = withMenu(props.children, menu, depth + 1)
   if (!inner) return null
   // Spread an array back out, as JSX passed it, so React wants no keys.
   return Array.isArray(inner)
@@ -71,18 +124,18 @@ export function registerRowCards() {
     <>
       {result}
       <Safe name="row reason">
-        <Reason />
+        <Reason scene={props.scene} />
       </Safe>
     </>
   ))
   patchAfter(
     'SceneCard.Popovers',
     (props, result) =>
-      withMenu(result) || (
+      withMenu(result, <Menu key="cherrypick-menu" scene={props.scene} />) || (
         <>
           {result}
           <Safe name="card menu">
-            <MenuRow />
+            <MenuRow scene={props.scene} />
           </Safe>
         </>
       ),

@@ -6,6 +6,7 @@ import {
   DEMO,
   PLUGIN_ID,
   demoScene,
+  finishedBracket,
   forYouCards,
   gql,
   pluginConfig,
@@ -52,6 +53,112 @@ test('For you comes first on the front page, before Stash rows', async ({
   expect(errors).toEqual([])
 })
 
+// To loop, Stash's slider copies every card to each end of the row. The
+// demo library's More with rows hold 5 cards; just under 1909 px the slider
+// shows 4, so a looping row would show a copy of its first card after its
+// last.
+test("Cherry Pick's rows show each card once, however few they hold", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1850, height: 1000 })
+  await page.goto('/')
+  await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
+  const follow = page.locator('.cherrypick-follow')
+  await expect(follow.first()).toBeVisible({ timeout: 20_000 })
+  const rows = await page
+    .locator('.cherrypick-front .cherrypick-row')
+    .evaluateAll((rows) =>
+      rows.map((row) =>
+        [...row.querySelectorAll('.scene-card, .performer-card')].map((card) =>
+          card
+            .querySelector('a[href*="/scenes/"], a[href*="/performers/"]')
+            ?.getAttribute('href'),
+        ),
+      ),
+    )
+  for (const cards of rows) expect(cards).toEqual([...new Set(cards)])
+})
+
+// Cherry Pick's rows ask Stash for their scenes by id (Stash's own
+// FindScenes with scene_ids), and Stash fails the whole request if one id
+// is gone: a scene deleted or merged since Cherry Pick read the library.
+// This adds an id no scene has to each request for more than one scene.
+const sceneByIds = (route) => {
+  const body = route.request().postDataJSON()
+  return body?.operationName === 'FindScenes' &&
+    Array.isArray(body.variables?.scene_ids)
+    ? body
+    : null
+}
+
+test('For you keeps its cards when Stash has lost one of its scenes', async ({
+  page,
+}) => {
+  await page.route('**/graphql', (route) => {
+    const body = sceneByIds(route)
+    const ids = body?.variables.scene_ids
+    if (!ids || ids.length < 2) return route.continue()
+    return route.continue({
+      postData: JSON.stringify({
+        ...body,
+        variables: { ...body.variables, scene_ids: [...ids, 999999] },
+      }),
+    })
+  })
+  await page.goto('/')
+  await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
+  expect(await forYouCards(page).count()).toBe(12)
+})
+
+test('For you says so when Stash sends none of its scenes', async ({
+  page,
+}) => {
+  await page.route('**/graphql', (route) =>
+    sceneByIds(route)
+      ? route.fulfill({
+          json: { errors: [{ message: 'scene with id 1 not found' }] },
+        })
+      : route.continue(),
+  )
+  await page.goto('/')
+  await expect(
+    page.locator('.cherrypick-for-you .cherrypick-row-empty'),
+  ).toHaveText(
+    "Stash didn't send these scenes. Reload the page to try again.",
+    {
+      timeout: 20_000,
+    },
+  )
+})
+
+// A champion merged into another performer, or deleted, stays in the
+// bracket history Cherry Pick keeps.
+test('the Hall of Fame keeps its champions when Stash has lost one', async ({
+  page,
+}) => {
+  const before = (await pluginConfig()) ?? {}
+  const gone = { ...finishedBracket('999999', null), id: 'bgone' }
+  await setPluginSettings(PLUGIN_ID, {
+    ...before,
+    hallOfFame: JSON.stringify([
+      finishedBracket(demo.performers['Bea Lark'], null),
+      gone,
+    ]),
+  })
+  try {
+    await page.goto('/')
+    const cards = page.locator(
+      '.cherrypick-row-hall-of-fame .slick-slide .performer-card',
+    )
+    await expect(cards.first()).toBeVisible({ timeout: 20_000 })
+    expect(await cards.count()).toBe(1)
+  } finally {
+    // no page left open to save over the configuration put back
+    await page.close()
+    await setPluginSettings(PLUGIN_ID, before)
+  }
+})
+
 // Stash stretches every card in a row to the tallest one, with the popover
 // row at its foot, whatever each card's description holds.
 test("the cards in Cherry Pick's rows end at the same height, as in Stash's rows", async ({
@@ -62,11 +169,11 @@ test("the cards in Cherry Pick's rows end at the same height, as in Stash's rows
     await page.addStyleTag({
       content: `${row} .slick-slide[data-index="1"] .scene-card__details { padding-bottom: 3rem; }`,
     })
+    // offsetHeight, the height before transforms: Refract floats its cards
+    // rated 4.75★ and up, up to 6% larger, in Stash's rows as in these
     const heights = await page
-      .locator(`${row} .slick-slide:not(.slick-cloned) .scene-card`)
-      .evaluateAll((cards) => [
-        ...new Set(cards.map((c) => c.getBoundingClientRect().height)),
-      ])
+      .locator(`${row} .slick-slide .scene-card`)
+      .evaluateAll((cards) => [...new Set(cards.map((c) => c.offsetHeight))])
     expect(heights, row).toHaveLength(1)
   }
   await page.goto('/')
@@ -138,20 +245,26 @@ test('the bracket buttons say why they are greyed out until the model is in', as
   )
 })
 
+// Refract floats its cards rated 4.75★ and up for as long as they show (its
+// reduced motion rule loses to the float), and a click waits for its target
+// to stand still. Beside Refract, a click in a card checks that its target
+// shows and goes ahead.
+async function press(target) {
+  await expect(target).toBeVisible()
+  await target.click({ force: companionPluginIds().includes('refract') })
+}
+
 test('Not interested hides a card in place and is saved to Stash', async ({
   page,
 }) => {
   await page.goto('/')
   const card = forYouCards(page).first()
   await expect(card).toBeVisible({ timeout: 20_000 })
-  const slide = page.locator(
-    '.cherrypick-for-you .slick-active:not(.slick-cloned)',
-  )
-  await slide.first().locator('.cherrypick-card-menu button').click()
-  await slide.first().locator('.cherrypick-ni').click()
-  // Slick clones slides for its infinite scroll; act on the real ones.
+  const slide = page.locator('.cherrypick-for-you .slick-active')
+  await press(slide.first().locator('.cherrypick-card-menu button'))
+  await press(slide.first().locator('.cherrypick-ni'))
   const hidden = page.locator(
-    '.cherrypick-for-you .slick-slide:not(.slick-cloned) .cherrypick-hidden-card',
+    '.cherrypick-for-you .slick-slide .cherrypick-hidden-card',
   )
   await expect(hidden.first()).toBeVisible()
   await expect
@@ -185,6 +298,10 @@ test('Your score shows on unrated scene cards only', async ({ page }) => {
 test("Your score's ribbon is as long as Stash's rating ribbon", async ({
   page,
 }) => {
+  test.skip(
+    companionPluginIds().includes('refract'),
+    'Refract draws ratings as chips (companions.contract.spec.mjs)',
+  )
   const unrated = demoScene(demo, { rated: false, played: true })
   const rated = demoScene(demo, { rated: true, played: true })
   await page.goto('/scenes?sortby=title&perPage=120')
@@ -244,11 +361,13 @@ test("Your score shows where another plugin set the rating, in place of Stash's 
         /^~\d\.\d/,
       )
       await expect(card.locator('.cherrypick-score-banner')).toBeVisible()
-      // Stash's banner carries the other plugin's number: Your score takes
-      // the corner
+      // Stash's banner carries the other plugin's number (and Refract's
+      // chip, beside Refract): Your score takes the corner
+      if (companionPluginIds().includes('refract'))
+        await expect(card.locator(':scope > .rating-banner')).toBeAttached()
       await expect(
-        card.locator('.rating-banner:not(.cherrypick-score-banner)'),
-      ).toBeHidden()
+        card.locator('.rating-banner:not(.cherrypick-score-banner):visible'),
+      ).toHaveCount(0)
     }
     await page.goto(`/scenes/${mirrored}`)
     await expect(
@@ -283,6 +402,25 @@ test('the scene page shows the score line and More like this', async ({
   await expect(page.locator('.cherrypick-connect-line')).toBeAttached()
   // Don't learn is in a pick's menu and in its tags setting, not here
   await expect(line).toHaveText(/^likely .* for you$/)
+  // Its words sit beside the stars, not on them: a theme that sizes the
+  // toolbar's buttons would squeeze the line's button and spill its words
+  const onStars = await page.evaluate(() => {
+    const stars = document
+      .querySelector('.scene-toolbar .rating-stars')
+      .getBoundingClientRect()
+    const words = document.createRange()
+    words.selectNodeContents(
+      document.querySelector('.scene-toolbar .cherrypick-line-button'),
+    )
+    const box = words.getBoundingClientRect()
+    return (
+      box.left < stars.right &&
+      stars.left < box.right &&
+      box.top < stars.bottom &&
+      stars.top < box.bottom
+    )
+  })
+  expect(onStars).toBe(false)
 })
 
 test("Don't learn from this in a pick's menu is saved to Stash", async ({
@@ -290,19 +428,17 @@ test("Don't learn from this in a pick's menu is saved to Stash", async ({
 }) => {
   await page.goto('/')
   await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
-  const slide = page
-    .locator('.cherrypick-for-you .slick-active:not(.slick-cloned)')
-    .first()
+  const slide = page.locator('.cherrypick-for-you .slick-active').first()
   const marks = async () =>
     JSON.parse((await pluginConfig())?.dontLearn || '[]')
-  await slide.locator('.cherrypick-card-menu button').click()
-  await slide.locator('.cherrypick-dl').click()
+  await press(slide.locator('.cherrypick-card-menu button'))
+  await press(slide.locator('.cherrypick-dl'))
   await expect.poll(marks).toHaveLength(1)
-  await slide.locator('.cherrypick-card-menu button').click()
+  await press(slide.locator('.cherrypick-card-menu button'))
   await expect(slide.locator('.cherrypick-dl')).toHaveText(
     'Not learning from this (undo)',
   )
-  await slide.locator('.cherrypick-dl').click()
+  await press(slide.locator('.cherrypick-dl'))
   await expect.poll(marks).toHaveLength(0)
 })
 
@@ -318,7 +454,7 @@ test("Cherry Pick's page counts the scenes with a tag it doesn't learn from", as
     dontLearnTags: `${name.toUpperCase()}, No such tag`,
   })
   try {
-    await page.goto('/plugins/cherrypick')
+    await page.goto('/plugins/cherrypick/manage')
     const section = page.locator('#dont-learn')
     await expect(section).toContainText(
       `Scenes tagged ${name.toUpperCase()} or No such tag`,
@@ -363,14 +499,23 @@ test("More like this fits the page and clears the scene's details", async ({
         `at ${width} wide`,
       ).toBe(0)
   }
-  // Still 390 wide: the demo scene's performer cards run past one screen
+  // Still 390 wide: the demo scene's performer cards run past one screen.
+  // What shows of each piece: a box that clips its overflow cuts off what
+  // runs past it, such as the glare Refract lays over each card
   const overlap = await page.evaluate(() => {
     const tabs = document.querySelector('.scene-tabs')
-    const bottom = Math.max(
-      ...[...tabs.querySelectorAll('*')].map(
-        (e) => e.getBoundingClientRect().bottom,
-      ),
-    )
+    const shown = (e) => {
+      let bottom = e.getBoundingClientRect().bottom
+      for (
+        let a = e.parentElement;
+        a !== tabs.parentElement;
+        a = a.parentElement
+      )
+        if (getComputedStyle(a).overflowY !== 'visible')
+          bottom = Math.min(bottom, a.getBoundingClientRect().bottom)
+      return bottom
+    }
+    const bottom = Math.max(...[...tabs.querySelectorAll('*')].map(shown))
     const top = document
       .querySelector('.cherrypick-more-like-this')
       .getBoundingClientRect().top
@@ -394,7 +539,7 @@ test('nothing of Cherry Pick shows once the scene plays', async ({ page }) => {
   await expect(page.locator('.cherrypick-nav-icon').first()).toBeHidden()
 })
 
-test('the navbar cherries open the plugin page, which survives a reload', async ({
+test('the navbar cherries open the plugin page on For you, which survives a reload', async ({
   page,
 }) => {
   await page.goto('/')
@@ -403,10 +548,15 @@ test('the navbar cherries open the plugin page, which survives a reload', async 
   await expect(page.locator('.cherrypick-page h1').first()).toContainText(
     'Cherry Pick',
   )
+  await expect(page.locator('.cherrypick-tabs .nav-link.active')).toHaveText(
+    'For you',
+  )
   await page.reload()
-  await expect(page.locator('#your-score')).toBeVisible({ timeout: 20_000 })
-  await expect(page.locator('#your-score')).toContainText(
-    /within half a star \d+ times in 10/,
+  await expect(
+    page.locator('.cherrypick-fy-list .scene-card').first(),
+  ).toBeVisible({ timeout: 20_000 })
+  await expect(page.locator('.cherrypick-strip')).toContainText(
+    /Your score is (on: within half a star \d+ times in 10|waiting)/,
   )
 })
 
@@ -552,7 +702,7 @@ test('without Stash Curator, nothing offers to hide Your score on cards', async 
     )
   const offer = page.locator('.cherrypick-curator-offer')
   let answer = asked()
-  await page.goto('/plugins/cherrypick')
+  await page.goto('/plugins/cherrypick/manage')
   await answer
   await expect(page.locator('#your-score')).toContainText(
     /within half a star \d+ times in 10/,
@@ -569,7 +719,7 @@ test('without Stash Curator, nothing offers to hide Your score on cards', async 
   await expect(offer).toHaveCount(0)
 })
 
-test('switching For you off removes the row', async ({ page }) => {
+test('switching For you off removes the row and the tab', async ({ page }) => {
   // Through the configuration, as Stash's Settings page saves it: develop
   // collapses each plugin's settings, so the switch is not always visible.
   const before = await pluginConfig()
@@ -582,6 +732,16 @@ test('switching For you off removes the row', async ({ page }) => {
     })
     await page.waitForTimeout(2000)
     await expect(page.locator('.cherrypick-for-you')).toHaveCount(0)
+    // Cherry Pick's page opens on the Hall of Fame, with no For you tab
+    await page.goto('/plugins/cherrypick')
+    await expect(page.locator('.cherrypick-tabs .nav-link.active')).toHaveText(
+      'Hall of Fame',
+      { timeout: 20_000 },
+    )
+    await expect(page.locator('.cherrypick-tabs .nav-link')).toHaveText([
+      'Hall of Fame',
+      'Manage',
+    ])
   } finally {
     await setPluginSettings(PLUGIN_ID, before)
   }
@@ -614,7 +774,7 @@ test("with the switch on, other plugins' matches reach the model", async ({
   const before = await pluginConfig()
   await setPluginSettings(PLUGIN_ID, { ...before, learnFromMatches: true })
   try {
-    await page.goto('/plugins/cherrypick')
+    await page.goto('/plugins/cherrypick/manage')
     await expect(page.locator('#your-score')).toContainText(
       '2 matches in HotOrNot',
       { timeout: 20_000 },
@@ -627,8 +787,8 @@ test("with the switch on, other plugins' matches reach the model", async ({
 })
 
 test('Remove Cherry Pick data leaves a tombstone', async ({ page }) => {
-  await page.goto('/plugins/cherrypick')
-  // Every section renders at once, Your score as "Learning your taste…", and
+  await page.goto('/plugins/cherrypick/manage')
+  // The tab's sections render at once, Your score as "Learning your taste…", and
   // grows by a row when the model lands, which moves Remove down. A click
   // that Playwright dispatches in that moment lands on the section beside the
   // button, and Playwright does not retry it: the dialog never opens.

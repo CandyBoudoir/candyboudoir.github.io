@@ -19,6 +19,8 @@ import { PLUGIN_ID, STORAGE_PREFIX } from '../name.js'
 export const KEYS = {
   mirror: STORAGE_PREFIX + 'config-mirror',
   signals: STORAGE_PREFIX + 'for-you-signals',
+  // For you tab's view, zoom and page size (features/forYouPage.jsx)
+  forYouView: STORAGE_PREFIX + 'for-you-view',
   stashdb: STORAGE_PREFIX + 'stashdb-cache',
 }
 

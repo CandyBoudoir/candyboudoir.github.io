@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.5.1
+
+- Cherry Pick's rows and Stash Curator's lanes both show on the front page. From Curator 0.47.0, Curator puts its lanes among Stash's own rows, and each plugin added its rows only where it found Stash's rows as Stash draws them, so the plugin Stash loaded second no longer found Stash's rows where it looked and added none of its own. Depending on the order, Cherry Pick's rows or Curator's lanes were missing. Cherry Pick now looks for Stash's rows inside Curator's too, and Curator still finds them beside Cherry Pick's, so both show, Cherry Pick's first, and Customise works as before.
+- Each scene shows once in Cherry Pick's rows, on the front page and in More like this. A row looped back to its first card after its last, as Stash's own rows do, and to loop, Stash's slider copies every card to each end of the row. Stash's rows hold 25 cards, so the copies stay out of sight. Cherry Pick's hold a dozen or fewer, and when a row's cards fit the window with room to spare, the copies showed after the last card: a More with row of five scenes could show its first scenes again beside them. Cherry Pick's rows no longer loop, and their arrows stop at the first and the last card.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.49.0, Xenith 3.2.0, Restash 0.3.0-55c1cb2 and Refract 1.24.3-458b135.
+
+## 0.5.0
+
+- For you has its own tab on Cherry Pick's page, which the cherries in the navbar open, and View all on the For you row opens it too. The tab lists every scene For you would show, in For you's order: the row's twelve first, then the rest of your library. It uses Stash's own Grid, List and Wall, with Stash's card sizes and pages of 20, 40, 60 or 120 scenes, and each card says why it is there and has the ⋯ menu, as in the row. A click on a scene plays it, with the scenes on that page queued in For you's order. A search, Performers, Studios, Tags, Unwatched and a length narrow the tab to the scenes that fit, ranked again among themselves. The view, the page and the filters are in the page's address, so Back from a scene returns to the same place, and the tab opens in the view you used last. With For you off under Settings > Plugins, the tab goes with the row and the page opens on the Hall of Fame.
+- Cherry Pick's page has three tabs, For you, Hall of Fame and Manage, each at its own address. Manage holds Your score, StashDB, Not interested, Don't learn and Remove Cherry Pick data, and links to Cherry Pick's switches in Settings > Plugins. A line above the tabs says where Your score stands, and with Brackets on it starts a performer or scene bracket, or finishes the one you paused. A link to a part of the old page, such as one you bookmarked, opens the tab that holds it.
+- In a scene bracket, each cover plays the scene's preview clip, muted and on a loop, so you can see both scenes move before you pick. A click or tap on the playing cover still picks it. Pointing at a cover turns its sound on when Stash is set to play sound on previews. A clip starts once at least half the cover is on screen, so on a phone the lower scene waits until you scroll to it, and nothing loads for a cover you haven't reached. A scene Stash made no preview for keeps its cover, and with reduced motion set on your device every cover stays still. The clip is the preview Stash generated, as in Look closer, so it plays whatever the scene's format and records no play.
+- The foot of Cherry Pick's page shows the version Stash has installed, with links to what's new, the forum topic and the source code, and Support Cherry Pick, which opens CandyBoudoir's Ko-fi page for anyone who wants to leave a tip. Cherry Pick is free, and a tip changes nothing in it.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.46.0, Xenith 3.2.0, Restash 0.3.0-55c1cb2 and Refract 1.24.3-458b135.
+
+## 0.4.2
+
+- For you stays on the front page when Stash no longer has one of its scenes, after the scene is deleted, merged into another scene or removed by Stash's Clean task. Stash turns down a request for several scenes when one of them is gone, and Cherry Pick asked for For you's twelve in one request, so the row left the page with no word until a later visit to the front page, a few minutes on. The rows after For you could go the same way, and More like this on a scene page said it found nothing like the scene. When Stash turns a request down, Cherry Pick now asks for each scene on its own and shows the ones Stash still has.
+- The Hall of Fame shows its champions after one of them is merged into another performer or deleted. It said "No champions yet" for good.
+- A Cherry Pick row with nothing to show stays on the front page and says why. In a library under 30 scenes, New in your library takes For you's place and leaves out scenes played in the last two weeks or rated under 3★. When that leaves nothing, the row says so and that For you starts at 30 scenes. A row whose scenes Stash didn't send asks you to reload the page.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.45.0, Xenith 3.2.0, Restash 0.3.0-55c1cb2 and Refract 1.24.3-458b135.
+
+## 0.4.1
+
+- More like this sits under the scene's details and player, as wide as the page, under themes that fit the scene page to the window, such as Refract. Under Refract it sat in the narrow details column instead, and the details and the player shrank to make room for it. The page now scrolls down to it.
+- "likely 4★ for you" stays beside the stars under Refract. Refract draws the toolbar's buttons as small circles, and it squeezed the line into one, so its words ran over the fourth and fifth stars.
+- Your score shows on scene cards under Refract, as an outlined chip in the top left corner, where Refract shows a scene's rating. Refract hid it, and read it as the scene's rating: it could frame the card as it frames a well-rated scene.
+- The ⋯ menu on cards in Cherry Pick's rows is a pill over the picture under Refract, beside Refract's own pills. Refract hides the row of buttons under each card, which held the menu, so Not interested and Don't learn from this were out of reach. On a scene you don't have, the links to its store and to StashDB are pills there too, and "Not in your library" moves to the top left corner, clear of the title.
+- Watch This shows its player under Refract. Refract stretches every player to fill the scene page's column, which on the front page left it no height. Refract also hides the big play button in the middle of every player, so start the pick with the play button in the player's bar, a click on the video or Space.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.45.0, Xenith 3.2.0, Restash 0.3.0-55c1cb2 and Refract 1.24.3-458b135.
+
 ## 0.4.0
 
 - Tags Cherry Pick doesn't learn from, a new setting under Settings > Plugins, keeps every scene with one of the tags you list out of what Cherry Pick learns, as Don't learn from this does for one scene. Their plays, ratings and bracket picks teach Cherry Pick nothing, and opening or passing one in For you changes nothing. Tag the scenes in Stash, one at a time or many at once from the Scenes list, and type the tags' names into the setting, separated by commas. Cherry Pick's page counts the tagged scenes and names any listed tag no scene in your library has. The scenes can still show up in Cherry Pick's rows, which Tags to keep out of my picks controls.

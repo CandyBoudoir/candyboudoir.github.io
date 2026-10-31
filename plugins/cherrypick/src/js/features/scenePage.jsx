@@ -6,6 +6,9 @@
 // Stash has no slot beside the rating (RatingSystem does not know its scene,
 // and the toolbar takes no extensions), so the line renders through a portal
 // into the toolbar's first group, from a component added after ScenePage.
+// More like this renders through a portal too, after the page's .row: themes
+// such as Refract lay that row out as a grid locked to the window's height,
+// where one more child would take its height from the player.
 import { Bootstrap, patchAfter, React, ReactDOM } from '../runtime/api.js'
 import { badgeLabel, fmtStars, rateMore, unratedByYou } from '../model/index.js'
 import { popularity, performerRankPhrase } from '../model/signals.js'
@@ -83,24 +86,41 @@ function ScoreLine({ scene }) {
   )
 }
 
-// Renders into Stash's scene toolbar, beside the rating, through a portal.
-function ToolbarExtras({ scene }) {
+// A node of Cherry Pick's own that place(row) puts into Stash's page, given
+// the scene page's .row, for a portal; it leaves with the component. The
+// anchor goes in the component's output, inside the row.
+function useRowSlot(place) {
   const anchor = React.useRef(null)
   const [slot, setSlot] = React.useState(null)
   React.useLayoutEffect(() => {
-    const group = anchor.current
-      ?.closest('.row')
-      ?.querySelector('.scene-toolbar .scene-toolbar-group')
-    if (!group) return
-    const el = document.createElement('span')
+    const row = anchor.current?.closest('.row')
+    const el = row && place(row)
+    if (!el) return
+    setSlot({ el, row })
+    return () => el.remove()
+    // once: the row and the node last as long as the component
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  return [<span ref={anchor} hidden />, slot?.el, slot?.row]
+}
+
+// Renders into Stash's scene toolbar, beside the rating, through a portal.
+// The slot is a div, where Stash wraps each toolbar button in a span: themes
+// shape those icon buttons by that place (Refract makes every
+// `.scene-toolbar > span > span > button` a 26px circle), and the line is
+// text.
+function ToolbarExtras({ scene }) {
+  const [anchor, slot] = useRowSlot((row) => {
+    const group = row.querySelector('.scene-toolbar .scene-toolbar-group')
+    if (!group) return null
+    const el = document.createElement('div')
     el.className = 'cherrypick-score-line cherrypick-ui'
     group.appendChild(el)
-    setSlot(el)
-    return () => el.remove()
-  }, [])
+    return el
+  })
   return (
     <>
-      <span ref={anchor} hidden />
+      {anchor}
       {slot ? ReactDOM.createPortal(<ScoreLine scene={scene} />, slot) : null}
     </>
   )
@@ -165,10 +185,40 @@ function MoreLikeThis({ scene }) {
   )
 }
 
+// Renders after the scene page's .row, through a portal, so it sits under
+// the player on wide screens and after the scene's details on a phone.
+function AfterRow({ children }) {
+  const [anchor, slot, row] = useRowSlot((row) => {
+    const el = document.createElement('div')
+    el.className = 'cherrypick-after-row'
+    row.after(el)
+    return el
+  })
+  // The row's side padding, so what renders here lines up with the details
+  // and the player: Stash pads the page around the row, but a theme can pad
+  // the row instead (Refract does, on the scene page alone)
+  React.useLayoutEffect(() => {
+    if (!slot) return
+    const pad = () => {
+      const style = getComputedStyle(row)
+      slot.style.paddingLeft = style.paddingLeft
+      slot.style.paddingRight = style.paddingRight
+    }
+    pad()
+    window.addEventListener('resize', pad)
+    return () => window.removeEventListener('resize', pad)
+  }, [slot, row])
+  return (
+    <>
+      {anchor}
+      {slot ? ReactDOM.createPortal(children, slot) : null}
+    </>
+  )
+}
+
 export function registerScenePage() {
-  // Both go after ScenePage's own output, inside the page's .row; CSS orders
-  // More like this last and full width, so it sits under the player on wide
-  // screens and after the scene's details on a phone.
+  // Both go after ScenePage's own output, inside the page's .row, and render
+  // where they belong through portals.
   patchAfter('ScenePage', (props, result) => (
     <>
       {result}
@@ -176,7 +226,9 @@ export function registerScenePage() {
         <ToolbarExtras scene={props.scene} />
       </Safe>
       <Safe name="More like this">
-        <MoreLikeThis scene={props.scene} />
+        <AfterRow>
+          <MoreLikeThis scene={props.scene} />
+        </AfterRow>
       </Safe>
     </>
   ))

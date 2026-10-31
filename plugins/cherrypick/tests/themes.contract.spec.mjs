@@ -4,6 +4,7 @@
 // no page errors with each theme enabled beside it.
 import { expect, test } from '@playwright/test'
 import { listPlugins } from '../../../scripts/site.mjs'
+import { companionPluginIds } from '../../../tests/stash/companions.mjs'
 import {
   forYouCards,
   PLUGIN_ID,
@@ -28,6 +29,8 @@ test.afterAll(async () => {
 const themes = (await listPlugins())
   .filter(({ mod }) => mod.kind === 'theme' && !mod.incubating)
   .map(({ mod }) => mod.id)
+// Refract is a theme too, and restyles the same pieces: none is paired with it
+const besideRefract = companionPluginIds().includes('refract')
 
 const unratedPlayed = (ids) =>
   ids.scenes['Bright Street'] ?? Object.values(ids.scenes)[0]
@@ -36,9 +39,17 @@ for (const theme of themes) {
   test(`with ${theme}: the rows, badges and scene line render in the theme`, async ({
     page,
   }) => {
+    test.skip(besideRefract, 'Refract is a theme too')
     await usePlugins('CherryPick', theme)
     const errors = []
-    page.on('pageerror', (e) => errors.push(e.message))
+    page.on('pageerror', (e) => {
+      // WebKit rejects a request a full page load cancels, and Stash's
+      // Apollo client leaves that rejection unhandled. The test loads each
+      // page in full while queries are in flight; Stash's own navigation
+      // never unloads the page, so users don't hit it.
+      if (/graphql due to access control checks/.test(e.message)) return
+      errors.push(e.message)
+    })
     await page.goto('/')
     await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
     // The row's heading is Stash's, so it takes the theme's font.
@@ -65,6 +76,7 @@ for (const theme of themes) {
 
 // The bracket map draws in the theme's accent, read from its primary button
 test('the bracket map takes each theme’s accent', async ({ page }) => {
+  test.skip(besideRefract, 'Refract is a theme too')
   for (const theme of themes) {
     await usePlugins('CherryPick', theme)
     await setPluginSettings(PLUGIN_ID, {})

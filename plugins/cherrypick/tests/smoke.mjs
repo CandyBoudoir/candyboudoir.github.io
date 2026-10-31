@@ -146,9 +146,7 @@ await check('front page: navbar cherries and For you', async () => {
   await page.goto('/')
   await visible('.navbar .cherrypick-nav-icon')
   // The first visit reads the whole library before For you can fill
-  const cards = page.locator(
-    '.cherrypick-for-you .slick-slide:not(.slick-cloned) .scene-card',
-  )
+  const cards = page.locator('.cherrypick-for-you .slick-slide .scene-card')
   await cards.first().waitFor({ timeout: 120_000 })
   const rows = await page.locator('.cherrypick-front .cherrypick-row').count()
   return `${rows} Cherry Pick rows, ${await cards.count()} For you cards`
@@ -167,7 +165,7 @@ for (const list of ['scenes', 'performers'])
     })
 
 await check('plugin page survives a reload', async () => {
-  await page.goto('/plugins/cherrypick')
+  await page.goto('/plugins/cherrypick/manage')
   await visible('#your-score')
   await page.reload()
   await visible('#your-score')

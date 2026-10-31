@@ -9,7 +9,7 @@
 // The rows are computed once per visit to the front page and then hold
 // still: Not interested turns a card into an Undo card in place, and nothing
 // reorders while the page is open.
-import { patchAfter, ReactRouterDOM } from '../runtime/api.js'
+import { patchAfter, React, ReactRouterDOM } from '../runtime/api.js'
 import { store } from '../runtime/app.js'
 import { recordOpen, undoNotInterested } from '../runtime/actions.js'
 import {
@@ -34,6 +34,7 @@ import { rateMore } from '../model/index.js'
 import { toRateUrl } from '../data/listFilter.js'
 import { useFallbackLookups } from '../stashdb/layer.js'
 import { KEYS, local } from '../storage/tier3.js'
+import { FOR_YOU_TAB } from '../name.js'
 import { WatchThis } from './watchThis.jsx'
 
 // ------------------------------------------------------------ the visit's rows
@@ -43,8 +44,8 @@ let snap = null
 // The rows for this visit: computed when the front page opens with a model
 // (and again within the visit only if the settings or the StashDB data
 // change). Cards shown last visit and not opened count as passed over,
-// once, here.
-function snapshot(s) {
+// once, here. For you's tab starts with the same row (forYouPage.jsx).
+export function snapshot(s) {
   if (!s.M) return null
   const key = [s.visit, JSON.stringify(s.settings), s.M.db.hasStashdb].join('|')
   if (snap?.key === key) return snap
@@ -83,9 +84,14 @@ function snapshot(s) {
   return snap
 }
 
+// What a row with scenes says when Stash sends none of them back (a scene
+// deleted since the visit began is only left out: data/byIds.js).
+const NOT_SENT = "Stash didn't send these scenes. Reload the page to try again."
+
 // One row of the visit. Hidden cards stay in place as Undo cards; scenes
-// hidden since the visit began never show again in it.
-function SceneRow({ id, title, items, className, onOpen, extra }) {
+// hidden since the visit began never show again in it. A row with nothing
+// to show says why in `empty`; without it, the row leaves the page.
+function SceneRow({ id, title, items, className, onOpen, extra, empty, link }) {
   const hidden = useAppState((s) => s.notInterested)
   const recent = useAppState((s) => s.recentHidden)
   const isHidden = new Set(hidden.map((n) => n.sceneId))
@@ -101,6 +107,8 @@ function SceneRow({ id, title, items, className, onOpen, extra }) {
       className={`cherrypick-ui ${className || ''}`}
       kind="scene"
       extra={extra}
+      link={link}
+      empty={shown.length ? NOT_SENT : empty}
       items={items ? shown : null}
       renderCard={(scene, it, i) =>
         isHidden.has(it.scene.id) ? (
@@ -193,6 +201,8 @@ function CherryPickRows() {
           className="cherrypick-for-you"
           onOpen={recordOpen}
           extra={<SharpenLine />}
+          link={{ to: FOR_YOU_TAB, text: 'View all' }}
+          empty="Every scene is marked Not interested or has a tag from Tags to keep out of my picks."
         />
       ) : null}
       {v.fallback ? (
@@ -201,6 +211,7 @@ function CherryPickRows() {
           title="New in your library"
           items={v.fallback}
           className="cherrypick-fallback"
+          empty="Every scene here was played in the last two weeks, rated under 3★ or kept out of your picks. For you starts at 30 scenes."
         />
       ) : null}
       {v.follow.map((r) => (
@@ -240,17 +251,45 @@ function FrontPiece() {
 // Stash's FrontPage renders a loading indicator, the Customise editor or the
 // rows' .recommendations-container; Cherry Pick's rows join only the last.
 const isRows = (el) =>
-  String(el?.props?.className || '').includes('recommendations-container')
+  String(el?.props?.className || '')
+    .split(/\s+/)
+    .includes('recommendations-container')
+
+// Stash's rows view with Cherry Pick's rows above it. The element keeps the
+// view's own props, so an after patch that runs later and reads its
+// className and children, or clones it with new ones, finds Stash's: Stash
+// Curator's swaps its entries in the list for its own rows that way.
+function FrontPageRows({ view, ...props }) {
+  return (
+    <>
+      <FrontPiece />
+      {React.createElement(view, props)}
+    </>
+  )
+}
+
+// `el` with Stash's rows view in it as FrontPageRows, or null if it has no
+// rows view. An after patch that ran earlier may have wrapped the view
+// (Stash Curator's puts it in a provider of its own), so the view is looked
+// for in the children too.
+function withRows(el) {
+  if (!React.isValidElement(el)) return null
+  if (isRows(el))
+    return <FrontPageRows key={el.key} view={el.type} {...el.props} />
+  const children = childrenWithRows(el.props.children)
+  return children && React.cloneElement(el, { children })
+}
+
+function childrenWithRows(children) {
+  if (!Array.isArray(children)) return withRows(children)
+  for (let i = 0; i < children.length; i++) {
+    const swapped = childrenWithRows(children[i])
+    if (swapped)
+      return [...children.slice(0, i), swapped, ...children.slice(i + 1)]
+  }
+  return null
+}
 
 export function registerFrontPage() {
-  patchAfter('FrontPage', (props, result) =>
-    isRows(result) ? (
-      <>
-        <FrontPiece />
-        {result}
-      </>
-    ) : (
-      result
-    ),
-  )
+  patchAfter('FrontPage', (props, result) => withRows(result) ?? result)
 }

@@ -10,6 +10,10 @@ const slug = PLUGIN_ID.toLowerCase()
 // PluginApi.register.route path for the plugin page. Stash's server owns
 // /plugin/ (plugin assets), so a reload there would 404; /plugins/ is free.
 export const PLUGIN_ROUTE = '/plugins/' + slug
+// the page's tabs (features/pluginPage.jsx); For you is the page's own path
+export const FOR_YOU_TAB = PLUGIN_ROUTE
+export const HALL_OF_FAME_TAB = PLUGIN_ROUTE + '/hall-of-fame'
+export const MANAGE_TAB = PLUGIN_ROUTE + '/manage'
 // custom fields the plugin writes on performers (tier 2)
 export const FIELD_PREFIX = slug + '_'
 // browser storage keys (tier 3)

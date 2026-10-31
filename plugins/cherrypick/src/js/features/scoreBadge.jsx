@@ -2,11 +2,13 @@
 // wherever Stash draws a scene card. Stash's own RatingBanner sits in
 // SceneCard.Image, so the badge goes there too, in the same markup
 // (.rating-banner) so themes style it, outlined to set it apart from a real
-// rating.
+// rating. Under Refract it is a chip of its own instead: Refract would hide
+// it, put its number in place of its text and frame the card by it.
 import { patchAfter, React } from '../runtime/api.js'
 import { badgeLabel, fmtStars, unratedByYou } from '../model/index.js'
 import { NAME_S } from '../name.js'
 import { useModel, useSettings } from '../ui/hooks.js'
+import { refract } from '../ui/refract.js'
 import { Safe } from '../ui/Safe.jsx'
 
 // A Your score for this scene right now, or null: scenes the user hasn't
@@ -48,7 +50,7 @@ function ScoreCorner({ scene }) {
   return (
     <div
       ref={ref}
-      className="rating-banner cherrypick-score-banner cherrypick-ui"
+      className={`${refract() ? 'cherrypick-score-chip' : 'rating-banner'} cherrypick-score-banner cherrypick-ui`}
       title={title}
     >
       {s.label.corner}

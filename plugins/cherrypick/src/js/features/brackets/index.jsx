@@ -25,7 +25,13 @@ export function registerBrackets() {
   registerDialog(VIEWS.challenge, ChallengeDialog)
   registerDialog(VIEWS.result, ResultDialog)
   registerDialog(VIEWS.apply, ApplyDialog)
-  registerPageSection('hall-of-fame', 20, 'Hall of Fame', HallOfFameSection)
+  registerPageSection(
+    'hall-of-fame',
+    20,
+    null,
+    HallOfFameSection,
+    'hall-of-fame',
+  )
   registerListOps()
   // Apply bracket ratings automatically: a champion screen dismissed in any
   // way (closed, a link followed, a Champions round started, playback) but

@@ -14,10 +14,14 @@
 // both plugins' navbar items; Cherry Pick counts Xenith's, and a bracket of
 // the performers Xenith played leaves every one alone. Beside Curator, whose
 // patches change the list components' arguments and whose criteria Stash's
-// schema lacks, the lists render and Bracket works on a list it filters.
+// schema lacks, the lists render and Bracket works on a list it filters,
+// and the front page shows both plugins' rows in either load order.
 // Beside Restash, its own tasks score the library: with its mirror off
 // every rating stays the user's, and with it on Apply leaves each mirrored
 // performer alone and checks again before it writes and before an Undo.
+// Beside Refract (COMPANIONS=refract), a theme that fits the scene page to
+// the window, More like this sits under the details and the player and
+// leaves them their height.
 import { expect, test } from '@playwright/test'
 import { companionPluginIds } from '../../../tests/stash/companions.mjs'
 import {
@@ -584,7 +588,7 @@ for (const [key, side] of Object.entries(SIDE)) {
             ...config,
             learnFromMatches: true,
           })
-          await visit.goto('/plugins/cherrypick')
+          await visit.goto('/plugins/cherrypick/manage')
           await expect(visit.locator('#your-score')).toContainText(
             `${matches.size} matches in ${side.name}`,
             { timeout: 20_000 },
@@ -747,6 +751,24 @@ async function answered() {
   return { badges: c?.badges, curatorOffer: c?.curatorOffer ?? null }
 }
 
+// Has Stash run `id`'s script before every other plugin's. Stash loads them
+// in the reverse of its Plugins query's order, and each plugin's patches
+// run in the order the scripts registered them.
+async function loadFirst(page, id) {
+  await page.route('**/graphql', async (route) => {
+    if (route.request().postDataJSON()?.operationName !== 'Plugins')
+      return route.fallback()
+    const response = await route.fetch()
+    const json = await response.json()
+    const { plugins } = json.data
+    json.data.plugins = [
+      ...plugins.filter((p) => p.id !== id),
+      ...plugins.filter((p) => p.id === id),
+    ]
+    await route.fulfill({ response, json })
+  })
+}
+
 // Stash's answers that rejected a query outright, as "400 CherryPickListScenes"
 function rejected(page) {
   const out = []
@@ -821,6 +843,49 @@ test.describe('beside Stash Curator', () => {
 
     expect(errors).toEqual([])
   })
+
+  // From 0.47.0 Curator puts its lanes on the front page with an after
+  // patch on FrontPage that acts only on Stash's rows view, as Cherry Pick's
+  // does, so whichever ran second found the other's output and left it.
+  for (const first of [PLUGIN_ID, 'stash-curator']) {
+    test(`the front page shows Cherry Pick's rows and Curator's lane with ${first} loaded first, and Customise still works`, async ({
+      page,
+    }) => {
+      const errors = []
+      page.on('pageerror', (e) => errors.push(e.message))
+      await loadFirst(page, first)
+      const lane = page.locator('.curator-home-row-for_you')
+      const ordered = () =>
+        page.evaluate(() => {
+          const ours = document.querySelector('.cherrypick-front')
+          const theirs = document.querySelector('.curator-home-row')
+          return !!(
+            ours &&
+            theirs &&
+            ours.compareDocumentPosition(theirs) &
+              Node.DOCUMENT_POSITION_FOLLOWING
+          )
+        })
+
+      await page.goto('/')
+      await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
+      await expect(lane).toBeVisible({ timeout: 20_000 })
+      expect(await ordered()).toBe(true)
+
+      // Customise names Curator's lane, and saving brings every row back
+      await page.locator('.recommendations-footer .btn').click()
+      await expect(
+        page.locator(
+          '.recommendations-container-edit h2[data-curator-label="Curator: For You"]',
+        ),
+      ).toBeVisible({ timeout: 20_000 })
+      await page.getByRole('button', { name: 'Save', exact: true }).click()
+      await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
+      await expect(lane).toBeVisible({ timeout: 20_000 })
+      expect(await ordered()).toBe(true)
+      expect(errors).toEqual([])
+    })
+  }
 
   test('Bracket on a Scenes list filtered by Curator Appeal leaves it out and says so', async ({
     page,
@@ -906,7 +971,7 @@ test.describe('beside Stash Curator', () => {
       await page.goto('/scenes?sortby=title&perPage=120')
       await expect(banners.first()).toBeVisible({ timeout: 20_000 })
 
-      await page.goto('/plugins/cherrypick')
+      await page.goto('/plugins/cherrypick/manage')
       const card = page.locator('#your-score .cherrypick-curator-offer')
       await expect(card).toContainText('Stash Curator also scores your cards', {
         timeout: 20_000,
@@ -967,7 +1032,7 @@ test.describe('beside Stash Curator', () => {
     try {
       // Cherry Pick writes its defaults at first load, as it would long
       // before anyone opens Settings
-      await page.goto('/plugins/cherrypick')
+      await page.goto('/plugins/cherrypick/manage')
       await expect(offer(page)).toBeVisible({ timeout: 20_000 })
       await expect.poll(async () => (await pluginConfig())?.badges).toBe(true)
 
@@ -1011,7 +1076,7 @@ test.describe('beside Stash Curator', () => {
   }) => {
     const before = await pluginConfig()
     try {
-      await page.goto('/plugins/cherrypick')
+      await page.goto('/plugins/cherrypick/manage')
       await offer(page).getByRole('button', { name: 'Keep both' }).click({
         timeout: 20_000,
       })
@@ -1136,7 +1201,7 @@ test.describe('beside Restash', () => {
       expect(s.rating100, s.id).toBe(scenes[s.id].rating100)
     // Cherry Pick learns from every rated scene but one that equals its
     // score by chance
-    await page.goto('/plugins/cherrypick')
+    await page.goto('/plugins/cherrypick/manage')
     await expect(page.locator('#your-score')).toContainText(
       learning(await learnedScenes()),
       { timeout: 20_000 },
@@ -1157,7 +1222,7 @@ test.describe('beside Restash', () => {
       expect(learned).toBeLessThan(
         Object.values(scenes).filter((s) => s.rating100 != null).length,
       )
-      await page.goto('/plugins/cherrypick')
+      await page.goto('/plugins/cherrypick/manage')
       await expect(page.locator('#your-score')).toContainText(
         learning(learned),
         { timeout: 20_000 },
@@ -1239,5 +1304,125 @@ test.describe('beside Restash', () => {
       await putBack(before)
       await putBackScenes(scenes)
     }
+  })
+})
+
+// Refract lays the scene page's .row out as a grid from 1200px wide: the
+// details in a narrow column beside the player, both locked to the window's
+// height. More like this sits under them, as wide as the page, and leaves
+// them the height they have without it.
+test.describe('beside Refract', () => {
+  test.skip(
+    companionPluginIds().length !== 1 ||
+      !companionPluginIds().includes('refract'),
+    'Refract is not installed alone (COMPANIONS=refract)',
+  )
+
+  let demo
+  test.beforeAll(async () => {
+    ;({ demo } = await setUpCherryPick())
+  })
+  test.afterAll(tearDownCherryPick)
+  test.afterEach(() => setPluginSettings(PLUGIN_ID, {}))
+
+  // The boxes of the player, the details and More like this, once the scene
+  // page has its score line (or More like this its first card)
+  async function sceneBoxes(page, scene, ready) {
+    await page.goto(`/scenes/${scene}`)
+    await expect(page.locator('body.stash-liquid-glass')).toBeAttached({
+      timeout: 20_000,
+    })
+    await expect(ready).toBeAttached({ timeout: 20_000 })
+    return page.evaluate(() => {
+      const box = (selector) => {
+        const r = document.querySelector(selector)?.getBoundingClientRect()
+        return (
+          r && { top: r.top, bottom: r.bottom, left: r.left, right: r.right }
+        )
+      }
+      return {
+        player: box('.scene-player-container'),
+        tabs: box('.scene-tabs'),
+        more: box('.cherrypick-more-like-this'),
+        sideways: document.documentElement.scrollWidth - window.innerWidth,
+      }
+    })
+  }
+
+  test('More like this sits under the player and the details, across the page', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    const scene = demoScene(demo, { rated: false, played: true })
+    const height = (b) => Math.round(b.bottom - b.top)
+
+    await setPluginSettings(PLUGIN_ID, { showMoreLikeThis: false })
+    const without = await sceneBoxes(
+      page,
+      scene,
+      page.locator('.scene-toolbar .cherrypick-line-button'),
+    )
+    expect(without.more).toBeUndefined()
+
+    await setPluginSettings(PLUGIN_ID, {})
+    const card = page.locator('.cherrypick-mlt-owned .scene-card').first()
+    const now = await sceneBoxes(page, scene, card)
+    expect(height(now.player)).toBe(height(without.player))
+    expect(height(now.tabs)).toBe(height(without.tabs))
+    expect(now.more.top).toBeGreaterThanOrEqual(
+      Math.max(now.player.bottom, now.tabs.bottom),
+    )
+    // Refract pads the row, not the page: More like this lines up with the
+    // details on the left and the player on the right
+    expect(Math.abs(now.more.left - now.tabs.left)).toBeLessThanOrEqual(1)
+    expect(Math.abs(now.more.right - now.player.right)).toBeLessThanOrEqual(1)
+    expect(now.sideways).toBe(0)
+
+    // The page scrolls down to it
+    const shown = page.locator('.cherrypick-mlt-owned .slick-active').first()
+    await shown.scrollIntoViewIfNeeded()
+    await expect(shown).toBeInViewport()
+  })
+
+  // Refract hides each .rating-banner nested in a scene card, puts its number
+  // in place of its text and frames the card by it, and hides the popover row
+  test("Your score is a chip in Refract's corner, and the ⋯ menu a pill in its row", async ({
+    page,
+  }) => {
+    const unrated = demoScene(demo, { rated: false, played: true })
+    await page.goto('/scenes?sortby=title&perPage=120')
+    const card = page.locator(
+      `.scene-card:has(a[href="/scenes/${unrated}"], a[href^="/scenes/${unrated}?"])`,
+    )
+    const chip = card.locator('.cherrypick-score-chip')
+    await expect(chip).toBeVisible({ timeout: 20_000 })
+    // Refract's chips for the rated scenes: it has read the cards
+    await expect(
+      page.locator('.scene-card > .rating-banner').first(),
+    ).toBeVisible()
+    await expect(chip).toHaveText(/^~\d\.\d/)
+    const [ours, corner] = [await chip.boundingBox(), await card.boundingBox()]
+    expect(ours.x - corner.x).toBeLessThan(12)
+    expect(ours.y - corner.y).toBeLessThan(12)
+    const framed = await page
+      .locator('.scene-card:has(.cherrypick-score-chip)')
+      .evaluateAll((cards) =>
+        cards.filter((c) => /\brefract-card-tier-/.test(c.className)),
+      )
+    expect(framed).toHaveLength(0)
+
+    await page.goto('/')
+    const pills = page
+      .locator('.cherrypick-for-you .slick-active .stash-card-counts')
+      .first()
+    const menu = pills.locator('.cherrypick-card-menu button')
+    await expect(menu).toBeVisible({ timeout: 20_000 })
+    const height = async (l) => (await l.boundingBox()).height
+    expect(
+      Math.abs(
+        (await height(menu)) -
+          (await height(pills.locator(':scope > :visible').first())),
+      ),
+    ).toBeLessThanOrEqual(1)
   })
 })

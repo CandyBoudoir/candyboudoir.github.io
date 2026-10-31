@@ -1,9 +1,21 @@
 // The plugin's one page, at /plugins/cherrypick, reached from the navbar's
-// cherries and from Settings › Plugins. A plain Stash settings page: setting
-// sections and cards. Features add their own sections (registerPageSection);
-// this file holds Your score (with the offer beside Stash Curator), Not
-// interested, Don't learn and Remove.
-import { Bootstrap, React, ReactRouterDOM, register } from '../runtime/api.js'
+// cherries, the rows' View all and Settings › Plugins. Three tabs, as on
+// Stash's performer page, each at its own address: For you
+// (forYouPage.jsx), the Hall of Fame and Manage. With the For you switch off
+// the tab goes and the page opens on the Hall of Fame. A line on top says
+// where Your score stands and starts a bracket; a footer has the version,
+// the links and Ko-fi. Hall of Fame and Manage are Stash settings sections
+// and cards: features add their own (registerPageSection); this file holds
+// Your score (with the offer beside Stash Curator), Not interested, Don't
+// learn and Remove.
+import {
+  Bootstrap,
+  FontAwesomeSolid,
+  components,
+  React,
+  ReactRouterDOM,
+  register,
+} from '../runtime/api.js'
 import {
   answerCuratorOffer,
   toggleDontLearn,
@@ -15,16 +27,42 @@ import { sourcesText } from '../model/matches.js'
 import { andList, tagNames } from '../model/util.js'
 import { MIN_RATED } from '../model/taste.js'
 import { toRateUrl } from '../data/listFilter.js'
-import { NAME_S, PLUGIN_NAME, PLUGIN_ROUTE } from '../name.js'
+import {
+  FOR_YOU_TAB,
+  HALL_OF_FAME_TAB,
+  MANAGE_TAB,
+  NAME_S,
+  PLUGIN_ID,
+  PLUGIN_NAME,
+  PLUGIN_ROUTE,
+} from '../name.js'
 import { Cherries } from '../ui/Cherries.jsx'
 import { closeDialog, openDialog, registerDialog } from '../ui/dialogs.jsx'
 import { useAppState } from '../ui/hooks.js'
 import { Safe } from '../ui/Safe.jsx'
 import { removePluginData, removalCounts } from './remove.js'
 import { OFFER, useCuratorOffer } from './curatorOffer.js'
+import { ForYouTab } from './forYouPage.jsx'
+import { useBracketsOn } from './brackets/parts.jsx'
+import {
+  quickStartClip,
+  quickStartPerformers,
+  resumeBracket,
+} from './brackets/actions.js'
+import { scenePool } from '../model/bracketSetup.js'
+import { run } from '../runtime/app.js'
 
-const { Button, Modal } = Bootstrap
-const { Link } = ReactRouterDOM
+const { Button, Modal, Tab, Tabs } = Bootstrap
+const { faMugHot } = FontAwesomeSolid
+const { Link, useHistory, useLocation } = ReactRouterDOM
+
+const REPO = 'https://github.com/CandyBoudoir/candyboudoir.github.io'
+const LINKS = {
+  changes: `${REPO}/blob/main/plugins/cherrypick/CHANGELOG.md`,
+  forum: 'https://discourse.stashapp.cc/t/cherry-pick/18889',
+  source: `${REPO}/tree/main/plugins/cherrypick`,
+  kofi: 'https://ko-fi.com/candyboudoir',
+}
 
 const shortDate = (iso) =>
   new Date(iso).toLocaleDateString(undefined, {
@@ -36,17 +74,18 @@ const shortDate = (iso) =>
 
 const sections = []
 
-// order: where the section sits (Your score 10, Hall of Fame 20, StashDB 30,
-// Not interested 40, Don't learn 50, Remove 90).
-export function registerPageSection(id, order, title, Component) {
-  sections.push({ id, order, title, Component })
+// tab: 'hall-of-fame' or 'manage'. order: where the section sits in its tab
+// (Your score 10, Hall of Fame 20, StashDB 30, Not interested 40, Don't
+// learn 50, Remove 90). title: null for a section that is its tab.
+export function registerPageSection(id, order, title, Component, tab) {
+  sections.push({ id, order, title, Component, tab: tab || 'manage' })
   sections.sort((a, b) => a.order - b.order)
 }
 
 export function Section({ id, title, children }) {
   return (
     <div className="setting-section cherrypick-section" id={id}>
-      <h1>{title}</h1>
+      {title ? <h1>{title}</h1> : null}
       {children}
     </div>
   )
@@ -360,33 +399,208 @@ function RemoveDialog() {
   )
 }
 
+// One line on where Your score stands, with the quickest way to sharpen it,
+// and the bracket buttons, with Brackets on.
+function StatusStrip() {
+  const M = useAppState((s) => s.M)
+  const active = useAppState((s) => !!s.brackets.active)
+  const brackets = useBracketsOn()
+  const cv = M?.cv
+  let text
+  let rate = null
+  if (!M) text = 'Learning your taste…'
+  else if (!cv) {
+    text = `Your score starts once you ${rateMore(M).toLowerCase()}.`
+    rate = (
+      <Link className="btn btn-secondary btn-sm" to={toRateUrl()}>
+        Scenes to rate
+      </Link>
+    )
+  } else
+    text = M.gate
+      ? `Your score is on: within half a star ${Math.round(cv.withinModel * 10)} times in 10.`
+      : 'Your score is waiting until it beats your average.'
+  return (
+    <div className="cherrypick-strip">
+      <span className="cherrypick-strip-text">
+        {text}{' '}
+        <Link to={`${MANAGE_TAB}#your-score`} className="cherrypick-strip-more">
+          Details
+        </Link>
+      </span>
+      <span className="cherrypick-strip-actions">
+        {rate}
+        {brackets && M ? (
+          active ? (
+            <Button variant="secondary" size="sm" onClick={resumeBracket}>
+              Finish your bracket
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => quickStartPerformers(null)}
+              >
+                Bracket performers
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() =>
+                  quickStartClip({
+                    ids: scenePool(M, null),
+                    poolLabel: 'All scenes',
+                    poolNote: 'Every scene in your library',
+                    short: '',
+                    origin: FOR_YOU_TAB,
+                  })
+                }
+              >
+                Bracket scenes
+              </Button>
+            </>
+          )
+        ) : null}
+      </span>
+    </div>
+  )
+}
+
+// The version Stash has installed, the links, and Ko-fi. The link names
+// Cherry Pick: Stash's own navbar has a Donate heart, for Stash.
+function Footer() {
+  const { Icon } = components
+  const [version, setVersion] = React.useState(null)
+  React.useEffect(() => {
+    run('query CherryPickVersion { plugins { id version } }').then(
+      (d) => setVersion(d?.plugins?.find((p) => p.id === PLUGIN_ID)?.version),
+      () => {},
+    )
+  }, [])
+  return (
+    <footer className="cherrypick-footer text-muted">
+      <div className="cherrypick-footer-links">
+        <span>
+          {PLUGIN_NAME}
+          {version ? ` ${version}` : ''}
+        </span>
+        <a href={LINKS.changes} target="_blank" rel="noreferrer">
+          What&apos;s new
+        </a>
+        <a href={LINKS.forum} target="_blank" rel="noreferrer">
+          Forum
+        </a>
+        <a href={LINKS.source} target="_blank" rel="noreferrer">
+          Source
+        </a>
+      </div>
+      <div className="cherrypick-footer-kofi">
+        <span>
+          {PLUGIN_NAME} is free. If it earns its place, you can tip on Ko-fi.
+        </span>
+        <a
+          className="btn btn-secondary btn-sm cherrypick-kofi"
+          href={LINKS.kofi}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <Icon icon={faMugHot} /> Support {PLUGIN_NAME}
+        </a>
+      </div>
+    </footer>
+  )
+}
+
+function Sections({ tab }) {
+  return sections
+    .filter((x) => x.tab === tab)
+    .map(({ id, title, Component }) => (
+      <Section key={id} id={id} title={title}>
+        <Safe name={`${title || id} section`}>
+          <Component />
+        </Safe>
+      </Section>
+    ))
+}
+
+function ManageTab() {
+  return (
+    <>
+      <p className="text-muted cherrypick-manage-settings">
+        {PLUGIN_NAME}&apos;s switches are in Stash&apos;s settings.{' '}
+        <Link to="/settings?tab=plugins">Open Settings › Plugins</Link>
+      </p>
+      <Sections tab="manage" />
+    </>
+  )
+}
+
+const TAB_OF_PATH = {
+  [HALL_OF_FAME_TAB]: 'hall-of-fame',
+  [MANAGE_TAB]: 'manage',
+}
+const PATH_OF_TAB = {
+  'for-you': FOR_YOU_TAB,
+  'hall-of-fame': HALL_OF_FAME_TAB,
+  manage: MANAGE_TAB,
+}
+
+// The tab an address opens. Links from before the tabs point at a section
+// by hash (#hall-of-fame, #stashdb): they open the tab that holds it.
+function tabOf(location, forYou) {
+  const path = location.pathname.replace(/\/+$/, '')
+  const hash = location.hash.slice(1)
+  const byHash = hash && sections.find((x) => x.id === hash)?.tab
+  const tab = TAB_OF_PATH[path] || byHash || 'for-you'
+  return tab === 'for-you' && !forYou ? 'hall-of-fame' : tab
+}
+
 function PluginPage() {
   const notice = useAppState((s) => s.notice)
+  const forYou = useAppState((s) => s.settings.showForYou)
+  const location = useLocation()
+  const history = useHistory()
+  const tab = tabOf(location, forYou)
   React.useEffect(() => {
-    const id = window.location.hash.slice(1)
+    const id = location.hash.slice(1)
     if (id) document.getElementById(id)?.scrollIntoView()
-  }, [])
+  }, [location.hash, tab])
   return (
     <div className="container cherrypick-page cherrypick-ui">
       <h1 className="cherrypick-page-title">
         {PLUGIN_NAME} <Cherries />
       </h1>
-      <p className="text-muted">
-        Settings are in Settings › Plugins › {PLUGIN_NAME}.
-      </p>
       {notice?.kind === 'removed' ? (
         <div className="alert alert-info">
           {PLUGIN_NAME}&apos;s data is gone. It starts over as if just
           installed.
         </div>
       ) : null}
-      {sections.map(({ id, title, Component }) => (
-        <Section key={id} id={id} title={title}>
-          <Safe name={`${title} section`}>
-            <Component />
-          </Safe>
-        </Section>
-      ))}
+      <StatusStrip />
+      <Tabs
+        id="cherrypick-tabs"
+        className="cherrypick-tabs"
+        mountOnEnter
+        unmountOnExit
+        activeKey={tab}
+        onSelect={(key) => key !== tab && history.push(PATH_OF_TAB[key])}
+      >
+        {forYou ? (
+          <Tab eventKey="for-you" title="For you">
+            <Safe name="For you tab">
+              <ForYouTab />
+            </Safe>
+          </Tab>
+        ) : null}
+        <Tab eventKey="hall-of-fame" title="Hall of Fame">
+          <Sections tab="hall-of-fame" />
+        </Tab>
+        <Tab eventKey="manage" title="Manage">
+          <ManageTab />
+        </Tab>
+      </Tabs>
+      <Footer />
     </div>
   )
 }

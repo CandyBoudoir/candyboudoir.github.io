@@ -8,6 +8,14 @@
   z-index: 3;
 }
 
+/* Under Refract the title lies over the foot of the cover, and the top left
+   corner, where Refract draws a scene's rating, is free. */
+body.stash-liquid-glass .cherrypick-missing-badge {
+  bottom: auto;
+  left: 0.45rem;
+  top: 0.45rem;
+}
+
 /* "Not in your library" after a performer's scenes, in the same grid. */
 .cherrypick-not-in-library {
   margin-top: 1.5rem;

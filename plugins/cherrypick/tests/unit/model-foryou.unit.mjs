@@ -479,3 +479,57 @@ test('a scene you saw months ago comes back only for people who rewatch', () => 
   const once = fresh(0)
   assert.ok(once.seen < once.never - 0.5)
 })
+
+// The windows of twelve in a row where one performer has more than two
+// scenes, by where each window starts
+function clumps(scenes) {
+  const at = []
+  for (let i = 0; i + FY.FY.size <= scenes.length; i++) {
+    const per = new Map()
+    for (const s of scenes.slice(i, i + FY.FY.size))
+      for (const p of s.performers) per.set(p.id, (per.get(p.id) || 0) + 1)
+    if (Math.max(0, ...per.values()) > FY.FY.perPerformer) at.push(i)
+  }
+  return at
+}
+
+test("the For you tab: the row's twelve first, then every other scene For you allows, once", () => {
+  const ctx = FY.context(M, STATE)
+  const row = FY.computeForYou(ctx, FY.EMPTY_SIGNALS)
+  const list = FY.forYouList(ctx, FY.EMPTY_SIGNALS, { row })
+  const ids = list.map((it) => it.scene.id)
+  assert.deepEqual(
+    ids.slice(0, FY.FY.size),
+    row.map((it) => it.scene.id),
+  )
+  assert.equal(new Set(ids).size, ids.length)
+  assert.equal(ids.length, db.owned.filter((s) => FY.allowed(ctx, s)).length)
+  // past the row each item carries its score, for the card's reason
+  assert.ok(list.slice(FY.FY.size).every((it) => it.x?.scene === it.scene))
+  assert.match(FY.reasonFor(ctx, list[FY.FY.size].x), /^[A-Z].{8,}/)
+})
+
+test('the For you tab spreads performers as the row does until the scenes left run short', () => {
+  const ctx = FY.context(M, STATE)
+  const list = FY.forYouList(ctx, FY.EMPTY_SIGNALS, {
+    row: FY.computeForYou(ctx, FY.EMPTY_SIGNALS),
+  })
+  const ranked = FY.rankedScenes(ctx, FY.EMPTY_SIGNALS)
+  const tail = Math.floor((list.length * 3) / 4)
+  assert.ok(clumps(ranked.map((x) => x.scene)).some((i) => i < tail))
+  assert.deepEqual(
+    clumps(list.map((it) => it.scene)).filter((i) => i < tail),
+    [],
+  )
+})
+
+test('a filtered For you tab ranks the scenes that fit alone, best first', () => {
+  const ctx = FY.context(M, STATE)
+  const pool = new Set(db.owned.filter((s, i) => i % 3 === 0).map((s) => s.id))
+  const list = FY.forYouList(ctx, FY.EMPTY_SIGNALS, { pool })
+  const ranked = FY.rankedScenes(ctx, FY.EMPTY_SIGNALS, (s) => pool.has(s.id))
+  assert.ok(list.length > FY.FY.size)
+  assert.equal(list.length, ranked.length)
+  assert.ok(list.every((it) => pool.has(it.scene.id)))
+  assert.equal(list[0].scene.id, ranked[0].scene.id)
+})

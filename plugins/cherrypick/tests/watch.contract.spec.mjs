@@ -9,6 +9,7 @@
 // as they were afterwards, for the themes' screenshots.
 import { expect, test } from '@playwright/test'
 import { listPlugins } from '../../../scripts/site.mjs'
+import { companionPluginIds } from '../../../tests/stash/companions.mjs'
 import {
   PLUGIN_ID,
   forYouCards,
@@ -20,6 +21,9 @@ import {
   tearDownCherryPick,
   usePlugins,
 } from './stash.mjs'
+
+// Refract is a theme too
+const besideRefract = companionPluginIds().includes('refract')
 
 const setWatchThis = async (on) =>
   setPluginSettings(PLUGIN_ID, {
@@ -99,6 +103,13 @@ test.afterAll(async () => {
 })
 
 const player = (page) => page.locator('.cherrypick-watch-player .video-js')
+// A click on the player's bar, the mouse over the player first, as a
+// viewer's is: video.js hides a playing player's bar while the mouse stays
+// still, and Refract hides a paused one's 2.5 s after the mouse last moved
+const clickBar = async (page, button) => {
+  await player(page).hover()
+  await button.click()
+}
 const line = (page) => page.locator('.cherrypick-watch-line')
 // The pick's line, once the player has its scene (the skeleton has a line
 // of its own for the progress)
@@ -261,7 +272,9 @@ test("Stash's Auto-start video decides whether the pick starts by itself", async
   await ready(page)
   await page.waitForTimeout(2000)
   await expect(player(page)).not.toHaveClass(/vjs-has-started/)
-  await page.locator('.cherrypick-watch-player .vjs-big-play-button').click()
+  // Refract hides the big play button and leaves the bar's
+  const play = besideRefract ? '.vjs-play-control' : '.vjs-big-play-button'
+  await clickBar(page, page.locator(`.cherrypick-watch-player ${play}`))
   await expect(player(page)).toHaveClass(/vjs-playing/)
 })
 
@@ -394,7 +407,7 @@ test("during playback the player's next and previous buttons skip and go back", 
     if ((r.postData() || '').includes('CherryPickConfigurePlugin'))
       writes.push(r.postData())
   })
-  await next.click()
+  await clickBar(page, next)
   await expect.poll(() => playerSceneId(page)).not.toBe(a)
   await expect(previous).toBeVisible()
   // the same player, with the next pick, and still no line
@@ -407,7 +420,7 @@ test("during playback the player's next and previous buttons skip and go back", 
     [a, 1],
   ])
 
-  await previous.click()
+  await clickBar(page, previous)
   await expect.poll(() => playerSceneId(page)).toBe(a)
   await expect(previous).toBeHidden()
   // Back puts the snooze back as it was: none
@@ -453,13 +466,11 @@ test('a skip after playing a tenth of the pick starts its ladder again; a shorte
     snoozesIn(await pluginConfig()).find((e) => e.id === id)
 
   // The demo clip lasts 8 seconds: 2 seconds of play is a quarter of it.
-  // The control bar takes clicks once the mouse moves over the player.
   await playerFocused(page)
   await page.keyboard.press('Space')
   await expect(player(page)).toHaveClass(/vjs-playing/)
   await page.waitForTimeout(2000)
-  await player(page).hover()
-  await next.click()
+  await clickBar(page, next)
   expect(
     await page
       .locator('.cherrypick-watch-player video')
@@ -472,18 +483,21 @@ test('a skip after playing a tenth of the pick starts its ladder again; a shorte
   expect((watched.until - Date.now()) / HOUR).toBeGreaterThan(47.9)
 
   // Back puts the two steps back; skipped at once, a look, it climbs
-  await previous.click()
+  await clickBar(page, previous)
   await expect.poll(() => playerSceneId(page)).toBe(a)
   expect(
     await page
       .locator('.cherrypick-watch-player video')
       .evaluate((v) => v.paused),
   ).toBe(true)
-  await next.click()
+  await clickBar(page, next)
   await expect.poll(() => playerSceneId(page)).not.toBe(a)
-  await expect.poll(() => writes.length, { timeout: 15_000 }).toBe(2)
+  // Back's save and the skip's go to Stash as one write, or as two when
+  // Back's is out before the skip
+  await expect
+    .poll(async () => (await stepOf(a))?.step, { timeout: 15_000 })
+    .toBe(3)
   const look = await stepOf(a)
-  expect(look.step).toBe(3)
   expect((look.until - Date.now()) / HOUR).toBeGreaterThan(719.9)
 })
 
@@ -543,8 +557,8 @@ test.describe('phone', () => {
   })
 })
 
-// Every CandyBoudoir theme but the incubating ones, as in
-// themes.contract.spec.mjs
+// Every CandyBoudoir theme but the incubating ones, and none beside Refract,
+// as in themes.contract.spec.mjs
 const themes = (await listPlugins())
   .filter(({ mod }) => mod.kind === 'theme' && !mod.incubating)
   .map(({ mod }) => mod.id)
@@ -553,6 +567,7 @@ for (const theme of themes) {
   test(`with ${theme}: the player and its line render, the line on screen`, async ({
     page,
   }) => {
+    test.skip(besideRefract, 'Refract is a theme too')
     await usePlugins(PLUGIN_ID, theme)
     await setWatchThis(true)
     const errors = []

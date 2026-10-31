@@ -1,6 +1,6 @@
 name: Cherry Pick
 description: Learns what you like from your ratings and plays. A For you row, Your score on scenes you haven't rated, More like this and performer brackets.
-version: 0.4.0
+version: 0.5.1
 url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/cherrypick
 ui:
   javascript:
@@ -21,7 +21,7 @@ settings:
     type: BOOLEAN
   showForYou:
     displayName: For you row
-    description: The first row on the front page.
+    description: The first row on the front page, and the For you tab on Cherry Pick's page.
     type: BOOLEAN
   showFollowRows:
     displayName: Rows that follow your watching

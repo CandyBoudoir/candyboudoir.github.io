@@ -12,15 +12,15 @@ import { access } from 'node:fs/promises'
 // latest release: `latest` says where to look, and tested-with.mjs holds
 // back a Cherry Pick release while a newer one is out.
 const CURATOR_RELEASE =
-  'https://github.com/mrx-31415/stash-curator/releases/download/v0.41.0'
+  'https://github.com/mrx-31415/stash-curator/releases/download/v0.49.0'
 const CURATOR_ZIPS = {
   'linux-x64': [
     'stash-curator-linux-amd64.zip',
-    '4bfa9ac484e0b0bf77e58d6441e911212e5ae56a63f731143e163bff5b7a0059',
+    '6b791d2c577dd566892dfa5a988c2ecf7324193805a7c5c7f41f4445c3ab7367',
   ],
   'darwin-arm64': [
     'stash-curator-darwin-arm64.zip',
-    'aa13b5a472a1f3e8e5d8a6586a0613f8438c313ac8bc567152a947b525802a4d',
+    'ffb408c6feb045fcd634a437f3a5737bb0ddafec14aad3d1225114db07aff890',
   ],
 }
 // Stash Curator's zip for the machine Stash runs on, linux-amd64 by default
@@ -77,11 +77,11 @@ export const COMPANIONS = {
     disable: [],
     latest: { index: 'https://lowgrade12.github.io/hot-or-not/main/index.yml' },
   },
-  // Stash Curator 0.41.0, local recommendations that score scenes and
+  // Stash Curator 0.49.0, local recommendations that score scenes and
   // performers on Stash's own cards, from
   // https://github.com/mrx-31415/stash-curator (AGPL-3.0). Its zip carries a
   // compiled backend, one zip per platform: linux-amd64 in CI, darwin-arm64
-  // for a local run on a Mac. Both are the builds attached to the v0.41.0
+  // for a local run on a Mac. Both are the builds attached to the v0.49.0
   // release, which later releases leave in place; its GitHub Pages index
   // serves only the newest. Its manifest runs `python` (a launcher for the
   // backend), so Stash needs one on its PATH: where there is only python3,
@@ -90,8 +90,8 @@ export const COMPANIONS = {
     package: {
       id: 'stash-curator',
       name: 'Stash Curator',
-      version: '0.41.0',
-      date: '2026-10-20 13:29:36',
+      version: '0.49.0',
+      date: '2026-10-30 18:28:33',
       ...curatorZip(),
     },
     enable: ['stash-curator'],
@@ -138,6 +138,30 @@ export const COMPANIONS = {
     disable: [],
     latest: { index: 'https://espionage9248.github.io/Restash/index.yml' },
   },
+  // Refract 1.24.3, the liquid-glass theme with the busiest theme topic on
+  // the forum, from https://github.com/ordureconnoisseur/stash-refract
+  // (AGPL-3.0). Its GitHub Pages source is the only build it publishes:
+  // the zip holds the theme at commit 458b135 of ordureconnoisseur/plugins.
+  // Pages keeps no history and rebuilds the zip on every push, so a
+  // republished zip fails the sha256 check instead of changing what the leg
+  // tests. From 1200px wide it lays the scene page's .row out as a grid
+  // locked to the window's height, which is why it is a companion.
+  refract: {
+    package: {
+      id: 'refract',
+      name: 'Refract',
+      version: '1.24.3-458b135',
+      date: '2026-09-06 09:04:46',
+      path: 'https://ordureconnoisseur.github.io/plugins/main/refract.zip',
+      sha256:
+        '5071d1aaf7052f1c6f82a346d27ccad7eddbde978402516639db33bbdb7cfd47',
+    },
+    enable: ['refract'],
+    disable: [],
+    latest: {
+      index: 'https://ordureconnoisseur.github.io/plugins/main/index.yml',
+    },
+  },
 }
 
 // Other authors' plugins that themes here restyle. prepare.mjs puts each of
@@ -150,26 +174,26 @@ export const COMPANIONS = {
 // of a theme that restyles one while a newer release of it is out, and with
 // --issues opens an issue for it; pin-restyled.mjs moves a pin to the latest
 // release.
-const INSIGHTS_COMMIT = 'd4bca1a85fa59e130ec7311435543bce9d3e3440'
-const PERFORMERS_TOOLKIT_COMMIT = 'ff5082dd22b97d74aa3ef25347c082403e81d754'
+const INSIGHTS_COMMIT = 'c660e7dc2677900b63f27636d81c847f7b3f14bc'
+const PERFORMERS_TOOLKIT_COMMIT = '0d58f7b7d5f2a209336065f20cf863b94aac3f15'
 export const RESTYLED = {
-  // Insights 2.14.0, a stats dashboard on Stash's Stats page, from
+  // Insights 2.14.1, a stats dashboard on Stash's Stats page, from
   // https://gitlab.com/allisless0/stash-plugins (MIT): its plugin folder at
-  // the 2.14.0 commit, the same files as the zip its GitLab Pages source
+  // the 2.14.1 commit, the same files as the zip its GitLab Pages source
   // served for that release.
   insights: {
     id: 'Insights',
     name: 'Insights',
-    version: '2.14.0',
+    version: '2.14.1',
     commit: INSIGHTS_COMMIT,
     base: `https://gitlab.com/allisless0/stash-plugins/-/raw/${INSIGHTS_COMMIT}/plugins/Insights`,
     files: {
       'Insights.css':
         '959eab447780ef03db2c99cbf41e9fd0d86e424744e54715da493b93b9eabc6d',
       'Insights.js':
-        '67e0c9eca16625a2a1b24b006b72441aa215896be1bfc34942ddb24a013b90f2',
+        'b93e2a6441cd255866315fe5a4721ed551bca6b72ea727f6fb1a6d8861bcccd5',
       'Insights.yml':
-        'd4accf788b07eb1e71222d24916f5e89838127be6025de290deaca04e7caae80',
+        'd2838617525e824fcd7de9708df8dc32d5046cb8243f8b856c27967084e552f1',
       'README.md':
         'fa8a53abc408511411b6680b3cb5e580417569467b6baa965ee66f296dc80a3e',
     },
@@ -177,27 +201,27 @@ export const RESTYLED = {
       index: 'https://allisless0.gitlab.io/stash-plugins/main/index.yml',
     },
   },
-  // Performers Toolkit 0.22.0, a toolkit page at /performerstoolkit and a
+  // Performers Toolkit 0.23.1, a toolkit page at /performerstoolkit and a
   // strip and two tabs on performer pages, from the same repository and
   // in the same Flexoki look as Insights. Its scans and saves run in a
   // Python backend (standard library only), which the specs never start.
   performerstoolkit: {
     id: 'PerformersToolkit',
     name: 'Performers Toolkit',
-    version: '0.22.0',
+    version: '0.23.1',
     commit: PERFORMERS_TOOLKIT_COMMIT,
     base: `https://gitlab.com/allisless0/stash-plugins/-/raw/${PERFORMERS_TOOLKIT_COMMIT}/plugins/PerformersToolkit`,
     files: {
       'PerformersToolkit-matte.js':
         'fdd022c5b4653b6ade3ce88f57198abcc6d344769304164205247925a63f76f6',
       'PerformersToolkit.js':
-        '98e57c6959ffc3ecde5b5822de9cd783c64d4a980869c1e9509b3b7bd689bb6c',
+        '889a6c1be93a716e2a0e6248ecab1fc297a2c05cac2f75839fa1308383dce5bb',
       'PerformersToolkit.py':
-        'dc19f72d915d749e42b02e41f462ad9004c0b196d3f010dba75d01980c42057f',
+        'b07addb4c7467f3fe036284ac2c05da2818c860de56004f64dda8302dc39140f',
       'PerformersToolkit.yml':
-        'd76e79787dc8fdc38f4fac6e8ad5fe212f34478e10742843fd6f458f5fe1da13',
+        'd29730247938761250812801298dc0577f8dc13071c79981cf1f9ac111e55316',
       'README.md':
-        '65641d60f437d41ce5e249ffdc1fdc5b08c12c072929e22a4f6082aa15ef8cd0',
+        'bcae2fa8af169a9cad24ba85cb2ad26379d2eb7e98e9990fc00a5c5b9c393412',
     },
     latest: {
       index: 'https://allisless0.gitlab.io/stash-plugins/main/index.yml',
