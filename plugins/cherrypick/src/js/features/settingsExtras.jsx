@@ -1,7 +1,8 @@
 // Under Cherry Pick's settings in Settings › Plugins: the offer beside Stash
 // Curator, the remembered bracket gender with Forget, and a link to the
 // plugin page. Rows use Stash's own Setting component, so they look like the
-// switches above them.
+// switches above them. Among the switches, Reasons on cards is a drop-down
+// in place of Stash's text box.
 //
 // Stash's Settings page writes back the configuration it loaded whenever a
 // switch changes, so Cherry Pick's own writes wait until the user leaves the
@@ -21,14 +22,19 @@ import { store } from '../runtime/app.js'
 import { answerCuratorOffer } from '../runtime/actions.js'
 import { answerSettings } from '../model/curator.js'
 import { genderLabel } from '../model/util.js'
-import { inManifestOrder, SETTING_DEFAULTS } from '../storage/settings.js'
+import {
+  inManifestOrder,
+  reasonDisplayOf,
+  SETTING_DEFAULTS,
+  SETTING_KEYS,
+} from '../storage/settings.js'
 import { withCuratorAnswer } from '../storage/tier1.js'
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_ROUTE } from '../name.js'
 import { useAppState } from '../ui/hooks.js'
 import { Safe } from '../ui/Safe.jsx'
 import { OFFER, useCuratorOffer } from './curatorOffer.js'
 
-const { Button } = Bootstrap
+const { Button, Form } = Bootstrap
 
 // New brackets start from the largest pool again.
 const forgetBracketGender = () =>
@@ -122,6 +128,56 @@ function CuratorOffer() {
   )
 }
 
+// Reasons on cards: Stash's plugin settings are only BOOLEAN, STRING or
+// NUMBER, and a STRING is a text box, so the row is drawn here as Stash's
+// SelectSetting draws one (which takes no plain heading), with the
+// manifest's name and description, and saves as the switches do.
+const REASON_SETTING = 'reasonDisplay'
+const REASON_CHOICES = { text: 'Text', icon: 'Icon', off: 'Off' }
+
+function ReasonDisplay({ setting }) {
+  const { plugins, savePluginSettings } = hooks.useSettings()
+  const map = plugins?.[PLUGIN_ID] || {}
+  const { Setting } = components
+  const change = (value) => {
+    savePluginSettings(PLUGIN_ID, { ...map, [REASON_SETTING]: value })
+    store.set((s) => ({ settings: { ...s.settings, [REASON_SETTING]: value } }))
+  }
+  return (
+    <Setting
+      id={`plugin-${PLUGIN_ID}-${REASON_SETTING}`}
+      className="cherrypick-ui"
+      heading={setting.display_name || setting.name}
+      subHeading={setting.description || undefined}
+    >
+      <Form.Control
+        as="select"
+        className="input-control"
+        value={reasonDisplayOf(map[REASON_SETTING])}
+        onChange={(e) => change(e.currentTarget.value)}
+      >
+        {Object.entries(REASON_CHOICES).map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
+      </Form.Control>
+    </Setting>
+  )
+}
+
+// The drop-down in the switch's place: before the first switch the
+// manifest lists after it.
+function withReasonRow(children, row) {
+  const rank = (name) => SETTING_KEYS.indexOf(name)
+  const at = children.findIndex(
+    (c) => rank(c.props?.setting?.name) > rank(REASON_SETTING),
+  )
+  return at < 0
+    ? [...children, row]
+    : [...children.slice(0, at), row, ...children.slice(at)]
+}
+
 function PageLink() {
   const { Setting } = components
   const { Link } = ReactRouterDOM
@@ -140,13 +196,28 @@ function PageLink() {
 }
 
 export function registerSettingsExtras() {
-  patch.before('PluginSettings', (props, ...rest) =>
-    props?.pluginID === PLUGIN_ID && Array.isArray(props.settings)
-      ? [{ ...props, settings: inManifestOrder(props.settings) }, ...rest]
-      : [props, ...rest],
-  )
+  // Sorted, and without Reasons on cards, which the after patch draws as a
+  // drop-down from the setting it is handed here
+  patch.before('PluginSettings', (props, ...rest) => {
+    if (props?.pluginID !== PLUGIN_ID || !Array.isArray(props.settings))
+      return [props, ...rest]
+    const reasons = props.settings.find((x) => x.name === REASON_SETTING)
+    return [
+      {
+        ...props,
+        settings: inManifestOrder(props.settings.filter((x) => x !== reasons)),
+        cherrypickReasons: reasons,
+      },
+      ...rest,
+    ]
+  })
   patchAfter('PluginSettings', (props, result) => {
     if (props.pluginID !== PLUGIN_ID) return result
+    const reasons = props.cherrypickReasons ? (
+      <Safe key="cherrypick-reasons" name="reasons on cards">
+        <ReasonDisplay setting={props.cherrypickReasons} />
+      </Safe>
+    ) : null
     const rows = (
       <Safe key="cherrypick-settings-extras" name="settings extras">
         {/* On its own: it reads Stash's Settings page through PluginApi.hooks */}
@@ -159,17 +230,22 @@ export function registerSettingsExtras() {
     )
     // Inside Stash's .plugin-settings, after the last switch, so its
     // dividers run on; beside it if another plugin changed what it renders.
-    if (React.isValidElement(result) && result.type === 'div')
+    if (React.isValidElement(result) && result.type === 'div') {
+      const switches = React.Children.toArray(result.props.children)
       return React.cloneElement(
         result,
         undefined,
-        ...React.Children.toArray(result.props.children),
+        ...(reasons ? withReasonRow(switches, reasons) : switches),
         rows,
       )
+    }
     return (
       <>
         {result}
-        <div className="plugin-settings">{rows}</div>
+        <div className="plugin-settings">
+          {reasons}
+          {rows}
+        </div>
       </>
     )
   })

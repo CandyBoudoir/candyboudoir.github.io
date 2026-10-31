@@ -91,7 +91,17 @@ const NOT_SENT = "Stash didn't send these scenes. Reload the page to try again."
 // One row of the visit. Hidden cards stay in place as Undo cards; scenes
 // hidden since the visit began never show again in it. A row with nothing
 // to show says why in `empty`; without it, the row leaves the page.
-function SceneRow({ id, title, items, className, onOpen, extra, empty, link }) {
+function SceneRow({
+  id,
+  title,
+  items,
+  className,
+  onOpen,
+  extra,
+  empty,
+  link,
+  icons,
+}) {
   const hidden = useAppState((s) => s.notInterested)
   const recent = useAppState((s) => s.recentHidden)
   const isHidden = new Set(hidden.map((n) => n.sceneId))
@@ -125,6 +135,7 @@ function SceneRow({ id, title, items, className, onOpen, extra, empty, link }) {
             rowId={id}
             index={i}
             onOpen={onOpen}
+            icons={icons}
           />
         )
       }
@@ -200,6 +211,7 @@ function CherryPickRows() {
           items={v.forYou}
           className="cherrypick-for-you"
           onOpen={recordOpen}
+          icons
           extra={<SharpenLine />}
           link={{ to: FOR_YOU_TAB, text: 'View all' }}
           empty="Every scene is marked Not interested or has a tag from Tags to keep out of my picks."

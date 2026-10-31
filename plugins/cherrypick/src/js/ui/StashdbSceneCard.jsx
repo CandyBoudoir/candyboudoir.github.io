@@ -12,7 +12,7 @@ import { components, FontAwesomeSolid, ReactRouterDOM } from '../runtime/api.js'
 import { fetchedScene } from '../stashdb/layer.js'
 import { stashdbPage, storeOf } from '../stashdb/queries.js'
 import { CardMenu } from './CardMenu.jsx'
-import { useAppState } from './hooks.js'
+import { useAppState, useReasonDisplay } from './hooks.js'
 import { refract } from './refract.js'
 
 const { Link } = ReactRouterDOM
@@ -41,6 +41,9 @@ export function StashdbSceneCard({ scene, item, rowId, width, zoom = 1 }) {
   )
   const store = storeOf(useAppState((s) => fetchedScene(s, scene.stashId)))
   const studioSite = store && /^studio$/i.test(store.site)
+  // the reason line under Reasons on cards: Text only; these cards sit in
+  // rows whose titles say why under Icon
+  const reason = useReasonDisplay() === 'text' ? item?.reason : null
   const url = stashdbPage(endpoint, 'scenes', scene.stashId)
   const duration = fmtDuration(scene.duration)
   const icon = (i) => (Icon ? <Icon icon={i} /> : null)
@@ -125,9 +128,9 @@ export function StashdbSceneCard({ scene, item, rowId, width, zoom = 1 }) {
         </a>
         <div className="scene-card__details">
           <span className="scene-card__date">{scene.date}</span>
-          {item?.reason ? (
+          {reason ? (
             <div className="scene-card__description cherrypick-reason">
-              {item.reason}
+              {reason}
             </div>
           ) : null}
         </div>

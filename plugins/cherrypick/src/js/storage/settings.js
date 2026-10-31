@@ -11,6 +11,9 @@ export const MANIFEST_SETTINGS = [
   { key: 'showHallOfFame', type: 'BOOLEAN', def: true },
   { key: 'showMoreLikeThis', type: 'BOOLEAN', def: true },
   { key: 'outOfLibrary', type: 'BOOLEAN', def: true },
+  // text, icon or off (REASON_DISPLAYS); Settings › Plugins shows a
+  // drop-down for it (features/settingsExtras.jsx)
+  { key: 'reasonDisplay', type: 'STRING', def: 'text' },
   { key: 'badges', type: 'BOOLEAN', def: true },
   { key: 'sceneLine', type: 'BOOLEAN', def: true },
   { key: 'medals', type: 'BOOLEAN', def: true },
@@ -30,6 +33,20 @@ export const SETTING_KEYS = MANIFEST_SETTINGS.map((s) => s.key)
 export const SETTING_DEFAULTS = Object.fromEntries(
   MANIFEST_SETTINGS.map((s) => [s.key, s.def]),
 )
+
+// How cards say why they are in Cherry Pick's rows: a line under each card,
+// an icon on For you's covers, or nothing (ui/rowCards.jsx).
+export const REASON_DISPLAYS = ['text', 'icon', 'off']
+
+// The stored value as one of REASON_DISPLAYS. Typed by hand into Stash's
+// text box if the drop-down is missing, so case and spaces don't matter;
+// anything else is the default.
+export function reasonDisplayOf(value) {
+  const v = String(value ?? '')
+    .trim()
+    .toLowerCase()
+  return REASON_DISPLAYS.includes(v) ? v : 'text'
+}
 
 /**
  * Apply bracket ratings automatically: what to write, or null to leave it.

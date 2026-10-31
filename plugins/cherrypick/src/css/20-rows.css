@@ -22,7 +22,8 @@
    ui/StashdbSceneCard.jsx), in the look of Refract's own pills (its
    css/08_misc_mid.css) */
 .stash-card-counts .cherrypick-card-menu > .btn,
-.stash-card-counts > .cherrypick-pill {
+.stash-card-counts > .cherrypick-pill,
+.stash-card-counts .cherrypick-reason-glyph {
   align-items: center;
   background: var(--accent-tint);
   border: 1px solid var(--accent-glow);
@@ -87,4 +88,91 @@
   font-size: inherit;
   padding: 0;
   vertical-align: baseline;
+}
+
+/* Reasons on cards: Icon. For you's reason as an icon at the bottom left of
+   the cover (ui/ReasonIcon.jsx), on the line Stash's overlays sit on (1rem
+   up: the resolution and length at the right), on a half-black dim like
+   Your score's so it reads over any picture. The button is 32px square, a
+   finger's size around the 24px glyph, whose foot sits on that line. It
+   clears Stash's progress bar (5 to 10px up) and covers the left end of
+   the 20px strip where the cover's scrubber takes the pointer. */
+.cherrypick-reason-icon {
+  align-items: center;
+  background: none;
+  border: 0;
+  bottom: calc(1rem - 4px);
+  color: #fff;
+  display: flex;
+  height: 32px;
+  justify-content: center;
+  left: calc(0.7rem - 6px);
+  padding: 0;
+  position: absolute;
+  width: 32px;
+  z-index: 2;
+}
+
+.cherrypick-reason-glyph {
+  align-items: center;
+  background: rgb(0 0 0 / 55%);
+  border-radius: 50%;
+  display: flex;
+  font-size: 13px;
+  height: 24px;
+  justify-content: center;
+  width: 24px;
+}
+
+.cherrypick-reason-icon:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* The corner can be taken: on an interactive scene Stash shows the
+   script's speed there (.scene-interactive-speed-overlay, empty on other
+   scenes), and Xenith's rank badge, Ascension's score and, on For you's
+   tab, Stash Curator's Appeal pill sit there too. The icon goes up a line,
+   above them. */
+.thumbnail-section:has(
+    .scene-interactive-speed-overlay:not(:empty),
+    .hon-compact-badge,
+    .hon-asc-score-display,
+    .curator-scene-card-badge
+  )
+  > .cherrypick-reason-icon {
+  bottom: 2.75rem;
+}
+
+/* Pointing at the icon or pressing it (after a tap a phone leaves its hover
+   there) is not pointing at the cover: the preview Stash plays on a hovered
+   card stays hidden. */
+.scene-card:has(.cherrypick-reason-icon:hover) .scene-card-preview-video,
+.scene-card:has(.cherrypick-reason-icon:active) .scene-card-preview-video {
+  top: -9999px;
+}
+
+/* Under Refract the reason's icon is the first of its pills (Refract puts
+   its duration last with order: 99), in their look, with a hit area 6px
+   past the pill on each side */
+.stash-card-counts > .cherrypick-reason-pill {
+  order: -1;
+}
+
+.stash-card-counts .cherrypick-reason-icon {
+  bottom: auto;
+  height: auto;
+  left: auto;
+  position: relative;
+  width: auto;
+}
+
+.stash-card-counts .cherrypick-reason-icon::after {
+  content: '';
+  inset: -6px;
+  position: absolute;
+}
+
+.stash-card-counts .cherrypick-reason-glyph {
+  height: auto;
+  width: auto;
 }
