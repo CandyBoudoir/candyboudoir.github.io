@@ -1317,9 +1317,7 @@ test.describe('beside Refract', () => {
     expect(now.sideways).toBe(0)
 
     // The page scrolls down to it
-    const shown = page
-      .locator('.cherrypick-mlt-owned .slick-active:not(.slick-cloned)')
-      .first()
+    const shown = page.locator('.cherrypick-mlt-owned .slick-active').first()
     await shown.scrollIntoViewIfNeeded()
     await expect(shown).toBeInViewport()
   })
@@ -1353,9 +1351,7 @@ test.describe('beside Refract', () => {
 
     await page.goto('/')
     const pills = page
-      .locator(
-        '.cherrypick-for-you .slick-active:not(.slick-cloned) .stash-card-counts',
-      )
+      .locator('.cherrypick-for-you .slick-active .stash-card-counts')
       .first()
     const menu = pills.locator('.cherrypick-card-menu button')
     await expect(menu).toBeVisible({ timeout: 20_000 })

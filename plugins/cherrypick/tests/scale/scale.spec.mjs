@@ -104,9 +104,7 @@ test.afterEach(() => {
 })
 
 const forYou = () =>
-  page.locator(
-    '.cherrypick-for-you .slick-slide:not(.slick-cloned) .scene-card',
-  )
+  page.locator('.cherrypick-for-you .slick-slide .scene-card')
 const visible = (sel) => page.locator(sel).filter({ visible: true }).first()
 const idOf = (href) => href?.match(/\/scenes\/(\d+)/)?.[1]
 
@@ -228,9 +226,7 @@ test('For you on a first visit', async () => {
   metrics.steps.firstForYou = secs(t)
   await expect(forYou()).toHaveCount(12)
   const reasons = await page
-    .locator(
-      '.cherrypick-for-you .slick-slide:not(.slick-cloned) .cherrypick-reason',
-    )
+    .locator('.cherrypick-for-you .slick-slide .cherrypick-reason')
     .allTextContents()
   expect(reasons.length).toBe(12)
   for (const r of reasons) expect(r.trim()).not.toBe('')
