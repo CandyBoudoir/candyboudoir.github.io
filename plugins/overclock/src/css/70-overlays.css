@@ -1,8 +1,10 @@
 /*
  * Menus, popovers, tooltips, toasts and modals: clipped teal-black panels with
  * a yellow left rule. Stash paints its menus slate through div.dropdown-menu
- * rules, so the menu rules name the div too, and some menus and their items
- * carry Bootstrap's !important bg-secondary.
+ * rules, so the menu rules name the div too. The list toolbars' Sort by and
+ * more menus and a scene's Operations menu also put Bootstrap's !important
+ * bg-secondary and text-white on the menu and every item, so their colours,
+ * hover and pressed states included, need !important as well.
  */
 div.dropdown-menu {
   --overclock-cut: 10px;
@@ -63,6 +65,30 @@ div.dropdown-menu .dropdown-item:active {
 
   background: var(--overclock-yellow);
   color: var(--overclock-black);
+}
+
+div.dropdown-menu .dropdown-item.text-white {
+  color: var(--overclock-text) !important;
+}
+
+div.dropdown-menu .dropdown-item.bg-secondary:hover,
+div.dropdown-menu .dropdown-item.bg-secondary:focus {
+  background-color: rgb(243 230 0 / 9%) !important;
+}
+
+div.dropdown-menu .dropdown-item.text-white:hover,
+div.dropdown-menu .dropdown-item.text-white:focus {
+  color: var(--overclock-yellow) !important;
+}
+
+div.dropdown-menu .dropdown-item.bg-secondary.active,
+div.dropdown-menu .dropdown-item.bg-secondary:active {
+  background-color: var(--overclock-yellow) !important;
+}
+
+div.dropdown-menu .dropdown-item.text-white.active,
+div.dropdown-menu .dropdown-item.text-white:active {
+  color: var(--overclock-black) !important;
 }
 
 .dropdown-item.disabled,
