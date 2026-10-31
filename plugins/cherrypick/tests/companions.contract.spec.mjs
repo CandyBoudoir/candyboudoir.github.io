@@ -14,7 +14,8 @@
 // both plugins' navbar items; Cherry Pick counts Xenith's, and a bracket of
 // the performers Xenith played leaves every one alone. Beside Curator, whose
 // patches change the list components' arguments and whose criteria Stash's
-// schema lacks, the lists render and Bracket works on a list it filters.
+// schema lacks, the lists render and Bracket works on a list it filters,
+// and the front page shows both plugins' rows in either load order.
 // Beside Restash, its own tasks score the library: with its mirror off
 // every rating stays the user's, and with it on Apply leaves each mirrored
 // performer alone and checks again before it writes and before an Undo.
@@ -750,6 +751,24 @@ async function answered() {
   return { badges: c?.badges, curatorOffer: c?.curatorOffer ?? null }
 }
 
+// Has Stash run `id`'s script before every other plugin's. Stash loads them
+// in the reverse of its Plugins query's order, and each plugin's patches
+// run in the order the scripts registered them.
+async function loadFirst(page, id) {
+  await page.route('**/graphql', async (route) => {
+    if (route.request().postDataJSON()?.operationName !== 'Plugins')
+      return route.fallback()
+    const response = await route.fetch()
+    const json = await response.json()
+    const { plugins } = json.data
+    json.data.plugins = [
+      ...plugins.filter((p) => p.id !== id),
+      ...plugins.filter((p) => p.id === id),
+    ]
+    await route.fulfill({ response, json })
+  })
+}
+
 // Stash's answers that rejected a query outright, as "400 CherryPickListScenes"
 function rejected(page) {
   const out = []
@@ -824,6 +843,49 @@ test.describe('beside Stash Curator', () => {
 
     expect(errors).toEqual([])
   })
+
+  // From 0.47.0 Curator puts its lanes on the front page with an after
+  // patch on FrontPage that acts only on Stash's rows view, as Cherry Pick's
+  // does, so whichever ran second found the other's output and left it.
+  for (const first of [PLUGIN_ID, 'stash-curator']) {
+    test(`the front page shows Cherry Pick's rows and Curator's lane with ${first} loaded first, and Customise still works`, async ({
+      page,
+    }) => {
+      const errors = []
+      page.on('pageerror', (e) => errors.push(e.message))
+      await loadFirst(page, first)
+      const lane = page.locator('.curator-home-row-for_you')
+      const ordered = () =>
+        page.evaluate(() => {
+          const ours = document.querySelector('.cherrypick-front')
+          const theirs = document.querySelector('.curator-home-row')
+          return !!(
+            ours &&
+            theirs &&
+            ours.compareDocumentPosition(theirs) &
+              Node.DOCUMENT_POSITION_FOLLOWING
+          )
+        })
+
+      await page.goto('/')
+      await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
+      await expect(lane).toBeVisible({ timeout: 20_000 })
+      expect(await ordered()).toBe(true)
+
+      // Customise names Curator's lane, and saving brings every row back
+      await page.locator('.recommendations-footer .btn').click()
+      await expect(
+        page.locator(
+          '.recommendations-container-edit h2[data-curator-label="Curator: For You"]',
+        ),
+      ).toBeVisible({ timeout: 20_000 })
+      await page.getByRole('button', { name: 'Save', exact: true }).click()
+      await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
+      await expect(lane).toBeVisible({ timeout: 20_000 })
+      expect(await ordered()).toBe(true)
+      expect(errors).toEqual([])
+    })
+  }
 
   test('Bracket on a Scenes list filtered by Curator Appeal leaves it out and says so', async ({
     page,
