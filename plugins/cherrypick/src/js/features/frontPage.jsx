@@ -9,7 +9,7 @@
 // The rows are computed once per visit to the front page and then hold
 // still: Not interested turns a card into an Undo card in place, and nothing
 // reorders while the page is open.
-import { patchAfter, ReactRouterDOM } from '../runtime/api.js'
+import { patchAfter, React, ReactRouterDOM } from '../runtime/api.js'
 import { store } from '../runtime/app.js'
 import { recordOpen, undoNotInterested } from '../runtime/actions.js'
 import {
@@ -251,17 +251,45 @@ function FrontPiece() {
 // Stash's FrontPage renders a loading indicator, the Customise editor or the
 // rows' .recommendations-container; Cherry Pick's rows join only the last.
 const isRows = (el) =>
-  String(el?.props?.className || '').includes('recommendations-container')
+  String(el?.props?.className || '')
+    .split(/\s+/)
+    .includes('recommendations-container')
+
+// Stash's rows view with Cherry Pick's rows above it. The element keeps the
+// view's own props, so an after patch that runs later and reads its
+// className and children, or clones it with new ones, finds Stash's: Stash
+// Curator's swaps its entries in the list for its own rows that way.
+function FrontPageRows({ view, ...props }) {
+  return (
+    <>
+      <FrontPiece />
+      {React.createElement(view, props)}
+    </>
+  )
+}
+
+// `el` with Stash's rows view in it as FrontPageRows, or null if it has no
+// rows view. An after patch that ran earlier may have wrapped the view
+// (Stash Curator's puts it in a provider of its own), so the view is looked
+// for in the children too.
+function withRows(el) {
+  if (!React.isValidElement(el)) return null
+  if (isRows(el))
+    return <FrontPageRows key={el.key} view={el.type} {...el.props} />
+  const children = childrenWithRows(el.props.children)
+  return children && React.cloneElement(el, { children })
+}
+
+function childrenWithRows(children) {
+  if (!Array.isArray(children)) return withRows(children)
+  for (let i = 0; i < children.length; i++) {
+    const swapped = childrenWithRows(children[i])
+    if (swapped)
+      return [...children.slice(0, i), swapped, ...children.slice(i + 1)]
+  }
+  return null
+}
 
 export function registerFrontPage() {
-  patchAfter('FrontPage', (props, result) =>
-    isRows(result) ? (
-      <>
-        <FrontPiece />
-        {result}
-      </>
-    ) : (
-      result
-    ),
-  )
+  patchAfter('FrontPage', (props, result) => withRows(result) ?? result)
 }

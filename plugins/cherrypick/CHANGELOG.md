@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Cherry Pick's rows and Stash Curator's lanes both show on the front page. From Curator 0.47.0, Curator puts its lanes among Stash's own rows, and each plugin added its rows only where it found Stash's rows as Stash draws them, so the plugin Stash loaded second no longer found Stash's rows where it looked and added none of its own. Depending on the order, Cherry Pick's rows or Curator's lanes were missing. Cherry Pick now looks for Stash's rows inside Curator's too, and Curator still finds them beside Cherry Pick's, so both show, Cherry Pick's first, and Customise works as before.
 - Each scene shows once in Cherry Pick's rows, on the front page and in More like this. A row looped back to its first card after its last, as Stash's own rows do, and to loop, Stash's slider copies every card to each end of the row. Stash's rows hold 25 cards, so the copies stay out of sight. Cherry Pick's hold a dozen or fewer, and when a row's cards fit the window with room to spare, the copies showed after the last card: a More with row of five scenes could show its first scenes again beside them. Cherry Pick's rows no longer loop, and their arrows stop at the first and the last card.
 
 ## 0.5.0
