@@ -18,7 +18,8 @@
 //
 // stash.sh starts it: `node tests/stash/config-guard.mjs <port> <stash port>
 // <stash pid>`, and it exits when Stash does. It logs each write it held back
-// while reads were in Stash, the moment the deadlock could have struck.
+// while reads were in Stash, the moment the deadlock could have struck, with
+// the reads it waits for.
 import { Agent, createServer, request } from 'node:http'
 import { connect } from 'node:net'
 import { resolve } from 'node:path'
@@ -89,9 +90,26 @@ const collect = (req) =>
     req.on('error', fail)
   })
 
+// How the log names a guarded request: its path, and a GraphQL operation's
+// name when it has one
+function nameOf(req, body) {
+  let op
+  try {
+    op = JSON.parse(body).operationName
+  } catch {
+    // Not JSON, or no body
+  }
+  return `${req.method} ${req.url}${op ? ` ${op}` : ''}`
+}
+
+const age = (read) =>
+  `${read.name} (${((Date.now() - read.at) / 1000).toFixed(1)} s${read.gone ? ', its client gone' : ''})`
+
 export function createGuard({ target, log = () => {} }) {
   const gate = new Gate()
   const agent = new Agent({ keepAlive: true })
+  // The reads in Stash, which the log names when a write waits for them
+  const inside = new Set()
 
   const server = createServer(async (req, res) => {
     // A GraphQL body is read whole to tell a config write or read apart
@@ -105,13 +123,23 @@ export function createGuard({ target, log = () => {} }) {
     }
     const kind = kindOf(req.method, req.url, body)
     if (kind === 'write' && gate.reads)
-      log(`held a ${kind} for ${gate.reads} read(s) in Stash`)
+      log(
+        `held a write for ${gate.reads} read(s) in Stash: ${[...inside].map(age).join(', ')}`,
+      )
     if (kind) await gate.enter(kind)
+    const read = kind === 'read' && { name: nameOf(req, body), at: Date.now() }
+    if (read) {
+      inside.add(read)
+      res.on('close', () => {
+        if (!res.writableFinished) read.gone = true
+      })
+    }
 
     let left = false
     const leave = () => {
       if (kind && !left) {
         left = true
+        inside.delete(read)
         gate.leave(kind)
       }
     }

@@ -196,15 +196,25 @@ jobs:
       # A Stash that stops answering writes every goroutine's stack to its log
       # on SIGQUIT, which the report artifact keeps. The stacks of the five
       # hangs from 2026-10-21 to 23 all show the config lock deadlock that
-      # config-guard.mjs (started by stash.sh) now keeps out
+      # config-guard.mjs (started by stash.sh) now keeps out. A Stash that
+      # answers while its configuration doesn't come through the guard means
+      # the guard holds a read that never left (as on 2026-10-27), and
+      # guard.log names it
       - name: Stash's stacks if it stopped answering
         if: always() && steps.prepare.outcome == 'success'
         run: |
-          curl -fsS -m 15 -o /dev/null -H 'Content-Type: application/json' \
-            -d '{"query":"{ version { version } }"}' "$STASH_URL/graphql" && exit 0
-          echo "::warning::Stash stopped answering; its goroutines are in stash.log"
-          kill -QUIT "$(cat "$WORK/stash.pid")"
-          sleep 2
+          ask() {
+            curl -fsS -m 15 -o /dev/null -H 'Content-Type: application/json' \
+              -d "{\"query\":\"$1\"}" "$STASH_URL/graphql"
+          }
+          if ! ask '{ version { version } }'; then
+            echo "::warning::Stash stopped answering; its goroutines are in stash.log"
+            kill -QUIT "$(cat "$WORK/stash.pid")"
+            sleep 2
+          elif ! ask '{ configuration { general { databasePath } } }'; then
+            echo "::warning::config-guard.mjs holds Stash's configuration back; guard.log names the reads it waits for"
+            tail -3 "$WORK/guard.log"
+          fi
       - name: Record result
         if: always()
         run: node tests/stash/status.mjs
