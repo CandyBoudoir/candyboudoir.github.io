@@ -6,9 +6,9 @@ import DATA from 'tagcandy:data'
 import { matchTag, parseExtraMatches } from './match.js'
 import { BACKUP_FIELD, FIELD, isBackup, ownership, stamp } from './owner.js'
 import {
-  explicitName,
-  explicitUrl,
   iconUrls,
+  overrideName,
+  overrideUrl,
   redact,
   selfBase,
   withKey,
@@ -20,10 +20,16 @@ const TAG_FIELDS =
   'id name aliases image_path updated_at custom_fields stash_ids { endpoint stash_id }'
 const KEY_NEEDED =
   'needs an API key because this Stash has a password. Generate one in Settings > Security, then run the task again.'
-// A download address that fails this many times in a row without ever
-// working is skipped for the rest of the run, so an unreachable host costs
-// three timeouts, not one per tag.
+// A download address that cannot be reached this many times without ever
+// answering is skipped for the rest of the run, so an unreachable host costs
+// three timeouts, not one per tag. A host that answers, even with 404, is up.
 const DEAD_AFTER = 3
+// The stamp of an override names its file after this prefix. Versions before
+// 0.2.0 wrote explicit: for the same thing.
+const OVERRIDE = 'override:'
+const isOverride = (icon) =>
+  typeof icon === 'string' &&
+  (icon.startsWith(OVERRIDE) || icon.startsWith('explicit:'))
 
 let index = null
 let apiKey = ''
@@ -41,10 +47,10 @@ function readSettings() {
   )
   const s = (r.configuration.plugins || {})[PLUGIN_ID] || {}
   return {
-    replace: s.replaceOwnImages === true,
     hooks: s.leaveNewTagsAlone !== true,
     extra: s.extraMatches || '',
-    explicit: String(s.explicitIconsUrl || '').trim(),
+    // Shown as Icon overrides URL; the id is the one 0.1 named Explicit icons URL.
+    overrides: String(s.explicitIconsUrl || '').trim(),
     // Not shown in Settings: the tests point Tag Candy at a local copy of
     // the icons with configurePlugin.
     iconBase: s.iconBaseUrl || '',
@@ -68,8 +74,16 @@ const allTags = () =>
     `query { findTags(filter: { per_page: -1 }) { tags { ${TAG_FIELDS} } } }`,
   ).findTags.tags
 
+// The HTTP status of a download the host answered with an error, from
+// Stash's "http error 404", or 0 when it did not answer.
+const httpStatus = (e) => {
+  const m = /http error (\d{3})/.exec(message(e))
+  return m ? Number(m[1]) : 0
+}
+
 // Sets a tag's image from the first address that works, with the tag_candy
-// stamp in the same update. Returns null, or the last error.
+// stamp in the same update. Returns null, or the last error, with its HTTP
+// status when the host answered and dead when the host was skipped.
 function setImage(tag, urls, iconId, health) {
   let last = null
   for (const url of urls) {
@@ -78,7 +92,10 @@ function setImage(tag, urls, iconId, health) {
     const h = health.get(base) || { fails: 0, ok: false }
     health.set(base, h)
     if (!h.ok && h.fails >= DEAD_AFTER) {
-      last = last || new Error(`${base} did not answer`)
+      if (!last) {
+        last = new Error(`${redact(base, apiKey)} did not answer`)
+        last.dead = true
+      }
       continue
     }
     try {
@@ -92,25 +109,56 @@ function setImage(tag, urls, iconId, health) {
       h.ok = true
       return null
     } catch (e) {
-      h.fails++
+      const status = httpStatus(e)
+      if (status) h.ok = true
+      else h.fails++
       last = new Error(`${redact(url.split('?')[0], apiKey)}: ${message(e)}`)
+      last.status = status
     }
   }
   return last
 }
 
-// Gives a tag the concept's icon, the nude version first when the Explicit
-// icons URL serves one. Returns { error, id } with the icon id it set.
-function giveIcon(tag, concept, ctx) {
-  if (ctx.explicit && concept.x && !ctx.noExplicit.has(concept.i)) {
-    const id = `explicit:${explicitName(concept.i)}`
-    const url = explicitUrl(ctx.explicit, concept.i, ctx.self, ctx.key)
-    if (!setImage(tag, [url], id, ctx.health)) return { error: null, id }
-    ctx.noExplicit.add(concept.i)
-    log.Info(
-      `No nude version of ${concept.n} at the Explicit icons URL, so ${concept.n} keeps its regular icon.`,
+// Stops asking Icon overrides URL for a concept after a 404, or for anything
+// once it refuses Tag Candy or does not answer. Tags already showing an
+// override keep it then, since only a 404 says the file is gone.
+function noOverride(ctx, concept, err) {
+  if (err.status === 401 || err.status === 403) {
+    log.Warn(
+      `Icon overrides URL answered ${err.status}, so Tag Candy asks it for nothing more this run and leaves the overrides tags already show. For a path on this Stash, check the API key in Settings > Security.`,
     )
+    ctx.overrides = ''
+    ctx.overridesDown = true
+  } else if (err.dead) {
+    log.Warn(
+      `Icon overrides URL did not answer, so Tag Candy asks it for nothing more this run and leaves the overrides tags already show: ${err.message}`,
+    )
+    ctx.overrides = ''
+    ctx.overridesDown = true
+  } else ctx.noOverride.add(concept.n)
+}
+
+// Gives a tag its icon: the concept's override first when Icon overrides URL
+// serves one, else its regular icon. shown is the icon the tag shows now, so a
+// tag that already shows the regular icon is not sent it again. Returns
+// { error, id } with the icon id the tag shows afterwards, null when the
+// concept has neither.
+function giveIcon(tag, concept, ctx, shown) {
+  if (ctx.overridesDown && isOverride(shown)) return { error: null, id: shown }
+  if (ctx.overrides && !ctx.noOverride.has(concept.n)) {
+    const file = overrideName(concept.n)
+    const id = OVERRIDE + file
+    const err = setImage(
+      tag,
+      [overrideUrl(ctx.overrides, file, ctx.self, ctx.key)],
+      id,
+      ctx.health,
+    )
+    if (!err) return { error: null, id }
+    noOverride(ctx, concept, err)
   }
+  if (!concept.i) return { error: null, id: null }
+  if (shown === concept.i) return { error: null, id: shown }
   return {
     error: setImage(
       tag,
@@ -122,33 +170,42 @@ function giveIcon(tag, concept, ctx) {
   }
 }
 
-// The icon id a concept should show under the current settings.
-const wanted = (concept, ctx) =>
-  ctx.explicit && concept.x && !ctx.noExplicit.has(concept.i)
-    ? `explicit:${explicitName(concept.i)}`
-    : concept.i
+// Takes an override off a tag whose concept has no regular icon to go back to.
+function clearOverride(tag) {
+  try {
+    query(UPDATE, {
+      i: { id: tag.id, image: null, custom_fields: { remove: [FIELD] } },
+    })
+    return null
+  } catch (e) {
+    return new Error(message(e))
+  }
+}
 
-function runContext(s) {
+function runContext(s, replace) {
   const ctx = {
-    explicit: s.explicit,
+    overrides: s.overrides,
+    // Set when Icon overrides URL cannot be checked this run.
+    overridesDown: false,
     iconBase: s.iconBase,
-    noExplicit: new Set(),
+    noOverride: new Set(),
     health: new Map(),
     self: '',
     key: '',
     missingKey: false,
   }
-  if (s.replace || s.explicit.startsWith('/')) {
+  if (replace || s.overrides.startsWith('/')) {
     const a = access()
     ctx.self = a.self
     ctx.key = a.key
     ctx.missingKey = a.missingKey
   }
-  if (ctx.explicit.startsWith('/') && ctx.missingKey) {
+  if (ctx.overrides.startsWith('/') && ctx.missingKey) {
     log.Warn(
-      `Explicit icons URL is a path on this Stash, which ${KEY_NEEDED} Until then Tag Candy uses the regular icons.`,
+      `Icon overrides URL is a path on this Stash, which ${KEY_NEEDED} Until then Tag Candy gives no new overrides and leaves the ones tags already show.`,
     )
-    ctx.explicit = ''
+    ctx.overrides = ''
+    ctx.overridesDown = true
   }
   return ctx
 }
@@ -222,7 +279,8 @@ function backupImage(tag, ctx, store) {
 
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`
 
-function apply(dry) {
+// Apply icons and Dry run, and with replace, Replace my own images.
+function apply(dry, replace) {
   const s = readSettings()
   const idx = data()
   const extra = parseExtraMatches(s.extra, idx)
@@ -230,9 +288,9 @@ function apply(dry) {
     log.Warn(
       `Extra matches name concepts Tag Candy does not know: ${extra.unknown.join(', ')}`,
     )
-  const ctx = runContext(s)
-  if (s.replace && ctx.missingKey) {
-    const text = `Replace my own tag images ${KEY_NEEDED}`
+  const ctx = runContext(s, replace)
+  if (replace && ctx.missingKey) {
+    const text = `Replace my own images ${KEY_NEEDED}`
     log.Warn(text)
     return { Output: text }
   }
@@ -249,28 +307,36 @@ function apply(dry) {
     removed: 0,
     noIcon: 0,
     failed: 0,
+    overrides: 0,
   }
   const unmatched = []
   const failures = []
+  const asked = []
 
   live.forEach((tag, i) => {
     if (i % 25 === 0) log.Progress(i / live.length)
     const m = matchTag(tag, idx, extra.pairs)
     if (m.concept === null) return unmatched.push(tag.name)
     const concept = m.concept >= 0 ? idx.concepts[m.concept] : null
-    if (!concept || !concept.i) return n.noIcon++
-
     const own = ownership(tag)
+    const shown = own.state === 'mine' ? own.stamp.icon : null
+    // Nothing to give, and no override of Tag Candy's to take back.
+    if (!concept || (!concept.i && !ctx.overrides && !isOverride(shown)))
+      return n.noIcon++
+
     let action
     if (own.state === 'empty') action = 'set'
-    else if (own.state === 'removed') action = s.replace ? 'set' : 'removed'
-    else if (own.state === 'mine')
-      action = own.stamp.icon === wanted(concept, ctx) ? 'current' : 'updated'
-    else action = s.replace ? 'replaced' : 'kept'
-
-    if (action === 'current' || action === 'kept' || action === 'removed')
-      return n[action]++
+    else if (own.state === 'removed') action = replace ? 'set' : 'removed'
+    else if (own.state === 'mine') action = 'updated'
+    else action = replace && concept.i ? 'replaced' : 'kept'
+    if (action === 'kept' || action === 'removed') return n[action]++
+    // With no overrides to ask for, a tag showing its regular icon is current.
+    if (action === 'updated' && !ctx.overrides && shown === concept.i)
+      return n.current++
     if (dry) {
+      if (ctx.overrides) asked.push(`${tag.name}: ${overrideName(concept.n)}`)
+      if (action === 'updated' && (shown === concept.i || isOverride(shown)))
+        return n.current++
       n[action]++
       return log.Info(
         `Would ${action === 'set' ? 'give' : action === 'updated' ? 'update' : 'replace the image on'} ${tag.name}: ${concept.n}`,
@@ -285,23 +351,38 @@ function apply(dry) {
         )
       }
     }
-    const { error, id } = giveIcon(tag, concept, ctx)
+    const { error, id } = giveIcon(tag, concept, ctx, shown)
     if (error) {
       n.failed++
-      failures.push(`${tag.name}: ${error.message}`)
-    } else if (action === 'updated' && own.stamp.icon === id) {
-      n.current++
-    } else n[action]++
+      return failures.push(`${tag.name}: ${error.message}`)
+    }
+    if (id === null) {
+      if (!isOverride(shown)) return n.noIcon++
+      const err = clearOverride(tag)
+      if (err) {
+        n.failed++
+        return failures.push(`${tag.name}: ${err.message}`)
+      }
+      return n.updated++
+    }
+    if (isOverride(id)) n.overrides++
+    if (action === 'updated' && id === shown) n.current++
+    else n[action]++
   })
   log.Progress(1)
 
   const verb = dry ? 'would give' : 'gave'
+  const shows = !dry && s.overrides ? `, ${n.overrides} show an override` : ''
   const lines = [
-    `${dry ? 'Dry run: Tag Candy' : 'Tag Candy'} ${verb} ${plural(n.set, 'tag', 'tags')} an icon, ${dry ? 'would update' : 'updated'} ${n.updated} and ${dry ? 'would replace' : 'replaced'} ${plural(n.replaced, 'image', 'images')} of yours. ${n.current} already current, ${n.kept} kept your own image, ${n.removed} left without the icon you removed, ${n.noIcon} have no icon yet, ${unmatched.length} matched nothing${dry ? '' : `, ${n.failed} failed`}.`,
+    `${dry ? 'Dry run: Tag Candy' : 'Tag Candy'} ${verb} ${plural(n.set, 'tag', 'tags')} an icon, ${dry ? 'would update' : 'updated'} ${n.updated} and ${dry ? 'would replace' : 'replaced'} ${plural(n.replaced, 'image', 'images')} of yours. ${n.current} already current${shows}, ${n.kept} kept your own image, ${n.removed} left without the icon you removed, ${n.noIcon} have no icon yet, ${unmatched.length} matched nothing${dry ? '' : `, ${n.failed} failed`}.`,
   ]
-  if (n.kept && !s.replace)
+  if (n.kept && !replace)
     lines.push(
-      `Kept your own images on ${plural(n.kept, 'tag', 'tags')}. To use Tag Candy icons there too, turn on Replace my own tag images in Settings > Plugins > Tag Candy and run Apply icons again. Tag Candy copies every image it replaces to a backup tag, and Restore replaced images puts them back.`,
+      `Kept your own images on ${plural(n.kept, 'tag', 'tags')}. To use Tag Candy icons there too, run Replace my own images in Settings > Tasks. Tag Candy copies every image it replaces to a backup tag, and Restore replaced images puts them back.`,
+    )
+  if (asked.length)
+    lines.push(
+      `Apply asks Icon overrides URL first for these files, and Dry run cannot see which of them it holds: ${asked.sort().join('; ')}`,
     )
   if (unmatched.length)
     lines.push(`Matched nothing: ${unmatched.sort().join(', ')}`)
@@ -409,13 +490,17 @@ function hook(context) {
   const m = matchTag(tag, idx, parseExtraMatches(s.extra, idx).pairs)
   const concept =
     m.concept !== null && m.concept >= 0 ? idx.concepts[m.concept] : null
-  if (!concept || !concept.i) return { Output: `No icon for ${tag.name}.` }
-  const { error } = giveIcon(tag, concept, runContext({ ...s, replace: false }))
+  if (!concept || (!concept.i && !s.overrides))
+    return { Output: `No icon for ${tag.name}.` }
+  const { error, id } = giveIcon(tag, concept, runContext(s, false), null)
   if (error) {
     log.Warn(`Could not give ${tag.name} its icon: ${error.message}`)
     return { Error: error.message }
   }
-  return { Output: `Gave ${tag.name} the ${concept.n} icon.` }
+  if (id === null) return { Output: `No icon for ${tag.name}.` }
+  return {
+    Output: `Gave ${tag.name} the ${concept.n} ${isOverride(id) ? 'override' : 'icon'}.`,
+  }
 }
 
 function run() {
@@ -423,9 +508,11 @@ function run() {
   if (args.hookContext) return hook(args.hookContext)
   switch (args.mode) {
     case 'apply':
-      return apply(false)
+      return apply(false, false)
     case 'dryrun':
-      return apply(true)
+      return apply(true, false)
+    case 'replace':
+      return apply(false, true)
     case 'restore':
       return restore()
     case 'deletebackups':

@@ -6,9 +6,9 @@ import { buildIndex } from '../../lookup.mjs'
 import { matchTag, normalize, parseExtraMatches } from '../../src/match.js'
 import { FIELD, ownership, parseStamp, stamp } from '../../src/owner.js'
 import {
-  explicitName,
-  explicitUrl,
   iconUrls,
+  overrideName,
+  overrideUrl,
   redact,
   selfBase,
   withKey,
@@ -69,7 +69,11 @@ test('the index puts library names first and drops shared StashDB names', () => 
   assert.equal(index.names.cage, undefined)
   assert.deepEqual(index.ambiguous, ['cage'])
   assert.equal(index.stashdb['id-none'], -1)
-  assert.equal(index.concepts[1].x, true)
+  // The bundle's nude marks no longer reach the plugin.
+  assert.deepEqual(index.concepts[1], {
+    n: 'Chastity',
+    i: 'chastity-1a2b3c4d.webp',
+  })
 })
 
 test('a library name that two concepts claim stops the build', () => {
@@ -138,7 +142,7 @@ test('ownership follows the stamp written with the image', () => {
   assert.equal(parseStamp('nonsense'), null)
 })
 
-test('addresses for icons, this Stash and explicit icons', () => {
+test('addresses for icons, this Stash and icon overrides', () => {
   assert.deepEqual(iconUrls('a-0a1b2c3d.webp'), [
     'https://candyboudoir.github.io/tagcandy/icons/a-0a1b2c3d.webp',
     'https://candyboudoir.github.io/develop/tagcandy/icons/a-0a1b2c3d.webp',
@@ -164,21 +168,24 @@ test('addresses for icons, this Stash and explicit icons', () => {
   )
   assert.equal(withKey('http://x/a', 'k=1'), 'http://x/a?apikey=k%3D1')
   assert.equal(withKey('http://x/a?t=1', ''), 'http://x/a?t=1')
-  assert.equal(explicitName('chastity-1a2b3c4d.webp'), 'chastity.webp')
+  assert.equal(overrideName('Chastity'), 'chastity.webp')
+  assert.equal(overrideName('Stockings / Hosiery'), 'stockings-hosiery.webp')
+  assert.equal(overrideName('Ménage à Trois'), 'menage-a-trois.webp')
+  assert.equal(overrideName('Cum & Go'), 'cum-and-go.webp')
   assert.equal(
-    explicitUrl(
-      '/custom/explicit',
-      'chastity-1a2b3c4d.webp',
+    overrideUrl(
+      '/custom/overrides',
+      'chastity.webp',
       'http://127.0.0.1:9999',
       'KEY',
     ),
-    'http://127.0.0.1:9999/custom/explicit/chastity.webp?apikey=KEY',
+    'http://127.0.0.1:9999/custom/overrides/chastity.webp?apikey=KEY',
   )
   assert.equal(
-    explicitUrl('https://example.org/x/', 'chastity-1a2b3c4d.webp', '', 'KEY'),
+    overrideUrl('https://example.org/x/', 'chastity.webp', '', 'KEY'),
     'https://example.org/x/chastity.webp',
   )
-  assert.equal(explicitUrl('  ', 'a.webp', '', ''), null)
+  assert.equal(overrideUrl('  ', 'a.webp', '', ''), null)
   assert.equal(
     redact('get http://h/?apikey=abc: 404 abc', 'abc'),
     'get http://h/?apikey=<api key>: 404 <api key>',
@@ -193,4 +200,17 @@ test('the shipped bundle builds and every icon it names exists', async () => {
   const files = new Set(await readdir(new URL('../../icons/', import.meta.url)))
   for (const c of real.concepts)
     if (c.icon) assert.ok(files.has(c.icon), `${c.icon} is missing from icons/`)
+})
+
+test('an override shares its concept’s icon name without the hash, and no two concepts share one', async () => {
+  const real = await readBundle()
+  const seen = new Map()
+  for (const c of real.concepts) {
+    const file = overrideName(c.name)
+    if (c.icon)
+      assert.equal(file, c.icon.replace(/-[0-9a-f]{8}\.webp$/, '.webp'))
+    assert.notEqual(file, '.webp', c.name)
+    assert.equal(seen.get(file), undefined, `${c.name} and ${seen.get(file)}`)
+    seen.set(file, c.name)
+  }
 })

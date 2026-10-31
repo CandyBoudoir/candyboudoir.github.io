@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0
+
+- Explicit icons URL is now Icon overrides URL, and Tag Candy asks it for every concept, including concepts with no icon yet and the ones 0.1.8 stopped covering. Overrides can be nude versions or any other picture. Each file is named after its concept, such as `big-dick.webp`, the regular icon's name without its hash, so folders set up for 0.1 keep working. Dry run lists the file each tag asks for.
+- A concept with no override (404) leaves the address in use, so a folder that holds a few overrides serves every one of them. An address that refuses Tag Candy (401 or 403) logs one warning, and a tag that already shows its regular icon is not sent it again.
+- An override you replace or delete reaches its tags on the next Apply icons.
+- Replace my own tag images is now a task, Replace my own images, so Apply icons never swaps an image you set. The setting is gone.
+
 ## 0.1.8
 
 - Explicit icons URL no longer covers Accidental Exposure, Anal Creampie, Anal Fingering, Anal Gape, Anal Winking, Ass Spreading, Ball Licking, Big Clit, Big Dick, Biting Balls and 71 more.

@@ -3,17 +3,17 @@
 // icon bytes Stash downloads, people's own images kept by default, a removed
 // icon left removed, an edited tag's icon counted as the person's, older
 // icons updated, the hooks, Remove Tag Candy icons, WebP on Stash's pages, an
-// unreachable icon address, the API key on a Stash with a password, backups
-// and Restore, explicit icons by web address and by a path on this Stash, and
-// no API key in the log.
+// unreachable icon address, the API key on a Stash with a password, Replace
+// my own images with its backups and Restore, icon overrides by web address
+// and by a path on this Stash, and no API key in the log.
 import { expect, test } from '@playwright/test'
 import { join } from 'node:path'
-import { copyFile, mkdtemp } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import { buildScript, readBundle } from '../plugin.mjs'
+import { copyFile, rm } from 'node:fs/promises'
+import { readBundle } from '../plugin.mjs'
+import { overrideName } from '../src/urls.js'
 import {
-  EXPLICIT_DIR,
   ICONS,
+  OVERRIDES_DIR,
   PLUGIN,
   TC,
   allLogs,
@@ -25,7 +25,6 @@ import {
   gql,
   iconBytes,
   imageHash,
-  installScript,
   lock,
   runTask,
   settings,
@@ -103,6 +102,7 @@ test('StashDB links decide a tag, and Extra matches beat them', async () => {
   }
   // Its name matches a concept, but its StashDB tag has no icon yet.
   const e = pick()
+  state.darkConcept = dark
   state.dark = await createTag({
     name: e.tags[0],
     stash_ids: [{ endpoint: SDB, stash_id: dark.stashdb[0].id }],
@@ -158,7 +158,7 @@ test('by default Apply keeps the images people set, and says how to swap them', 
     (await findTag(state.copied.id)).custom_fields.tag_candy,
   ).toBeUndefined()
   expect(log.join('\n')).toMatch(
-    /Kept your own images on 2 tags\. To use Tag Candy icons there too, turn on Replace my own tag images/,
+    /Kept your own images on 2 tags\. To use Tag Candy icons there too, run Replace my own images/,
   )
 })
 
@@ -275,35 +275,36 @@ test('an unreachable icon address changes nothing and names the address', async 
   state.retry = { ...tag, concept: p }
 })
 
-test('with a password and no API key, Replace my own tag images changes nothing', async () => {
+test('with a password and no API key, Replace my own images changes nothing', async () => {
   await lock({ withKey: false })
-  await settings({ leaveNewTagsAlone: true, replaceOwnImages: true })
-  const log = await runTask('Apply icons')
+  const log = await runTask('Replace my own images')
   expect(log.join('\n')).toContain(
-    'Replace my own tag images needs an API key because this Stash has a password',
+    'Replace my own images needs an API key because this Stash has a password',
   )
   expect(await imageHash(state.own.id)).toBe(OWN_HASH)
   expect(await imageHash(state.retry.id)).toBeNull()
 })
 
-test('with an API key, Apply copies each replaced image to a backup tag first', async () => {
+test('with an API key, Replace my own images copies each replaced image to a backup tag first', async () => {
   apiKey = await lock({ withKey: true })
   const q = pick()
-  await runTask('Apply icons')
+  await runTask('Replace my own images')
   expect(await imageHash(state.own.id)).toBe(await iconHash(state.ownConcept))
   const backup = await findByName(`Tag Candy backup ${state.own.id}`)
   expect(backup.parents.map((t) => t.name)).toEqual(['Tag Candy backups'])
   expect(await imageHash(backup.id)).toBe(OWN_HASH)
   const copiedBackup = await findByName(`Tag Candy backup ${state.copied.id}`)
   expect(await imageHash(copiedBackup.id)).toBe(state.copiedHash)
-  // The hooks never replace a person's image, even with the setting on.
-  await settings({ replaceOwnImages: true })
+  // Neither the hooks nor a later Apply icons replace an image set since.
+  await hooks(true)
   const fresh = await createTag({
     name: q.tags[0],
     image: dataUri(OWN, 'image/png'),
   })
   expect(await imageHash(fresh.id)).toBe(OWN_HASH)
-  await settings({ leaveNewTagsAlone: true, replaceOwnImages: true })
+  await hooks(false)
+  await runTask('Apply icons')
+  expect(await imageHash(fresh.id)).toBe(OWN_HASH)
 })
 
 test('Restore puts back replaced images unless the person chose again, and Delete backups clears the rest', async () => {
@@ -324,44 +325,94 @@ test('Restore puts back replaced images unless the person chose again, and Delet
   await settings({ leaveNewTagsAlone: true })
 })
 
-test('Explicit icons URL gives marked concepts their nude version, by web address and by a path on this Stash', async () => {
-  // The shipped data marks no concept yet, so build a script that marks two:
-  // one the explicit folder serves and one it does not.
-  const [served, missing, stand] = [pick(), pick(), pick()]
-  const changed = structuredClone(bundle)
-  for (const c of changed.concepts)
-    if (c.name === served.name || c.name === missing.name) c.nude = true
-  const dir = await mkdtemp(join(tmpdir(), 'tagcandy-'))
-  await buildScript(changed, join(dir, 'tagcandy.js'))
-  await installScript(join(dir, 'tagcandy.js'))
-  // The stand-in nude version is another concept's icon, so its bytes differ.
+test('Icon overrides URL gives any concept its override and leaves the others alone', async () => {
+  const [served, missing, stand, other] = [pick(), pick(), pick(), pick()]
+  state.served = served
+  state.missing = missing
+  state.stand = stand
+  state.other = other
+  // Stand-in overrides are other concepts' icons, so their bytes differ.
+  const put = (concept, from) =>
+    copyFile(
+      join(PLUGIN, 'icons', from.icon),
+      join(OVERRIDES_DIR, overrideName(concept.name)),
+    )
+  await put(served, stand)
+  await put(state.darkConcept, other)
+  // Named to come last, so the address has answered 404 for every tag before it.
+  state.servedTag = await createTag({ name: 'Zz served' })
+  state.missingTag = await createTag({ name: missing.tags[0] })
+  state.extra = `Zz served=${served.name}`
+  await settings({ leaveNewTagsAlone: true, extraMatches: state.extra })
+  await runTask('Apply icons')
+  const before = (await findTag(state.missingTag.id)).updated_at
+
+  state.web = {
+    leaveNewTagsAlone: true,
+    extraMatches: state.extra,
+    explicitIconsUrl: `${ICONS}/overrides/`,
+  }
+  await settings(state.web)
+  const dry = (await runTask('Dry run')).join('\n')
+  expect(dry).toContain(`Zz served: ${overrideName(served.name)}`)
+  expect(dry).toContain('Dry run cannot see which of them it holds')
+  expect(await imageHash(state.servedTag.id)).toBe(await iconHash(served))
+
+  const log = (await runTask('Apply icons')).join('\n')
+  expect(await imageHash(state.servedTag.id)).toBe(await iconHash(stand))
+  expect(await imageHash(state.dark.id)).toBe(await iconHash(other))
+  expect(await imageHash(state.missingTag.id)).toBe(await iconHash(missing))
+  expect((await findTag(state.missingTag.id)).updated_at).toBe(before)
+  expect(log).toMatch(/, 2 show an override, .*, 0 failed\./)
+  expect(log).not.toContain('did not answer')
+
+  // The hook gives a new tag its override too.
+  await settings({ ...state.web, leaveNewTagsAlone: false })
+  const created = await createTag({ name: served.tags[0] })
+  expect(await imageHash(created.id)).toBe(await iconHash(stand))
+  await settings(state.web)
+})
+
+test('a replaced override reaches its tags, and a deleted one goes', async () => {
   await copyFile(
-    join(PLUGIN, 'icons', stand.icon),
-    join(EXPLICIT_DIR, served.icon.replace(/-[0-9a-f]{8}\.webp$/, '.webp')),
+    join(PLUGIN, 'icons', state.other.icon),
+    join(OVERRIDES_DIR, overrideName(state.served.name)),
   )
-  const servedTag = await createTag({ name: served.tags[0] })
-  const missingTag = await createTag({ name: missing.tags[0] })
+  await rm(join(OVERRIDES_DIR, overrideName(state.darkConcept.name)))
+  await runTask('Apply icons')
+  expect(await imageHash(state.servedTag.id)).toBe(await iconHash(state.other))
+  expect(await imageHash(state.dark.id)).toBeNull()
+  expect((await findTag(state.dark.id)).custom_fields.tag_candy).toBeUndefined()
+})
 
+test('Icon overrides URL works as a path on this Stash, and clearing it brings the icons back', async () => {
+  await copyFile(
+    join(PLUGIN, 'icons', state.stand.icon),
+    join(OVERRIDES_DIR, overrideName(state.served.name)),
+  )
   await settings({
-    leaveNewTagsAlone: true,
-    explicitIconsUrl: `${ICONS}/explicit/`,
+    ...state.web,
+    explicitIconsUrl: '/custom/tagcandy-overrides/',
   })
   await runTask('Apply icons')
-  expect(await imageHash(servedTag.id)).toBe(await iconHash(stand))
-  expect(await imageHash(missingTag.id)).toBe(await iconHash(missing))
-  expect(await imageHash(state.copied.id)).toBe(OWN_HASH)
-
-  await runTask('Remove Tag Candy icons')
-  await settings({
-    leaveNewTagsAlone: true,
-    explicitIconsUrl: '/custom/tagcandy-explicit/',
-  })
+  expect(await imageHash(state.servedTag.id)).toBe(await iconHash(state.stand))
+  await settings({ leaveNewTagsAlone: true, extraMatches: state.extra })
   await runTask('Apply icons')
-  expect(await imageHash(servedTag.id)).toBe(await iconHash(stand))
+  expect(await imageHash(state.servedTag.id)).toBe(await iconHash(state.served))
+})
 
+test('an address that refuses Tag Candy warns once and leaves the overrides tags show', async () => {
+  await settings(state.web)
+  await runTask('Apply icons')
+  expect(await imageHash(state.servedTag.id)).toBe(await iconHash(state.stand))
+  await settings({ ...state.web, explicitIconsUrl: `${ICONS}/locked/` })
+  const log = await runTask('Apply icons')
+  expect(log.filter((l) => l.includes('answered 401'))).toHaveLength(1)
+  expect(await imageHash(state.servedTag.id)).toBe(await iconHash(state.stand))
+  expect(await imageHash(state.missingTag.id)).toBe(
+    await iconHash(state.missing),
+  )
   await settings({ leaveNewTagsAlone: true })
-  await runTask('Apply icons')
-  expect(await imageHash(servedTag.id)).toBe(await iconHash(served))
 })
 
 test('no log line carries the API key', async () => {

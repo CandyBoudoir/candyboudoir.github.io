@@ -30,18 +30,25 @@ export const withKey = (url, key) =>
     ? `${url}${url.includes('?') ? '&' : '?'}apikey=${encodeURIComponent(key)}`
     : url
 
-// A nude version is named like the regular icon without its hash:
-// stockings-1a2b3c4d.webp -> stockings.webp.
-export const explicitName = (icon) =>
-  icon.replace(/-[0-9a-f]{8}\.webp$/, '.webp')
+// An override is named after its concept: lowercase, "&" read as "and",
+// accents dropped and every other run of characters a hyphen, so "Stockings /
+// Hosiery" asks for stockings-hosiery.webp. The regular icons are named the
+// same way, with their hash added.
+export const overrideName = (concept) =>
+  String(concept ?? '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') + '.webp'
 
-// The Explicit icons URL setting is a web address, or a path on this Stash
+// The Icon overrides URL setting is a web address, or a path on this Stash
 // (served through custom_served_folders), which needs the API key when Stash
 // has a password.
-export function explicitUrl(setting, icon, self, key) {
+export function overrideUrl(setting, file, self, key) {
   const base = String(setting ?? '').trim()
   if (!base) return null
-  const file = explicitName(icon)
   return base.startsWith('/')
     ? withKey(join(self + base, file), key)
     : join(base, file)
