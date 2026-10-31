@@ -67,29 +67,67 @@ const crowded = (cards) =>
         .filter((a) => a instanceof CSSTransition)
         .map((a) => a.finished.catch(() => {})),
     )
-    // Stash sets both left and right on the speed overlay, so its box
-    // spans the cover: its number is what takes the corner
-    const box = (el) => {
+    // An element's four corners as drawn. Stash's rating ribbon is turned
+    // 45°, and its upright box reaches far past it into the cover, so a
+    // turned element's corners come from its transform, placed where its
+    // box is. Stash sets both left and right on the speed overlay, so its
+    // box spans the cover: its number is what takes the corner.
+    const corners = (el) => {
+      const cs = getComputedStyle(el)
+      if (cs.visibility === 'hidden') return null
       const words = document.createRange()
       words.selectNodeContents(el)
       const b = el.matches('.scene-interactive-speed-overlay')
         ? words.getBoundingClientRect()
         : el.getBoundingClientRect()
-      return b.width && b.height && getComputedStyle(el).visibility !== 'hidden'
-        ? b
-        : null
+      if (!b.width || !b.height) return null
+      if (
+        cs.transform === 'none' ||
+        el.matches('.scene-interactive-speed-overlay')
+      )
+        return [
+          [b.left, b.top],
+          [b.right, b.top],
+          [b.right, b.bottom],
+          [b.left, b.bottom],
+        ]
+      const m = new DOMMatrix(cs.transform)
+      const [ox, oy] = cs.transformOrigin.split(' ').map(parseFloat)
+      const w = el.offsetWidth
+      const h = el.offsetHeight
+      const pts = [
+        [0, 0],
+        [w, 0],
+        [w, h],
+        [0, h],
+      ].map(([x, y]) => {
+        const p = m.transformPoint(new DOMPoint(x - ox, y - oy))
+        return [p.x + ox, p.y + oy]
+      })
+      const x0 = Math.min(...pts.map((p) => p[0]))
+      const y0 = Math.min(...pts.map((p) => p[1]))
+      return pts.map(([x, y]) => [x - x0 + b.left, y - y0 + b.top])
     }
+    // Two convex shapes overlap unless an edge of one separates them
     const hit = (a, b) =>
-      a.left < b.right &&
-      b.left < a.right &&
-      a.top < b.bottom &&
-      b.top < a.bottom
+      ![a, b].some((shape) =>
+        shape.some((p, i) => {
+          const q = shape[(i + 1) % shape.length]
+          const [nx, ny] = [q[1] - p[1], p[0] - q[0]]
+          const span = (s) => s.map(([x, y]) => x * nx + y * ny)
+          const [sa, sb] = [span(a), span(b)]
+          return (
+            Math.max(...sa) <= Math.min(...sb) ||
+            Math.max(...sb) <= Math.min(...sa)
+          )
+        }),
+      )
     return els.flatMap((card) => {
-      const icon = box(card.querySelector('.cherrypick-reason-icon'))
+      const icon = corners(card.querySelector('.cherrypick-reason-icon'))
       if (!icon) return []
       return [...card.querySelectorAll(corner)]
         .filter((el) => getComputedStyle(el).opacity !== '0')
-        .map((el) => [el.className, box(el)])
+        .map((el) => [el.className, corners(el)])
         .filter(([, b]) => b && hit(icon, b))
         .map(([cls]) => cls)
     })

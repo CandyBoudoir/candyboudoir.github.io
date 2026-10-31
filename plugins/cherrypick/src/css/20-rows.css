@@ -143,6 +143,14 @@
   bottom: 2.75rem;
 }
 
+/* Xenith moves the speed up a line, above its badge
+   (.video-section.hon-processed .scene-interactive-speed-overlay), so the
+   icon goes up one more. */
+.video-section.hon-processed:has(.scene-interactive-speed-overlay:not(:empty))
+  > .cherrypick-reason-icon {
+  bottom: 4.25rem;
+}
+
 /* Pointing at the icon or pressing it (after a tap a phone leaves its hover
    there) is not pointing at the cover: the preview Stash plays on a hovered
    card stays hidden. */
