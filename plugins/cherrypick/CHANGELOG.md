@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Each scene shows once in Cherry Pick's rows, on the front page and in More like this. A row looped back to its first card after its last, as Stash's own rows do, and to loop, Stash's slider copies every card to each end of the row. Stash's rows hold 25 cards, so the copies stay out of sight. Cherry Pick's hold a dozen or fewer, and when a row's cards fit the window with room to spare, the copies showed after the last card: a More with row of five scenes could show its first scenes again beside them. Cherry Pick's rows no longer loop, and their arrows stop at the first and the last card.
+
 ## 0.5.0
 
 - For you has its own tab on Cherry Pick's page, which the cherries in the navbar open, and View all on the For you row opens it too. The tab lists every scene For you would show, in For you's order: the row's twelve first, then the rest of your library. It uses Stash's own Grid, List and Wall, with Stash's card sizes and pages of 20, 40, 60 or 120 scenes, and each card says why it is there and has the ⋯ menu, as in the row. A click on a scene plays it, with the scenes on that page queued in For you's order. A search, Performers, Studios, Tags, Unwatched and a length narrow the tab to the scenes that fit, ranked again among themselves. The view, the page and the filters are in the page's address, so Back from a scene returns to the same place, and the tab opens in the view you used last. With For you off under Settings > Plugins, the tab goes with the row and the page opens on the Hall of Fame.

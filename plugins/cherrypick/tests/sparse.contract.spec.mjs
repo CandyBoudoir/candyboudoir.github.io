@@ -57,9 +57,7 @@ test('For you leans on favorites and says how to sharpen it', async ({
     /^\/scenes\?c=.*rating100.*IS_NULL.*&sortby=play_count&sortdir=desc$/,
   )
   const reasons = await page
-    .locator(
-      '.cherrypick-for-you .slick-slide:not(.slick-cloned) .cherrypick-reason',
-    )
+    .locator('.cherrypick-for-you .slick-slide .cherrypick-reason')
     .allInnerTexts()
   expect(reasons).toHaveLength(12)
   // Nothing is rated, so nothing claims to be like what you rate well...

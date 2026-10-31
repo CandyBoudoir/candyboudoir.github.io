@@ -143,9 +143,7 @@ export async function pickCandidate(page, play, candidates) {
 
 // The For you row is there once the library and the model are in.
 export const forYouCards = (page) =>
-  page.locator(
-    '.cherrypick-for-you .slick-slide:not(.slick-cloned) .scene-card',
-  )
+  page.locator('.cherrypick-for-you .slick-slide .scene-card')
 
 // ------------------------------------------------- for the themes' checks
 

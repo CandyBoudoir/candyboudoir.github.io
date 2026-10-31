@@ -53,6 +53,32 @@ test('For you comes first on the front page, before Stash rows', async ({
   expect(errors).toEqual([])
 })
 
+// To loop, Stash's slider copies every card to each end of the row. The
+// demo library's More with rows hold 5 cards; just under 1909 px the slider
+// shows 4, so a looping row would show a copy of its first card after its
+// last.
+test("Cherry Pick's rows show each card once, however few they hold", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1850, height: 1000 })
+  await page.goto('/')
+  await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
+  const follow = page.locator('.cherrypick-follow')
+  await expect(follow.first()).toBeVisible({ timeout: 20_000 })
+  const rows = await page
+    .locator('.cherrypick-front .cherrypick-row')
+    .evaluateAll((rows) =>
+      rows.map((row) =>
+        [...row.querySelectorAll('.scene-card, .performer-card')].map((card) =>
+          card
+            .querySelector('a[href*="/scenes/"], a[href*="/performers/"]')
+            ?.getAttribute('href'),
+        ),
+      ),
+    )
+  for (const cards of rows) expect(cards).toEqual([...new Set(cards)])
+})
+
 // Cherry Pick's rows ask Stash for their scenes by id (Stash's own
 // FindScenes with scene_ids), and Stash fails the whole request if one id
 // is gone: a scene deleted or merged since Cherry Pick read the library.
@@ -122,7 +148,7 @@ test('the Hall of Fame keeps its champions when Stash has lost one', async ({
   try {
     await page.goto('/')
     const cards = page.locator(
-      '.cherrypick-row-hall-of-fame .slick-slide:not(.slick-cloned) .performer-card',
+      '.cherrypick-row-hall-of-fame .slick-slide .performer-card',
     )
     await expect(cards.first()).toBeVisible({ timeout: 20_000 })
     expect(await cards.count()).toBe(1)
@@ -146,7 +172,7 @@ test("the cards in Cherry Pick's rows end at the same height, as in Stash's rows
     // offsetHeight, the height before transforms: Refract floats its cards
     // rated 4.75★ and up, up to 6% larger, in Stash's rows as in these
     const heights = await page
-      .locator(`${row} .slick-slide:not(.slick-cloned) .scene-card`)
+      .locator(`${row} .slick-slide .scene-card`)
       .evaluateAll((cards) => [...new Set(cards.map((c) => c.offsetHeight))])
     expect(heights, row).toHaveLength(1)
   }
@@ -234,14 +260,11 @@ test('Not interested hides a card in place and is saved to Stash', async ({
   await page.goto('/')
   const card = forYouCards(page).first()
   await expect(card).toBeVisible({ timeout: 20_000 })
-  const slide = page.locator(
-    '.cherrypick-for-you .slick-active:not(.slick-cloned)',
-  )
+  const slide = page.locator('.cherrypick-for-you .slick-active')
   await press(slide.first().locator('.cherrypick-card-menu button'))
   await press(slide.first().locator('.cherrypick-ni'))
-  // Slick clones slides for its infinite scroll; act on the real ones.
   const hidden = page.locator(
-    '.cherrypick-for-you .slick-slide:not(.slick-cloned) .cherrypick-hidden-card',
+    '.cherrypick-for-you .slick-slide .cherrypick-hidden-card',
   )
   await expect(hidden.first()).toBeVisible()
   await expect
@@ -405,9 +428,7 @@ test("Don't learn from this in a pick's menu is saved to Stash", async ({
 }) => {
   await page.goto('/')
   await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
-  const slide = page
-    .locator('.cherrypick-for-you .slick-active:not(.slick-cloned)')
-    .first()
+  const slide = page.locator('.cherrypick-for-you .slick-active').first()
   const marks = async () =>
     JSON.parse((await pluginConfig())?.dontLearn || '[]')
   await press(slide.locator('.cherrypick-card-menu button'))

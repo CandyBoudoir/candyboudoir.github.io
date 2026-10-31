@@ -9,14 +9,16 @@ const Slider = window.PluginApi.libraries.ReactSlick.default
 const { Link } = ReactRouterDOM
 
 // Stash's own slider settings (src/core/recommendations.ts), which plugins
-// cannot import.
+// cannot import, without the loop: to loop, the slider copies every card to
+// each end of the row, and a row of a dozen cards or fewer leaves room on a
+// wide screen for the copies to show after the last card.
 function slidesToScroll(cards, show, isTouch) {
   if (isTouch) return 1
   return cards > show ? show : cards
 }
 export function sliderSettings(cards, isTouch) {
   const at = (show) => ({
-    infinite: !isTouch && cards > show,
+    infinite: false,
     slidesToShow: cards > show ? show : cards,
     slidesToScroll: slidesToScroll(cards, show, isTouch),
   })
