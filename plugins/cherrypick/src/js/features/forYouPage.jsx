@@ -18,7 +18,7 @@ import {
   ReactRouterDOM,
 } from '../runtime/api.js'
 import { recordOpen } from '../runtime/actions.js'
-import { context, forYouList, reasonFor } from '../model/foryou.js'
+import { context, forYouList, pageReasons } from '../model/foryou.js'
 import { BuildingLine } from '../ui/BuildingLine.jsx'
 import { PageItems } from '../ui/rowCards.jsx'
 import { useStashRecords } from '../ui/records.js'
@@ -467,19 +467,20 @@ export function ForYouTab() {
     pageItems.map((it) => it.scene.id),
   )
   const order = (records || []).map((r) => r.id)
+  // Each page's reasons share the row's variety rule (pageReasons); New in
+  // your library's cards bring their own.
   const byId = React.useMemo(
-    () =>
-      new Map(
-        pageItems.map((it) => [
+    () => {
+      const reasons = list?.ctx ? pageReasons(list.ctx, pageItems) : null
+      return new Map(
+        pageItems.map((it, i) => [
           it.scene.id,
-          {
-            ...it,
-            reason:
-              it.reason ??
-              (list?.ctx && it.x ? reasonFor(list.ctx, it.x) : null),
-          },
+          reasons
+            ? { ...it, reason: reasons[i].text, reasonIcon: reasons[i].icon }
+            : it,
         ]),
-      ),
+      )
+    },
     // pageItems follow the page and the list
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [list, page, v.per, hidden],
@@ -526,7 +527,7 @@ export function ForYouTab() {
             : 'Every scene is marked Not interested or has a tag from Tags to keep out of my picks.'}
         </p>
       ) : (
-        <PageItems.Provider value={{ rowId: ROW_ID, items: byId }}>
+        <PageItems.Provider value={{ rowId: ROW_ID, items: byId, icons: true }}>
           <div className="cherrypick-fy-list" onClickCapture={onClickCapture}>
             <SceneList
               scenes={records}

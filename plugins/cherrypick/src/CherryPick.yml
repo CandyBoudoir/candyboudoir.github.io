@@ -39,6 +39,10 @@ settings:
     displayName: Show scenes you don't have
     description: StashDB scenes in More like this and on performer pages (needs a StashDB key).
     type: BOOLEAN
+  reasonDisplay:
+    displayName: Reasons on cards
+    description: "Text, Icon or Off. Text: a line under each card in Cherry Pick's rows saying why it is there. Icon: an icon on the covers in For you that shows the reason when you point at it or tap it, and no line on the other rows. Off: no reasons."
+    type: STRING
   badges:
     displayName: Score badges on cards
     description: Your score in the rating corner of scenes you haven't rated, with the reason on hover.

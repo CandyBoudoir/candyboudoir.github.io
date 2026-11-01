@@ -467,14 +467,22 @@ function freshPhrase(ctx, s, f) {
   return null
 }
 
-// The reasons a card could give, best first, each with its kind: recent
-// behaviour (momentum), then freshness, then taste. Exploration cards have
-// one reason of their own.
+// The icon a reason shows on For you's covers under Reasons on cards: Icon
+// (ui/ReasonIcon.jsx), picked with the reason rather than read from its
+// words. trend: recent watching; seedling: never watched; clock: not
+// watched in a while; cherries: your taste; flask: something to try.
+const freshIcon = (f) =>
+  f.kind === 'new' || f.kind === 'never' ? 'seedling' : 'clock'
+
+// The reasons a card could give, best first, each with its kind and icon:
+// recent behaviour (momentum), then freshness, then taste. Exploration cards
+// have one reason of their own.
 function reasonOptions(ctx, it) {
   if (it.kind === 'forgotten')
     return [
       {
         kind: 'explore',
+        icon: 'clock',
         text: freshPhrase(ctx, it.scene, it.f) || 'One of your favorites',
       },
     ]
@@ -483,6 +491,7 @@ function reasonOptions(ctx, it) {
     return [
       {
         kind: 'explore',
+        icon: 'flask',
         text: 'Worth a try' + (t ? ': ' + t[0].toLowerCase() + t.slice(1) : ''),
       },
     ]
@@ -492,13 +501,14 @@ function reasonOptions(ctx, it) {
     it.m.source && it.m.value >= 0.2
       ? momentumPhrase(ctx, it.m.source, it.scene.id)
       : null
-  if (mp) out.push({ kind: 'momentum', text: mp })
+  if (mp) out.push({ kind: 'momentum', icon: 'trend', text: mp })
   const fp = freshPhrase(ctx, it.scene, it.f)
-  if (fp) out.push({ kind: 'fresh', text: fp })
+  if (fp) out.push({ kind: 'fresh', icon: freshIcon(it.f), text: fp })
   for (const text of tastePhrases(ctx, it.scene))
-    out.push({ kind: 'taste', text })
+    out.push({ kind: 'taste', icon: 'cherries', text })
   out.push({
     kind: 'taste',
+    icon: 'cherries',
     text: ctx.M.ratingsToGo
       ? 'From your library'
       : 'A lot like scenes you rate well',
@@ -510,14 +520,15 @@ function reasonOptions(ctx, it) {
 // than twice: in the mockup 7 of 12 cards cited recent watching (the sample
 // user's recent plays were their favourites) and the row read as
 // repetitive. A card past a limit gives its next-best reason; only the text
-// changes, never the ranking.
+// changes, never the ranking. A card with `given` (a reason it already
+// showed) keeps it, and it counts toward the limits.
 export const REASON_SHARE = 0.5
 export function assignReasons(ctx, cards) {
   const cap = Math.ceil(cards.length * REASON_SHARE)
   const kinds = new Map()
   const texts = new Map()
   return cards.map((card) => {
-    const options = reasonOptions(ctx, card)
+    const options = card.given ? [card.given] : reasonOptions(ctx, card)
     const pick =
       options.find(
         (o) => (kinds.get(o.kind) || 0) < cap && (texts.get(o.text) || 0) < 2,
@@ -529,6 +540,26 @@ export function assignReasons(ctx, cards) {
     return pick
   })
 }
+
+// The reasons of one page of For you's tab (forYouList's items, in order):
+// the row's own cards keep the reason they showed on the front page, and
+// the rest go through the row's variety rule over the page, so a page of
+// 40 doesn't give one sentence, and one icon, to most of its cards.
+export const pageReasons = (ctx, items) =>
+  assignReasons(
+    ctx,
+    items.map((it) =>
+      it.x
+        ? { ...it.x, kind: 'main' }
+        : {
+            given: {
+              text: it.reason,
+              kind: it.reasonKind,
+              icon: it.reasonIcon,
+            },
+          },
+    ),
+  )
 
 // ---------------------------------------------------------------- the row
 
@@ -714,6 +745,7 @@ export function computeForYou(ctx, signals) {
   items.forEach((item, i) => {
     item.reason = reasons[i].text
     item.reasonKind = reasons[i].kind
+    item.reasonIcon = reasons[i].icon
   })
   return items
 }
