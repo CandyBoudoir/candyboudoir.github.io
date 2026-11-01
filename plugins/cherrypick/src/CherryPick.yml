@@ -1,6 +1,6 @@
 name: Cherry Pick
 description: Learns what you like from your ratings and plays. A For you row, Your score on scenes you haven't rated, More like this and performer brackets.
-version: 0.6.0
+version: 0.6.1
 url: https://github.com/CandyBoudoir/candyboudoir.github.io/tree/main/plugins/cherrypick
 ui:
   javascript:
@@ -41,7 +41,7 @@ settings:
     type: BOOLEAN
   reasonDisplay:
     displayName: Reasons on cards
-    description: "Text, Icon or Off. Text: a line under each card in Cherry Pick's rows saying why it is there. Icon: an icon on the covers in For you that shows the reason when you point at it or tap it, and no line on the other rows. Off: no reasons."
+    description: "Text, Icon or Off. Text: a line under each card in Cherry Pick's rows saying why it is there. Icon: an icon on the covers in For you, More with and Back to that shows the reason when you point at it or tap it, and no line on the other rows. Off: no reasons."
     type: STRING
   badges:
     displayName: Score badges on cards

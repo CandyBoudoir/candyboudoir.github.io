@@ -467,9 +467,9 @@ function freshPhrase(ctx, s, f) {
   return null
 }
 
-// The icon a reason shows on For you's covers under Reasons on cards: Icon
-// (ui/ReasonIcon.jsx), picked with the reason rather than read from its
-// words. trend: recent watching; seedling: never watched; clock: not
+// The icon a reason shows on the covers of For you and the rows that follow
+// it under Reasons on cards: Icon (ui/ReasonIcon.jsx), picked with the
+// reason rather than read from its words. trend: recent watching; seedling: never watched; clock: not
 // watched in a while; cherries: your taste; flask: something to try.
 const freshIcon = (f) =>
   f.kind === 'new' || f.kind === 'never' ? 'seedling' : 'clock'
@@ -781,7 +781,7 @@ export function followRows(ctx, signals, shownIds) {
       .sort((a, b) => b.t.value + b.f.value - (a.t.value + a.f.value))
       .map((x) => ({
         scene: x.scene,
-        reason: followReason(ctx, x),
+        ...followReason(ctx, x),
         key: 'p:' + p.id,
       }))
     const items = own.slice(0, 12)
@@ -817,7 +817,7 @@ export function followRows(ctx, signals, shownIds) {
       .filter((x) => x.f.kind !== 'recent')
       .sort((a, b) => b.t.value + b.f.value - (a.t.value + a.f.value))
       .slice(0, 12)
-      .map((x) => ({ scene: x.scene, reason: followReason(ctx, x), key: k }))
+      .map((x) => ({ scene: x.scene, ...followReason(ctx, x), key: k }))
     if (items.length >= 4)
       rows.push({
         id: 'back-' + t.id,
@@ -830,12 +830,14 @@ export function followRows(ctx, signals, shownIds) {
   return rows.sort((a, b) => b.strength - a.strength).slice(0, 2)
 }
 
+// A follow row's card: freshness, else taste, each with For you's icon for it
 function followReason(ctx, x) {
-  return (
-    freshPhrase(ctx, x.scene, x.f) ||
-    tastePhrase(ctx, x.scene) ||
-    'From your library'
-  )
+  const fresh = freshPhrase(ctx, x.scene, x.f)
+  if (fresh) return { reason: fresh, reasonIcon: freshIcon(x.f) }
+  return {
+    reason: tastePhrase(ctx, x.scene) || 'From your library',
+    reasonIcon: 'cherries',
+  }
 }
 
 // ---------------------------------------------------------------- fallback

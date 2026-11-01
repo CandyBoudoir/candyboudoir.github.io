@@ -1,6 +1,7 @@
 // Stash's SceneCard, as Cherry Pick's rows and For you's tab show it: the
 // card's description gives way to the reason the card is there (or, under
-// Reasons on cards: Icon, For you's covers show it as an icon), and its
+// Reasons on cards: Icon, the covers of For you and the rows that follow it
+// show it as an icon), and its
 // popover row gains the ⋯ menu (Refract's row of pills, under Refract). The
 // patches apply to every SceneCard, so they read a context only Cherry
 // Pick's rows and tab provide and render nothing anywhere else.
@@ -11,8 +12,8 @@ import { ReasonIcon } from './ReasonIcon.jsx'
 import { refract } from './refract.js'
 import { Safe } from './Safe.jsx'
 
-// { item, rowId, icons }: icons is true on the For you row, whose covers
-// show the reason's icon under Reasons on cards: Icon.
+// { item, rowId, icons }: icons is true on the For you row and the rows that
+// follow it, whose covers show the reason's icon under Reasons on cards: Icon.
 export const RowItem = React.createContext(null)
 // For you's tab: its cards come from Stash's SceneList, one context for all
 // of them. { rowId, items: Map(scene id -> item), icons }
@@ -28,7 +29,7 @@ function useItem(scene) {
 }
 
 // The line under the card, under Text only: under Icon the rows that show
-// no icon say why in their titles (More with, Back to, More like this).
+// no icon say why in their titles (More like this, New in your library).
 function Reason({ scene }) {
   const ctx = useItem(scene)
   const display = useReasonDisplay()
@@ -41,7 +42,8 @@ function Reason({ scene }) {
 }
 
 // The icon on the cover, beside Stash's overlays and outside the card's
-// link, on For you's cards whose reason has one. Refract lays its title and
+// link, on the cards of the rows that show icons whose reason has one.
+// Refract lays its title and
 // a row of performers and pills over the foot of the picture, so there the
 // icon is the first of those pills, as the ⋯ menu is the last.
 function ReasonCorner({ scene }) {

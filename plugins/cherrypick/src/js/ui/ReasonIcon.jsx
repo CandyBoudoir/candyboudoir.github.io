@@ -1,5 +1,6 @@
-// For you's reason as an icon at the bottom left of a card's cover, under
-// Reasons on cards: Icon. One icon per reason, picked with it in
+// The reason of a card in For you, or in a row that follows it, as an icon
+// at the bottom left of the cover, under Reasons on cards: Icon. One icon
+// per reason, picked with it in
 // model/foryou.js. Pointing at it (or focusing it from the keyboard) shows
 // the whole reason; on a phone a tap does, and a tap anywhere else closes
 // it. The icon sits beside the card's link, not in it, so a tap opens
