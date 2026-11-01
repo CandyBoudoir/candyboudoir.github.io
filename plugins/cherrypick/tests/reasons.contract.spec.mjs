@@ -1,7 +1,8 @@
 // Reasons on cards (the reasonDisplay setting): Text puts the reason under
-// each card in Cherry Pick's rows; Icon puts an icon on For you's covers
-// that shows the reason on hover or tap, with no line on the other rows;
-// Off shows no reason. Settings › Plugins draws it as a drop-down
+// each card in Cherry Pick's rows; Icon puts an icon on the covers of For
+// you and the rows that follow it (More with, Back to) that shows the
+// reason on hover or tap, with no line on the other rows; Off shows no
+// reason. Settings › Plugins draws it as a drop-down
 // (features/settingsExtras.jsx, ui/rowCards.jsx, ui/ReasonIcon.jsx).
 import { expect, test } from '@playwright/test'
 import { companionPluginIds } from '../../../tests/stash/companions.mjs'
@@ -22,12 +23,26 @@ test.beforeAll(async () => {
 test.afterAll(tearDownCherryPick)
 
 const ICONS = ['trend', 'seedling', 'clock', 'cherries', 'flask']
+// the rows that follow For you give freshness or taste: their titles say
+// what you watched lately
+const FOLLOW_ICONS = ['seedling', 'clock', 'cherries']
 const companions = companionPluginIds()
 
 const front = (page) => page.locator('.cherrypick-front')
 const tab = (page) => page.locator('.cherrypick-fy-list')
 const tabCards = (page) => tab(page).locator('.scene-card')
 const popover = (page) => page.locator('.cherrypick-reason-popover')
+const followCards = (page) =>
+  page.locator('.cherrypick-follow .slick-slide .scene-card')
+// For you and the first row that follows it, each with its cards
+const iconRows = (page) => [
+  ['For you', page.locator('.cherrypick-for-you').first(), forYouCards(page)],
+  [
+    'More with or Back to',
+    page.locator('.cherrypick-follow').first(),
+    followCards(page),
+  ],
+]
 
 // Runs body with Reasons on cards set to value, as Stash's Settings page
 // saves it, and puts the configuration back after
@@ -174,7 +189,7 @@ test('Text: the reason is a line under each card, and no cover has an icon', asy
   await expect(follow.locator('.cherrypick-reason').first()).not.toBeEmpty()
 })
 
-test("Icon: For you's covers show the reason's icon, other rows show no reason", async ({
+test("Icon: the covers of For you and the rows that follow it show the reason's icon, other rows show no reason", async ({
   page,
 }) => {
   await withDisplay('icon', async () => {
@@ -189,46 +204,53 @@ test("Icon: For you's covers show the reason's icon, other rows show no reason",
       expect(ICONS).toContain(await icon.getAttribute('data-icon'))
       expect(await icon.getAttribute('aria-label')).toMatch(/^[A-Z].{8,}/)
     }
+    // one on each card of the rows that follow your watching
+    await expect(followCards(page).first()).toBeVisible({ timeout: 20_000 })
+    const follow = page.locator(
+      '.cherrypick-follow .slick-slide .cherrypick-reason-icon',
+    )
+    await expect(follow).toHaveCount(await followCards(page).count())
+    for (const icon of await follow.all()) {
+      expect(FOLLOW_ICONS).toContain(await icon.getAttribute('data-icon'))
+      expect(await icon.getAttribute('aria-label')).toMatch(/^[A-Z].{8,}/)
+    }
     // no line on any of Cherry Pick's front-page cards, and nothing on
     // Stash's own rows
-    await expect(page.locator('.cherrypick-follow').first()).toBeVisible({
-      timeout: 20_000,
-    })
     await expect(front(page).locator('.cherrypick-reason')).toHaveCount(0)
-    await expect(
-      page.locator('.cherrypick-follow .cherrypick-reason-icon'),
-    ).toHaveCount(0)
     await expect(
       page.locator(
         '.recommendations-container:not(.cherrypick-front) .cherrypick-reason-icon',
       ),
     ).toHaveCount(0)
 
-    // At the bottom left of the cover, outside the card's link, with room
-    // for a finger, and apart from everything else on the cover. Under
-    // Refract, the first of the pills Refract lays over the picture.
-    const card = forYouCards(page).first()
-    const place = await placeOf(card)
-    expect(place.inLink).toBe(false)
-    if (companions.includes('refract')) expect(place.inPills).toBe(true)
-    else {
-      expect(place.left).toBeLessThan(16)
-      expect(place.bottom).toBeGreaterThan(9)
-      expect(place.width).toBeGreaterThanOrEqual(30)
-      expect(place.height).toBeGreaterThanOrEqual(30)
-    }
-    await companionBadges(forYouCards(page))
-    expect(await crowded(forYouCards(page))).toEqual([])
+    for (const [name, , cards] of iconRows(page)) {
+      // At the bottom left of the cover, outside the card's link, with
+      // room for a finger, and apart from everything else on the cover.
+      // Under Refract, the first of the pills Refract lays over the
+      // picture.
+      const card = cards.first()
+      const place = await placeOf(card)
+      expect(place.inLink, name).toBe(false)
+      if (companions.includes('refract')) expect(place.inPills, name).toBe(true)
+      else {
+        expect(place.left, name).toBeLessThan(16)
+        expect(place.bottom, name).toBeGreaterThan(9)
+        expect(place.width, name).toBeGreaterThanOrEqual(30)
+        expect(place.height, name).toBeGreaterThanOrEqual(30)
+      }
+      await companionBadges(cards)
+      expect(await crowded(cards), name).toEqual([])
 
-    // Pointing at it shows the whole reason, keeps the cover's preview
-    // hidden, and moving away hides the reason
-    const icon = card.locator('.cherrypick-reason-icon')
-    const reason = await icon.getAttribute('aria-label')
-    await icon.hover({ force: companions.includes('refract') })
-    await expect(popover(page)).toHaveText(reason)
-    expect(await previewShown(card)).toBe(false)
-    await page.mouse.move(5, 5)
-    await expect(popover(page)).toHaveCount(0)
+      // Pointing at it shows the whole reason, keeps the cover's preview
+      // hidden, and moving away hides the reason
+      const icon = card.locator('.cherrypick-reason-icon')
+      const reason = await icon.getAttribute('aria-label')
+      await icon.hover({ force: companions.includes('refract') })
+      await expect(popover(page)).toHaveText(reason)
+      expect(await previewShown(card), name).toBe(false)
+      await page.mouse.move(5, 5)
+      await expect(popover(page)).toHaveCount(0)
+    }
   })
 })
 
@@ -254,19 +276,22 @@ test('Icon: the icon goes above the speed of an interactive scene', async ({
   await withDisplay('icon', async () => {
     await page.goto('/')
     await expect(forYouCards(page)).toHaveCount(12, { timeout: 20_000 })
-    const card = forYouCards(page).first()
-    const speed = card.locator('.scene-interactive-speed-overlay')
-    await expect(speed).toHaveText('142')
-    await companionBadges(forYouCards(page))
-    expect(await crowded(forYouCards(page))).toEqual([])
-    // Under Refract the icon is one of Refract's pills, apart from the
-    // number as checked above
-    if (companions.includes('refract')) return
-    const [icon, number] = await Promise.all([
-      card.locator('.cherrypick-reason-icon').boundingBox(),
-      speed.boundingBox(),
-    ])
-    expect(icon.y + icon.height).toBeLessThanOrEqual(number.y + 1)
+    await expect(followCards(page).first()).toBeVisible({ timeout: 20_000 })
+    for (const [name, , cards] of iconRows(page)) {
+      const card = cards.first()
+      const speed = card.locator('.scene-interactive-speed-overlay')
+      await expect(speed).toHaveText('142')
+      await companionBadges(cards)
+      expect(await crowded(cards), name).toEqual([])
+      // Under Refract the icon is one of Refract's pills, apart from the
+      // number as checked above
+      if (companions.includes('refract')) continue
+      const [icon, number] = await Promise.all([
+        card.locator('.cherrypick-reason-icon').boundingBox(),
+        speed.boundingBox(),
+      ])
+      expect(icon.y + icon.height, name).toBeLessThanOrEqual(number.y + 1)
+    }
   })
 })
 
@@ -279,29 +304,30 @@ test.describe('on a phone', () => {
     await withDisplay('icon', async () => {
       await page.goto('/')
       await expect(forYouCards(page).first()).toBeVisible({ timeout: 20_000 })
-      const card = page
-        .locator('.cherrypick-for-you .slick-slide.slick-active .scene-card')
-        .first()
-      const icon = card.locator('.cherrypick-reason-icon')
-      const reason = await icon.getAttribute('aria-label')
-      await icon.tap({ force: companions.includes('refract') })
-      await expect(popover(page)).toHaveText(reason)
-      // still on the front page, the cover still, and no click through:
-      // For you counts one only on the card's links
-      await page.waitForTimeout(500)
-      expect(new URL(page.url()).pathname).toBe('/')
-      expect(await previewShown(card)).toBe(false)
-      expect((await placeOf(card)).inLink).toBe(false)
-      // A second tap hides it, and so does one anywhere else
-      await icon.tap({ force: companions.includes('refract') })
-      await expect(popover(page)).toHaveCount(0)
-      await icon.tap({ force: companions.includes('refract') })
-      await expect(popover(page)).toHaveText(reason)
-      await page
-        .locator('.cherrypick-for-you .recommendation-row-head h2')
-        .tap()
-      await expect(popover(page)).toHaveCount(0)
-      expect(new URL(page.url()).pathname).toBe('/')
+      await expect(followCards(page).first()).toBeVisible({ timeout: 20_000 })
+      for (const [name, row] of iconRows(page)) {
+        const card = row
+          .locator('.slick-slide.slick-active .scene-card')
+          .first()
+        const icon = card.locator('.cherrypick-reason-icon')
+        const reason = await icon.getAttribute('aria-label')
+        await icon.tap({ force: companions.includes('refract') })
+        await expect(popover(page)).toHaveText(reason)
+        // still on the front page, the cover still, and no click through:
+        // For you counts one only on the card's links
+        await page.waitForTimeout(500)
+        expect(new URL(page.url()).pathname, name).toBe('/')
+        expect(await previewShown(card), name).toBe(false)
+        expect((await placeOf(card)).inLink, name).toBe(false)
+        // A second tap hides it, and so does one anywhere else
+        await icon.tap({ force: companions.includes('refract') })
+        await expect(popover(page)).toHaveCount(0)
+        await icon.tap({ force: companions.includes('refract') })
+        await expect(popover(page)).toHaveText(reason)
+        await row.locator('.recommendation-row-head h2').tap()
+        await expect(popover(page)).toHaveCount(0)
+        expect(new URL(page.url()).pathname, name).toBe('/')
+      }
     })
   })
 })

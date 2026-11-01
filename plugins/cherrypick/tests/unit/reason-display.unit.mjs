@@ -1,5 +1,6 @@
-// Reasons on cards: the setting, and the icon each For you reason shows
-// under Icon, picked with the reason (model/foryou.js), never read from it.
+// Reasons on cards: the setting, and the icon each reason of For you and
+// the rows that follow it shows under Icon, picked with the reason
+// (model/foryou.js), never read from it.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { buildDb } from '../../src/js/model/db.js'
@@ -189,6 +190,28 @@ test("every card of For you's row carries the icon of its reason", () => {
   const icons = new Set(row.map((it) => it.reasonIcon))
   for (const icon of ['trend', 'clock', 'flask'])
     assert.ok(icons.has(icon), `no ${icon} in ${[...icons]}`)
+})
+
+test('every card of the rows that follow For you carries the icon of its reason', () => {
+  const c = library()
+  const fy = FY.computeForYou(c, FY.EMPTY_SIGNALS)
+  const rows = FY.followRows(
+    c,
+    FY.EMPTY_SIGNALS,
+    fy.map((it) => it.scene.id),
+  )
+  assert.ok(rows.length, 'no row follows For you')
+  const icons = new Set()
+  for (const row of rows)
+    for (const it of row.items) {
+      assert.match(it.reason, /^[A-Z].{8,}/)
+      assert.equal(it.reasonIcon, expected(it.reason), it.reason)
+      icons.add(it.reasonIcon)
+    }
+  // freshness or taste: what you watched lately is the row's own title
+  for (const icon of icons)
+    assert.ok(['seedling', 'clock', 'cherries'].includes(icon), icon)
+  assert.ok(icons.size > 1, `only ${[...icons]}`)
 })
 
 test("each page of For you's tab spreads its reasons as the row does, and keeps the row's", () => {

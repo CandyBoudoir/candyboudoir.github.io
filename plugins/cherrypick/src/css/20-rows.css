@@ -90,8 +90,9 @@
   vertical-align: baseline;
 }
 
-/* Reasons on cards: Icon. For you's reason as an icon at the bottom left of
-   the cover (ui/ReasonIcon.jsx), on the line Stash's overlays sit on (1rem
+/* Reasons on cards: Icon. The reason of a card in For you, or in a row that
+   follows it, as an icon at the bottom left of the cover
+   (ui/ReasonIcon.jsx), on the line Stash's overlays sit on (1rem
    up: the resolution and length at the right), on a half-black dim like
    Your score's so it reads over any picture. The button is 32px square, a
    finger's size around the 24px glyph, whose foot sits on that line. It

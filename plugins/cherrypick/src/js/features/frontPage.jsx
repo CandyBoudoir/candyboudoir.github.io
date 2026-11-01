@@ -233,6 +233,7 @@ function CherryPickRows() {
           title={r.title}
           items={r.items}
           className="cherrypick-follow"
+          icons
         />
       ))}
       <HallOfFameRow extra={<ResumePill />} />
