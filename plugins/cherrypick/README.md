@@ -2,7 +2,7 @@
 
 A [Stash](https://github.com/stashapp/stash) plugin that learns what you like from your own ratings and plays, and shows it inside Stash's pages: a For you row on the front page, or one scene ready to play in its place, Your score on scenes you haven't rated, More like this on scene pages, and performer and scene brackets that sharpen what it learns. It needs no account and no setup. A StashDB key, if you have one in Stash, adds popularity and the scenes you don't have.
 
-Cherry Pick 0.5.1 is built and tested on Stash v0.31.1.
+Cherry Pick 0.6.0 is built and tested on Stash v0.31.1.
 
 ![The front page with Cherry Pick: For you first, each card saying why it is there, then a row of one performer's scenes](docs/screenshots/front.png)
 
@@ -134,7 +134,7 @@ Cherry Pick's tests run on these Stash versions and on Stash's latest develop bu
 | Stash         | v0.31.1        |
 | Ascension     | 1.4.1          |
 | HotOrNot      | 1.0.0-c4106bf  |
-| Stash Curator | 0.49.0         |
+| Stash Curator | 0.52.0         |
 | Xenith        | 3.2.0          |
 | Restash       | 0.3.0-55c1cb2  |
 | Refract       | 1.24.3-458b135 |

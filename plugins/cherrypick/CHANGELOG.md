@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0
+
+- Reasons on cards, under Settings > Plugins > Cherry Pick, sets how Cherry Pick says why a scene is in its rows: Text, Icon or Off. Text, the default, keeps the line under each card. Icon puts one icon at the bottom left of each cover in For you, on the front page and in the For you tab's Grid, and pointing at it, or tapping it on a phone, shows the whole reason. The arrow is for what you watched lately, the seedling for a scene you haven't watched, the clock for one you haven't watched in a while, the cherries for your taste and the flask for one to try. With Icon the other rows show no reason, since their titles say why, and neither does New in your library, which takes For you's place in a library under 30 scenes. Off shows no reasons on Cherry Pick's cards. Watch This's line, "likely 4★ for you" and the score badge's hover keep theirs.
+- The icon moves up a line when something else holds the cover's bottom left: an interactive scene's funscript speed, Xenith's rank, Ascension's score or Stash Curator's Appeal. Under Refract's card style, which lays the title over the foot of the cover, the icon is the first of Refract's pills instead.
+- Each page of the For you tab varies its reasons as the row does, so a page no longer gives most of its cards the same sentence. The scenes keep their order.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.52.0, Xenith 3.2.0, Restash 0.3.0-55c1cb2 and Refract 1.24.3-458b135.
+
 ## 0.5.1
 
 - Cherry Pick's rows and Stash Curator's lanes both show on the front page. From Curator 0.47.0, Curator puts its lanes among Stash's own rows, and each plugin added its rows only where it found Stash's rows as Stash draws them, so the plugin Stash loaded second no longer found Stash's rows where it looked and added none of its own. Depending on the order, Cherry Pick's rows or Curator's lanes were missing. Cherry Pick now looks for Stash's rows inside Curator's too, and Curator still finds them beside Cherry Pick's, so both show, Cherry Pick's first, and Customise works as before.
