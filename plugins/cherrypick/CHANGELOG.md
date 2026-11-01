@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1
+
+- Under Reasons on cards: Icon, the More with and Back to rows on the front page show an icon on each cover, as For you does, and pointing at it, or tapping it on a phone, shows the whole reason. In 0.6.0 they showed no reason. Their icons are the seedling for a scene you haven't watched, the clock for one you haven't watched in a while and the cherries for your taste. The icon moves up a line when something else holds the cover's bottom left, and under Refract it is the first of Refract's pills, as in For you. Text and Off are unchanged.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.52.0, Xenith 3.2.0, Restash 0.3.0-55c1cb2 and Refract 1.24.3-458b135.
+
 ## 0.6.0
 
 - Reasons on cards, under Settings > Plugins > Cherry Pick, sets how Cherry Pick says why a scene is in its rows: Text, Icon or Off. Text, the default, keeps the line under each card. Icon puts one icon at the bottom left of each cover in For you, on the front page and in the For you tab's Grid, and pointing at it, or tapping it on a phone, shows the whole reason. The arrow is for what you watched lately, the seedling for a scene you haven't watched, the clock for one you haven't watched in a while, the cherries for your taste and the flask for one to try. With Icon the other rows show no reason, since their titles say why, and neither does New in your library, which takes For you's place in a library under 30 scenes. Off shows no reasons on Cherry Pick's cards. Watch This's line, "likely 4★ for you" and the score badge's hover keep theirs.
