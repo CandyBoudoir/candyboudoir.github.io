@@ -185,6 +185,32 @@ test('the filters narrow For you, live in the address and clear', async ({
     .toBe(true)
 })
 
+// On a slow machine, Clear after typing a search: on React 18 the search
+// box took the cleared search late, and its pause sent the old search back
+// (with Unwatched on, an empty tab: all of Juno Marsh's scenes are played).
+test('a cleared search stays cleared on a slow machine', async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== 'chromium', "slows the CPU through Chromium's CDP")
+  await page.goto('/plugins/cherrypick')
+  await expect(tabCards(page).first()).toBeVisible({ timeout: 20_000 })
+  await page.locator('.cherrypick-fy-search').fill('juno marsh')
+  await expect(page).toHaveURL(/[?&]q=juno\+marsh/)
+  const cdp = await page.context().newCDPSession(page)
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 20 })
+  try {
+    await page.locator('.cherrypick-fy-clear').click()
+    await expect(page).not.toHaveURL(/[?&]q=/)
+    // past the box's pause
+    await page.waitForTimeout(2000)
+  } finally {
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+  }
+  await expect(page).not.toHaveURL(/[?&]q=/)
+  await expect(page.locator('.cherrypick-fy-search')).toHaveValue('')
+})
+
 test('Not interested on a For you card takes it off the tab and is saved to Stash', async ({
   page,
 }) => {

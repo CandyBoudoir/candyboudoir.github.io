@@ -236,8 +236,17 @@ function Filters({ v, set, db }) {
     v.tags.length +
     (v.unwatched ? 1 : 0) +
     (v.length ? 1 : 0)
+  // The box sends what is typed to the address after a pause. A search the
+  // address changes itself (Clear, Back) takes the box in the same render.
+  // Copied in an effect, it took the box a render later, which React 18
+  // runs on its own and a busy page can hold back past the pause, and the
+  // pause then sent the cleared search back.
   const [q, setQ] = React.useState(v.q)
-  React.useEffect(() => setQ(v.q), [v.q])
+  const [shownQ, setShownQ] = React.useState(v.q)
+  if (v.q !== shownQ) {
+    setShownQ(v.q)
+    setQ(v.q)
+  }
   React.useEffect(() => {
     if (q === v.q) return
     const t = setTimeout(() => set({ q }), 300)
