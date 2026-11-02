@@ -163,37 +163,42 @@ export async function openPerformerBracket(page) {
   return play
 }
 
+// Waits until Stash's plugin configuration holds every change the page
+// made (each a debounced save that then waits for the page to settle, at
+// most 11 s), and done(map) holds. The tab's browser mirror takes each
+// change at once, newer than the map, and the map's stamp once the last
+// save has landed. A test that ends sooner leaves the next one, in a fresh
+// browser with no mirror, Stash's older copy: a bracket finished as the
+// test ended came back as "Resume bracket" at the bracket's first save.
+export async function savesLanded(page, done = () => true) {
+  if (!page.url().startsWith('http')) return
+  const mirrored = () =>
+    page.evaluate(
+      () =>
+        JSON.parse(localStorage.getItem('cherrypick:config-mirror'))
+          ?.updatedAt ?? null,
+    )
+  const saved = async () => {
+    const map = await pluginConfig()
+    return done(map) && (map?.updatedAt ?? null) === (await mirrored())
+  }
+  for (let i = 0; i < 75 && !(await saved()); i++)
+    await new Promise((r) => setTimeout(r, 200))
+}
+
 // Abandons the bracket a play dialog shows (asking first, unless the
 // question is open), and waits until Stash's plugin configuration holds the
-// abandonment (a debounced save that then waits for the page to settle, at
-// most 11 s), so the next test's list offers a new bracket instead of
+// abandonment, so the next test's list offers a new bracket instead of
 // resuming this one. A map with no bracket is not enough: the save of the
 // bracket's opening may still be on its way, and lands after the page has
-// closed with the abandonment unsaved. The tab's browser mirror takes each
-// change at once, newer than the map, and the map's stamp once the last
-// save has landed.
+// closed with the abandonment unsaved.
 export async function abandonBracket(play) {
   const confirm = play.locator('.modal-footer .btn-danger')
   if (!(await confirm.isVisible()))
     await play.getByRole('button', { name: 'Abandon', exact: true }).click()
   await confirm.click()
   await play.waitFor({ state: 'detached' })
-  const mirrored = () =>
-    play
-      .page()
-      .evaluate(
-        () =>
-          JSON.parse(localStorage.getItem('cherrypick:config-mirror'))
-            ?.updatedAt ?? null,
-      )
-  const saved = async () => {
-    const map = await pluginConfig()
-    return (
-      map?.bracket == null && (map?.updatedAt ?? null) === (await mirrored())
-    )
-  }
-  for (let i = 0; i < 75 && !(await saved()); i++)
-    await new Promise((r) => setTimeout(r, 200))
+  await savesLanded(play.page(), (map) => map?.bracket == null)
 }
 
 // What a button in a bracket dialog's header shows, with the pointer off it

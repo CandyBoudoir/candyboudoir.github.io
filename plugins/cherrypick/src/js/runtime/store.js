@@ -1,7 +1,7 @@
 // A small external store for the plugin's state. Stash renders the plugin's
 // pieces in many separate React trees (one per patched component), so state
-// lives outside React and each piece subscribes to what it reads. Stash runs
-// React 17, which has no useSyncExternalStore.
+// lives outside React and each piece subscribes to what it reads. Stash ran
+// React 17, which has no useSyncExternalStore, until 0.32.
 import { React } from './api.js'
 
 const { useEffect, useRef, useState } = React

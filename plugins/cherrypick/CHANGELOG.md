@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.2
+
+- Clear in the For you tab keeps the search cleared. On Stash 0.32, which runs React 18, a busy page could put the search you had just cleared back into the box and the address a moment later, and the tab then showed that search's scenes, or none with another filter on. Stash 0.31 is not affected.
+
+Tested beside Ascension 1.4.1, HotOrNot 1.0.0-c4106bf, Stash Curator 0.52.0, Xenith 3.2.0, Restash 0.3.0-55c1cb2 and Refract 1.24.3-458b135.
+
 ## 0.6.1
 
 - Under Reasons on cards: Icon, the More with and Back to rows on the front page show an icon on each cover, as For you does, and pointing at it, or tapping it on a phone, shows the whole reason. In 0.6.0 they showed no reason. Their icons are the seedling for a scene you haven't watched, the clock for one you haven't watched in a while and the cherries for your taste. The icon moves up a line when something else holds the cover's bottom left, and under Refract it is the first of Refract's pills, as in For you. Text and Off are unchanged.

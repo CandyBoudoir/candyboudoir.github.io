@@ -12,6 +12,7 @@ import {
   pluginConfig,
   savedBracketStatus,
   setPluginSettings,
+  savesLanded,
   setUpSparseCherryPick,
   sharedScenes,
   tearDownCherryPick,
@@ -35,6 +36,8 @@ test.beforeAll(async () => {
   await setPluginSettings(PLUGIN_ID, { dontLearn: JSON.stringify(dontLearn) })
 })
 test.afterAll(tearDownCherryPick)
+// A bracket played to its end saves as the test ends
+test.afterEach(({ page }) => savesLanded(page))
 
 const favorites = SPARSE.performers.filter((p) => p.favorite).map((p) => p.name)
 const visible = (locator) => locator.filter({ visible: true }).first()
