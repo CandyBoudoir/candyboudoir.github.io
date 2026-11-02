@@ -33,6 +33,7 @@ import {
   PLUGIN_ID,
   pluginConfig,
   setPluginSettings,
+  savesLanded,
   setUpCherryPick,
   tearDownCherryPick,
 } from './stash.mjs'
@@ -450,6 +451,8 @@ for (const [key, side] of Object.entries(SIDE)) {
       await rankEveryPerformer(side, false)
       await tearDownCherryPick()
     })
+    // A bracket played to its end saves as the test ends
+    test.afterEach(({ page }) => savesLanded(page))
 
     test(`${side.name} writes Stash's ratings, so Apply bracket ratings automatically starts off`, async ({
       page,

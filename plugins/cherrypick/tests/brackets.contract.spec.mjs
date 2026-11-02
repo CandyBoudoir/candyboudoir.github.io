@@ -18,6 +18,7 @@ import {
   PLUGIN_ID,
   pluginConfig,
   savedBracketStatus,
+  savesLanded,
   setAutoApply,
   setPluginSettings,
   setUpCherryPick,
@@ -35,6 +36,8 @@ test.beforeAll(async () => {
   ;({ demo } = await setUpCherryPick())
 })
 test.afterAll(tearDownCherryPick)
+// A bracket played to its end saves as the test ends
+test.afterEach(({ page }) => savesLanded(page))
 
 const visible = (locator) => locator.filter({ visible: true }).first()
 

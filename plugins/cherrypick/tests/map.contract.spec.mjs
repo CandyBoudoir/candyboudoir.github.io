@@ -14,6 +14,7 @@ import {
   demoCandidates,
   pluginConfig,
   setPluginSettings,
+  savesLanded,
   setUpCherryPick,
   tearDownCherryPick,
 } from './stash.mjs'
@@ -23,6 +24,8 @@ test.beforeAll(async () => {
   ;({ demo } = await setUpCherryPick())
 })
 test.afterAll(tearDownCherryPick)
+// A bracket played to its end saves as the test ends
+test.afterEach(({ page }) => savesLanded(page))
 // each test starts with no bracket in play or in the Hall of Fame
 test.beforeEach(() => setPluginSettings(PLUGIN_ID, {}))
 
